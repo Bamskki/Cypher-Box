@@ -1,0 +1,3 @@
+app_identifier("io.bluewallet.bluewallet")
+apple_id(ENV["APPLE_ID"]) # Your Apple email ID
+itc_team_id(ENV["ITC_TEAM_ID"]) # App Store Connect Team ID
