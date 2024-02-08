@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  android-studio:
+    image: yongjhih/android-studio
+    privileged: true
+    volumes:
+      - $HOME/AndroidStudioProjects:/home/ubuntu/AndroidStudioProjects
+      # - $HOME/.android:/home/ubuntu/.android
+      # - $HOME/.AndroidStudio1.5:/home/ubuntu/.AndroidStudio1.5
+      # - /dev/bus/usb:/dev/bus/usb
+      # - /dev/kvm:/dev/kvm
+      # - $ANDROID_HOME:/opt/android-sdk
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - $XAUTHORITY:/home/ubuntu/.Xauthority
+    environment:
+      - DISPLAY=$DISPLAY
+    network_mode: host
