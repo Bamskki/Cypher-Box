@@ -1,5 +1,5 @@
 # Cypher Bank - The New Way of Using Bitcoin
-*FIGMA DESIGN AND PROTOTYPE CAN BE FOUND* *[HERE]*(https://www.figma.com/file/tOPzd8F5sS5vux6o8gquhx/Prototype-1?type=design&node-id=48%3A114&mode=design&t=RM6JJskEqcuRwQpG-1)
+**APP UNDER CONSTRUCTION. FIGMA DESIGN AND PROTOTYPE CAN BE FOUND [HERE](https://www.figma.com/file/tOPzd8F5sS5vux6o8gquhx/Prototype-1?type=design&node-id=48%3A114&mode=design&t=RM6JJskEqcuRwQpG-1)**
 Derived from BlueWallet & Blink Wallet
 Built with React Native, Electrum, and Blink's API from Galoy. You could think of Blink as bank, and Galoy as a factory that creates banks.
 
