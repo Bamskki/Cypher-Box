@@ -22,4 +22,4 @@ Community: [telegram group](https://t.me/+t01zpIzF5s8wYjlh)
 * And many more features...
 
 
-<img src="https://imgur.com/bJtx6Cg" width="100%">
+<img src="https://i.imgur.com/bJtx6Cg.png" width="100%">
