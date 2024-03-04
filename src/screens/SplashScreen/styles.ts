@@ -13,8 +13,8 @@ export default StyleSheet.create<Style>({
         backgroundColor:'#1e1e1e'
     },
     logoImage: {
-        width: 250,
-        height: 250,
+        width: 214,
+        height: 181,
         alignSelf: 'center',
     }
 })

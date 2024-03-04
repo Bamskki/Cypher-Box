@@ -87,6 +87,7 @@ import PaymentCodesList from './screen/wallets/paymentCodesList';
 import loc from './loc';
 import { useTheme } from './components/themes';
 import { HomeScreen, SplashScreen, WelcomeScreen } from './src/screens';
+import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 
 const WalletsStack = createNativeStackNavigator();
 
@@ -456,11 +457,13 @@ const LappBrowserStackRoot = () => {
   );
 };
 
-const InitStack = createNativeStackNavigator();
+const InitStack = createStackNavigator();
 const InitRoot = () => (
-  <InitStack.Navigator initialRouteName="SplashScreen">
-    <InitStack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false }}/>
-    <InitStack.Screen name="WelcomeScreen" component={WelcomeScreen} options={{ headerShown: false }}/>
+  <InitStack.Navigator initialRouteName="SplashScreen" screenOptions={{
+      cardStyleInterpolator: CardStyleInterpolators.forBottomSheetAndroid,
+    }}>
+    <InitStack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false,gestureEnabled: false }}/>
+    <InitStack.Screen name="WelcomeScreen" component={WelcomeScreen} options={{ headerShown: false, gestureEnabled: false }} />
     <InitStack.Screen name="UnlockWithScreenRoot" component={UnlockWithScreenRoot} options={{ headerShown: false }} />
     <InitStack.Screen
       name="ReorderWallets"

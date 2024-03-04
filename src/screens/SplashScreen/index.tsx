@@ -16,15 +16,16 @@ export default function SplashScreen_() {
     const { dispatch } = useNavigation();
 
     useEffect(() => {
-        SplashScreen?.dismissSplashScreen();
-        successfullyAuthenticated()
+        setTimeout(() => {
+            SplashScreen?.dismissSplashScreen();
+            successfullyAuthenticated()
+        }, 1000);
     }, []);
 
     const successfullyAuthenticated = async () => {
         if (await startAndDecrypt()) {
-            navigate('WelcomeScreen')
-            // setWalletsInitialized(true);
-            // dispatch(StackActions.replace(isHandset ? 'Navigation' : 'DrawerRoot'));
+            setWalletsInitialized(true);
+            dispatch(StackActions.replace(isHandset ? 'Navigation' : 'DrawerRoot'));
         } else {
             navigate('WelcomeScreen')
         }

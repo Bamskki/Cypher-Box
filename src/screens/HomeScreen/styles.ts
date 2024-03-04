@@ -73,7 +73,7 @@ export default StyleSheet.create<Style>({
     titleText: {
         color: '#FFFFFF',
         fontSize: 22,
-        fontWeight: '600',
+        fontFamily: 'Lato-Bold'
     },
     image: {
         width: 25,
@@ -92,14 +92,14 @@ export default StyleSheet.create<Style>({
     },
     text: {
         color: '#FFFFFF',
-        fontWeight: '600',
-        fontSize: 16
+        fontSize: 18,
+        fontFamily:'Lato-Bold',
     },
     bitcointext: {
         fontSize: 16,
         color: '#FFF',
         marginEnd: 7,
-        fontWeight: 'bold'
+        fontFamily:'Lato-Bold'
     },
     wrappedIcon: {
         width: 32,

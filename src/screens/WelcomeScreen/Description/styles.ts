@@ -10,12 +10,13 @@ export default StyleSheet.create<Style>({
     view: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop:5
+        marginTop: 5,
     },
     circle: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        marginTop:4,
         backgroundColor:'#FFFFFF'
     },
     text: {
@@ -23,6 +24,6 @@ export default StyleSheet.create<Style>({
         fontSize: 16,
         textAlign: 'center',
         marginStart: 10,
-        fontWeight:'500'
-    }
+        fontFamily: 'Lato-Bold'
+    },
 })

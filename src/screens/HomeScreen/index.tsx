@@ -33,7 +33,7 @@ export default function HomeScreen() {
         <View style={styles.container}>
             <View>
                 <View style={styles.title}>
-                    <Text style={styles.titleText}>My Balance</Text>
+                    <Text style={styles.titleText}>Total Balance</Text>
                     <View style={{ flexDirection: 'row' }}>
                         <TouchableOpacity style={styles.imageView}
                             onPress={navigateToSettings}>
@@ -52,26 +52,32 @@ export default function HomeScreen() {
                     </View>
                 </View>
                 <LinearGradient
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
+                    start={{ x: 0.75, y: -1 }}
+                    end={{ x: 1.1, y: 1.0 }}
                     style={styles.linearGradient}
-                    colors={['#db36ad', '#17c6dc']}>
+                    locations={[0, 0.5, 0.6]}
+                    colors={['#db36ad', '#db36ad', '#17c6dc']}>
                     <View style={styles.inner}>
                         <Text style={styles.titleText}>0.00000000 BTC</Text>
                         <Text style={styles.titleText}>$0</Text>
                     </View>
                 </LinearGradient>
                 <LinearGradient
-                    start={{ x: 0, y: 0 }}
+                    start={{ x: 0, y: 1 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.linearGradient}
-                    colors={['#f456c8', '#c71c97']}>
+                    colors={['#FF65DD', 'rgba(214, 23, 161, 0.9)']}>
                     <View style={styles.middle}>
                         <Image style={styles.arrow}
                             resizeMode="contain"
                             source={require('../../../img/arrow-right.png')}
                         />
-                        <Text style={[styles.titleText, { fontSize: 18, marginStart: 5 }]}>Create Your Checking Account</Text>
+                        <Text style={[styles.titleText, {
+                            fontSize: 20, marginStart: 5,
+                            textShadowColor: 'rgba(0, 0, 0, 0.75)',
+                            textShadowOffset: { width: 0, height: 2 },
+                            textShadowRadius: 10
+                        }]}>Create Your Checking Account</Text>
                     </View>
                 </LinearGradient>
                 <View style={{ flexDirection: 'row', marginTop: 10, alignSelf: 'center' }}>
@@ -98,7 +104,6 @@ export default function HomeScreen() {
                             />
                         </View>
                     </View>
-                    <Text style={[styles.titleText, { fontSize: 20 }]}>0 BTC</Text>
                 </View>
             </LinearGradient>
         </View>

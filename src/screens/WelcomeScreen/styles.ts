@@ -2,7 +2,8 @@ import { ImageStyle, StyleSheet, TextStyle, ViewStyle } from "react-native";
 
 interface Style {
     container: ViewStyle;
-    title: TextStyle;
+    title: ImageStyle;
+    middle: ImageStyle;
     bottomtitle: TextStyle;
     buttonText: TextStyle;
     linearGradient: ViewStyle;
@@ -16,16 +17,19 @@ export default StyleSheet.create<Style>({
         paddingVertical: 60,
         justifyContent: 'space-between',
         padding: 20,
-        paddingBottom: 100
+        paddingBottom: 50
     },
     title: {
-        color: '#FFFFFF',
-        fontSize: 45,
-        fontStyle: 'italic',
-        alignSelf: 'center',
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginTop: 40
+        marginVertical: 60,
+        height: 150,
+        width: undefined,
+    },
+    middle: {
+        marginTop: 20,
+        height: 113,
+        width: 177,
+        alignSelf:'center',
+        // backgroundColor:'red'
     },
     linearGradient: {
         // backgroundColor: 'green',
@@ -35,11 +39,10 @@ export default StyleSheet.create<Style>({
         justifyContent: 'center',
     },
     buttonText: {
-        fontSize: 18,
-        fontFamily: 'Gill Sans',
+        fontSize: 22,
+        fontFamily: 'Lato-Semibold',
         textAlign: 'center',
         color: '#FFFFFF',
-        fontWeight:'bold'
     },
     bottomtitle: {
         color: '#FFFFFF',
