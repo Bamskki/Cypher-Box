@@ -86,6 +86,8 @@ import PaymentCode from './screen/wallets/paymentCode';
 import PaymentCodesList from './screen/wallets/paymentCodesList';
 import loc from './loc';
 import { useTheme } from './components/themes';
+import { HomeScreen, SplashScreen, WelcomeScreen } from './src/screens';
+import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 
 const WalletsStack = createNativeStackNavigator();
 
@@ -94,6 +96,9 @@ const WalletsRoot = () => {
 
   return (
     <WalletsStack.Navigator screenOptions={{ headerShadowVisible: false }}>
+      <WalletsStack.Screen name="HomeScreen" component={HomeScreen} options={{
+        headerShown: false, translucent: false
+      }} />
       <WalletsStack.Screen name="WalletsList" component={WalletsList} options={WalletsList.navigationOptions(theme)} />
       <WalletsStack.Screen name="WalletTransactions" component={WalletTransactions} options={WalletTransactions.navigationOptions(theme)} />
       <WalletsStack.Screen name="LdkOpenChannel" component={LdkOpenChannel} options={LdkOpenChannel.navigationOptions(theme)} />
@@ -452,9 +457,13 @@ const LappBrowserStackRoot = () => {
   );
 };
 
-const InitStack = createNativeStackNavigator();
+const InitStack = createStackNavigator();
 const InitRoot = () => (
-  <InitStack.Navigator initialRouteName="UnlockWithScreenRoot">
+  <InitStack.Navigator initialRouteName="SplashScreen" screenOptions={{
+      cardStyleInterpolator: CardStyleInterpolators.forBottomSheetAndroid,
+    }}>
+    <InitStack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false,gestureEnabled: false }}/>
+    <InitStack.Screen name="WelcomeScreen" component={WelcomeScreen} options={{ headerShown: false, gestureEnabled: false }} />
     <InitStack.Screen name="UnlockWithScreenRoot" component={UnlockWithScreenRoot} options={{ headerShown: false }} />
     <InitStack.Screen
       name="ReorderWallets"

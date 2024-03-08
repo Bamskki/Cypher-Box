@@ -410,6 +410,7 @@ export const BlueHeaderDefaultSub = props => {
               fontWeight: 'bold',
               fontSize: 30,
               color: colors.foregroundColor,
+              marginLeft: Platform.OS === 'android' ? 40 : 0,
             }}
           >
             {props.leftText}
