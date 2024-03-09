@@ -14,6 +14,8 @@ import {
 } from 'react-native';
 import { NavigationContainer, CommonActions } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ApolloProvider } from '@apollo/client';
+import { loadErrorMessages, loadDevMessages } from "@apollo/client/dev";
 import { navigationRef } from './NavigationService';
 import * as NavigationService from './NavigationService';
 import { Chain } from './models/bitcoinUnits';
@@ -34,6 +36,7 @@ import Privacy from './blue_modules/Privacy';
 import triggerHapticFeedback, { HapticFeedbackTypes } from './blue_modules/hapticFeedback';
 import MenuElements from './components/MenuElements';
 import { updateExchangeRate } from './blue_modules/currency';
+import client from './apollo/apolloConfig';
 const A = require('./blue_modules/analytics');
 
 const eventEmitter = Platform.OS === 'ios' ? new NativeEventEmitter(NativeModules.EventEmitter) : undefined;
@@ -50,6 +53,11 @@ if (Platform.OS === 'android') {
   if (UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
   }
+}
+
+if (__DEV__) {  // Adds messages only in a dev environment
+  loadDevMessages();
+  loadErrorMessages();
 }
 
 const App = () => {
@@ -297,18 +305,20 @@ const App = () => {
 
   return (
     <SafeAreaProvider>
-      <View style={styles.root}>
-        <NavigationContainer ref={navigationRef} theme={colorScheme === 'dark' ? BlueDarkTheme : BlueDefaultTheme}>
-          <InitRoot />
-          <Notifications onProcessNotifications={processPushNotifications} />
-          <MenuElements />
-          <DeviceQuickActions />
-        </NavigationContainer>
-      </View>
-      <WatchConnectivity />
-      <Biometric />
-      <WidgetCommunication />
-      <Privacy />
+      <ApolloProvider client={client}>
+        <View style={styles.root}>
+          <NavigationContainer ref={navigationRef} theme={colorScheme === 'dark' ? BlueDarkTheme : BlueDefaultTheme}>
+            <InitRoot />
+            <Notifications onProcessNotifications={processPushNotifications} />
+            <MenuElements />
+            <DeviceQuickActions />
+          </NavigationContainer>
+        </View>
+        <WatchConnectivity />
+        <Biometric />
+        <WidgetCommunication />
+        <Privacy />
+      </ApolloProvider>
     </SafeAreaProvider>
   );
 };

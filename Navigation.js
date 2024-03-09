@@ -86,8 +86,13 @@ import PaymentCode from './screen/wallets/paymentCode';
 import PaymentCodesList from './screen/wallets/paymentCodesList';
 import loc from './loc';
 import { useTheme } from './components/themes';
-import { HomeScreen, SplashScreen, WelcomeScreen } from './src/screens';
+import { HomeScreen, SplashScreen as Splash, WelcomeScreen } from './src/screens';
 import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
+import CaptchaAuthCodeScreen from './screen/Authentication/CaptchaAuthScreen';
+import UserLoginScreen from './screen/Authentication/UserLoginScreen';
+import BalanceScreen from './screen/Home/BalanceScreen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import SplashScreen from './screen/Splash/SplashScreen';
 
 const WalletsStack = createNativeStackNavigator();
 
@@ -95,7 +100,12 @@ const WalletsRoot = () => {
   const theme = useTheme();
 
   return (
-    <WalletsStack.Navigator screenOptions={{ headerShadowVisible: false }}>
+    <WalletsStack.Navigator initialRouteName='Splash' screenOptions={{ headerShadowVisible: false }}>
+      <WalletsStack.Screen name="Splash" component={SplashScreen} options={WalletTransactions.navigationOptions(theme)} />
+      <WalletsStack.Screen name="UserBalance" component={BalanceScreen} options={WalletTransactions.navigationOptions(theme)} />
+      <WalletsStack.Screen name="CaptchaAuth" component={CaptchaAuthCodeScreen} options={WalletTransactions.navigationOptions(theme)} />
+      <WalletsStack.Screen name="UserLogin" component={UserLoginScreen} options={WalletTransactions.navigationOptions(theme)} />  
+
       <WalletsStack.Screen name="HomeScreen" component={HomeScreen} options={{
         headerShown: false, translucent: false
       }} />
@@ -462,7 +472,7 @@ const InitRoot = () => (
   <InitStack.Navigator initialRouteName="SplashScreen" screenOptions={{
       cardStyleInterpolator: CardStyleInterpolators.forBottomSheetAndroid,
     }}>
-    <InitStack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false,gestureEnabled: false }}/>
+    <InitStack.Screen name="SplashScreen" component={Splash} options={{ headerShown: false,gestureEnabled: false }}/>
     <InitStack.Screen name="WelcomeScreen" component={WelcomeScreen} options={{ headerShown: false, gestureEnabled: false }} />
     <InitStack.Screen name="UnlockWithScreenRoot" component={UnlockWithScreenRoot} options={{ headerShown: false }} />
     <InitStack.Screen

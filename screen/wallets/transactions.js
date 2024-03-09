@@ -303,7 +303,7 @@ const WalletTransactions = ({ navigation }) => {
   const onWalletSelect = async selectedWallet => {
     if (selectedWallet) {
       navigate('WalletTransactions', {
-        walletType: wallet.type,
+        walletType: wallet?.type || '',
         walletID: wallet.getID(),
         key: `WalletTransactions-${wallet.getID()}`,
       });
@@ -623,11 +623,11 @@ WalletTransactions.navigationOptions = navigationStyle({}, (options, { theme, na
       <TouchableOpacity
         accessibilityRole="button"
         testID="WalletDetails"
-        disabled={route.params.isLoading === true}
+        disabled={!!route.params?.isLoading}
         style={styles.walletDetails}
         onPress={() =>
           navigation.navigate('WalletDetails', {
-            walletID: route.params.walletID,
+            walletID: route.params?.walletID,
           })
         }
       >
@@ -636,7 +636,7 @@ WalletTransactions.navigationOptions = navigationStyle({}, (options, { theme, na
     ),
     title: '',
     headerStyle: {
-      backgroundColor: WalletGradient.headerColorFor(route.params.walletType),
+      backgroundColor: WalletGradient.headerColorFor(route.params?.walletType || ''),
       borderBottomWidth: 0,
       elevation: 0,
       // shadowRadius: 0,
