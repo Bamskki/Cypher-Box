@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
+import { Alert, Text, View } from 'react-native';
 import { useCaptchaCreateChallenge, useCaptchaRequestAuthCode } from '../../apollo/api';
 import InputField from '../../components/InputField';
 import Button from '../../components/Button';
@@ -34,11 +34,17 @@ const CaptchaAuthCodeScreen = ({navigation}) => {
         return;
       }
       else if(email) {
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+          Alert.alert('Error', 'Please enter a valid email');
+          return;
+        }
+    
         const response = await requestEmailCode(email);
         if(response.result){
           navigation.navigate('UserLogin', {emailId: response.result});
         } else {
-          alert(response.errors[0].message);
+          Alert.alert('Error', response.errors[0].message);
         }
       } else {
         const payload = {
