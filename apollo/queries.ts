@@ -51,3 +51,38 @@ export const ME_QUERY = gql`
     }
   }
 `;
+
+export const GET_BALANCE_QUERY = gql`
+  query me {
+    me {
+        email {
+            address
+        }
+        username
+        defaultAccount {
+            id
+            wallets {
+                id
+                walletCurrency
+                balance
+            }
+        }
+    }
+  }
+`;
+
+export const GET_LN_INVOICE = gql`
+  mutation lnInvoiceCreateOnBehalfOfRecipient($input: LnInvoiceCreateOnBehalfOfRecipientInput!) {
+    lnInvoiceCreateOnBehalfOfRecipient(input: $input) {
+      errors {
+        message
+      }
+      invoice {
+        paymentRequest
+        paymentHash
+        paymentSecret
+        satoshis
+      }
+    }
+  }
+`;

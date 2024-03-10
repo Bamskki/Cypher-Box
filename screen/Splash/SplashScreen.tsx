@@ -3,28 +3,24 @@ import { View, Text, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SplashScreen = ({ navigation }) => {
-  const [token, setToken] = React.useState(undefined);
 
   useEffect(() => {
+    async function handleToken() {
+      const token = await getToken()
+      if (token) {
+        navigation.replace('UserBalance');
+      } else {
+        navigation.replace('CaptchaAuth');
+      }        
+    }
     handleToken();
-  }, []);
-
-  const handleToken = async () => {
+  }, [navigation]);
+  
+  const getToken = async () => {
     const authToken = await AsyncStorage.getItem('authToken');
-    authToken ? setToken(authToken) : setToken('');
+    return authToken;
   };
 
-  useEffect(() => {
-    if (token && token !== '') {
-      navigation.replace('UserBalance');
-    } else {
-      navigation.replace('CaptchaAuth');
-    }
-  }, [token, navigation]);
-  
-  
-
-  console.log('token: ', token)
   return (
     <View style={styles.container}>
       <Text style={styles.title}>CYPHER BANK</Text>

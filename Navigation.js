@@ -93,6 +93,9 @@ import UserLoginScreen from './screen/Authentication/UserLoginScreen';
 import BalanceScreen from './screen/Home/BalanceScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SplashScreen from './screen/Splash/SplashScreen';
+import ReceiveMethodScreen from './screen/Home/ReceiveMethodScreen';
+import ReceiveDetail from './screen/Home/ReceiveDetail';
+import QRView from './screen/Home/QRView';
 
 const WalletsStack = createNativeStackNavigator();
 
@@ -109,6 +112,10 @@ const WalletsRoot = () => {
       <WalletsStack.Screen name="HomeScreen" component={HomeScreen} options={{
         headerShown: false, translucent: false
       }} />
+      <WalletsStack.Screen name="ReceiveMethod" component={ReceiveMethodScreen} options={WalletTransactions.navigationOptions(theme)} />  
+      <WalletsStack.Screen name="ReceiveDetail" component={ReceiveDetail} options={WalletTransactions.navigationOptions(theme)} />  
+      <WalletsStack.Screen name="QRView" component={QRView} options={WalletTransactions.navigationOptions(theme)} />  
+
       <WalletsStack.Screen name="WalletsList" component={WalletsList} options={WalletsList.navigationOptions(theme)} />
       <WalletsStack.Screen name="WalletTransactions" component={WalletTransactions} options={WalletTransactions.navigationOptions(theme)} />
       <WalletsStack.Screen name="LdkOpenChannel" component={LdkOpenChannel} options={LdkOpenChannel.navigationOptions(theme)} />

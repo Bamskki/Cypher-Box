@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import useMeQuery from '../../apollo/hooks/useMeQuery';
+import useGetBalanceQuery from '../../apollo/hooks/useGetBalanceQuery';
+import Button from '../../components/Button';
 
 const BalanceScreen = ({ navigation }) => {
-  const { data, loading, error } = useMeQuery();
+  const { data, loading, error } = useGetBalanceQuery();
 
   const handleLogout = async () => {
     try {
@@ -30,15 +31,18 @@ const BalanceScreen = ({ navigation }) => {
       </TouchableOpacity>
       {data && (
         <View>
-          {data.me.defaultAccount.wallets.map(wallet => (
-            <View key={wallet.id} style={{ marginBottom: 20 }}>
-              <Text>Wallet ID: {wallet.id}</Text>
-              <Text>Currency: {wallet.walletCurrency}</Text>
-              <Text>Balance: {wallet.balance}</Text>
-            </View>
-          ))}
+          <View key={data.me.defaultAccount.wallets[0].id} style={{ marginBottom: 20 }}>
+            <Text>Wallet ID: {data.me.defaultAccount.wallets[0].id}</Text>
+            <Text>Currency: {data.me.defaultAccount.wallets[0].walletCurrency}</Text>
+            <Text>Balance: {data.me.defaultAccount.wallets[0].balance}</Text>
+          </View>
         </View>
       )}
+      <Button
+        title="Receive Lightning"
+        onPress={() => navigation.navigate('ReceiveMethod', { userData: data?.me })}
+        disabled={loading}
+      />
     </View>
   );
 };
