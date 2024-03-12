@@ -14,7 +14,7 @@ const BalanceScreen = ({ navigation }) => {
       // Navigate to CaptchaAuth screen
       navigation.replace('CaptchaAuth');
     } catch (error) {
-      console.error('Error logging out:', error.message);
+      console.error('Error logging out:', error?.message);
     }
   };
 
@@ -39,7 +39,7 @@ const BalanceScreen = ({ navigation }) => {
         </View>
       )}
       <Button
-        title="Receive Lightning"
+        title="Receive"
         onPress={() => navigation.navigate('ReceiveMethod', { userData: data?.me })}
         disabled={loading}
       />

@@ -5,6 +5,7 @@ import {
   USER_LOGIN,
   ME_QUERY,
   GET_LN_INVOICE,
+  ON_CHAIN_CREATE_ADDRESS,
 } from './queries';
 
 export const useCaptchaCreateChallenge = () =>
@@ -17,4 +18,6 @@ export const useUserLogin = () => useMutation(USER_LOGIN);
 
 export const useMeQuery = () => useQuery(ME_QUERY);
 
-export const useCreateLNInvoice = () => useMutation(GET_LN_INVOICE)
+export const useCreateLNInvoice = () => useMutation(GET_LN_INVOICE);
+
+export const useCreateOnChainAddress = () => useMutation(ON_CHAIN_CREATE_ADDRESS);

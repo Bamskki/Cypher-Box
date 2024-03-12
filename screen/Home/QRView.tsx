@@ -4,8 +4,7 @@ import { View, Text, Image, TouchableOpacity } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
 const QRView = ({ route }) => {
-    const { paymentRequest, paymentHash, satoshis } = route.params.invoice;
-    const { qrView } = route.params
+    const { qrView, qrCode } = route.params
 
     const copyToClipboard = (text: string) => {
         Clipboard.setString(text);
@@ -16,19 +15,17 @@ const QRView = ({ route }) => {
             {qrView &&
                 <View style={{ marginVertical: 20 }}>
                     <QRCode
-                        value={paymentRequest}
+                        value={qrCode}
                         size={200}
                         color="black"
                         backgroundColor="white"
                     />
                 </View>
             }
-            <Text>Lightning URL: {paymentRequest}</Text>
-            <TouchableOpacity style={{marginTop: 20}} onPress={() => copyToClipboard(paymentRequest)}>
+            <Text>{qrCode}</Text>
+            <TouchableOpacity style={{marginTop: 20}} onPress={() => copyToClipboard(qrCode)}>
                 <Text style={{color: 'blue'}}>Copy</Text>
             </TouchableOpacity>
-
-
         </View>
     );
 };

@@ -86,3 +86,14 @@ export const GET_LN_INVOICE = gql`
     }
   }
 `;
+
+export const ON_CHAIN_CREATE_ADDRESS = gql`
+  mutation onChainAddressCreate($input: OnChainAddressCreateInput!) {
+    onChainAddressCreate(input: $input) {
+      address
+      errors {
+        message
+      }
+    }
+  }
+`;
