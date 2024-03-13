@@ -1,3 +1,10 @@
 export { default as SplashScreen } from './SplashScreen';
 export { default as WelcomeScreen } from './WelcomeScreen';
 export { default as HomeScreen } from './HomeScreen';
+export { default as CheckAccount } from './Account/CheckAccount';
+export { default as InfoBlink } from './Account/InfoBlink';
+export { default as DownloadBlink } from './Account/DownloadBlink';
+export { default as LoginBlink } from './Account/LoginBlink';
+export { default as LoginBlinkPhone } from './Account/LoginBlinkPhone';
+export { default as VerifyPhone } from './Account/VerifyPhone';
+export { default as AccountStatus } from './Account/AccountStatus';

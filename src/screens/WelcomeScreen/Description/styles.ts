@@ -1,3 +1,4 @@
+import { colors } from "@Cypher/style-guide";
 import { StyleSheet, TextStyle, ViewStyle } from "react-native";
 
 interface Style {
@@ -16,14 +17,10 @@ export default StyleSheet.create<Style>({
         width: 6,
         height: 6,
         borderRadius: 3,
-        marginTop:4,
-        backgroundColor:'#FFFFFF'
+        marginTop: 4,
+        backgroundColor: colors.white,
     },
     text: {
-        color: '#FFFFFF',
-        fontSize: 16,
-        textAlign: 'center',
         marginStart: 10,
-        fontFamily: 'Lato-Bold'
     },
 })

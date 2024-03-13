@@ -1,4 +1,5 @@
 <resources>
     <color name="white">#FFF</color>
-    <color name="background_color">#1e1e1e</color> <!-- Light background -->
+    <color name="background_color">#1e1e1e</color>
+    <color name="bootsplash_background">#1E1E1E</color>
 </resources>

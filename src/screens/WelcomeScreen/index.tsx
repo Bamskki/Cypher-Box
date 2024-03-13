@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Image, TouchableOpacity, View } from "react-native";
 import styles from "./styles";
 import Description from "./Description";
-import LinearGradient from "react-native-linear-gradient";
 import { StackActions, useNavigation } from "@react-navigation/native";
 import { isHandset } from "../../../blue_modules/environment";
 import { BlueStorageContext } from "../../../blue_modules/storage-context";
 import { MiddleImage, TitleImage } from "../../../img";
+import { Start } from "@Cypher/assets/images";
 
 export default function WelcomeScreen() {
     const { setWalletsInitialized, startAndDecrypt } = useContext(BlueStorageContext);
@@ -31,9 +31,14 @@ export default function WelcomeScreen() {
 
     return (
         <View style={styles.container}>
-            <View style={{ marginBottom: 0 }}>
+            <View style={styles.inner}>
                 <Image source={TitleImage} style={styles.title}
                     resizeMode="contain" />
+                <Image
+                    source={require('../../../img/logo.png')}
+                    resizeMode={'contain'}
+                    style={styles.logoImage}
+                />
                 <View style={{ alignSelf: 'center' }}>
                     <Description text="A 'sat' is a tiny fraction of a Bitcoin" />
                     <Description text="100M sats equal 1 Bitcoin" />
@@ -41,16 +46,10 @@ export default function WelcomeScreen() {
                 </View>
                 <Image source={MiddleImage} style={styles.middle}
                     resizeMode="contain" />
-            </View>
-            <View>
-                <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#f456c8', '#c71c97']} style={styles.linearGradient}>
-                    <TouchableOpacity style={styles.linearGradient}
-                        onPress={startClickHandler}>
-                        <Text style={styles.buttonText}>
-                            Start
-                        </Text>
-                    </TouchableOpacity>
-                </LinearGradient>
+                <TouchableOpacity onPress={startClickHandler}>
+                    <Image source={Start} style={styles.start}
+                        resizeMode="contain" />
+                </TouchableOpacity>
             </View>
         </View>
     )

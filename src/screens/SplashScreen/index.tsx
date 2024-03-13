@@ -1,26 +1,48 @@
-import React, { useContext, useEffect, useState } from "react";
-import { ActivityIndicator, NativeModules, Text, TouchableOpacity, View } from "react-native";
+import React, { useContext, useRef, useState } from "react";
+import { Animated, StyleSheet, View } from "react-native";
 import styles from "./styles";
-// import Description from "./Description";
-import LinearGradient from "react-native-linear-gradient";
 import { StackActions, useNavigation } from "@react-navigation/native";
 import { isHandset } from "../../../blue_modules/environment";
 import { BlueStorageContext } from "../../../blue_modules/storage-context";
-import { Image } from "react-native";
 import { navigate } from "../../../NavigationService";
-
-const { SplashScreen } = NativeModules;
+import BootSplash from 'react-native-bootsplash';
+import { heights } from "@Cypher/style-guide";
 
 export default function SplashScreen_() {
+    const [isLoading, setIsLoading] = useState(true);
+    const opacity = useRef(new Animated.Value(1));
+    const translateY = useRef(new Animated.Value(0));
+
     const { setWalletsInitialized, startAndDecrypt } = useContext(BlueStorageContext);
     const { dispatch } = useNavigation();
 
-    useEffect(() => {
-        setTimeout(() => {
-            SplashScreen?.dismissSplashScreen();
+    const initialise = async () => {
+        BootSplash.hide({ fade: true });
+
+        const useNativeDriver = true;
+
+        // Animate icon up 50 pixels before animating it down off the screen
+        Animated.stagger(1000, [
+            Animated.spring(translateY.current, {
+                useNativeDriver,
+                toValue: -50,
+                delay: 500,
+            }),
+            Animated.spring(translateY.current, {
+                useNativeDriver,
+                toValue: heights,
+            }),
+        ]).start();
+        // Fade screen out
+        Animated.timing(opacity.current, {
+            useNativeDriver,
+            toValue: 0,
+            duration: 750,
+            delay: 1250,
+        }).start(() => {
             successfullyAuthenticated()
-        }, 1000);
-    }, []);
+        });
+    };
 
     const successfullyAuthenticated = async () => {
         if (await startAndDecrypt()) {
@@ -29,11 +51,30 @@ export default function SplashScreen_() {
         } else {
             navigate('WelcomeScreen')
         }
+        setIsLoading(false);
     };
 
     return (
         <View style={styles.container}>
-            <Image source={require('../../../img/logo.png')} style={styles.logoImage} resizeMode="contain" />
+            {isLoading && (
+                <Animated.View
+                    style={[
+                        StyleSheet.absoluteFill,
+                        styles.splash,
+                        { opacity: opacity.current },
+                    ]}>
+                    <Animated.Image
+                        source={require('../../../img/logo.png')}
+                        fadeDuration={0}
+                        onLoadEnd={initialise}
+                        resizeMode={'contain'}
+                        style={[
+                            styles.logoImage,
+                            { transform: [{ translateY: translateY.current }] },
+                        ]}
+                    />
+                </Animated.View>
+            )}
         </View>
     )
 }

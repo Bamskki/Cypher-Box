@@ -2,7 +2,6 @@ import React, { useCallback, useMemo } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { Platform, useWindowDimensions, Dimensions, I18nManager } from 'react-native';
-
 import Settings from './screen/settings/settings';
 import About from './screen/settings/about';
 import ReleaseNotes from './screen/settings/releasenotes';
@@ -86,10 +85,10 @@ import PaymentCode from './screen/wallets/paymentCode';
 import PaymentCodesList from './screen/wallets/paymentCodesList';
 import loc from './loc';
 import { useTheme } from './components/themes';
-import { HomeScreen, SplashScreen, WelcomeScreen } from './src/screens';
+import { AccountStatus, CheckAccount, DownloadBlink, HomeScreen, InfoBlink, LoginBlink, LoginBlinkPhone, SplashScreen, VerifyPhone, WelcomeScreen } from './src/screens';
 import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 
-const WalletsStack = createNativeStackNavigator();
+const WalletsStack = createStackNavigator();
 
 const WalletsRoot = () => {
   const theme = useTheme();
@@ -97,8 +96,16 @@ const WalletsRoot = () => {
   return (
     <WalletsStack.Navigator screenOptions={{ headerShadowVisible: false }}>
       <WalletsStack.Screen name="HomeScreen" component={HomeScreen} options={{
-        headerShown: false, translucent: false
+        headerShown: false, translucent: false,
+        cardStyleInterpolator: CardStyleInterpolators.forBottomSheetAndroid,
       }} />
+      <WalletsStack.Screen name="CheckAccount" component={CheckAccount} options={{headerShown: false}} />
+      <WalletsStack.Screen name="InfoBlink" component={InfoBlink} options={{headerShown: false}} />
+      <WalletsStack.Screen name="DownloadBlink" component={DownloadBlink} options={{headerShown: false}} />
+      <WalletsStack.Screen name="LoginBlink" component={LoginBlink} options={{headerShown: false}} />
+      <WalletsStack.Screen name="LoginBlinkPhone" component={LoginBlinkPhone} options={{headerShown: false}} />
+      <WalletsStack.Screen name="VerifyPhone" component={VerifyPhone} options={{headerShown: false}} />
+      <WalletsStack.Screen name="AccountStatus" component={AccountStatus} options={{headerShown: false}} />
       <WalletsStack.Screen name="WalletsList" component={WalletsList} options={WalletsList.navigationOptions(theme)} />
       <WalletsStack.Screen name="WalletTransactions" component={WalletTransactions} options={WalletTransactions.navigationOptions(theme)} />
       <WalletsStack.Screen name="LdkOpenChannel" component={LdkOpenChannel} options={LdkOpenChannel.navigationOptions(theme)} />

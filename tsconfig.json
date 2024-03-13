@@ -11,7 +11,11 @@
     "strict": true,
     "target": "esnext",
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "baseUrl": "./",
+    "paths": {
+      "@Cypher/*": ["src/*/index", "src/*"]
+    },
   },
   "extends": "@tsconfig/react-native/tsconfig.json",
   "exclude": ["node_modules", "babel.config.js", "metro.config.js", "jest.config.js", "components/react-native-draggable-flatlist", "scripts/maccatalystpatches"],
