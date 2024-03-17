@@ -4,6 +4,7 @@ import { ImageStyle, StyleSheet, TextStyle, ViewStyle } from "react-native";
 interface Style {
     container: ViewStyle;
     title: ViewStyle;
+    loading: ViewStyle;
     inner: ViewStyle;
     imageView: ViewStyle;
     image: ImageStyle;
@@ -43,6 +44,9 @@ export default StyleSheet.create<Style>({
     },
     flex: {
         flex: 1
+    },
+    loading: {
+        marginTop: 20,
     },
     priceView: {
         marginTop: 20,

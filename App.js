@@ -34,6 +34,9 @@ import Privacy from './blue_modules/Privacy';
 import triggerHapticFeedback, { HapticFeedbackTypes } from './blue_modules/hapticFeedback';
 import MenuElements from './components/MenuElements';
 import { updateExchangeRate } from './blue_modules/currency';
+import { ApolloProvider } from '@apollo/client';
+import client from './apollo/apolloConfig';
+
 const A = require('./blue_modules/analytics');
 
 const eventEmitter = Platform.OS === 'ios' ? new NativeEventEmitter(NativeModules.EventEmitter) : undefined;
@@ -297,18 +300,20 @@ const App = () => {
 
   return (
     <SafeAreaProvider>
-      <View style={styles.root}>
-        <NavigationContainer ref={navigationRef} theme={colorScheme === 'dark' ? BlueDarkTheme : BlueDefaultTheme}>
-          <InitRoot />
-          <Notifications onProcessNotifications={processPushNotifications} />
-          <MenuElements />
-          <DeviceQuickActions />
-        </NavigationContainer>
-      </View>
-      <WatchConnectivity />
-      <Biometric />
-      <WidgetCommunication />
-      <Privacy />
+      <ApolloProvider client={client}>
+        <View style={styles.root}>
+          <NavigationContainer ref={navigationRef} theme={colorScheme === 'dark' ? BlueDarkTheme : BlueDefaultTheme}>
+            <InitRoot />
+            <Notifications onProcessNotifications={processPushNotifications} />
+            <MenuElements />
+            <DeviceQuickActions />
+          </NavigationContainer>
+        </View>
+        <WatchConnectivity />
+        <Biometric />
+        <WidgetCommunication />
+        <Privacy />
+      </ApolloProvider>
     </SafeAreaProvider>
   );
 };

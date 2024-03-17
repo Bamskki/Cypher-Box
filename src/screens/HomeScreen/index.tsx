@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { Image, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Image, TouchableOpacity, View } from "react-native";
 import styles from "./styles";
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import { scanQrHelper } from "../../../helpers/scan-qr";
@@ -9,6 +9,8 @@ import { BlinkText, Current } from "@Cypher/assets/images";
 import { GradientButton, GradientCard } from "@Cypher/components";
 import { colors } from "@Cypher/style-guide";
 import { Text } from "@Cypher/component-library";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import useGetBalanceQuery from "../../../apollo/hooks/useGetBalanceQuery";
 
 interface Props {
     route: any;
@@ -18,7 +20,23 @@ export default function HomeScreen({ route }: Props) {
     const { navigate } = useNavigation();
     const routeName = useRoute().name;
     const [isLogin, setLogin] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const { data, loading, error } = useGetBalanceQuery();
 
+    useEffect(() => {
+        async function handleToken() {
+          const token = await getToken()
+          setLogin(!!token);
+          setIsLoading(false);
+        }
+        handleToken();
+      }, []);
+      
+      const getToken = async () => {
+        const authToken = await AsyncStorage.getItem('authToken');
+        return authToken;
+      };
+    
     const navigateToSettings = () => {
         navigate('Settings');
     };
@@ -52,6 +70,7 @@ export default function HomeScreen({ route }: Props) {
         navigate('ReceivedMethodScreen');
     }
 
+    console.log('data: ',data)
     return (
         <View style={styles.container}>
             <View>
@@ -76,18 +95,23 @@ export default function HomeScreen({ route }: Props) {
                 </View>
                 <GradientCard style={styles.priceView} disabled>
                     <View style={styles.inner}>
-                        <Text subHeader bold>0.00000000 BTC</Text>
+                        <Text subHeader bold>{data && data.me.defaultAccount.wallets[0].balance ? data.me.defaultAccount.wallets[0].balance : 0.00000000} BTC</Text>
                         <Text subHeader bold>$0</Text>
                     </View>
                 </GradientCard>
-                {isLogin ?
+                {!data && loading && isLoading ?
+                    <View style={styles.loading}>
+                        <ActivityIndicator size="large" color={colors.pink.default} />
+                    </View>
+                    :
+                    isLogin && data ?
                     <>
                         <GradientCard style={styles.linearGradient2} disabled>
                             <View style={styles.view}>
                                 <Text h2 bold style={styles.check}>Checking Account</Text>
                                 <Image source={BlinkText} style={styles.blink} resizeMode="contain" />
                             </View>
-                            <Text h2 bold style={styles.sats}>0 sats</Text>
+                            <Text h2 bold style={styles.sats}>{data?.me?.defaultAccount.wallets[0].balance ? data.me.defaultAccount.wallets[0].balance : 0} sats</Text>
                             <View style={styles.showLine} />
                         </GradientCard>
                         <View style={styles.btnView}>
@@ -99,7 +123,7 @@ export default function HomeScreen({ route }: Props) {
                         </View>
                         <Text h4 style={styles.alert}>Nice! You can now deposit and accumulate bitcoin into your Checking Account. </Text>
                     </>
-                    :
+                    : !loading && !isLoading &&
                     <>
                         <GradientCard style={styles.linearGradient} onPress={createChekingAccountClickHandler}>
                             <View style={styles.middle}>
@@ -124,7 +148,7 @@ export default function HomeScreen({ route }: Props) {
                     <View style={styles.bottominner}>
                         <Text h2>Savings Vault</Text>
                         <View style={styles.row}>
-                            <Text h3 bold style={styles.bitcointext}>Bitcoin Networn</Text>
+                            <Text h3 bold style={styles.bitcointext}>Bitcoin Network</Text>
                             <Image style={styles.bitcoinimg}
                                 resizeMode="contain"
                                 source={require('../../../img/bitcoin.png')}
