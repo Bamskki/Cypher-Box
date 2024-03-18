@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { TextInput, View } from "react-native";
 import styles from "./styles";
 import { Blink } from "@Cypher/assets/images";
-import { GradientButton, GradientText, HeaderBackButton, Progress, Screen } from "@Cypher/components";
+import { GradientButton, GradientText, HeaderBackButton, Progress } from "@Cypher/components";
 import { useNavigation } from "@react-navigation/native";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 
 export default function LoginBlinkPhone() {
     const [phone, setPhone] = useState<string>('');
-    const { navigate } = useNavigation();
+    const { navigate }: any = useNavigation();
 
     const nextClickHandler = () => {
         navigate('VerifyPhone', { phone: phone });

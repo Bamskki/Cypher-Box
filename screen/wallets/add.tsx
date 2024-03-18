@@ -276,7 +276,7 @@ const WalletsAdd: React.FC = () => {
       return alert('LDK wallet already exists');
     }
     setIsLoading(true);
-    const wallet = new LightningLdkWallet();
+    const wallet = new LightningLdkWallet('Ldk Wallet');
     wallet.setLabel(label || loc.wallets.details_title);
 
     await wallet.generate();

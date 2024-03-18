@@ -2,13 +2,13 @@ import React from "react";
 import { Image, View } from "react-native";
 import styles from "./styles";
 import { Blink } from "@Cypher/assets/images";
-import { GradientButton, GradientText, HeaderBackButton, Progress, Screen } from "@Cypher/components";
+import { GradientButton, GradientText, HeaderBackButton, Progress } from "@Cypher/components";
 import { useNavigation } from "@react-navigation/native";
 import Description from "./Description";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 
 export default function InfoBlink() {
-    const { navigate } = useNavigation();
+    const { navigate }: any = useNavigation();
 
     const nextClickHandler = () => {
         navigate('DownloadBlink');

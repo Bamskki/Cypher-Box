@@ -5,8 +5,8 @@ import { Text } from "@Cypher/component-library";
 
 interface Props {
     label: string;
-    text: string;
-    setText(): void;
+    text: string | undefined;
+    setText(): (text: string | undefined) => void;
     type: 'email-address' | 'phone-pad';
 }
 

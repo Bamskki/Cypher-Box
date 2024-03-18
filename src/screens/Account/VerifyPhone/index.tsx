@@ -9,10 +9,11 @@ import { useUserLogin } from "../../../../apollo/api";
 import { emailLogin } from "../../../../api/authApis";
 
 interface Props {
-    route: any;
+  navigation: any;
+  route: any;
 }
 
-export default function VerifyPhone({ route}:Props) {
+export default function VerifyPhone({ navigation, route }:Props) {
     const [code, setCode] = useState<string>('');
     const [isLoading, setIsLoading] = useState(false);
     const { navigate } = useNavigation();
@@ -53,7 +54,7 @@ export default function VerifyPhone({ route}:Props) {
           }
         }
   
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error logging in:', error?.message);
       } finally {
         setIsLoading(false);
@@ -61,7 +62,10 @@ export default function VerifyPhone({ route}:Props) {
     };
   
     const nextClickHandler = () => {
-        navigate('AccountStatus');
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'AccountStatus' }],
+      });
     }
 
     return (

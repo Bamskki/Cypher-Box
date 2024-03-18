@@ -14,7 +14,7 @@ const useGetBalanceQuery = () => {
           if (token) {
             setAuthToken(token);
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error retrieving authToken:', error?.message);
         } finally {
           setLoadingToken(false);

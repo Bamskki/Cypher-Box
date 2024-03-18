@@ -6,11 +6,10 @@ import { GradientButton, GradientCard, GradientText } from "@Cypher/components";
 import { useNavigation } from "@react-navigation/native";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 
-export default function AccountStatus() {
-    const { navigate } = useNavigation();
+export default function AccountStatus({navigation}: any) {
 
     const nextClickHandler = () => {
-        navigate('HomeScreen', {
+        navigation.replace('HomeScreen', {
             isLogin_: true
         });
     }
@@ -28,7 +27,7 @@ export default function AccountStatus() {
                         </View>
                         <View style={styles.showLine} />
                     </GradientCard>
-                    <Text h4 style={styles.description}>Your Cecking Account has been created. The interactive bar display helps you in visualizing your Checking Account's balance, indicating a threshold above which storing bitcoin in a bank carries increased counter-party risk.{`\n\n`}
+                    <Text h4 style={styles.description}>Your Checking Account has been created. The interactive bar display helps you in visualizing your Checking Account's balance, indicating a threshold above which storing bitcoin in a bank carries increased counter-party risk.{`\n\n`}
                         You can deposit money beyond the threshold, but remember, you are technically not the owner of it; you are relying on a third-party custodian. Cypher Bank will enable you to become the sole owner of your money once you hit this threshold (set to 2M sats by default but you can adjust it in the settings).</Text>
                 </View>
                 <GradientButton title="Home" onPress={nextClickHandler} />

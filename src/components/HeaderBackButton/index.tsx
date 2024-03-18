@@ -1,7 +1,6 @@
 import React from 'react';
 import { Image, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { StackHeaderLeftButtonProps } from '@react-navigation/stack';
 
 import { colors } from '@Cypher/style-guide';
 
@@ -9,7 +8,9 @@ import styles from './styles';
 // import RoundedIcon from '../RoundedIcon';
 import { Back } from '@Cypher/assets/images';
 
-type Props = StackHeaderLeftButtonProps;
+type Props = {
+  onPress?: () => void;
+};
 
 export default function HeaderBackButton({ onPress }: Props) {
   const navigation = useNavigation();

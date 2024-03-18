@@ -17,7 +17,7 @@ interface Props {
 }
 
 export default function HomeScreen({ route }: Props) {
-    const { navigate } = useNavigation();
+    const { navigate }: any = useNavigation();
     const routeName = useRoute().name;
     const [isLogin, setLogin] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -42,7 +42,7 @@ export default function HomeScreen({ route }: Props) {
     };
 
     const onScanButtonPressed = () => {
-        scanQrHelper(navigate, routeName).then(onBarScanned);
+        // scanQrHelper(navigate, routeName).then(onBarScanned);
     };
 
     const loginClickHandler = () => {
@@ -54,13 +54,13 @@ export default function HomeScreen({ route }: Props) {
             setLogin(route?.params?.isLogin_);
     });
 
-    const onBarScanned = (value: any) => {
-        if (!value) return;
-        DeeplinkSchemaMatch.navigationRouteFor({ url: value }, completionValue => {
-            triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
-            navigate(...completionValue);
-        });
-    };
+    // const onBarScanned = (value: any) => {
+    //     if (!value) return;
+    //     DeeplinkSchemaMatch.navigationRouteFor({ url: value }, completionValue => {
+    //         triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
+    //         navigate(...completionValue);
+    //     });
+    // };
 
     const createChekingAccountClickHandler = () => {
         navigate('DownloadBlink');
