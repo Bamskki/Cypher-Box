@@ -4,6 +4,7 @@ import styles from "./styles";
 import { GradientText } from "@Cypher/components";
 import { Button, ScreenLayout, Text } from "@Cypher/component-library";
 import { dispatchNavigate } from "@Cypher/helpers";
+import { colors } from "@Cypher/style-guide";
 
 export default function DownloadBlink() {
 
@@ -27,10 +28,10 @@ export default function DownloadBlink() {
                 <View style={styles.innerView}>
                     <GradientText>Download Blink</GradientText>
                     <Text h4 style={styles.descption}>To use Cypher Bank, you should download Blink wallet from the app store and register your account by providing them with your phone number.</Text>
-                    <Button onPress={appleStoreClickHandler} text="Download Blink wallet" leftIcon="logo-apple" />
+                    <Button onPress={appleStoreClickHandler} text="Download Blink wallet" leftIcon="logo-apple" textStyle={{color:colors.black.default}}/>
                 </View>
                 <Text style={styles.info}>If you’ve manged to create a account, or already have an existing account on Blink, you can login now!</Text>
-                <Button onPress={loginClickHandler} text="Login" style={styles.login} />
+                <Button onPress={loginClickHandler} text="Login" style={styles.login} textStyle={{color:colors.black.default}}/>
             </View>
         </ScreenLayout>
     )
