@@ -2,16 +2,15 @@ import React from "react";
 import { Image, View } from "react-native";
 import styles from "./styles";
 import { Bank } from "@Cypher/assets/images";
-import { GradientButton, GradientText, HeaderBackButton, Progress, Screen } from "@Cypher/components";
+import { GradientButton, GradientText } from "@Cypher/components";
 import { colors } from "@Cypher/style-guide";
-import { useNavigation } from "@react-navigation/native";
 import { ScreenLayout, Text } from "@Cypher/component-library";
+import { dispatchNavigate } from "@Cypher/helpers";
 
 export default function CheckAccount() {
-    const { navigate } = useNavigation();
 
     const nextClickHandler = () => {
-        navigate('InfoBlink');
+        dispatchNavigate('InfoBlink');
     }
 
     return (

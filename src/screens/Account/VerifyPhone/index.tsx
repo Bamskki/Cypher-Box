@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { TextInput, View } from "react-native";
 import styles from "./styles";
 import { GradientButton } from "@Cypher/components";
-import { useNavigation } from "@react-navigation/native";
 import { ScreenLayout, Text } from "@Cypher/component-library";
+import { dispatchNavigate } from "@Cypher/helpers";
 
 interface Props {
     route: any;
@@ -11,10 +11,9 @@ interface Props {
 
 export default function VerifyPhone({ route}:Props) {
     const [code, setCode] = useState<string>('');
-    const { navigate } = useNavigation();
 
     const nextClickHandler = () => {
-        navigate('AccountStatus');
+        dispatchNavigate('AccountStatus');
     }
 
     return (

@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { View } from "react-native";
 import styles from "./styles";
-import { GradientButton, GradientText, HeaderBackButton, Progress, Screen } from "@Cypher/components";
+import { GradientButton, GradientText } from "@Cypher/components";
 import { useNavigation } from "@react-navigation/native";
 import InputEmailPhone from "./InputEmailPhone";
 import { ScreenLayout, Text } from "@Cypher/component-library";
+import { dispatchNavigate } from "@Cypher/helpers";
 
 export default function LoginBlink() {
     const [email, setEmail] = useState<string | null>(null);
@@ -12,13 +13,11 @@ export default function LoginBlink() {
     const { navigate } = useNavigation();
 
     const nextClickHandler = () => {
-        navigate('LoginBlinkPhone');
+        dispatchNavigate('LoginBlinkPhone');
     }
 
     return (
         <ScreenLayout disableScroll showToolbar progress={1}>
-            {/* <Progress current={1} />
-            <HeaderBackButton /> */}
             <View style={styles.container}>
                 <View style={styles.innerView}>
                     <GradientText>Login to Blink</GradientText>

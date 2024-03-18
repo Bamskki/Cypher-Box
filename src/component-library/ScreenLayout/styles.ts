@@ -69,15 +69,16 @@ const styles = StyleSheet.create<Styles>({
     flexDirection: 'row',
     flexWrap: 'nowrap',
     alignItems: 'center',
-    // justifyContent: 'center',
+    zIndex: 1
   },
   icon: {
     width: 35,
     height: 35,
     position: 'absolute',
     left: 0,
+    top:0,
     justifyContent: 'center',
-    alignItems:'center',
+    alignItems: 'center',
   },
   delete: {
     width: 30,
@@ -88,7 +89,7 @@ const styles = StyleSheet.create<Styles>({
     justifyContent: 'center',
     borderRadius: 5,
     backgroundColor: colors.white,
-    shadowColor: colors.shadow,
+    shadowColor: colors.shadow25,
     shadowOpacity: 0.5,
     shadowRadius: 2,
     shadowOffset: {

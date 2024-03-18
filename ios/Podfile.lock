@@ -465,6 +465,8 @@ PODS:
     - React-jsi (= 0.72.10)
     - React-logger (= 0.72.10)
     - React-perflogger (= 0.72.10)
+  - ReactNativeART (1.2.0):
+    - React
   - ReactNativeCameraKit (13.0.0):
     - React-Core
   - RealmJS (12.6.0):
@@ -584,6 +586,7 @@ DEPENDENCIES:
   - React-runtimescheduler (from `../node_modules/react-native/ReactCommon/react/renderer/runtimescheduler`)
   - React-utils (from `../node_modules/react-native/ReactCommon/react/utils`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - "ReactNativeART (from `../node_modules/@react-native-community/art`)"
   - ReactNativeCameraKit (from `../node_modules/react-native-camera-kit`)
   - RealmJS (from `../node_modules/realm`)
   - rn-ldk (from `../node_modules/rn-ldk`)
@@ -731,6 +734,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/utils"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  ReactNativeART:
+    :path: "../node_modules/@react-native-community/art"
   ReactNativeCameraKit:
     :path: "../node_modules/react-native-camera-kit"
   RealmJS:
@@ -846,6 +851,7 @@ SPEC CHECKSUMS:
   React-runtimescheduler: 6ca43e8deadf01ff06b3f01abf8f0e4d508e23c3
   React-utils: 372b83030a74347331636909278bf0a60ec30d59
   ReactCommon: 38824bfffaf4c51fbe03a2730b4fd874ef34d67b
+  ReactNativeART: 78edc68dd4a1e675338cd0cd113319cf3a65f2ab
   ReactNativeCameraKit: 9d46a5d7dd544ca64aa9c03c150d2348faf437eb
   RealmJS: a62dc7a1f94b888fe9e8712cd650167ad97dc636
   rn-ldk: 0d8749d98cc5ce67302a32831818c116b67f7643
@@ -877,4 +883,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: e0f5fbbba3256422a2f7625f2f64c00e10113748
 
-COCOAPODS: 1.14.3
+COCOAPODS: 1.15.2

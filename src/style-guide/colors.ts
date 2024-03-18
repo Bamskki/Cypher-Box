@@ -8,9 +8,9 @@ const colors = {
     main: '#E335DC',
   },
 
-  shadow: 'rgba(0, 0, 0, 0.25)',
-  shadow2: 'rgba(0, 0, 0, 0.4)',
-  shadow3: 'rgba(0, 0, 0, 0.75)',
+  shadow25: 'rgba(0, 0, 0, 0.25)',
+  shadow50: 'rgba(0, 0, 0, 0.50)',
+  shadow75: 'rgba(0, 0, 0, 0.75)',
   gray: {
     default: '#808080',
     light: '#B6B6B6',

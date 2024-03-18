@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { ScrollView, StyleSheet, Platform } from 'react-native';
+import { ScrollView, StyleSheet, Platform, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import navigationStyle from '../../components/navigationStyle';
@@ -7,6 +7,7 @@ import { BlueHeaderDefaultSub } from '../../BlueComponents';
 import loc from '../../loc';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
 import ListItem from '../../components/ListItem';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const styles = StyleSheet.create({
   root: {
@@ -21,7 +22,9 @@ const Settings = () => {
   const { language } = useContext(BlueStorageContext);
 
   return (
+    <SafeAreaView style={styles.root}>
     <ScrollView style={styles.root} contentInsetAdjustmentBehavior="automatic" automaticallyAdjustContentInsets>
+      <View style={{ height:45 }} />
       {Platform.OS === 'android' ? <BlueHeaderDefaultSub leftText={loc.settings.header} /> : <></>}
       <ListItem title={loc.settings.general} onPress={() => navigate('GeneralSettings')} testID="GeneralSettings" chevron />
       <ListItem title={loc.settings.currency} onPress={() => navigate('Currency')} testID="Currency" chevron />
@@ -31,6 +34,7 @@ const Settings = () => {
       <ListItem title={loc.settings.tools} onPress={() => navigate('Tools')} testID="Tools" chevron />
       <ListItem title={loc.settings.about} onPress={() => navigate('About')} testID="AboutButton" chevron />
     </ScrollView>
+    </SafeAreaView>
   );
 };
 

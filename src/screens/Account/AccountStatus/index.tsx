@@ -1,16 +1,15 @@
-import React, { } from "react";
+import React from "react";
 import { Image, View } from "react-native";
 import styles from "./styles";
 import { BlinkText } from "@Cypher/assets/images";
 import { GradientButton, GradientCard, GradientText } from "@Cypher/components";
-import { useNavigation } from "@react-navigation/native";
 import { ScreenLayout, Text } from "@Cypher/component-library";
+import { dispatchNavigate } from "@Cypher/helpers";
 
 export default function AccountStatus() {
-    const { navigate } = useNavigation();
 
     const nextClickHandler = () => {
-        navigate('HomeScreen', {
+        dispatchNavigate('HomeScreen', {
             isLogin_: true
         });
     }

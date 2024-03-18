@@ -1,15 +1,14 @@
 import React from "react";
 import { Linking, Platform, View } from "react-native";
 import styles from "./styles";
-import { GradientText, HeaderBackButton, Progress, Screen } from "@Cypher/components";
-import { useNavigation } from "@react-navigation/native";
+import { GradientText } from "@Cypher/components";
 import { Button, ScreenLayout, Text } from "@Cypher/component-library";
+import { dispatchNavigate } from "@Cypher/helpers";
 
 export default function DownloadBlink() {
-    const { navigate } = useNavigation();
 
     const loginClickHandler = () => {
-        navigate('LoginBlink');
+        dispatchNavigate('LoginBlink');
     }
 
     const appleStoreClickHandler = () => {

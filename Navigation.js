@@ -94,7 +94,7 @@ const WalletsRoot = () => {
   const theme = useTheme();
 
   return (
-    <WalletsStack.Navigator screenOptions={{ headerShadowVisible: false }}>
+    <WalletsStack.Navigator screenOptions={{ headerShadowVisible: false,gestureEnabled:false }}>
       <WalletsStack.Screen name="HomeScreen" component={HomeScreen} options={{
         headerShown: false, translucent: false,
         cardStyleInterpolator: CardStyleInterpolators.forBottomSheetAndroid,
@@ -173,7 +173,7 @@ const WalletsRoot = () => {
   );
 };
 
-const AddWalletStack = createNativeStackNavigator();
+const AddWalletStack = createStackNavigator();
 const AddWalletRoot = () => {
   const theme = useTheme();
 
@@ -221,7 +221,7 @@ const AddWalletRoot = () => {
 };
 
 // CreateTransactionStackNavigator === SendDetailsStack
-const SendDetailsStack = createNativeStackNavigator();
+const SendDetailsStack = createStackNavigator();
 const SendDetailsRoot = () => {
   const theme = useTheme();
 
@@ -260,7 +260,7 @@ const SendDetailsRoot = () => {
   );
 };
 
-const LNDCreateInvoiceStack = createNativeStackNavigator();
+const LNDCreateInvoiceStack = createStackNavigator();
 const LNDCreateInvoiceRoot = () => {
   const theme = useTheme();
 
@@ -288,7 +288,7 @@ const LNDCreateInvoiceRoot = () => {
 };
 
 // LightningScanInvoiceStackNavigator === ScanLndInvoiceStack
-const ScanLndInvoiceStack = createNativeStackNavigator();
+const ScanLndInvoiceStack = createStackNavigator();
 const ScanLndInvoiceRoot = () => {
   const theme = useTheme();
 
@@ -308,7 +308,7 @@ const ScanLndInvoiceRoot = () => {
   );
 };
 
-const LDKOpenChannelStack = createNativeStackNavigator();
+const LDKOpenChannelStack = createStackNavigator();
 const LDKOpenChannelRoot = () => {
   const theme = useTheme();
 
@@ -325,7 +325,7 @@ const LDKOpenChannelRoot = () => {
   );
 };
 
-const AztecoRedeemStack = createNativeStackNavigator();
+const AztecoRedeemStack = createStackNavigator();
 const AztecoRedeemRoot = () => {
   const theme = useTheme();
 
@@ -337,7 +337,7 @@ const AztecoRedeemRoot = () => {
   );
 };
 
-const ScanQRCodeStack = createNativeStackNavigator();
+const ScanQRCodeStack = createStackNavigator();
 const ScanQRCodeRoot = () => (
   <ScanQRCodeStack.Navigator
     initialRouteName="ScanQRCode"
@@ -348,14 +348,14 @@ const ScanQRCodeRoot = () => (
   </ScanQRCodeStack.Navigator>
 );
 
-const UnlockWithScreenStack = createNativeStackNavigator();
+const UnlockWithScreenStack = createStackNavigator();
 const UnlockWithScreenRoot = () => (
   <UnlockWithScreenStack.Navigator name="UnlockWithScreenRoot" screenOptions={{ headerShown: false, statusBarStyle: 'auto' }}>
     <UnlockWithScreenStack.Screen name="UnlockWithScreen" component={UnlockWith} initialParams={{ unlockOnComponentMount: true }} />
   </UnlockWithScreenStack.Navigator>
 );
 
-const ReorderWalletsStack = createNativeStackNavigator();
+const ReorderWalletsStack = createStackNavigator();
 const ReorderWalletsStackRoot = () => {
   const theme = useTheme();
 
@@ -393,7 +393,7 @@ const DrawerRoot = () => {
   );
 };
 
-const ReceiveDetailsStack = createNativeStackNavigator();
+const ReceiveDetailsStack = createStackNavigator();
 const ReceiveDetailsStackRoot = () => {
   const theme = useTheme();
 
@@ -408,7 +408,7 @@ const ReceiveDetailsStackRoot = () => {
   );
 };
 
-const WalletXpubStack = createNativeStackNavigator();
+const WalletXpubStack = createStackNavigator();
 const WalletXpubStackRoot = () => {
   const theme = useTheme();
 
@@ -423,7 +423,7 @@ const WalletXpubStackRoot = () => {
   );
 };
 
-const SignVerifyStack = createNativeStackNavigator();
+const SignVerifyStack = createStackNavigator();
 const SignVerifyStackRoot = () => {
   const theme = useTheme();
 
@@ -438,7 +438,7 @@ const SignVerifyStackRoot = () => {
   );
 };
 
-const WalletExportStack = createNativeStackNavigator();
+const WalletExportStack = createStackNavigator();
 const WalletExportStackRoot = () => {
   const theme = useTheme();
 
@@ -453,7 +453,7 @@ const WalletExportStackRoot = () => {
   );
 };
 
-const LappBrowserStack = createNativeStackNavigator();
+const LappBrowserStack = createStackNavigator();
 const LappBrowserStackRoot = () => {
   const theme = useTheme();
 
@@ -468,6 +468,7 @@ const InitStack = createStackNavigator();
 const InitRoot = () => (
   <InitStack.Navigator initialRouteName="SplashScreen" screenOptions={{
       cardStyleInterpolator: CardStyleInterpolators.forBottomSheetAndroid,
+      gestureEnabled: false,
     }}>
     <InitStack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false,gestureEnabled: false }}/>
     <InitStack.Screen name="WelcomeScreen" component={WelcomeScreen} options={{ headerShown: false, gestureEnabled: false }} />
@@ -485,7 +486,7 @@ const InitRoot = () => (
   </InitStack.Navigator>
 );
 
-const ViewEditMultisigCosignersStack = createNativeStackNavigator();
+const ViewEditMultisigCosignersStack = createStackNavigator();
 const ViewEditMultisigCosignersRoot = () => {
   const theme = useTheme();
 
@@ -504,7 +505,7 @@ const ViewEditMultisigCosignersRoot = () => {
   );
 };
 
-const ExportMultisigCoordinationSetupStack = createNativeStackNavigator();
+const ExportMultisigCoordinationSetupStack = createStackNavigator();
 const ExportMultisigCoordinationSetupRoot = () => {
   const theme = useTheme();
 
@@ -523,7 +524,7 @@ const ExportMultisigCoordinationSetupRoot = () => {
   );
 };
 
-const PaymentCodeStack = createNativeStackNavigator();
+const PaymentCodeStack = createStackNavigator();
 const PaymentCodeStackRoot = () => {
   return (
     <PaymentCodeStack.Navigator name="PaymentCodeRoot" screenOptions={{ headerShadowVisible: false }} initialRouteName="PaymentCode">
@@ -537,7 +538,7 @@ const PaymentCodeStackRoot = () => {
   );
 };
 
-const RootStack = createNativeStackNavigator();
+const RootStack = createStackNavigator();
 const NavigationDefaultOptions = { headerShown: false, presentation: 'modal' };
 const NavigationFormModalOptions = { headerShown: false, presentation: 'formSheet' };
 const StatusBarLightOptions = { statusBarStyle: 'light' };

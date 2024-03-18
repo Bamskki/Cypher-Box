@@ -7,6 +7,7 @@ import { isHandset } from "../../../blue_modules/environment";
 import { BlueStorageContext } from "../../../blue_modules/storage-context";
 import { MiddleImage, TitleImage } from "../../../img";
 import { Start } from "@Cypher/assets/images";
+import { ScreenLayout } from "@Cypher/component-library";
 
 export default function WelcomeScreen() {
     const { setWalletsInitialized, startAndDecrypt } = useContext(BlueStorageContext);
@@ -30,7 +31,7 @@ export default function WelcomeScreen() {
     }
 
     return (
-        <View style={styles.container}>
+        <ScreenLayout style={styles.container}>
             <View style={styles.inner}>
                 <Image source={TitleImage} style={styles.title}
                     resizeMode="contain" />
@@ -51,6 +52,6 @@ export default function WelcomeScreen() {
                         resizeMode="contain" />
                 </TouchableOpacity>
             </View>
-        </View>
+        </ScreenLayout>
     )
 }

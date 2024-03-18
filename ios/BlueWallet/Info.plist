@@ -161,7 +161,7 @@
 		</dict>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>In order to quickly scan the recipient's address, we need your permission to use the camera to scan their QR Code.</string>
+	<string>In order to quickly scan the recipient&apos;s address, we need your permission to use the camera to scan their QR Code.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>In order to use FaceID please confirm your permission.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
@@ -212,6 +212,8 @@
 	<array>
 		<string>armv7</string>
 	</array>
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleDarkContent</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -225,7 +227,7 @@
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
-	<true/>
+	<false/>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>

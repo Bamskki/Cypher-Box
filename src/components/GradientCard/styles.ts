@@ -21,10 +21,11 @@ export default StyleSheet.create<Style>({
     },
     shadow:{
         shadowColor: colors.black.default,
-        shadowOffset: { width: 5, height: 10 },
-        shadowOpacity: 0.5,
-        shadowRadius: 5,
-        elevation: 15,
+        // shadowOffset: { width: 5, height: 10 },
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.4,
+        shadowRadius: 4,
+        elevation: 8,
         borderColor: "transparent", // Required to show shadows on Android for some reason !?!?
     }
 })
