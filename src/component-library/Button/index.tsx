@@ -10,6 +10,7 @@ import {
 import LoadingSpinner from '../LoadingSpinner';
 import styles from './styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { colors } from '@Cypher/style-guide';
 
 export interface Props extends TouchableOpacityProps {
   text: string;
@@ -50,6 +51,7 @@ function Button({
               <Ionicons
                 name={leftIcon}
                 size={20}
+                color={colors.black.default}
               />
             </View>
           )}

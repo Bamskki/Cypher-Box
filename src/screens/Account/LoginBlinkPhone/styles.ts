@@ -71,7 +71,6 @@ export default StyleSheet.create<Style>({
         backgroundColor: colors.white,
         width: '75%',
         borderRadius: 10,
-        height: 37,
         marginTop: 20,
         paddingHorizontal: 20,
     },
