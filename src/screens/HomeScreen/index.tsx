@@ -60,9 +60,13 @@ export default function HomeScreen({ route }: Props) {
     dispatchNavigate("CheckAccount");
   };
 
-  const receiveClickHandler = () => {};
+  const receiveClickHandler = () => {
+    dispatchNavigate('ReceivedMethodScreen');
+  };
 
-  const sendClickHandler = () => {};
+  const sendClickHandler = () => {
+    dispatchNavigate('SendScreen');
+  };
 
   return (
     <ScreenLayout>
