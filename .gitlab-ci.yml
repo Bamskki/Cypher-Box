@@ -1,0 +1,3 @@
+build-job:
+    script:
+        - echo "This is build job"
