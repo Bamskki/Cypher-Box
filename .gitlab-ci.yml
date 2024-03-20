@@ -1,0 +1,39 @@
+image: node:14.17.0  # Use Node.js Docker image
+
+stages:
+  - build
+  - test
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/  # Cache node_modules to speed up builds
+
+before_script:
+  - npm install -g react-native-cli  # Install React Native CLI globally
+  - npm install  # Install dependencies
+
+build_android:
+  stage: build
+  script:
+    - npm run android  # Run React Native command to build Android app
+  artifacts:
+    paths:
+      - android/app/build/outputs/  # Save Android build artifacts
+
+build_ios:
+  stage: build
+  script:
+    - cd ios && pod install && cd ..  # Run pod install in the ios directory
+    - npm run ios  # Run React Native command to build iOS app
+  artifacts:
+    paths:
+      - ios/build/  # Save iOS build artifacts
+
+test:
+  stage: test
+  script:
+    - npm run test  # Run React Native tests
+  artifacts:
+    paths:
+      - coverage/  # Save test coverage reports, if applicable
