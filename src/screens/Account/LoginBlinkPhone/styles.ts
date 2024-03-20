@@ -72,6 +72,7 @@ export default StyleSheet.create<Style>({
         width: '75%',
         borderRadius: 10,
         marginTop: 20,
+        height:37,
         paddingHorizontal: 20,
     },
     space: {

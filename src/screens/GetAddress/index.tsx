@@ -16,7 +16,7 @@ export default function GetAddressScreen() {
     }
 
     const createLightningAddressClickHandler = () => {
-        setVGA('Bam@Blink.sv');
+        setVGA(`${upi}@blink.sv`);
     }
 
     return (

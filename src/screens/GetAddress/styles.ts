@@ -83,7 +83,9 @@ export default StyleSheet.create<Style>({
         height: 30,
         marginEnd: 20,
         textAlign: 'center',
-        color: colors.gray.text
+        color: colors.black.default,
+        fontFamily: 'Lato-Bold',
+        fontSize:18,
     },
     desc: {
         textAlign: 'center',

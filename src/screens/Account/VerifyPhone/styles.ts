@@ -32,6 +32,7 @@ export default StyleSheet.create<Style>({
         width: '50%',
         borderRadius: 10,
         marginTop: 40,
+        height:37,
         paddingHorizontal: 20,
         textAlign:'center'
     },
