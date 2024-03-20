@@ -1,7 +1,5 @@
-image: node:14.17.0  # Use Node.js Docker image
-variables:
-  # Set JAVA_HOME to point to the Java installation directory
-  JAVA_HOME: "/usr/lib/jvm/java-11-openjdk-amd64"  # Adjust the path based on your Java installation
+#image: node:14.17.0  # Use Node.js Docker image
+image: java:8
 
 stages:
   - build
