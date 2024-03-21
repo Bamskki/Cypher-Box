@@ -13,6 +13,7 @@ before_script:
   # - java -version  # Verify Java installation
   # - npm install -g react-native-cli  # Install React Native CLI globally
   - npm install -g typescript
+  - npm install typescript tslint
   - npm install  # Install dependencies
 
 # build_android:
