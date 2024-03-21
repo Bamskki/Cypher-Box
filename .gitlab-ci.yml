@@ -12,6 +12,7 @@ before_script:
   # - export PATH="$JAVA_HOME/bin:$PATH"  # Add Java binary directory to PATH
   # - java -version  # Verify Java installation
   # - npm install -g react-native-cli  # Install React Native CLI globally
+  - npm install -g typescript
   - npm install  # Install dependencies
 
 # build_android:
