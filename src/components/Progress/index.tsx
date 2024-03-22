@@ -15,7 +15,9 @@ export default function Progress({ current = 0 }: Props) {
             {data.map((i,index) => {
                 return (
                     <>
-                        <LinearGradient style={styles.linear}
+                        <LinearGradient 
+                            key={index}
+                            style={styles.linear}
                             start={{ x: 1, y: 0 }}
                             end={{ x: 0, y: 0 }}
                             colors={current >= index ? [colors.pink.default, colors.pink.light]: [colors.black.light,colors.black.light]} />

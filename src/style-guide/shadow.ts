@@ -12,6 +12,7 @@ const shadow = StyleSheet.create({
         },
         elevation: 8,
         borderColor: "transparent",
+        backgroundColor: colors.white,
 
         // shadowColor: colors.black.default,
         // shadowOffset: { width: 0, height: 4 },

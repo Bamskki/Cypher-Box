@@ -1,4 +1,4 @@
-import { colors } from "@Cypher/style-guide";
+import { colors, shadow } from "@Cypher/style-guide";
 import { StyleSheet, TextStyle, ViewStyle } from "react-native";
 
 interface Style {
@@ -14,7 +14,9 @@ export default StyleSheet.create<Style>({
     button: {
         alignSelf: 'center',
         marginTop: 40,
-        paddingHorizontal:10
+        paddingHorizontal:30,
+        height: 43,
+        ...shadow.shadow25
     },
     buttonText: {
         color: colors.pink.main

@@ -6,10 +6,12 @@ import { useNavigation } from "@react-navigation/native";
 
 export default function CreateInvoice() {
 
-    const createInvoiceClickHandler = () => {}
+    const createInvoiceClickHandler = () => {
+        console.log('create invoice click');
+    }
 
     return (
-        <ScreenLayout showToolbar isBackButton title="Receive to Checking Account">
+        <ScreenLayout showToolbar isBackButton title="Receive with Invoice" >
             <View style={styles.priceView}>
                 <Text h3 style={styles.text}>Amount</Text>
                 <TextInput placeholder="0 BTC" style={styles.amount} value="0 BTC" />

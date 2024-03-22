@@ -1,4 +1,4 @@
-import { colors, widths } from "@Cypher/style-guide";
+import { colors, widths, shadow } from "@Cypher/style-guide";
 import { ImageStyle, StyleSheet, TextStyle, ViewStyle } from "react-native";
 
 interface Style {
@@ -11,6 +11,7 @@ interface Style {
     view: ViewStyle;
     linearGradient: ViewStyle;
     showLine: ViewStyle;
+    height: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -32,15 +33,11 @@ export default StyleSheet.create<Style>({
     },
     title: {
         marginStart: 10,
-        textShadowColor: colors.shadow25,
-        textShadowOffset: { width: 0, height: 2 },
-        textShadowRadius: 10,
+        ...shadow.text25
     },
     desc: {
         marginTop: 15,
-        textShadowColor: colors.shadow25,
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 1,
+        ...shadow.text25
     },
     description: {
         fontSize: 14,
@@ -53,14 +50,10 @@ export default StyleSheet.create<Style>({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        flex:1,
+        flex: 1,
         margin: 10,
-        paddingHorizontal:10,
+        paddingStart: 10,
         width: widths - 80,
-        shadowColor: colors.black.default,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.8,
-        shadowRadius: 1,
     },
     linearGradient: {
         borderRadius: 25,
@@ -77,5 +70,8 @@ export default StyleSheet.create<Style>({
         marginBottom: 20,
         marginStart: 50,
         marginEnd: 20,
+    },
+    height: {
+        height: 146,
     }
 })

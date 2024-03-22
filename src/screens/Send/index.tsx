@@ -3,8 +3,8 @@ import { Image, StyleSheet, TextInput, View } from "react-native";
 import styles from "./styles";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 import { Current } from "@Cypher/assets/images";
-import { GradientButton, GradientCard } from "@Cypher/components";
-import { colors } from "@Cypher/style-guide";
+import { GradientButton, GradientCard, GradientCardWithShadow, GradientText } from "@Cypher/components";
+import { colors, shadow } from "@Cypher/style-guide";
 import { dispatchNavigate } from "@Cypher/helpers";
 
 export default function SendScreen() {
@@ -15,7 +15,7 @@ export default function SendScreen() {
     const sendClickHandler = () => {
         dispatchNavigate('SendReceiveSuccessScreen', {
             isReceive: false,
-            value: sats,
+            value: sats || '10',
             valueUsd: inusd,
         })
     }
@@ -38,7 +38,7 @@ export default function SendScreen() {
     }, [sats]);
 
     return (
-        <ScreenLayout showToolbar isBackButton title="Send">
+        <ScreenLayout showToolbar isBackButton title="Send Bitcoin">
             <View style={styles.priceView}>
                 <Text h3 style={styles.text}>Amount</Text>
                 <View style={{ flexDirection: 'row', justifyContent: 'center', marginStart: 50 }}>
@@ -56,18 +56,20 @@ export default function SendScreen() {
                 </View>
             </View>
             <Text subHeader style={styles.inDollar}>{`$${inusd}`}</Text>
-            <GradientCard style={styles.main} linearStyle={styles.linearStyle}>
+            <GradientCardWithShadow style={styles.mainview} linearStyle={styles.main} shadowStyleTop={styles.main} shadowStyleBottom={styles.main}>
                 <View style={styles.middleView}>
                     <Text bold h3 style={styles.sats}>30,000 sats</Text>
-                    <Text bold h3 style={styles.sats}>From Blink Account</Text>
+                    <Text bold h3 style={styles.sats}>From Coinos Account</Text>
                 </View>
-                <View style={[styles.middleView, { marginBottom: 5 }]}>
+                <View style={styles.middlebView}>
+                    <View style={styles.border}>
                     <View style={styles.borderView}>
-                        <Text>Type Lightning address or paste invoice</Text>
+                        <GradientText h3 style={{fontSize:10, ...shadow.text25}}>Type Lightning address or paste invoice</GradientText>
+                    </View>
                     </View>
                     <Image source={require('../../../img/scan-new.png')} style={styles.image} resizeMode="contain" />
                 </View>
-            </GradientCard>
+            </GradientCardWithShadow>
             <View style={styles.sendView}>
                 <Image source={Current} style={styles.current} />
                 <GradientButton title="Send" onPress={sendClickHandler} isShadow isTextShadow disabled={Number(sats) < 1} />

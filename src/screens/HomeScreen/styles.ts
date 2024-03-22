@@ -1,4 +1,4 @@
-import { colors, widths } from "@Cypher/style-guide";
+import { colors, widths, shadow } from "@Cypher/style-guide";
 import { ImageStyle, StyleSheet, TextStyle, ViewStyle } from "react-native";
 
 interface Style {
@@ -9,6 +9,7 @@ interface Style {
     image: ImageStyle;
     arrow: ImageStyle;
     linearGradient: ViewStyle;
+    createView: ViewStyle;
     bitcointext: TextStyle;
     middle: TextStyle;
     text: TextStyle;
@@ -24,8 +25,6 @@ interface Style {
     bottominner: ViewStyle;
     bitcoinimg: ImageStyle;
     row: ViewStyle;
-    flex: ViewStyle;
-    receiveView: ViewStyle;
     alreadyView: ViewStyle;
     scan: ImageStyle;
     shadow: TextStyle;
@@ -35,6 +34,8 @@ interface Style {
     shadowTopBottom: any;
     shadowBottomBottom: any;
     shadowViewBottom: ViewStyle;
+    height: ViewStyle;
+    top: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -45,17 +46,10 @@ export default StyleSheet.create<Style>({
         padding: 20,
         paddingBottom: 60,
     },
-    flex: {
-        flex: 1
-    },
     alreadyView: {
         flexDirection: 'row',
         marginTop: 10,
         alignSelf: 'center'
-    },
-    receiveView: {
-        flex: 1,
-        marginEnd: 50,
     },
     title: {
         flexDirection: 'row',
@@ -77,6 +71,11 @@ export default StyleSheet.create<Style>({
         justifyContent: 'center',
     },
     linearGradient: {
+        marginTop: 20,
+        height: 132,
+        justifyContent: 'flex-start',
+    },
+    createView: {
         marginTop: 20,
     },
     image: {
@@ -102,9 +101,7 @@ export default StyleSheet.create<Style>({
     },
     bitcointext: {
         marginEnd: 7,
-        textShadowColor: colors.shadow75,
-        textShadowOffset: { width: 0, height: 2 },
-        textShadowRadius: 10
+        ...shadow.text25,
     },
     arrow: {
         width: 50,
@@ -114,21 +111,17 @@ export default StyleSheet.create<Style>({
     },
     view: {
         flexDirection: 'row',
+        padding: 15,
+        paddingHorizontal: 20,
         justifyContent: 'space-between',
-        margin: 10,
-        width: widths - 80,
-        shadowColor: colors.black.default,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.8,
-        shadowRadius: 1,
     },
     showLine: {
         borderWidth: 1,
         borderColor: colors.white,
         padding: 5,
         borderRadius: 5,
-        marginBottom: 20,
-        marginStart: 20,
+        marginVertical: 10,
+        marginStart: 25,
         marginHorizontal: 20
     },
     blink: {
@@ -139,17 +132,11 @@ export default StyleSheet.create<Style>({
     },
     check: {
         marginStart: 10,
-        textShadowColor: colors.shadow25,
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 5,
-        shadowOpacity: 0.2,
+        ...shadow.text25,
     },
     sats: {
-        marginStart: 20,
-        textShadowColor: colors.shadow25,
-        textShadowOffset: { width: 0, height: 4 },
-        textShadowRadius: 5,
-        shadowOpacity: 0.2,
+        marginStart: 25,
+        ...shadow.text25,
     },
     alert: {
         color: colors.green,
@@ -171,6 +158,7 @@ export default StyleSheet.create<Style>({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        marginTop: 5,
     },
     bitcoinimg: {
         width: 35,
@@ -179,76 +167,89 @@ export default StyleSheet.create<Style>({
     row: {
         flexDirection: 'row',
         alignItems: 'center',
-        height: 51,
-        justifyContent:'space-between',
+        marginTop: 2,
     },
     shadow: {
-        textShadowColor: colors.shadow25,
-        textShadowOffset: { width: 0, height: 4 },
-        textShadowRadius: 5,
-        shadowOpacity: 0.2,
+        ...shadow.text25,
     },
-    shadowTop:{
+    shadowTop: {
         shadowOffset: { width: 4, height: 4 },
         shadowOpacity: 1,
         shadowColor: "#F558C9",
         shadowRadius: 2,
         borderRadius: 25,
-        width: widths-40,
-        height: 150,
-        marginTop:20,
+        width: widths - 40,
+        height: 151,
         backgroundColor: colors.primary,
         padding: 15,
-        paddingHorizontal:30,
+        paddingHorizontal: 30,
     },
-    shadowTopBottom:{
+    shadowTopBottom: {
         shadowOffset: { width: 4, height: 4 },
         shadowOpacity: 1,
         shadowColor: "#FFFFFF",
         shadowRadius: 2,
         borderRadius: 25,
-        width: widths-40,
-        height: 150,
-        marginTop:20,
+        width: widths - 40,
+        height: 151,
         backgroundColor: colors.tundora,
         padding: 15,
-        paddingHorizontal:30,
+        paddingStart: 20,
+        paddingEnd: 10,
     },
-    shadowBottom:{
+    shadowBottom: {
         shadowOffset: { width: -2, height: -2 },
         shadowOpacity: 1,
         shadowColor: "#4F2844",
         shadowRadius: 2,
         borderRadius: 25,
-        width: widths-40,
+        width: widths - 40,
         height: 150,
-        justifyContent:'center',
+        justifyContent: 'center',
         position: 'absolute',
     },
-    shadowBottomBottom:{
+    shadowBottomBottom: {
         shadowOffset: { width: -2, height: -2 },
         shadowOpacity: 1,
         shadowColor: "#242424",
         shadowRadius: 2,
         borderRadius: 25,
-        width: widths-40,
+        width: widths - 40,
         height: 150,
-        justifyContent:'center',
+        justifyContent: 'center',
         position: 'absolute',
     },
-    shadowView:{
+    shadowView: {
         shadowOffset: { width: -8, height: -8 },
         shadowOpacity: 0.48,
         shadowColor: '#27272C',
         shadowRadius: 12,
         elevation: 24,
+        borderRadius: 25,
+        width: widths - 40,
+        height: 151,
+        marginTop: 20,
+        borderColor: "transparent",
+        backgroundColor: colors.white,
     },
-    shadowViewBottom:{
+    shadowViewBottom: {
         shadowOffset: { width: 8, height: 8 },
         shadowOpacity: 0.71,
         shadowColor: '#0C0C0C',
         shadowRadius: 12,
         elevation: 24,
+        borderRadius: 25,
+        width: widths - 40,
+        height: 151,
         marginTop: 20,
+        borderColor: "transparent",
+        backgroundColor: colors.tundora,
     },
+    height: {
+        height: 132
+    },
+    top: {
+        height: 132,
+        justifyContent: 'flex-start',
+    }
 })

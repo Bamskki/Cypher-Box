@@ -84,7 +84,7 @@ function ScreenLayout({
     return (
       <>
         {progress > -1 &&
-          <Progress current={progress} />
+          <Progress key={progress} current={progress} />
         }
         {showToolbar && !showHeader ? (
           <View style={[styles.showToolbar, { justifyContent: isTitleCenter ? 'flex-start' : 'center' }]}>

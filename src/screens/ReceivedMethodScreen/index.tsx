@@ -1,18 +1,20 @@
 import React from "react";
-import { Image, View } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
 import styles from "./styles";
 import { LeftArrow } from "@Cypher/assets/images";
-import { GradientCard } from "@Cypher/components";
+import { GradientCard, GradientCardWithShadow } from "@Cypher/components";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 import { dispatchNavigate } from "@Cypher/helpers";
 
 export default function ReceivedMethodScreen() {
 
     const handleCreateInvoice = () => {
+        console.log('create invoice click');
         dispatchNavigate('CreateInvoice');
     }
 
     const getAddressClickHandler = () => {
+        console.log('getaddress click');
         dispatchNavigate('GetAddressScreen');
     }
 
@@ -21,8 +23,7 @@ export default function ReceivedMethodScreen() {
             <View style={styles.container}>
                 <View style={styles.innerView}>
                     <Text subHeader bold>Choose receive method</Text>
-                    <View style={{ height: 50 }} />
-                    <GradientCard onPress={getAddressClickHandler}>
+                    <GradientCardWithShadow style={StyleSheet.flatten([styles.height,{marginTop: 50}])} linearStyle={styles.height} shadowStyleTop={styles.height} shadowStyleBottom={styles.height} onPress={getAddressClickHandler}>
                         <View style={styles.view}>
                             <View style={{ marginBottom: 20 }}>
                                 <Text subHeader bold style={styles.title}>Get Address</Text>
@@ -30,9 +31,9 @@ export default function ReceivedMethodScreen() {
                             </View>
                             <Image source={LeftArrow} style={styles.image} resizeMode="contain" />
                         </View>
-                    </GradientCard>
+                    </GradientCardWithShadow>
                     <View style={{ height: 20 }} />
-                    <GradientCard onPress={handleCreateInvoice}>
+                    <GradientCardWithShadow style={styles.height} linearStyle={styles.height} shadowStyleTop={styles.height} shadowStyleBottom={styles.height} onPress={handleCreateInvoice}>
                         <View style={styles.view}>
                             <View style={{ marginBottom: 0 }}>
                                 <Text subHeader bold style={styles.title}>Create Invoice</Text>
@@ -40,7 +41,7 @@ export default function ReceivedMethodScreen() {
                             </View>
                             <Image source={LeftArrow} style={styles.image} resizeMode="contain" />
                         </View>
-                    </GradientCard>
+                    </GradientCardWithShadow>
                 </View>
             </View>
         </ScreenLayout>

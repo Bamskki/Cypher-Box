@@ -85,7 +85,7 @@ import PaymentCode from './screen/wallets/paymentCode';
 import PaymentCodesList from './screen/wallets/paymentCodesList';
 import loc from './loc';
 import { useTheme } from './components/themes';
-import { AccountStatus, CheckAccount, CreateInvoice, DownloadBlink, GetAddressScreen, HomeScreen, InfoBlink, LoginBlink, LoginBlinkPhone, QrScreen, ReceivedMethodScreen, SendReceiveSuccessScreen, SendScreen, SplashScreen, VerifyPhone, WelcomeScreen } from './src/screens';
+import { AccountStatus, CheckAccount, CreateCoinOSScreen, CreateInvoice, DownloadBlink, GetAddressScreen, HomeScreen, InfoBlink, LoginBlink, LoginBlinkPhone, LoginCoinOSScreen, QrScreen, ReceivedMethodScreen, SendReceiveSuccessScreen, SendScreen, SplashScreen, VerifyPhone, WelcomeScreen } from './src/screens';
 import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 
 const WalletsStack = createStackNavigator();
@@ -103,6 +103,8 @@ const WalletsRoot = () => {
       <WalletsStack.Screen name="InfoBlink" component={InfoBlink} options={{headerShown: false}} />
       <WalletsStack.Screen name="DownloadBlink" component={DownloadBlink} options={{headerShown: false}} />
       <WalletsStack.Screen name="LoginBlink" component={LoginBlink} options={{headerShown: false}} />
+      <WalletsStack.Screen name="CreateCoinOSScreen" component={CreateCoinOSScreen} options={{headerShown: false}} />
+      <WalletsStack.Screen name="LoginCoinOSScreen" component={LoginCoinOSScreen} options={{headerShown: false}} />
       <WalletsStack.Screen name="LoginBlinkPhone" component={LoginBlinkPhone} options={{headerShown: false}} />
       <WalletsStack.Screen name="VerifyPhone" component={VerifyPhone} options={{headerShown: false}} />
       <WalletsStack.Screen name="AccountStatus" component={AccountStatus} options={{headerShown: false}} />

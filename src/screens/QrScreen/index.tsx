@@ -2,7 +2,6 @@ import React from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import styles from "./styles";
 import { Copy, QrCode, Share } from "@Cypher/assets/images";
-import { useNavigation } from "@react-navigation/native";
 import { colors } from "@Cypher/style-guide";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 import { dispatchNavigate } from "@Cypher/helpers";
@@ -12,10 +11,10 @@ interface Props {
 }
 
 export default function QrScreen({ route }: Props) {
-    const { navigate } = useNavigation();
     const { isBitcoinQr } = route?.params;
 
     const copyClickHandler = () => {
+        console.log('copy click temprary');
         dispatchNavigate('SendReceiveSuccessScreen', {
             isReceive: false,
             value: '10',
@@ -24,10 +23,10 @@ export default function QrScreen({ route }: Props) {
     }
 
     return (
-        <ScreenLayout showToolbar title='Show QR Code' isTitleCenter>
+        <ScreenLayout showToolbar title='Show QR Code'>
             <View style={styles.container}>
                 <View style={styles.innerView}>
-                    <Text bold style={styles.maintitle}>{isBitcoinQr ? 'Bitcoin Network Address' : 'Bitcoin Lightning QR'}</Text>
+                    <Text bold style={styles.maintitle}>{isBitcoinQr ? 'Bitcoin Network address' : 'Bitcoin Lightning QR'}</Text>
                     <Image source={QrCode} resizeMode="contain" style={styles.image} />
                     <View style={styles.imageView}>
                         <TouchableOpacity onPress={copyClickHandler}>

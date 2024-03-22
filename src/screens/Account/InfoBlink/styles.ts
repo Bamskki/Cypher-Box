@@ -8,6 +8,7 @@ interface Style {
     descption: TextStyle;
     alertText: TextStyle;
     alertText2: TextStyle;
+    link: TextStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -24,16 +25,16 @@ export default StyleSheet.create<Style>({
         alignItems: 'center'
     },
     image: {
-        width: 312,
-        height: 97,
+        width: 249,
+        height: 81,
         alignSelf: 'center',
         justifyContent: 'center',
         marginBottom:70,
         // flex: 1
     },
     descption: {
-        fontFamily: 'Archivo-Medium',
         marginVertical: 30,
+        lineHeight: 24,
     },
     alertText: {
         alignSelf: 'flex-start',
@@ -42,5 +43,10 @@ export default StyleSheet.create<Style>({
     },
     alertText2: {
         alignSelf: 'flex-start',
-    }
+        marginBottom: 30
+    },
+    link:{
+        marginTop:1,
+        color:colors.pink.main
+    },
 })

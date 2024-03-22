@@ -14,3 +14,5 @@ export { default as CreateInvoice } from './CreateInvoice';
 export { default as SendReceiveSuccessScreen } from './SendReceiveSuccessScreen';
 export { default as GetAddressScreen } from './GetAddress';
 export { default as SendScreen } from './Send';
+export { default as CreateCoinOSScreen } from './Account/CreateCoinOSScreen';
+export { default as LoginCoinOSScreen } from './Account/LoginCoinOSScreen';

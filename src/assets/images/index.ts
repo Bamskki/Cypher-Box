@@ -10,3 +10,6 @@ export { default as Copy } from './copy.png';
 export { default as Share } from './share.png';
 export { default as QrCode } from './qrcode.png';
 export { default as Electricity } from './electricity.png';
+export { default as Title } from './title.png';
+export { default as CoinOS } from './coinos.png';
+export { default as CoinOSSmall } from './coinossmall.png';

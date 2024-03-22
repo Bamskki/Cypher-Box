@@ -11,9 +11,9 @@ interface Style {
 export default StyleSheet.create<Style>({
     linearGradient: {
         borderRadius: 25,
-        height: 50,
+        height: 47,
         justifyContent: 'center',
-        width: (widths / 2) - 50,
+        width: (widths / 2) - 60,
     },
     shadow: {
         shadowOffset: { width: 4, height: 4 },
@@ -21,8 +21,8 @@ export default StyleSheet.create<Style>({
         shadowColor: "#27272C",
         shadowRadius: 2,
         borderRadius: 25,
-        width: (widths / 2) - 50,
-        height: 50,
+        width: (widths / 2) - 60,
+        height: 47,
         justifyContent: 'center',
     },
     innerShadow: {
@@ -31,8 +31,8 @@ export default StyleSheet.create<Style>({
         shadowColor: "#040404",
         shadowRadius: 2,
         borderRadius: 25,
-        width: (widths / 2) - 50,
-        height: 50,
+        width: (widths / 2) - 60,
+        height: 47,
         justifyContent: 'center',
         position: 'absolute',
     },

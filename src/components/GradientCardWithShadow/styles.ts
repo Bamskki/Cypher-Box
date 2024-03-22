@@ -1,4 +1,4 @@
-import { colors, widths } from "@Cypher/style-guide";
+import { colors, widths, shadow } from "@Cypher/style-guide";
 import { StyleSheet, ViewStyle } from "react-native";
 
 interface Style {
@@ -42,15 +42,16 @@ export default StyleSheet.create<Style>({
         justifyContent: 'center',
     },
     view: {
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.25,
-        shadowColor: colors.black.default,
-        shadowRadius: 4,
-        elevation: 8,
+        // shadowOffset: { width: 0, height: 4 },
+        // shadowOpacity: 0.25,
+        // shadowColor: colors.black.default,
+        // shadowRadius: 4,
+        // elevation: 8,
         borderRadius: 25,
         width: widths - 40,
         height: 150,
         justifyContent: 'center',
+        ...shadow.shadow25,
     },
     innerShadow: {
         shadowOffset: { width: -2, height: -2 },

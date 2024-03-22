@@ -1,4 +1,4 @@
-import { colors, widths } from "@Cypher/style-guide";
+import { colors, widths, shadow } from "@Cypher/style-guide";
 import { ImageStyle, StyleSheet, TextStyle, ViewStyle } from "react-native";
 
 interface Style {
@@ -10,6 +10,11 @@ interface Style {
     view: ViewStyle;
     linearGradient: ViewStyle;
     showLine: ViewStyle;
+    check: TextStyle;
+    sats: TextStyle;
+    blink: ImageStyle;
+    height: ViewStyle;
+    top: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -40,24 +45,43 @@ export default StyleSheet.create<Style>({
     },
     view: {
         flexDirection: 'row',
+        padding: 15,
+        paddingHorizontal: 20,
         justifyContent: 'space-between',
-        margin: 10,
-        width: widths - 80,
-        shadowColor: colors.black.default,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.8,
-        shadowRadius: 1,
     },
     linearGradient: {
         marginTop: 50,
+        height: 102,
+        justifyContent: 'flex-start',
     },
     showLine: {
         borderWidth: 1,
         borderColor: colors.white,
-        padding: 5,
+        padding: 3,
         borderRadius: 5,
-        marginBottom: 20,
+        marginVertical: 10,
         marginStart: 50,
-        marginEnd: 20
+        marginHorizontal: 30
+    },
+    check: {
+        marginStart: 10,
+        ...shadow.text25,
+    },
+    sats: {
+        marginStart: 25,
+        ...shadow.text25,
+    },
+    blink: {
+        width: 75,
+        height: 20,
+        marginTop: 10,
+        marginEnd: 15,
+    },
+    height: {
+        height: 102,
+    },
+    top:{
+        justifyContent: 'flex-start',
+        height: 102,
     }
 })

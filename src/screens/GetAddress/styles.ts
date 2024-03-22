@@ -6,6 +6,7 @@ interface Style {
     text: TextStyle;
     button: ViewStyle;
     buttonText: TextStyle;
+    create: TextStyle;
     orView: ViewStyle;
     inputView: ViewStyle;
     line: ViewStyle;
@@ -17,6 +18,13 @@ interface Style {
     number: TextStyle;
     code: ViewStyle;
     inner: ViewStyle;
+    bitcoinimg: ImageStyle;
+    height: ViewStyle;
+    new: TextStyle;
+    img: ImageStyle;
+    current: ImageStyle;
+    bitcointxt: ViewStyle;
+    topup: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -39,22 +47,29 @@ export default StyleSheet.create<Style>({
     },
     button: {
         alignSelf: 'center',
-        marginTop: 30,
-        marginBottom:20,
+        marginTop: 20,
+        marginBottom: 20,
         paddingHorizontal: 25,
-        height: 43,
+        height: 47,
     },
     buttonText: {
         color: colors.pink.main,
         fontSize: 16,
         fontFamily: 'Lato-Bold',
     },
+    create: {
+        color: colors.pink.main,
+        fontSize: 16,
+        fontFamily: 'Lato-Bold',
+        flex: 1,
+        textAlign: 'center'
+    },
     orView: {
         flexDirection: 'row',
         alignItems: 'center',
         alignSelf: 'center',
         marginBottom: 5,
-        marginTop:15,
+        marginTop: 10,
     },
     inputView: {
         flexDirection: 'row',
@@ -64,8 +79,9 @@ export default StyleSheet.create<Style>({
     },
     line: {
         height: 2,
-        width: 25,
-        backgroundColor: colors.white
+        width: 15,
+        backgroundColor: colors.white,
+        marginHorizontal: 2
     },
     or: {
         marginStart: 10,
@@ -83,9 +99,9 @@ export default StyleSheet.create<Style>({
         height: 30,
         marginEnd: 20,
         textAlign: 'center',
-        color: colors.black.default,
+        color: '#8C8C8C',
         fontFamily: 'Lato-Bold',
-        fontSize:18,
+        fontSize: 18,
     },
     desc: {
         textAlign: 'center',
@@ -97,10 +113,44 @@ export default StyleSheet.create<Style>({
     },
     code: {
         height: 68,
-        marginTop:10
+        marginTop: 10
     },
     inner: {
         flex: 1,
         justifyContent: 'space-evenly',
-    }
+    },
+    bitcoinimg: {
+        width: 55,
+        height: 55,
+        alignSelf: 'center',
+        marginTop: 5
+    },
+    height: {
+        height: 47,
+    },
+    new: {
+        fontSize: 18,
+    },
+    img: {
+        position: 'absolute',
+        width: 28,
+        height: 22,
+        right: 20
+    },
+    current: {
+        position: 'absolute',
+        right: 0,
+        width: 40,
+        height: 40,
+        zIndex: 1,
+    },
+    bitcointxt: {
+        alignSelf: 'center',
+        paddingHorizontal: 50,
+    },
+    topup: {
+        paddingHorizontal: 25,
+        marginTop: 5,
+        marginBottom: 20
+    },
 })

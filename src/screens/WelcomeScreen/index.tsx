@@ -6,7 +6,7 @@ import { StackActions, useNavigation } from "@react-navigation/native";
 import { isHandset } from "../../../blue_modules/environment";
 import { BlueStorageContext } from "../../../blue_modules/storage-context";
 import { MiddleImage, TitleImage } from "../../../img";
-import { Start } from "@Cypher/assets/images";
+import { Start, Title } from "@Cypher/assets/images";
 import { ScreenLayout } from "@Cypher/component-library";
 
 export default function WelcomeScreen() {
@@ -27,13 +27,14 @@ export default function WelcomeScreen() {
     };
 
     const startClickHandler = () => {
+        console.log('start click');
         setClick(true);
     }
 
     return (
         <ScreenLayout style={styles.container}>
             <View style={styles.inner}>
-                <Image source={TitleImage} style={styles.title}
+                <Image source={Title} style={styles.title}
                     resizeMode="contain" />
                 <Image
                     source={require('../../../img/logo.png')}

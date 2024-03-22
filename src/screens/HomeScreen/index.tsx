@@ -11,7 +11,7 @@ import DeeplinkSchemaMatch from "../../../class/deeplink-schema-match";
 import triggerHapticFeedback, {
   HapticFeedbackTypes,
 } from "../../../blue_modules/hapticFeedback";
-import { BlinkText, Current } from "@Cypher/assets/images";
+import { CoinOSSmall, Current } from "@Cypher/assets/images";
 import {
   GradientButtonWithShadow,
   GradientCardWithShadow,
@@ -30,15 +30,18 @@ export default function HomeScreen({ route }: Props) {
   const [isLogin, setLogin] = useState<boolean>(false);
 
   const navigateToSettings = () => {
+    console.log('setting click');
     dispatchNavigate("Settings");
   };
 
   const onScanButtonPressed = () => {
+    console.log('scan click');
     scanQrHelper(navigate, routeName).then(onBarScanned);
   };
 
   const loginClickHandler = () => {
-    dispatchNavigate("LoginBlink");
+    console.log('login click');
+    dispatchNavigate('LoginCoinOSScreen');
   };
 
   useFocusEffect(() => {
@@ -57,14 +60,17 @@ export default function HomeScreen({ route }: Props) {
   };
 
   const createChekingAccountClickHandler = () => {
+    console.log('create account click');
     dispatchNavigate("CheckAccount");
   };
 
   const receiveClickHandler = () => {
+    console.log('received click');
     dispatchNavigate('ReceivedMethodScreen');
   };
 
   const sendClickHandler = () => {
+    console.log('send click');
     dispatchNavigate('SendScreen');
   };
 
@@ -102,17 +108,17 @@ export default function HomeScreen({ route }: Props) {
           <View style={styles.shadowView}>
             <Shadow
               style={styles.shadowTop}
-              inner 
+              inner
               useArt
             >
-              <Text subHeader bold>
+              <Text subHeader bold style={{ marginStart: 2 }}>
                 0.00000000 BTC
               </Text>
-              <Text subHeader bold>
+              <Text bold style={{ fontSize: 20, lineHeight: 24 }} >
                 $0
               </Text>
               <Shadow
-                inner 
+                inner
                 useArt
                 style={styles.shadowBottom}
               />
@@ -120,28 +126,27 @@ export default function HomeScreen({ route }: Props) {
           </View>
           {isLogin ? (
             <>
-              <GradientCardWithShadow style={styles.linearGradient} disabled>
+              <GradientCardWithShadow style={styles.linearGradient} disabled linearStyle={styles.height} shadowStyleTop={styles.top} shadowStyleBottom={styles.height}>
                 <View style={styles.view}>
                   <Text h2 bold style={styles.check}>
                     Checking Account
                   </Text>
                   <Image
-                    source={BlinkText}
+                    source={CoinOSSmall}
                     style={styles.blink}
                     resizeMode="contain"
                   />
                 </View>
                 <Text h2 bold style={styles.sats}>
-                  0 sats
+                  0   sats
                 </Text>
                 <View style={styles.showLine} />
               </GradientCardWithShadow>
               <View style={styles.btnView}>
-                <View style={styles.receiveView}>
+                <View>
                   <Image source={Current} style={styles.current} />
                   <GradientButtonWithShadow
                     title="Receive"
-                    style={styles.flex}
                     onPress={receiveClickHandler}
                     isShadow
                     isTextShadow
@@ -149,7 +154,6 @@ export default function HomeScreen({ route }: Props) {
                 </View>
                 <GradientButtonWithShadow
                   title="Send"
-                  style={styles.flex}
                   onPress={sendClickHandler}
                   isShadow
                   isTextShadow
@@ -163,7 +167,7 @@ export default function HomeScreen({ route }: Props) {
           ) : (
             <>
               <GradientCardWithShadow
-                style={styles.linearGradient}
+                style={styles.createView}
                 onPress={createChekingAccountClickHandler}
               >
                 <View style={styles.middle}>
@@ -193,11 +197,11 @@ export default function HomeScreen({ route }: Props) {
         <View style={styles.shadowViewBottom}>
           <Shadow
             style={styles.shadowTopBottom}
-            inner 
+            inner
             useArt
           >
             <View style={styles.bottominner}>
-              <Text h2>Savings Vault</Text>
+              <Text h2 bold>Savings Vault</Text>
               <View style={styles.row}>
                 <Text h3 bold style={styles.bitcointext}>
                   Bitcoin Network
@@ -210,7 +214,7 @@ export default function HomeScreen({ route }: Props) {
               </View>
             </View>
             <Shadow
-              inner 
+              inner
               useArt
               style={styles.shadowBottomBottom}
             />

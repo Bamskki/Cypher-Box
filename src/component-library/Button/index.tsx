@@ -39,7 +39,7 @@ function Button({
     <TouchableOpacity
       accessibilityLabel={text}
       testID={text}
-      style={[styles.button, styles[type], style && style]}
+      style={[styles.button, style && style]}
       onPress={onPressButton}
       disabled={disabled ? disabled : loading}>
       {loading ? (

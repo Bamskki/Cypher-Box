@@ -1,4 +1,4 @@
-import { colors } from "@Cypher/style-guide";
+import { colors, shadow } from "@Cypher/style-guide";
 import { ImageStyle, StyleSheet, TextStyle, ViewStyle } from "react-native";
 
 interface Style {
@@ -7,7 +7,9 @@ interface Style {
     amount: TextStyle;
     priceView: ViewStyle;
     middleView: ViewStyle;
+    middlebView: ViewStyle;
     main: ViewStyle;
+    mainview: ViewStyle;
     linearStyle: ViewStyle;
     borderView: ViewStyle;
     sendView: ViewStyle;
@@ -17,6 +19,7 @@ interface Style {
     sats: TextStyle;
     current: ImageStyle;
     image: ImageStyle;
+    border: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -26,15 +29,21 @@ export default StyleSheet.create<Style>({
         paddingHorizontal: 10,
     },
     borderView: {
-        borderWidth: 3,
-        borderColor: colors.gray.line,
-        borderRadius: 10,
-        flex: 1,
+        // borderWidth: 4,
+        // borderColor: '#DFD6D6BF',
+        backgroundColor: colors.white,
+        borderRadius: 8,
+        // flex: 1,
         paddingHorizontal: 10,
-        marginEnd: 10
+        // marginEnd: 10
     },
     main: {
-        padding: 30,
+        height: 115,
+    },
+    mainview: {
+        alignSelf: 'center',
+        marginTop: 50,
+        height: 115,
     },
     linearStyle: {
         borderRadius: 20,
@@ -49,15 +58,26 @@ export default StyleSheet.create<Style>({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 10
+        padding: 10,
+        paddingHorizontal: 30,
+        paddingLeft: 35
+    },
+    middlebView: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 10,
+        paddingHorizontal: 20,
+        marginBottom: 5,
     },
     buttonText: {
         color: colors.pink.main,
     },
     sats: {
-        textShadowColor: colors.shadow50,
-        textShadowOffset: { width: 3, height: 5 },
-        textShadowRadius: 4,
+        // textShadowColor: colors.shadow50,
+        // textShadowOffset: { width: 3, height: 5 },
+        // textShadowRadius: 4,
+        ...shadow.text25
     },
     placeholder: {
         fontSize: 45,
@@ -98,5 +118,21 @@ export default StyleSheet.create<Style>({
         alignSelf: 'center',
         width: '40%',
         marginTop: 25,
+    },
+    border: {
+        flex: 1,
+        backgroundColor: '#DFD6D640',
+        padding: 3,
+        borderRadius: 10,
+        marginEnd: 20,
+        shadowColor: colors.black.default,
+        shadowRadius: 4,
+        shadowOpacity: 0.3,
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        elevation: 8,
+        borderColor: "transparent",
     },
 })

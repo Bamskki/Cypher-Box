@@ -131,6 +131,7 @@
     "coinselect": "3.1.13",
     "crypto-js": "4.2.0",
     "dayjs": "1.11.10",
+    "deprecated-react-native-prop-types": "^5.0.0",
     "detox": "20.17.0",
     "ecpair": "2.0.1",
     "ecurve": "1.0.6",
