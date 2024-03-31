@@ -8781,10 +8781,10 @@ react-native-device-info@10.12.0:
   resolved "https://registry.npmjs.org/react-native-device-info/-/react-native-device-info-10.12.0.tgz"
   integrity sha512-gnBkjyZNEqRd+5BNrdzuvmlraHTCH/to2x0Gp9rtDt0O9xWWW1MTYohUVWX9A0Ad2HVYcGanDCIvjWp4ngMZFg==
 
-"react-native-document-picker@https://github.com/BlueWallet/react-native-document-picker#0be5a70c3b456e35c2454aaf4dc8c2d40eb2ab47":
+"react-native-document-picker@github:BlueWallet/react-native-document-picker#0be5a70c3b456e35c2454aaf4dc8c2d40eb2ab47":
   version "9.1.0"
   resolved "git+ssh://git@github.com/BlueWallet/react-native-document-picker.git#0be5a70c3b456e35c2454aaf4dc8c2d40eb2ab47"
-  integrity sha512-74E4JnXExu4vu3W7NTDXUM1LF0FAjobWrIfC30ygSsxb4BV6eaIFRtnfrWOmKUuoY+Q9vlo+3dSrwqz5Xh2Ozw==
+  integrity sha512-T1QxAqsYIEowypi5eo2/KnDpYLJAvkeZEtO5fBcD9IpmXW6l6B4ytaXJ4k/OwBVDVJ0MQxSRa5WYJ8juCgOyKQ==
   dependencies:
     invariant "^2.2.4"
 
