@@ -15,7 +15,6 @@ before_script:
   - npm install -g typescript
   - npm install typescript tslint
   - npm install  # Install dependencies
-  - npm install react-native-document-picker
 
 # build_android:
 #   stage: build
