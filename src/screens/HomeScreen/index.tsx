@@ -38,8 +38,11 @@ export default function HomeScreen({ route }: Props) {
         async function handleToken() {
           const token = await getToken()
           setLogin(!!token);
+          console.log('token: ', token)
           if(token) {
             handleUser();
+          } else {
+            setIsLoading(false)
           }
         }
         handleToken();
