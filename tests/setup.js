@@ -165,9 +165,9 @@ jest.mock('react-native-idle-timer', () => {
   };
 });
 
-jest.mock('react-native-ios-context-menu', () => {
-  return {};
-});
+// jest.mock('react-native-ios-context-menu', () => {
+//   return {};
+// });
 
 jest.mock('react-native-haptic-feedback', () => {
   return {
