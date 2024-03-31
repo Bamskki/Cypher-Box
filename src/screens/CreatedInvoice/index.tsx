@@ -63,7 +63,7 @@ export default function CreatedInvoice({navigation, route} : any) {
                         getRef={c => {
                             if (!c?.toDataURL) return;
                                 c?.toDataURL((base64Image: string) => {
-                                base64QrCodeRef.current = base64Image.replace(/(\r\n|\n|\r)/gm, '');
+                                base64QrCodeRef.current = base64Image?.replace(/(\r\n|\n|\r)/gm, '');
                             });
                         }}
                       value={invoice?.hash}
