@@ -4,9 +4,9 @@ import styles from "./styles";
 import { StackActions, useNavigation } from "@react-navigation/native";
 import { isHandset } from "../../../blue_modules/environment";
 import { BlueStorageContext } from "../../../blue_modules/storage-context";
-import { navigate } from "../../../NavigationService";
 import BootSplash from 'react-native-bootsplash';
 import { heights } from "@Cypher/style-guide";
+import { dispatchNavigate } from "@Cypher/helpers";
 
 export default function SplashScreen_() {
     const [isLoading, setIsLoading] = useState(true);
@@ -49,7 +49,7 @@ export default function SplashScreen_() {
             setWalletsInitialized(true);
             dispatch(StackActions.replace(isHandset ? 'Navigation' : 'DrawerRoot'));
         } else {
-            navigate('WelcomeScreen')
+            dispatchNavigate('WelcomeScreen')
         }
         setIsLoading(false);
     };

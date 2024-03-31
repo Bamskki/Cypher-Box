@@ -1,17 +1,16 @@
-import React, { } from "react";
+import React from "react";
 import { Image, View } from "react-native";
 import styles from "./styles";
-import { BlinkText } from "@Cypher/assets/images";
-import { GradientButton, GradientCard, GradientText } from "@Cypher/components";
-import { useNavigation } from "@react-navigation/native";
+import { CoinOSSmall } from "@Cypher/assets/images";
+import { GradientButton, GradientCardWithShadow, GradientText } from "@Cypher/components";
 import { ScreenLayout, Text } from "@Cypher/component-library";
+import { dispatchNavigate } from "@Cypher/helpers";
 
 export default function AccountStatus({navigation}: any) {
 
     const nextClickHandler = () => {
-        navigation.replace('HomeScreen', {
-            isLogin_: true
-        });
+        console.log('home click');
+        navigation.replace('HomeScreen');
     }
 
     return (
@@ -19,14 +18,19 @@ export default function AccountStatus({navigation}: any) {
             <View style={styles.container}>
                 <View style={styles.innerView}>
                     <GradientText>Checking Account Created!</GradientText>
-
-                    <GradientCard style={styles.linearGradient} disabled>
+                    <GradientCardWithShadow style={styles.linearGradient} disabled linearStyle={styles.height} shadowStyleTop={styles.top} shadowStyleBottom={styles.height}>
                         <View style={styles.view}>
-                            <Text h3 bold style={styles.title}>Checking Account</Text>
-                            <Image source={BlinkText} style={styles.image} resizeMode="contain" />
+                            <Text h2 bold style={styles.check}>
+                                Checking Account
+                            </Text>
+                            <Image
+                                source={CoinOSSmall}
+                                style={styles.blink}
+                                resizeMode="contain"
+                            />
                         </View>
                         <View style={styles.showLine} />
-                    </GradientCard>
+                    </GradientCardWithShadow>
                     <Text h4 style={styles.description}>Your Checking Account has been created. The interactive bar display helps you in visualizing your Checking Account's balance, indicating a threshold above which storing bitcoin in a bank carries increased counter-party risk.{`\n\n`}
                         You can deposit money beyond the threshold, but remember, you are technically not the owner of it; you are relying on a third-party custodian. Cypher Bank will enable you to become the sole owner of your money once you hit this threshold (set to 2M sats by default but you can adjust it in the settings).</Text>
                 </View>

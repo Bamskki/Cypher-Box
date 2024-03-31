@@ -1,19 +1,30 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Image, TouchableOpacity, View } from "react-native";
 import styles from "./styles";
-import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import { scanQrHelper } from "../../../helpers/scan-qr";
 import DeeplinkSchemaMatch from "../../../class/deeplink-schema-match";
-import triggerHapticFeedback, { HapticFeedbackTypes } from "../../../blue_modules/hapticFeedback";
-import { BlinkText, Current } from "@Cypher/assets/images";
-import { GradientButton, GradientCard } from "@Cypher/components";
-import { colors } from "@Cypher/style-guide";
-import { Text } from "@Cypher/component-library";
+import { CoinOSSmall, Current } from "@Cypher/assets/images";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import useGetBalanceQuery from "../../../apollo/hooks/useGetBalanceQuery";
+import triggerHapticFeedback, {
+  HapticFeedbackTypes,
+} from "../../../blue_modules/hapticFeedback";
+import {
+  GradientButtonWithShadow,
+  GradientCardWithShadow,
+} from "@Cypher/components";
+import { ScreenLayout, Text } from "@Cypher/component-library";
+import { dispatchNavigate } from "@Cypher/helpers";
+import { Shadow } from "react-native-neomorph-shadows";
+import { getMe } from "../../../api/coinOSApis";
 
 interface Props {
-    route: any;
+  route: any;
 }
 
 export default function HomeScreen({ route }: Props) {
@@ -21,142 +32,241 @@ export default function HomeScreen({ route }: Props) {
     const routeName = useRoute().name;
     const [isLogin, setLogin] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const { data, loading, error } = useGetBalanceQuery();
+    const [balance, setBalance] = useState(0);
 
     useEffect(() => {
         async function handleToken() {
           const token = await getToken()
           setLogin(!!token);
-          setIsLoading(false);
+          if(token) {
+            handleUser();
+          }
         }
         handleToken();
       }, []);
       
+      const handleUser = async () => {
+        try {
+          const response = await getMe();
+          console.log('response: ', response);
+          if(response?.balance) {
+            setBalance(response?.balance || 0);
+          }
+          await AsyncStorage.setItem('user', response?.username);
+        } catch (error) {
+          console.log('error: ', error);
+        } finally {
+            setIsLoading(false)
+        }
+      }
+
       const getToken = async () => {
         const authToken = await AsyncStorage.getItem('authToken');
         return authToken;
       };
     
-    const navigateToSettings = () => {
-        navigate('Settings');
-    };
-
-    const onScanButtonPressed = () => {
-        // scanQrHelper(navigate, routeName).then(onBarScanned);
-    };
-
-    const loginClickHandler = () => {
-        navigate('LoginBlink');
-    };
-
-    useFocusEffect(() => {
-        if (route?.params?.isLogin_)
-            setLogin(route?.params?.isLogin_);
-    });
-
-    // const onBarScanned = (value: any) => {
-    //     if (!value) return;
-    //     DeeplinkSchemaMatch.navigationRouteFor({ url: value }, completionValue => {
-    //         triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
-    //         navigate(...completionValue);
-    //     });
+    // const navigateToSettings = () => {
+    //     navigate('Settings');
     // };
 
-    const createChekingAccountClickHandler = () => {
-        navigate('DownloadBlink');
-    }
+  const navigateToSettings = () => {
+    console.log('setting click');
+    dispatchNavigate("Settings");
+  };
 
-    const receiveClickHandler = () => {
-        navigate('ReceivedMethodScreen');
-    }
+  const onScanButtonPressed = () => {
+    console.log('scan click');
+    scanQrHelper(navigate, routeName).then(onBarScanned);
+  };
 
-    console.log('data: ',data)
-    return (
-        <View style={styles.container}>
-            <View>
-                <View style={styles.title}>
-                    <Text subHeader bold>Total Balance</Text>
-                    <View style={styles.row}>
-                        <TouchableOpacity style={styles.imageView}
-                            onPress={navigateToSettings}>
-                            <Image style={styles.image}
-                                resizeMode="contain"
-                                source={require('../../../img/settings.png')}
-                            />
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.imageView}
-                            onPress={onScanButtonPressed}>
-                            <Image style={styles.image}
-                                resizeMode="contain"
-                                source={require('../../../img/scan-new.png')}
-                            />
-                        </TouchableOpacity>
-                    </View>
+  const loginClickHandler = () => {
+    console.log('login click');
+    dispatchNavigate('LoginCoinOSScreen');
+  };
+
+  useFocusEffect(() => {
+    if (route?.params?.isLogin_) setLogin(route?.params?.isLogin_);
+  });
+
+  const onBarScanned = (value: any) => {
+    if (!value) return;
+    DeeplinkSchemaMatch.navigationRouteFor(
+      { url: value },
+      (completionValue: any) => {
+        triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
+        navigate(...completionValue);
+      }
+    );
+  };
+
+  const createChekingAccountClickHandler = () => {
+    console.log('create account click');
+    dispatchNavigate("CheckAccount");
+  };
+
+  const receiveClickHandler = () => {
+    console.log('received click');
+    dispatchNavigate('ReceivedMethodScreen');
+  };
+
+  const sendClickHandler = () => {
+    console.log('send click');
+    dispatchNavigate('SendScreen');
+  };
+
+  return (
+    <ScreenLayout>
+      <View style={styles.container}>
+        <View>
+          {isLoading ?
+            <ActivityIndicator size="large" color="#ffffff" />
+            :
+            <>
+              <View style={styles.title}>
+                <Text subHeader bold>
+                  Total Balance
+                </Text>
+                <View style={styles.row}>
+                  <TouchableOpacity
+                    style={styles.imageView}
+                    onPress={navigateToSettings}
+                  >
+                    <Image
+                      style={styles.image}
+                      resizeMode="contain"
+                      source={require("../../../img/settings.png")}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.imageViews}
+                    onPress={onScanButtonPressed}
+                  >
+                    <Image
+                      style={styles.scan}
+                      resizeMode="contain"
+                      source={require("../../../img/scan-new.png")}
+                    />
+                  </TouchableOpacity>
                 </View>
-                <GradientCard style={styles.priceView} disabled>
-                    <View style={styles.inner}>
-                        <Text subHeader bold>{data && data.me.defaultAccount.wallets[0].balance ? data.me.defaultAccount.wallets[0].balance : 0.00000000} BTC</Text>
-                        <Text subHeader bold>$0</Text>
-                    </View>
-                </GradientCard>
-                {!data && loading && isLoading ?
-                    <View style={styles.loading}>
-                        <ActivityIndicator size="large" color={colors.pink.default} />
-                    </View>
-                    :
-                    isLogin && data ?
-                    <>
-                        <GradientCard style={styles.linearGradient2} disabled>
-                            <View style={styles.view}>
-                                <Text h2 bold style={styles.check}>Checking Account</Text>
-                                <Image source={BlinkText} style={styles.blink} resizeMode="contain" />
-                            </View>
-                            <Text h2 bold style={styles.sats}>{data?.me?.defaultAccount.wallets[0].balance ? data.me.defaultAccount.wallets[0].balance : 0} sats</Text>
-                            <View style={styles.showLine} />
-                        </GradientCard>
-                        <View style={styles.btnView}>
-                            <View style={styles.receiveView}>
-                                <Image source={Current} style={styles.current} />
-                                <GradientButton title="Receive" style={styles.flex} />
-                            </View>
-                            <GradientButton title="Send" style={styles.flex} disabled />
-                        </View>
-                        <Text h4 style={styles.alert}>Nice! You can now deposit and accumulate bitcoin into your Checking Account. </Text>
-                    </>
-                    : !loading && !isLoading &&
-                    <>
-                        <GradientCard style={styles.linearGradient} onPress={createChekingAccountClickHandler}>
-                            <View style={styles.middle}>
-                                <Image style={styles.arrow}
-                                    resizeMode="contain"
-                                    source={require('../../../img/arrow-right.png')}
-                                />
-                                <Text h2>Create Your Checking Account</Text>
-                            </View>
-                        </GradientCard>
-                        <View style={styles.alreadyView}>
-                            <Text bold style={styles.text}>Already have an account?</Text>
-                            <TouchableOpacity onPress={loginClickHandler}>
-                                <Text bold style={styles.login}>Login</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </>
-                }
-            </View>
-            <GradientCard colors_={[colors.silver, colors.silver]} disabled>
-                <View style={styles.bottomcard}>
-                    <View style={styles.bottominner}>
-                        <Text h2>Savings Vault</Text>
-                        <View style={styles.row}>
-                            <Text h3 bold style={styles.bitcointext}>Bitcoin Network</Text>
-                            <Image style={styles.bitcoinimg}
-                                resizeMode="contain"
-                                source={require('../../../img/bitcoin.png')}
-                            />
-                        </View>
-                    </View>
+              </View>
+              <View style={styles.shadowView}>
+                <Shadow
+                  style={styles.shadowTop}
+                  inner
+                  useArt
+                >
+                  <Text subHeader bold style={{ marginStart: 2 }}>
+                    {balance} BTC
+                  </Text>
+                  <Text bold style={{ fontSize: 20, lineHeight: 24 }} >
+                    ${balance.toFixed(2)}
+                  </Text>
+                  <Shadow
+                    inner
+                    useArt
+                    style={styles.shadowBottom}
+                  />
+                </Shadow>
+              </View>
+            </>
+          }
+          {isLogin ? (
+            <>
+              <GradientCardWithShadow style={styles.linearGradient} disabled linearStyle={styles.height} shadowStyleTop={styles.top} shadowStyleBottom={styles.height}>
+                <View style={styles.view}>
+                  <Text h2 bold style={styles.check}>
+                    Checking Account
+                  </Text>
+                  <Image
+                    source={CoinOSSmall}
+                    style={styles.blink}
+                    resizeMode="contain"
+                  />
                 </View>
-            </GradientCard>
+                <Text h2 bold style={styles.sats}>
+                  {balance}   sats
+                </Text>
+                <View style={styles.showLine} />
+              </GradientCardWithShadow>
+              <View style={styles.btnView}>
+                <View>
+                  <Image source={Current} style={styles.current} />
+                  <GradientButtonWithShadow
+                    title="Receive"
+                    onPress={receiveClickHandler}
+                    isShadow
+                    isTextShadow
+                  />
+                </View>
+                <GradientButtonWithShadow
+                  title="Send"
+                  onPress={sendClickHandler}
+                  isShadow
+                  isTextShadow
+                />
+              </View>
+              <Text h4 style={styles.alert}>
+                Nice! You can now deposit and accumulate bitcoin into your
+                Checking Account.{" "}
+              </Text>
+            </>
+          ) : (
+            <>
+              <GradientCardWithShadow
+                style={styles.createView}
+                onPress={createChekingAccountClickHandler}
+              >
+                <View style={styles.middle}>
+                  <Image
+                    style={styles.arrow}
+                    resizeMode="contain"
+                    source={require("../../../img/arrow-right.png")}
+                  />
+                  <Text h2 style={styles.shadow}>
+                    Create Your Checking Account
+                  </Text>
+                </View>
+              </GradientCardWithShadow>
+              <View style={styles.alreadyView}>
+                <Text bold style={styles.text}>
+                  Already have an account?
+                </Text>
+                <TouchableOpacity onPress={loginClickHandler}>
+                  <Text bold style={styles.login}>
+                    Login
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
         </View>
-    )
+        <View style={styles.shadowViewBottom}>
+          <Shadow
+            style={styles.shadowTopBottom}
+            inner
+            useArt
+          >
+            <View style={styles.bottominner}>
+              <Text h2 bold>Savings Vault</Text>
+              <View style={styles.row}>
+                <Text h3 bold style={styles.bitcointext}>
+                  Bitcoin Network
+                </Text>
+                <Image
+                  style={styles.bitcoinimg}
+                  resizeMode="contain"
+                  source={require("../../../img/bitcoin.png")}
+                />
+              </View>
+            </View>
+            <Shadow
+              inner
+              useArt
+              style={styles.shadowBottomBottom}
+            />
+          </Shadow>
+        </View>
+      </View>
+    </ScreenLayout>
+  );
 }

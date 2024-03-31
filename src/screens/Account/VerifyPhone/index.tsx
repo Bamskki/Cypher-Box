@@ -3,10 +3,10 @@ import { TextInput, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "./styles";
 import { GradientButton } from "@Cypher/components";
-import { useNavigation } from "@react-navigation/native";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 import { useUserLogin } from "../../../../apollo/api";
 import { emailLogin } from "../../../../api/authApis";
+import { dispatchNavigate } from "@Cypher/helpers";
 
 interface Props {
   navigation: any;
@@ -16,7 +16,6 @@ interface Props {
 export default function VerifyPhone({ navigation, route }:Props) {
     const [code, setCode] = useState<string>('');
     const [isLoading, setIsLoading] = useState(false);
-    const { navigate } = useNavigation();
     const { phone, emailId } = route.params;
 
     const [userLogin, { loading }] = useUserLogin();
@@ -66,6 +65,7 @@ export default function VerifyPhone({ navigation, route }:Props) {
         index: 0,
         routes: [{ name: 'AccountStatus' }],
       });
+        // dispatchNavigate('AccountStatus');
     }
 
     return (

@@ -6,6 +6,8 @@ import {
   StyleSheet,
   RefreshControlProps,
   TouchableOpacity,
+  StatusBar,
+  StatusBarStyle,
 } from 'react-native';
 
 // *** Third Party Import
@@ -23,6 +25,7 @@ import { Progress } from '@Cypher/components';
 
 // *** Custom styles
 import styles from './styles';
+import { isIOS } from 'react-native-elements/dist/helpers';
 
 export interface Props {
   style?: any;
@@ -81,7 +84,7 @@ function ScreenLayout({
     return (
       <>
         {progress > -1 &&
-          <Progress current={progress} />
+          <Progress key={progress} current={progress} />
         }
         {showToolbar && !showHeader ? (
           <View style={[styles.showToolbar, { justifyContent: isTitleCenter ? 'flex-start' : 'center' }]}>
@@ -143,6 +146,8 @@ function ScreenLayout({
     );
   };
 
+  const barStyle: StatusBarStyle = isIOS ? 'dark-content' : 'light-content';
+
   return (
     <LinearGradient
       useAngle
@@ -152,6 +157,7 @@ function ScreenLayout({
       <SafeAreaView
         edges={edges ? edges : ['right', 'left', 'top']}
         style={StyleSheet.flatten([styles.inner, style])}>
+          <StatusBar backgroundColor={colors.primary} barStyle={barStyle}/>
         {renderContent()}
       </SafeAreaView>
     </LinearGradient>

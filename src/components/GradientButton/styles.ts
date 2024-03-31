@@ -22,16 +22,16 @@ export default StyleSheet.create<Style>({
     },
     buttonText: {
         fontFamily: 'Archivo-Bold',
-        textAlign: 'center',
     },
     shadow: {
         shadowColor: colors.black.default,
-        shadowOffset: { width: 5, height: 10 },
-        shadowOpacity: 0.5,
-        shadowRadius: 5,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.4,
+        shadowRadius: 4,
+        elevation: 8,
     },
     textShadow: {
-        textShadowColor: colors.shadow,
+        textShadowColor: colors.shadow25,
         textShadowOffset: { width: 0, height: 2 },
         textShadowRadius: 2
     },

@@ -1,22 +1,23 @@
-import { colors, widths } from "@Cypher/style-guide";
+import { colors, widths, shadow } from "@Cypher/style-guide";
 import { ImageStyle, StyleSheet, TextStyle, ViewStyle } from "react-native";
 
 interface Style {
     container: ViewStyle;
+    flex: ViewStyle;
     title: ViewStyle;
     loading: ViewStyle;
-    inner: ViewStyle;
+    priceView: ViewStyle;
     imageView: ViewStyle;
+    imageViews: ViewStyle;
     image: ImageStyle;
     arrow: ImageStyle;
     linearGradient: ViewStyle;
-    create: TextStyle;
+    createView: ViewStyle;
     bitcointext: TextStyle;
     middle: TextStyle;
     text: TextStyle;
     login: TextStyle;
     view: ViewStyle;
-    linearGradient2: ViewStyle;
     showLine: ViewStyle;
     check: TextStyle;
     sats: TextStyle;
@@ -24,21 +25,26 @@ interface Style {
     blink: ImageStyle;
     btnView: ViewStyle;
     current: ImageStyle;
-    bottomcard: ViewStyle;
     bottominner: ViewStyle;
     bitcoinimg: ImageStyle;
     row: ViewStyle;
-    flex: ViewStyle;
-    receiveView: ViewStyle;
-    priceView: ViewStyle;
     alreadyView: ViewStyle;
+    scan: ImageStyle;
+    shadow: TextStyle;
+    shadowTop: any;
+    shadowBottom: any;
+    shadowView: ViewStyle;
+    shadowTopBottom: any;
+    shadowBottomBottom: any;
+    shadowViewBottom: ViewStyle;
+    height: ViewStyle;
+    top: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
     container: {
         flex: 1,
         backgroundColor: colors.primary,
-        paddingVertical: 60,
         justifyContent: 'space-between',
         padding: 20,
     },
@@ -50,52 +56,47 @@ export default StyleSheet.create<Style>({
     },
     priceView: {
         marginTop: 20,
+        paddingBottom: 60,
     },
     alreadyView: {
         flexDirection: 'row',
         marginTop: 10,
         alignSelf: 'center'
     },
-    receiveView: {
-        flex: 1,
-        marginEnd: 20,
-    },
     title: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center'
-    },
-    inner: {
-        backgroundColor: colors.primary,
-        paddingHorizontal: 15,
-        flex: 1,
-        borderRadius: 25,
-        padding: 15,
-        marginEnd: -1.5,
-        marginBottom: -1.5,
+        alignItems: 'center',
     },
     imageView: {
         width: 40,
         height: 40,
         alignItems: 'center',
         justifyContent: 'center',
+        alignSelf: 'flex-end',
+        marginEnd: 10,
+    },
+    imageViews: {
+        width: 55,
+        height: 55,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     linearGradient: {
-        borderRadius: 25,
-        height: 150,
-        justifyContent: 'center',
-        padding: 1,
+        marginTop: 20,
+        height: 132,
+        justifyContent: 'flex-start',
+    },
+    createView: {
         marginTop: 20,
     },
-    create: {
-        marginStart: 5,
-        textShadowColor: colors.shadow3,
-        textShadowOffset: { width: 0, height: 2 },
-        textShadowRadius: 10
-    },
     image: {
-        width: 25,
-        height: 25
+        width: 33,
+        height: 33,
+    },
+    scan: {
+        width: 51,
+        height: 51,
     },
     middle: {
         flexDirection: 'row',
@@ -112,33 +113,27 @@ export default StyleSheet.create<Style>({
     },
     bitcointext: {
         marginEnd: 7,
+        ...shadow.text25,
     },
     arrow: {
         width: 50,
         height: 50,
-        left: -10,
-        top: 8
+        left: -5,
+        top: 10
     },
     view: {
         flexDirection: 'row',
+        padding: 15,
+        paddingHorizontal: 20,
         justifyContent: 'space-between',
-        margin: 10,
-        width: widths - 80,
-        shadowColor: colors.black.default,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.8,
-        shadowRadius: 1,
-    },
-    linearGradient2: {
-        marginTop: 20,
     },
     showLine: {
         borderWidth: 1,
         borderColor: colors.white,
         padding: 5,
         borderRadius: 5,
-        marginBottom: 20,
-        marginStart: 20,
+        marginVertical: 10,
+        marginStart: 25,
         marginHorizontal: 20
     },
     blink: {
@@ -149,9 +144,11 @@ export default StyleSheet.create<Style>({
     },
     check: {
         marginStart: 10,
+        ...shadow.text25,
     },
     sats: {
-        marginStart: 20
+        marginStart: 25,
+        ...shadow.text25,
     },
     alert: {
         color: colors.green,
@@ -164,31 +161,107 @@ export default StyleSheet.create<Style>({
     current: {
         position: 'absolute',
         top: -10,
-        right: -10,
+        right: -5,
         width: 40,
         height: 40,
         zIndex: 1,
-    },
-    bottomcard: {
-        backgroundColor: colors.tundora,
-        paddingHorizontal: 15,
-        flex: 1,
-        borderRadius: 25,
-        padding: 15,
-        marginEnd: -5,
-        marginBottom: -5,
     },
     bottominner: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        marginTop: 5,
     },
     bitcoinimg: {
         width: 35,
-        height: 35
+        height: 35,
     },
     row: {
         flexDirection: 'row',
-        alignItems: 'center'
+        alignItems: 'center',
+        marginTop: 2,
     },
+    shadow: {
+        ...shadow.text25,
+    },
+    shadowTop: {
+        shadowOffset: { width: 4, height: 4 },
+        shadowOpacity: 1,
+        shadowColor: "#F558C9",
+        shadowRadius: 2,
+        borderRadius: 25,
+        width: widths - 40,
+        height: 151,
+        backgroundColor: colors.primary,
+        padding: 15,
+        paddingHorizontal: 30,
+    },
+    shadowTopBottom: {
+        shadowOffset: { width: 4, height: 4 },
+        shadowOpacity: 1,
+        shadowColor: "#FFFFFF",
+        shadowRadius: 2,
+        borderRadius: 25,
+        width: widths - 40,
+        height: 151,
+        backgroundColor: colors.tundora,
+        padding: 15,
+        paddingStart: 20,
+        paddingEnd: 10,
+    },
+    shadowBottom: {
+        shadowOffset: { width: -2, height: -2 },
+        shadowOpacity: 1,
+        shadowColor: "#4F2844",
+        shadowRadius: 2,
+        borderRadius: 25,
+        width: widths - 40,
+        height: 150,
+        justifyContent: 'center',
+        position: 'absolute',
+    },
+    shadowBottomBottom: {
+        shadowOffset: { width: -2, height: -2 },
+        shadowOpacity: 1,
+        shadowColor: "#242424",
+        shadowRadius: 2,
+        borderRadius: 25,
+        width: widths - 40,
+        height: 150,
+        justifyContent: 'center',
+        position: 'absolute',
+    },
+    shadowView: {
+        shadowOffset: { width: -8, height: -8 },
+        shadowOpacity: 0.48,
+        shadowColor: '#27272C',
+        shadowRadius: 12,
+        elevation: 24,
+        borderRadius: 25,
+        width: widths - 40,
+        height: 151,
+        marginTop: 20,
+        borderColor: "transparent",
+        backgroundColor: colors.white,
+    },
+    shadowViewBottom: {
+        shadowOffset: { width: 8, height: 8 },
+        shadowOpacity: 0.71,
+        shadowColor: '#0C0C0C',
+        shadowRadius: 12,
+        elevation: 24,
+        borderRadius: 25,
+        width: widths - 40,
+        height: 151,
+        marginTop: 20,
+        borderColor: "transparent",
+        backgroundColor: colors.tundora,
+    },
+    height: {
+        height: 132
+    },
+    top: {
+        height: 132,
+        justifyContent: 'flex-start',
+    }
 })

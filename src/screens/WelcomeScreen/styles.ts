@@ -14,12 +14,11 @@ export default StyleSheet.create<Style>({
     container: {
         flex: 1,
         backgroundColor: colors.primary,
-        paddingVertical: 60,
         justifyContent: 'space-between',
         paddingBottom: 50
     },
     title: {
-        height: 150,
+        height: 219,
         width: undefined,
     },
     middle: {

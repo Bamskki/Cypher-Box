@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 import styles from "./styles";
-import { GradientButton, GradientText, HeaderBackButton, Progress } from "@Cypher/components";
-import { useNavigation } from "@react-navigation/native";
-import InputEmailPhone from "./InputEmailPhone";
-import { ScreenLayout, Text } from "@Cypher/component-library";
 import SimpleToast from 'react-native-simple-toast';
 import { requestEmailCode } from "../../../../api/authApis";
 import { useCaptchaCreateChallenge, useCaptchaRequestAuthCode } from "../../../../apollo/api";
+import { GradientButton, GradientText } from "@Cypher/components";
+import { useNavigation } from "@react-navigation/native";
+import InputEmailPhone from "./InputEmailPhone";
+import { ScreenLayout, Text } from "@Cypher/component-library";
+import { dispatchNavigate } from "@Cypher/helpers";
 
 export default function LoginBlink() {
     const [email, setEmail] = useState<string>();
@@ -88,13 +89,11 @@ export default function LoginBlink() {
     };
   
     const nextClickHandler = () => {
-        navigate('LoginBlinkPhone');
+        dispatchNavigate('LoginBlinkPhone');
     }
 
     return (
         <ScreenLayout disableScroll showToolbar progress={1}>
-            {/* <Progress current={1} />
-            <HeaderBackButton /> */}
             <View style={styles.container}>
                 <View style={styles.innerView}>
                     <GradientText>Login to Blink</GradientText>

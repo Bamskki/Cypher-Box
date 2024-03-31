@@ -46,7 +46,7 @@ it('Segwit HD (BIP49) can fetch more data if pointers to last_used_addr are lagg
   await hd.fetchBalance();
   await hd.fetchTransactions();
   assert.strictEqual(hd.getTransactions().length, 153);
-});
+}, 120000);
 
 it('HD (BIP49) can create TX', async () => {
   if (!process.env.HD_MNEMONIC_BIP49) {

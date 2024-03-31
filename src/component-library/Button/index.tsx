@@ -10,12 +10,14 @@ import {
 import LoadingSpinner from '../LoadingSpinner';
 import styles from './styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { colors } from '@Cypher/style-guide';
 
 export interface Props extends TouchableOpacityProps {
   text: string;
   type?: 'primary' | 'secondary' | 'danger' | 'tertiary' | 'disabled';
   onPress(): void;
   loading?: boolean;
+  loaderColor?: string;
   style?: ViewStyle;
   leftIcon?: string;
   rightIcon?: string;
@@ -27,6 +29,7 @@ function Button({
   type = 'primary',
   onPress,
   loading = false,
+  loaderColor = colors.white,
   style,
   leftIcon,
   rightIcon,
@@ -42,7 +45,7 @@ function Button({
       onPress={onPressButton}
       disabled={disabled ? disabled : loading}>
       {loading ? (
-        <LoadingSpinner />
+        <LoadingSpinner color={loaderColor} />
       ) : (
         <View style={styles.row}>
           {leftIcon && (
@@ -50,6 +53,7 @@ function Button({
               <Ionicons
                 name={leftIcon}
                 size={20}
+                color={colors.black.default}
               />
             </View>
           )}
