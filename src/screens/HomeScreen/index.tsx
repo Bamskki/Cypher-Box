@@ -213,7 +213,7 @@ export default function HomeScreen({ route }: Props) {
                 Checking Account.{" "}
               </Text>
             </>
-          ) : (
+          ) : !isLoading && (
             <>
               <GradientCardWithShadow
                 style={styles.createView}

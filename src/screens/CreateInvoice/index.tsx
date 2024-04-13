@@ -50,6 +50,7 @@ export default function CreateInvoice({navigation, route} : any) {
             <Button 
                 loading={isLoading}
                 disabled={isLoading}
+                loaderColor={colors.black.default} 
                 style={styles.button} 
                 textStyle={styles.buttonText} 
                 text="Create invoice" 

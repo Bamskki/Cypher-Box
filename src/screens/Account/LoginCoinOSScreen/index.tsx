@@ -50,7 +50,7 @@ export default function LoginCoinOSScreen() {
                 <View style={styles.innerView}>
                     <GradientText>Login to Coinos</GradientText>
                     <InputEmailPhone label={`Username`} setText={setEmail} text={email} style={{ marginTop: 50 }} />
-                    <InputEmailPhone label="Password" setText={setPassword} text={password} />
+                    <InputEmailPhone label="Password" secureTextEntry={true} setText={setPassword} text={password} />
                 </View>
                 <GradientButton title="Login" disabled={isLoading} onPress={nextClickHandler} />
             </View>

@@ -8,15 +8,17 @@ interface Props {
     text: string;
     setText: any;
     style?: ViewStyle;
+    secureTextEntry?: boolean;
     type?: 'email-address' | 'phone-pad';
 }
 
-export default function InputEmailPhone({ label, text, setText, type, style }: Props) {
+export default function InputEmailPhone({ label, text, setText, type, style, secureTextEntry=false }: Props) {
     return (
         <View style={[styles.container,style && style]}>
             <Text subHeader bold style={styles.text}>{label}</Text>
             <TextInput value={text} onChangeText={setText} keyboardType={type}
                 returnKeyType="done"
+                secureTextEntry={secureTextEntry}
                 style={styles.textInput} />
         </View>
     )
