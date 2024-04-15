@@ -1,13 +1,15 @@
 /* global jest */
 
-import mockClipboard from '@react-native-clipboard/clipboard/jest/clipboard-mock.js';
+import mockClipboard from "@react-native-clipboard/clipboard/jest/clipboard-mock.js";
 
 const consoleWarnOrig = console.warn;
 console.warn = (...args) => {
   if (
-    typeof args[0] === 'string' &&
-    (args[0].startsWith('WARNING: Sending to a future segwit version address can lead to loss of funds') ||
-      args[0].startsWith('only compressed public keys are good'))
+    typeof args[0] === "string" &&
+    (args[0].startsWith(
+      "WARNING: Sending to a future segwit version address can lead to loss of funds"
+    ) ||
+      args[0].startsWith("only compressed public keys are good"))
   ) {
     return;
   }
@@ -17,24 +19,24 @@ console.warn = (...args) => {
 const consoleLogOrig = console.log;
 console.log = (...args) => {
   if (
-    typeof args[0] === 'string' &&
-    (args[0].startsWith('updating exchange rate') ||
-      args[0].startsWith('begin connection') ||
-      args[0].startsWith('TLS Connected to') ||
-      args[0].startsWith('connected to'))
+    typeof args[0] === "string" &&
+    (args[0].startsWith("updating exchange rate") ||
+      args[0].startsWith("begin connection") ||
+      args[0].startsWith("TLS Connected to") ||
+      args[0].startsWith("connected to"))
   ) {
     return;
   }
   consoleLogOrig.apply(consoleLogOrig, args);
 };
 
-global.net = require('net'); // needed by Electrum client. For RN it is proviced in shim.js
-global.tls = require('tls'); // needed by Electrum client. For RN it is proviced in shim.js
-global.fetch = require('node-fetch');
+global.net = require("net"); // needed by Electrum client. For RN it is proviced in shim.js
+global.tls = require("tls"); // needed by Electrum client. For RN it is proviced in shim.js
+global.fetch = require("node-fetch");
 
-jest.mock('@react-native-clipboard/clipboard', () => mockClipboard);
+jest.mock("@react-native-clipboard/clipboard", () => mockClipboard);
 
-jest.mock('react-native-watch-connectivity', () => {
+jest.mock("react-native-watch-connectivity", () => {
   return {
     getIsWatchAppInstalled: jest.fn(() => Promise.resolve(false)),
     subscribeToMessages: jest.fn(),
@@ -42,19 +44,21 @@ jest.mock('react-native-watch-connectivity', () => {
   };
 });
 
-jest.mock('react-native-secure-key-store', () => {
+jest.mock("react-native-secure-key-store", () => {
   return {};
 });
 
-jest.mock('@react-native-community/push-notification-ios', () => {
+jest.mock("@react-native-community/push-notification-ios", () => {
   return {};
 });
 
-jest.mock('react-native-permissions', () => require('react-native-permissions/mock'));
+jest.mock("react-native-permissions", () =>
+  require("react-native-permissions/mock")
+);
 
-jest.mock('react-native-device-info', () => {
+jest.mock("react-native-device-info", () => {
   return {
-    getUniqueId: jest.fn().mockReturnValue('uniqueId'),
+    getUniqueId: jest.fn().mockReturnValue("uniqueId"),
     getSystemName: jest.fn(),
     getDeviceType: jest.fn().mockReturnValue(false),
     hasGmsSync: jest.fn().mockReturnValue(true),
@@ -62,7 +66,7 @@ jest.mock('react-native-device-info', () => {
   };
 });
 
-jest.mock('react-native-quick-actions', () => {
+jest.mock("react-native-quick-actions", () => {
   return {
     clearShortcutItems: jest.fn(),
     setQuickActions: jest.fn(),
@@ -70,14 +74,14 @@ jest.mock('react-native-quick-actions', () => {
   };
 });
 
-jest.mock('react-native-default-preference', () => {
+jest.mock("react-native-default-preference", () => {
   return {
     setName: jest.fn(),
     set: jest.fn(),
   };
 });
 
-jest.mock('react-native-fs', () => {
+jest.mock("react-native-fs", () => {
   return {
     mkdir: jest.fn(),
     moveFile: jest.fn(),
@@ -135,7 +139,7 @@ const realmInstanceMock = {
   delete: function () {},
   close: function () {},
   write: function (transactionFn) {
-    if (typeof transactionFn === 'function') {
+    if (typeof transactionFn === "function") {
       // to test if something is not right in Realm transactional database write
       transactionFn();
     }
@@ -152,57 +156,58 @@ const realmInstanceMock = {
     return wallets;
   },
 };
-jest.mock('realm', () => {
+jest.mock("realm", () => {
   return {
     UpdateMode: { Modified: 1 },
     open: jest.fn(() => realmInstanceMock),
   };
 });
 
-jest.mock('react-native-idle-timer', () => {
+jest.mock("react-native-idle-timer", () => {
   return {
     setIdleTimerDisabled: jest.fn(),
   };
 });
 
-// jest.mock('react-native-ios-context-menu', () => {
-//   return {};
-// });
+jest.mock("react-native-ios-context-menu", () => ({
+  ContextMenuView: jest.fn(),
+  ContextMenuButton: jest.fn(),
+}));
 
-jest.mock('react-native-haptic-feedback', () => {
+jest.mock("react-native-haptic-feedback", () => {
   return {
     trigger: jest.fn(),
   };
 });
 
-jest.mock('../blue_modules/analytics', () => {
+jest.mock("../blue_modules/analytics", () => {
   const ret = jest.fn();
-  ret.ENUM = { CREATED_WALLET: '' };
+  ret.ENUM = { CREATED_WALLET: "" };
   return ret;
 });
 
-jest.mock('react-native-share', () => {
+jest.mock("react-native-share", () => {
   return {
     open: jest.fn(),
   };
 });
 
-jest.mock('../blue_modules/WidgetCommunication', () => {
+jest.mock("../blue_modules/WidgetCommunication", () => {
   return {
     reloadAllTimelines: jest.fn(),
   };
 });
 
 const mockKeychain = {
-  SECURITY_LEVEL_ANY: 'MOCK_SECURITY_LEVEL_ANY',
-  SECURITY_LEVEL_SECURE_SOFTWARE: 'MOCK_SECURITY_LEVEL_SECURE_SOFTWARE',
-  SECURITY_LEVEL_SECURE_HARDWARE: 'MOCK_SECURITY_LEVEL_SECURE_HARDWARE',
+  SECURITY_LEVEL_ANY: "MOCK_SECURITY_LEVEL_ANY",
+  SECURITY_LEVEL_SECURE_SOFTWARE: "MOCK_SECURITY_LEVEL_SECURE_SOFTWARE",
+  SECURITY_LEVEL_SECURE_HARDWARE: "MOCK_SECURITY_LEVEL_SECURE_HARDWARE",
   setGenericPassword: jest.fn().mockResolvedValue(),
   getGenericPassword: jest.fn().mockResolvedValue(),
   resetGenericPassword: jest.fn().mockResolvedValue(),
 };
-jest.mock('react-native-keychain', () => mockKeychain);
+jest.mock("react-native-keychain", () => mockKeychain);
 
-jest.mock('react-native-tcp-socket', () => mockKeychain);
+jest.mock("react-native-tcp-socket", () => mockKeychain);
 
 global.alert = () => {};
