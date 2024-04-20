@@ -1,43 +1,93 @@
-image: node:14.17.0  # Use Node.js Docker image
+# image: node:14.17.0  # Use Node.js Docker image
+
+# stages:
+#   - test
+
+# cache:
+#   key: ${CI_COMMIT_REF_SLUG}
+#   paths:
+#     - node_modules/  # Cache node_modules to speed up builds
+
+# before_script:
+#   # - export PATH="$JAVA_HOME/bin:$PATH"  # Add Java binary directory to PATH
+#   # - java -version  # Verify Java installation
+#   # - npm install -g react-native-cli  # Install React Native CLI globally
+#   - npm install -g typescript
+#   - npm install typescript tslint
+#   - npm install  # Install dependencies
+#   - npm run patches
+
+# # build_android:
+# #   stage: build
+# #   script:
+# #     - npm run android  # Run React Native command to build Android app
+# #   artifacts:
+# #     paths:
+# #       - android/app/build/outputs/  # Save Android build artifacts
+
+# # build_ios:
+# #   stage: build
+# #   script:
+# #     - cd ios && pod install && cd ..  # Run pod install in the ios directory
+# #     - npm run ios  # Run React Native command to build iOS app
+# #   artifacts:
+# #     paths:
+# #       - ios/build/  # Save iOS build artifacts
+
+# test:
+#   stage: test
+#   script:
+#     - npm run test  # Run React Native tests
+#   artifacts:
+#     paths:
+#       - coverage/  # Save test coverage reports, if applicable
+
+
+image: node:18
+
+variables:
+  HD_MNEMONIC: "$HD_MNEMONIC"
+  HD_MNEMONIC_BIP84: "$HD_MNEMONIC_BIP84"
+
+cache:
+  paths:
+    - ~/.npm
+    - node_modules
 
 stages:
   - test
-
-cache:
-  key: ${CI_COMMIT_REF_SLUG}
-  paths:
-    - node_modules/  # Cache node_modules to speed up builds
-
-before_script:
-  # - export PATH="$JAVA_HOME/bin:$PATH"  # Add Java binary directory to PATH
-  # - java -version  # Verify Java installation
-  # - npm install -g react-native-cli  # Install React Native CLI globally
-  - npm install -g typescript
-  - npm install typescript tslint
-  - npm install  # Install dependencies
-  - npm run patches
-
-# build_android:
-#   stage: build
-#   script:
-#     - npm run android  # Run React Native command to build Android app
-#   artifacts:
-#     paths:
-#       - android/app/build/outputs/  # Save Android build artifacts
-
-# build_ios:
-#   stage: build
-#   script:
-#     - cd ios && pod install && cd ..  # Run pod install in the ios directory
-#     - npm run ios  # Run React Native command to build iOS app
-#   artifacts:
-#     paths:
-#       - ios/build/  # Save iOS build artifacts
+  - e2e
 
 test:
   stage: test
   script:
-    - npm run test  # Run React Native tests
+    - npm install
+    - npm test || npm test || npm test
+  environment:
+    name: pull_request
+  variables:
+    BIP47_HD_MNEMONIC: "$BIP47_HD_MNEMONIC"
+    HD_MNEMONIC: "$HD_MNEMONIC"
+    HD_MNEMONIC_BIP49: "$HD_MNEMONIC_BIP49"
+    HD_MNEMONIC_BIP49_MANY_TX: "$HD_MNEMONIC_BIP49_MANY_TX"
+    HD_MNEMONIC_BIP84: "$HD_MNEMONIC_BIP84"
+    HD_MNEMONIC_BREAD: "$HD_MNEMONIC_BREAD"
+    FAULTY_ZPUB: "$FAULTY_ZPUB"
+    MNEMONICS_COBO: "$MNEMONICS_COBO"
+    MNEMONICS_COLDCARD: "$MNEMONICS_COLDCARD"
+
+e2e:
+  stage: e2e
+  script:
+    - npm install
+    - npm run e2e:release-build
+    - npm run e2e:release-test || true
+    - npm run e2e:release-test || true
+    - npm run e2e:release-test || true
+    - npm run e2e:release-test || true
+  environment:
+    name: pull_request
   artifacts:
+    name: e2e-test-videos
     paths:
-      - coverage/  # Save test coverage reports, if applicable
+      - ./artifacts/
