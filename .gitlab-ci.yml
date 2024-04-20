@@ -1,4 +1,4 @@
-image: node:18.17.1  # Use Node.js Docker image
+image: node:14.17.0  # Use Node.js Docker image
 
 stages:
   - test
