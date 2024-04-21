@@ -28,63 +28,63 @@ interface Props {
 }
 
 export default function HomeScreen({ route }: Props) {
-    const { navigate }: any = useNavigation();
-    const routeName = useRoute().name;
-    const [isLogin, setLogin] = useState<boolean>(false);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [balance, setBalance] = useState(0);
+  const { navigate }: any = useNavigation();
+  const routeName = useRoute().name;
+  const [isLogin, setLogin] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [balance, setBalance] = useState(0);
 
-    useEffect(() => {
-        async function handleToken() {
-          const token = await getToken()
-          setLogin(!!token);
-          console.log('token: ', token)
-          if(token) {
-            handleUser();
-          } else {
-            setIsLoading(false)
-          }
-        }
-        handleToken();
-      }, []);
-      
-      const handleUser = async () => {
-        try {
-          const response = await getMe();
-          console.log('response: ', response);
-          if(response?.balance) {
-            setBalance(response?.balance || 0);
-          }
-          await AsyncStorage.setItem('user', response?.username);
-        } catch (error) {
-          console.log('error: ', error);
-        } finally {
-            setIsLoading(false)
-        }
+  useEffect(() => {
+    async function handleToken() {
+      const token = await getToken();
+      setLogin(!!token);
+      console.log("token: ", token);
+      if (token) {
+        handleUser();
+      } else {
+        setIsLoading(false);
       }
+    }
+    handleToken();
+  }, []);
 
-      const getToken = async () => {
-        const authToken = await AsyncStorage.getItem('authToken');
-        return authToken;
-      };
-    
-    // const navigateToSettings = () => {
-    //     navigate('Settings');
-    // };
+  const handleUser = async () => {
+    try {
+      const response = await getMe();
+      console.log("response: ", response);
+      if (response?.balance) {
+        setBalance(response?.balance || 0);
+      }
+      await AsyncStorage.setItem("user", response?.username);
+    } catch (error) {
+      console.log("error: ", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getToken = async () => {
+    const authToken = await AsyncStorage.getItem("authToken");
+    return authToken;
+  };
+
+  // const navigateToSettings = () => {
+  //     navigate('Settings');
+  // };
 
   const navigateToSettings = () => {
-    console.log('setting click');
+    console.log("setting click");
     dispatchNavigate("Settings");
   };
 
   const onScanButtonPressed = () => {
-    console.log('scan click');
+    console.log("scan click");
     scanQrHelper(navigate, routeName).then(onBarScanned);
   };
 
   const loginClickHandler = () => {
-    console.log('login click');
-    dispatchNavigate('LoginCoinOSScreen');
+    console.log("login click");
+    dispatchNavigate("LoginCoinOSScreen");
   };
 
   useFocusEffect(() => {
@@ -103,27 +103,32 @@ export default function HomeScreen({ route }: Props) {
   };
 
   const createChekingAccountClickHandler = () => {
-    console.log('create account click');
+    console.log("create account click");
     dispatchNavigate("CheckAccount");
   };
 
   const receiveClickHandler = () => {
-    console.log('received click');
-    dispatchNavigate('ReceivedMethodScreen');
+    console.log("received click");
+    dispatchNavigate("ReceivedMethodScreen");
   };
 
   const sendClickHandler = () => {
-    console.log('send click');
-    dispatchNavigate('SendScreen');
+    console.log("send click");
+    dispatchNavigate("SendScreen");
+  };
+
+  const handleCheckingAccountPress = () => {
+    dispatchNavigate("CheckingAccount");
+    // dispatchNavigate("Withdraw");
   };
 
   return (
     <ScreenLayout>
       <View style={styles.container}>
         <View>
-          {isLoading ?
+          {isLoading ? (
             <ActivityIndicator size="large" color="#ffffff" />
-            :
+          ) : (
             <>
               <View style={styles.title}>
                 <Text subHeader bold>
@@ -153,29 +158,27 @@ export default function HomeScreen({ route }: Props) {
                 </View>
               </View>
               <View style={styles.shadowView}>
-                <Shadow
-                  style={styles.shadowTop}
-                  inner
-                  useArt
-                >
+                <Shadow style={styles.shadowTop} inner useArt>
                   <Text subHeader bold style={{ marginStart: 2 }}>
                     {balance} BTC
                   </Text>
-                  <Text bold style={{ fontSize: 20, lineHeight: 24 }} >
+                  <Text bold style={{ fontSize: 20, lineHeight: 24 }}>
                     ${balance.toFixed(2)}
                   </Text>
-                  <Shadow
-                    inner
-                    useArt
-                    style={styles.shadowBottom}
-                  />
+                  <Shadow inner useArt style={styles.shadowBottom} />
                 </Shadow>
               </View>
             </>
-          }
+          )}
           {isLogin ? (
             <>
-              <GradientCardWithShadow style={styles.linearGradient} disabled linearStyle={styles.height} shadowStyleTop={styles.top} shadowStyleBottom={styles.height}>
+              <GradientCardWithShadow
+                style={styles.linearGradient}
+                linearStyle={styles.height}
+                shadowStyleTop={styles.top}
+                shadowStyleBottom={styles.height}
+                onPress={handleCheckingAccountPress}
+              >
                 <View style={styles.view}>
                   <Text h2 bold style={styles.check}>
                     Checking Account
@@ -187,7 +190,7 @@ export default function HomeScreen({ route }: Props) {
                   />
                 </View>
                 <Text h2 bold style={styles.sats}>
-                  {balance}   sats
+                  {balance} sats
                 </Text>
                 <View style={styles.showLine} />
               </GradientCardWithShadow>
@@ -213,44 +216,44 @@ export default function HomeScreen({ route }: Props) {
                 Checking Account.{" "}
               </Text>
             </>
-          ) : !isLoading && (
-            <>
-              <GradientCardWithShadow
-                style={styles.createView}
-                onPress={createChekingAccountClickHandler}
-              >
-                <View style={styles.middle}>
-                  <Image
-                    style={styles.arrow}
-                    resizeMode="contain"
-                    source={require("../../../img/arrow-right.png")}
-                  />
-                  <Text h2 style={styles.shadow}>
-                    Create Your Checking Account
+          ) : (
+            !isLoading && (
+              <>
+                <GradientCardWithShadow
+                  style={styles.createView}
+                  onPress={createChekingAccountClickHandler}
+                >
+                  <View style={styles.middle}>
+                    <Image
+                      style={styles.arrow}
+                      resizeMode="contain"
+                      source={require("../../../img/arrow-right.png")}
+                    />
+                    <Text h2 style={styles.shadow}>
+                      Create Your Checking Account
+                    </Text>
+                  </View>
+                </GradientCardWithShadow>
+                <View style={styles.alreadyView}>
+                  <Text bold style={styles.text}>
+                    Already have an account?
                   </Text>
+                  <TouchableOpacity onPress={loginClickHandler}>
+                    <Text bold style={styles.login}>
+                      Login
+                    </Text>
+                  </TouchableOpacity>
                 </View>
-              </GradientCardWithShadow>
-              <View style={styles.alreadyView}>
-                <Text bold style={styles.text}>
-                  Already have an account?
-                </Text>
-                <TouchableOpacity onPress={loginClickHandler}>
-                  <Text bold style={styles.login}>
-                    Login
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </>
+              </>
+            )
           )}
         </View>
         <View style={styles.shadowViewBottom}>
-          <Shadow
-            style={styles.shadowTopBottom}
-            inner
-            useArt
-          >
+          <Shadow style={styles.shadowTopBottom} inner useArt>
             <View style={styles.bottominner}>
-              <Text h2 bold>Savings Vault</Text>
+              <Text h2 bold>
+                Savings Vault
+              </Text>
               <View style={styles.row}>
                 <Text h3 bold style={styles.bitcointext}>
                   Bitcoin Network
@@ -262,11 +265,7 @@ export default function HomeScreen({ route }: Props) {
                 />
               </View>
             </View>
-            <Shadow
-              inner
-              useArt
-              style={styles.shadowBottomBottom}
-            />
+            <Shadow inner useArt style={styles.shadowBottomBottom} />
           </Shadow>
         </View>
       </View>

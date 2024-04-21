@@ -1,7 +1,7 @@
-import React, {ReactNode} from 'react';
-import {LayoutChangeEvent, Text as RNText, TextStyle} from 'react-native';
+import React, { ReactNode } from "react";
+import { LayoutChangeEvent, Text as RNText, TextStyle } from "react-native";
 
-import styles from './styles';
+import styles from "./styles";
 
 export interface Props {
   testID?: string;
@@ -26,7 +26,7 @@ export interface Props {
    * This ensures we only use agreed Text styles from the designer.
    * If you need to add another, discuss with designer.
    */
-  style?: TextStyle;
+  style?: TextStyle | TextStyle[];
   onLayout?: ((event: LayoutChangeEvent) => void) | undefined;
 }
 
@@ -75,7 +75,8 @@ function Text({
         white && styles.white,
         blue && styles.blue,
         style && style,
-      ]}>
+      ]}
+    >
       {children}
     </RNText>
   );
