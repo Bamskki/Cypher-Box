@@ -1,11 +1,12 @@
 import { Image, TextInput, TouchableOpacity, View } from "react-native";
 import React, { useState } from "react";
-import { RouteProp, useRoute } from "@react-navigation/native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import styles from "./styles";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 import LinearGradient from "react-native-linear-gradient";
 import { colors } from "@Cypher/style-guide";
 import { Currency, Sats } from "@Cypher/assets/images";
+import { GradientButton } from "@Cypher/components";
 
 type RootStackParamList = {
   CheckingAccount: { fromField: "withdraw" | "reserve" };
@@ -21,10 +22,13 @@ enum ECurrencyType {
 const CreateInvoiceScreen = () => {
   const route = useRoute<RouteProps>();
   const fromField: "withdraw" | "reserve" = route.params?.fromField;
+  const navigation: any = useNavigation();
 
   const [amount, setAmount] = useState<any>(20);
   const [isFocused, setIsFocused] = useState<boolean>(false);
-  const [selectedTab, setSelectedTab] = useState<ECurrencyType>(ECurrencyType.SATS);
+  const [selectedTab, setSelectedTab] = useState<ECurrencyType>(
+    ECurrencyType.SATS
+  );
 
   const inActiveColors: string[] = [colors.gray.charcoal, colors.gray.charcoal];
   const activeColors: string[] = [
@@ -129,7 +133,9 @@ const CreateInvoiceScreen = () => {
         <Text h2 bold white style={styles.dollar}>
           {`$${2000 / amount}`}
         </Text>
+      </View>
 
+      <View style={styles.bottom}>
         <View style={styles.tabView}>
           <RenderTabs
             text="Sats"
@@ -144,6 +150,18 @@ const CreateInvoiceScreen = () => {
             handleTabChange={handleTabChange}
           />
         </View>
+
+        <GradientButton
+          title={
+            fromField === "withdraw" ? "Set Threshold" : "Set Reserve Amount"
+          }
+          onPress={() => {
+            navigation.goBack();
+          }}
+          isShadow
+          isTextShadow
+          style={styles.button}
+        />
       </View>
     </ScreenLayout>
   );

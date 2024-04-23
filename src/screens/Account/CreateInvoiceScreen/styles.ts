@@ -15,6 +15,8 @@ interface Style {
   gradient: any;
   tabView: ViewStyle;
   image: ImageStyle;
+  button: any;
+  bottom: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -75,7 +77,6 @@ export default StyleSheet.create<Style>({
     flexDirection: "row",
     justifyContent: "space-between",
     backgroundColor: colors.gray.charcoal,
-    // backgroundColor: "red",
     height: 64,
     borderRadius: 25,
     width: "80%",
@@ -91,5 +92,14 @@ export default StyleSheet.create<Style>({
   },
   image: {
     marginRight: 8,
+  },
+  button: {
+    width: "95%",
+    backgroundColor: "transparent",
+    alignSelf: "center",
+  },
+  bottom: {
+    bottom: 30,
+    alignItems: "center",
   },
 });
