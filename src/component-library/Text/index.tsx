@@ -20,6 +20,7 @@ export interface Props {
   onPress?(): void;
   white?: boolean;
   blue?: boolean;
+  pink?: boolean;
   /**
    * style: only pass in margin or color styles here!!!
    * You should never need to change the size / font etc.
@@ -47,6 +48,7 @@ function Text({
   center = false,
   white = false,
   blue = false,
+  pink = false,
   style,
   onLayout,
 }: Props) {
@@ -74,6 +76,7 @@ function Text({
         center && styles.center,
         white && styles.white,
         blue && styles.blue,
+        pink && styles.pink,
         style && style,
       ]}
     >

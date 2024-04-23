@@ -1,6 +1,6 @@
-import { StyleSheet, TextStyle } from 'react-native';
+import { StyleSheet, TextStyle } from "react-native";
 
-import { colors, textSizes } from '@Cypher/style-guide';
+import { colors, textSizes } from "@Cypher/style-guide";
 
 interface Styles {
   default: TextStyle;
@@ -16,6 +16,7 @@ interface Styles {
   center: TextStyle;
   white: TextStyle;
   blue: TextStyle;
+  pink: TextStyle;
 }
 
 export default StyleSheet.create<Styles>({
@@ -23,22 +24,22 @@ export default StyleSheet.create<Styles>({
     fontSize: textSizes.default,
     lineHeight: 18,
     color: colors.white,
-    fontFamily: 'Lato-Medium',
+    fontFamily: "Lato-Medium",
   },
   headline: {
     fontSize: textSizes.headline,
     lineHeight: 50,
-    fontFamily: 'Lato-Bold',
+    fontFamily: "Lato-Bold",
   },
   h1: {
     fontSize: textSizes.h1,
     lineHeight: 50,
-    fontFamily: 'Lato-Bold',
+    fontFamily: "Lato-Bold",
   },
   h2: {
     fontSize: textSizes.h2,
     lineHeight: 28,
-    fontFamily: 'Lato-Bold',
+    fontFamily: "Lato-Bold",
   },
   h3: {
     fontSize: textSizes.h3,
@@ -51,25 +52,28 @@ export default StyleSheet.create<Styles>({
   header: {
     fontSize: textSizes.header,
     lineHeight: 45,
-    fontFamily: 'Lato-Bold',
+    fontFamily: "Lato-Bold",
   },
   subHeader: {
     fontSize: textSizes.subHeader,
     lineHeight: 32,
   },
   bold: {
-    fontFamily: 'Lato-Bold',
+    fontFamily: "Lato-Bold",
   },
   semibold: {
-    fontFamily: 'Lato-Semibold',
+    fontFamily: "Lato-Semibold",
   },
   center: {
-    textAlign: 'center',
+    textAlign: "center",
   },
   white: {
     color: colors.white,
   },
   blue: {
     color: colors.primary,
+  },
+  pink: {
+    color: colors.pink.default,
   },
 });

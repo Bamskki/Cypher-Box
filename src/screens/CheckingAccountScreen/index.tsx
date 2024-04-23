@@ -9,6 +9,7 @@ import LinearGradient from "react-native-linear-gradient";
 import HistorySection from "./components/HistorySection";
 import styles from "./styles";
 import { dispatchNavigate } from "@Cypher/helpers";
+import ThresholdSection from "./components/ThresholdSection";
 
 enum ETabType {
   HISTORY = "History",
@@ -52,7 +53,6 @@ const CheckingAccountScreen = () => {
     const checkWithdraw = async () => {
       const value = await AsyncStorage.getItem("viewWithdraw");
 
-      console.log("first, ", value);
       if (selectedTab === ETabType.THERESHOLD && value == "1") {
         await AsyncStorage.setItem("viewWithdraw", "0");
         dispatchNavigate("Withdraw");
@@ -77,7 +77,7 @@ const CheckingAccountScreen = () => {
           inActiveColors={inActiveColors}
           activeColors={activeColors}
         />
-        {isHistory ? <HistorySection /> : null}
+        {isHistory ? <HistorySection /> : <ThresholdSection />}
         <BottomView visible={isHistory} />
       </View>
     </ScreenLayout>
@@ -107,6 +107,10 @@ const TopView: React.FC<TopViewProps> = ({
           colors={bgColors}
           style={[
             styles.gradient,
+            isActive && {
+              borderWidth: 1,
+              borderColor: colors.black.border,
+            },
             !isActive && {
               opacity: 0.65,
               backgroundColor: colors.gray.charcoal,
@@ -122,7 +126,7 @@ const TopView: React.FC<TopViewProps> = ({
             style={
               tabType === ETabType.THERESHOLD
                 ? {
-                    marginTop: 10,
+                    marginTop: 8,
                   }
                 : undefined
             }
@@ -133,7 +137,12 @@ const TopView: React.FC<TopViewProps> = ({
   };
 
   return (
-    <View style={styles.innerView}>
+    <View
+      style={[
+        styles.innerView,
+        selectedTab === ETabType.THERESHOLD && { borderBottomWidth: 0 },
+      ]}
+    >
       <Text subHeader bold>
         Checking Account
       </Text>

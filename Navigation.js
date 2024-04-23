@@ -119,6 +119,7 @@ import {
 import CreatedInvoice from "@Cypher/screens/CreatedInvoice";
 import CheckingAccountScreen from "@Cypher/screens/CheckingAccountScreen";
 import WithdrawScreen from "@Cypher/screens/WithdrawScreen";
+import CreateInvoiceScreen from "@Cypher/screens/Account/CreateInvoiceScreen";
 
 const WalletsStack = createStackNavigator();
 
@@ -223,12 +224,18 @@ const WalletsRoot = () => {
         component={CheckingAccountScreen}
         options={{ headerShown: false }}
       />
-
       <WalletsStack.Screen
         name="Withdraw"
         component={WithdrawScreen}
         options={{ headerShown: false }}
       />
+
+      <WalletsStack.Screen
+        name="CreateInvoiceWT"
+        component={CreateInvoiceScreen}
+        options={{ headerShown: false }}
+      />
+
       <WalletsStack.Screen
         name="WalletsList"
         component={WalletsList}

@@ -16,3 +16,7 @@ export { default as CoinOSSmall } from "./coinossmall.png";
 export { default as History } from "./history.png";
 export { default as Threshold } from "./threshold.png";
 export { default as Withdraw } from "./withdraw.png";
+export { default as Up } from "./up.png";
+export { default as Down } from "./down.png";
+export { default as Sats } from "./sats.png";
+export { default as Currency } from "./currency.png";
