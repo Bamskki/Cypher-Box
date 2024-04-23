@@ -101,5 +101,7 @@ export default StyleSheet.create<Style>({
   bottom: {
     bottom: 30,
     alignItems: "center",
+    position: "absolute",
+    width: "100%",
   },
 });
