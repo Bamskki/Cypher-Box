@@ -21,11 +21,29 @@ import {
 import { ScreenLayout, Text } from "@Cypher/component-library";
 import { dispatchNavigate } from "@Cypher/helpers";
 import { Shadow } from "react-native-neomorph-shadows";
-import { getMe } from "../../../api/coinOSApis";
+import { getMe, testAPI } from "../../../api/coinOSApis";
 
 interface Props {
   route: any;
 }
+
+export let SATS = 100000000;
+export let sats = (n: number) => Math.round(n * SATS);
+export let btc = (n: number) => parseFloat((n / SATS).toFixed(8));
+export let fiat = (n: number, r: number) => (n * r) / SATS;
+export function matchKeyAndValue(obj1: Record<string, number>, value: string) {
+  // Iterate through the keys of the first object
+  for (let key in obj1) {
+      // Check if the value matches any value in the first object
+      if (key === value) {
+          // Return the key if a match is found
+          return obj1[key];
+      }
+  }
+  // If no match is found, return null or any other appropriate value
+  return null;
+}
+
 
 export default function HomeScreen({ route }: Props) {
     const { navigate }: any = useNavigation();
@@ -33,6 +51,9 @@ export default function HomeScreen({ route }: Props) {
     const [isLogin, setLogin] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [balance, setBalance] = useState(0);
+    const [currency, setCurrency] = useState('$');
+    const [convertedRate, setConvertedRate] = useState(0);
+    const [matchedRate, setMatchedRate] = useState(0);
 
     useEffect(() => {
         async function handleToken() {
@@ -52,6 +73,14 @@ export default function HomeScreen({ route }: Props) {
         try {
           const response = await getMe();
           console.log('response: ', response);
+          const responsetest = await testAPI();
+          const currency = btc(1);
+          const matched = matchKeyAndValue(responsetest, 'USD')
+          setMatchedRate(matched || 0)
+          console.log('converter: ', (matched || 0) * currency * response.balance);
+          setConvertedRate((matched || 0) * currency * response.balance)
+          setCurrency("USD")
+          console.log('currency: ', currency)
           if(response?.balance) {
             setBalance(response?.balance || 0);
           }
@@ -114,7 +143,7 @@ export default function HomeScreen({ route }: Props) {
 
   const sendClickHandler = () => {
     console.log('send click');
-    dispatchNavigate('SendScreen');
+    dispatchNavigate('SendScreen', {matchedRate, currency, balance});
   };
 
   return (
@@ -159,10 +188,10 @@ export default function HomeScreen({ route }: Props) {
                   useArt
                 >
                   <Text subHeader bold style={{ marginStart: 2 }}>
-                    {balance} BTC
+                    {btc(1) * (balance || 0)} BTC
                   </Text>
                   <Text bold style={{ fontSize: 20, lineHeight: 24 }} >
-                    ${balance.toFixed(2)}
+                    {"$"+convertedRate.toFixed(2)}
                   </Text>
                   <Shadow
                     inner

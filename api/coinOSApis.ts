@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import SimpleToast from "react-native-simple-toast";
 
 const BASE_URL = 'https://coinos.io/api';
 const getAuthToken = async () => {
@@ -110,14 +111,59 @@ export const sendLightningPayment = async (payreq: string) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ payreq }),
+      body: JSON.stringify({ payreq: payreq }),
     }));
-    return await response.json();
+
+    console.log('response: ', response)
+    const responseJSON = await response.text();
+    console.log('responseJSON: ', responseJSON)
+    return responseJSON;
   } catch (error) {
     console.error('Error sending lightning payment:', error);
     throw error;
   }
 };
+
+export const sendCoinsViaUsername = async (address: string, amount: number) => {
+  try {
+    let [name, domain] = address.split("@");
+    
+    let url = `https://${domain}/.well-known/lnurlp/${name}`;
+    
+    const response = await fetch(url);
+    console.log('sendCoinsViaLNURL response: ', response)
+    const lnurlPayData = await response.json();
+    console.log('sendCoinsViaLNURL lnurlPayData: ', lnurlPayData)
+
+    if (lnurlPayData.tag === "payRequest") {
+      const paymentResponse = await fetch(lnurlPayData.callback+'?amount='+(amount * 1000), {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log('sendCoinsViaLNURL paymentResponse: ', paymentResponse)
+
+      const paymentResult = await paymentResponse.json();
+      console.log('sendCoinsViaLNURL paymentResult: ', paymentResult)
+      if(paymentResult.pr){
+        const sendToUser = await sendLightningPayment(paymentResult.pr)
+
+        console.log('sendToUser: ' ,sendToUser)
+        return sendToUser;  
+      } else {
+        SimpleToast.show(paymentResult.reason, SimpleToast.SHORT);
+        return;
+      }
+    } else {
+      SimpleToast.show("Invalid LNURL-Pay response", SimpleToast.SHORT)
+      throw new Error("Invalid LNURL-pay response");
+    }
+  } catch (error) {
+    console.error("Error sending LNURL-pay payment:", error);
+    throw error;
+  }
+}
 
 export const sendInternalPayment = async (amount: number, hash: string) => {
   try {
@@ -154,6 +200,21 @@ export const sendBitcoinPayment = async (amount: number, address: string) => {
 export const getMe = async () => {
   try {
     const response = await fetch(`${BASE_URL}/me`, await withAuthToken({
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }));
+    return await response.json();
+  } catch (error) {
+    console.error('Error getting me:', error);
+    throw error;
+  }
+};
+
+export const testAPI = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/rates`, await withAuthToken({
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

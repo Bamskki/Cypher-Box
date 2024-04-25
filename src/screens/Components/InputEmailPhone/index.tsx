@@ -9,13 +9,14 @@ interface Props {
     setText: any;
     style?: ViewStyle;
     type?: 'email-address' | 'phone-pad';
+    placeholder?: string
 }
 
-export default function InputEmailPhone({ label, text, setText, type, style }: Props) {
+export default function InputEmailPhone({ label, text, setText, type, style, placeholder = "" }: Props) {
     return (
         <View style={[styles.container,style && style]}>
             <Text subHeader bold style={styles.text}>{label}</Text>
-            <TextInput value={text} onChangeText={setText} keyboardType={type}
+            <TextInput value={text} onChangeText={setText} placeholder={placeholder} keyboardType={type}
                 returnKeyType="done"
                 style={styles.textInput} />
         </View>

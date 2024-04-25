@@ -3,19 +3,19 @@ import { Image } from "react-native";
 import styles from "./styles";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 import { Electricity } from "@Cypher/assets/images";
-import { dispatchNavigate } from "@Cypher/helpers";
+import { dispatchNavigate, dispatchReset } from "@Cypher/helpers";
 
 interface Props {
     route?: any;
 }
 
 export default function SendReceiveSuccessScreen({ route }: Props) {
-    const { isReceive,value,valueUsd } = route?.params;
+    const { isReceive,value,valueUsd, currency, type } = route?.params;
     const [isReceive_] = useState(isReceive);
 
     useEffect(() => {
         setTimeout(() => {
-            dispatchNavigate('HomeScreen');
+            dispatchReset('HomeScreen');
         }, 3000);
     },[]);
 
@@ -24,9 +24,9 @@ export default function SendReceiveSuccessScreen({ route }: Props) {
             <Text subHeader style={styles.text}>{isReceive_ ? 'Boom!' : 'Zapped!'}</Text>
             <Image style={styles.image} source={Electricity} resizeMode="contain" />
             <Text subHeader style={styles.text}>{`You ${isReceive_ ? 'Received' : 'Sent'}`}</Text>
-            <Text subHeader style={styles.text}>{isReceive_ ? `${value} sats` : `${value} sats`}</Text>
-            {!isReceive_ &&
-                <Text subHeader style={styles.subtext}>{`$${valueUsd}`}</Text>
+            <Text subHeader style={styles.text}>{type == 'lightening' ? value : isReceive_ ? `${value} sats` : `${value || 0} sats`}</Text>
+            {!isReceive_ && type !== 'lightening' &&
+                <Text subHeader style={styles.subtext}>{`${currency} ${valueUsd.toFixed(2)}`}</Text>
             }
         </ScreenLayout>
     )

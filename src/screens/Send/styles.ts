@@ -103,7 +103,7 @@ export default StyleSheet.create<Style>({
         marginTop: 10,
     },
     text: {
-        position: 'absolute',
+        // position: 'absolute',
         marginStart: 20,
     },
     current: {

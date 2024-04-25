@@ -8,7 +8,7 @@ interface Style {
 
 export default StyleSheet.create<Style>({
     text: {
-        fontSize: 45,
+        fontSize: 20,
         fontFamily: 'Lato-Semibold',
         lineHeight: 60,
         alignSelf: 'center',
