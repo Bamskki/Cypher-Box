@@ -1,7 +1,7 @@
-import React, {ReactNode} from 'react';
-import {LayoutChangeEvent, Text as RNText, TextStyle} from 'react-native';
+import React, { ReactNode } from "react";
+import { LayoutChangeEvent, Text as RNText, TextStyle } from "react-native";
 
-import styles from './styles';
+import styles from "./styles";
 
 export interface Props {
   testID?: string;
@@ -20,13 +20,14 @@ export interface Props {
   onPress?(): void;
   white?: boolean;
   blue?: boolean;
+  pink?: boolean;
   /**
    * style: only pass in margin or color styles here!!!
    * You should never need to change the size / font etc.
    * This ensures we only use agreed Text styles from the designer.
    * If you need to add another, discuss with designer.
    */
-  style?: TextStyle;
+  style?: TextStyle | TextStyle[];
   onLayout?: ((event: LayoutChangeEvent) => void) | undefined;
 }
 
@@ -47,6 +48,7 @@ function Text({
   center = false,
   white = false,
   blue = false,
+  pink = false,
   style,
   onLayout,
 }: Props) {
@@ -74,8 +76,10 @@ function Text({
         center && styles.center,
         white && styles.white,
         blue && styles.blue,
+        pink && styles.pink,
         style && style,
-      ]}>
+      ]}
+    >
       {children}
     </RNText>
   );

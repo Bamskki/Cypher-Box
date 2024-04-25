@@ -77,7 +77,7 @@ export default function CreateCoinOSScreen() {
                 <View style={styles.innerView}>
                     <GradientText>Create Coinos Account</GradientText>
                     <InputEmailPhone label={`Username`} setText={setEmail} text={email} style={{ marginTop: 50 }} />
-                    <InputEmailPhone label="Password" setText={setPassword} text={password} />
+                    <InputEmailPhone label="Password" secureTextEntry={true} setText={setPassword} text={password} />
                     <Button 
                         style={StyleSheet.flatten(styles.button)} 
                         loading={isLoading} 

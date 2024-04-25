@@ -21,3 +21,4 @@ export const useMeQuery = () => useQuery(ME_QUERY);
 export const useCreateLNInvoice = () => useMutation(GET_LN_INVOICE);
 
 export const useCreateOnChainAddress = () => useMutation(ON_CHAIN_CREATE_ADDRESS);
+

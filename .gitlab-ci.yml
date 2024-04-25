@@ -15,6 +15,7 @@ before_script:
   - npm install -g typescript
   - npm install typescript tslint
   - npm install  # Install dependencies
+  - npm run patches
 
 # build_android:
 #   stage: build
