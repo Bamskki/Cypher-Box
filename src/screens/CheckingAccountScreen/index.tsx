@@ -35,10 +35,10 @@ type RouteProps = RouteProp<RootStackParamList, "Withdraw">;
 
 const CheckingAccountScreen = () => {
   const route = useRoute<RouteProps>();
-  const fromScreen: string | undefined = route.params?.fromScreen;
+  const info: any = route.params;
 
   const [selectedTab, setSelectedTab] = useState<ETabType>(
-    fromScreen ? ETabType.THERESHOLD : ETabType.HISTORY
+    info?.fromScreen ? ETabType.THERESHOLD : ETabType.HISTORY
   );
   const isHistory: boolean = selectedTab === ETabType.HISTORY;
 
@@ -69,7 +69,7 @@ const CheckingAccountScreen = () => {
   };
 
   return (
-    <ScreenLayout showToolbar isBackButton>
+    <ScreenLayout showToolbar isBackButton disableScroll>
       <View style={styles.container}>
         <TopView
           selectedTab={selectedTab}
@@ -77,7 +77,7 @@ const CheckingAccountScreen = () => {
           inActiveColors={inActiveColors}
           activeColors={activeColors}
         />
-        {isHistory ? <HistorySection /> : <ThresholdSection />}
+        {isHistory ? <HistorySection matchedRate={info?.matchedRate} /> : <ThresholdSection />}
         <BottomView visible={isHistory} />
       </View>
     </ScreenLayout>

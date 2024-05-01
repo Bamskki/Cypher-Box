@@ -132,9 +132,9 @@ export default function HomeScreen({ route }: Props) {
   };
 
   const handleCheckingAccountPress = () => {
-    dispatchNavigate("CheckingAccount");
+    dispatchNavigate("CheckingAccount", {matchedRate});
   }
-  
+
   const createChekingAccountClickHandler = () => {
     console.log("create account click");
     dispatchNavigate("CheckAccount");

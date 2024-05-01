@@ -226,3 +226,18 @@ export const testAPI = async () => {
     throw error;
   }
 };
+
+export const getTransactionHistory = async (offset: number, limit: number) => {
+  try {
+    const response = await fetch(`${BASE_URL}/payments?offset=${offset}&limit=${limit}`, await withAuthToken({
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }));
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching invoice by hash:', error);
+    throw error;
+  }
+};
