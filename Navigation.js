@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+
 import { Platform, useWindowDimensions, Dimensions, I18nManager } from 'react-native';
 
 import Settings from './screen/settings/settings';
@@ -89,16 +90,27 @@ import { useTheme } from './components/themes';
 import { HomeScreen, SplashScreen, WelcomeScreen } from './src/screens';
 import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 
+import ColdStorageCreated from './screen/coldStorage/coldStorageCreated';
+import ConnectHardware from './screen/coldStorage/connectHardware';
+import TermsAndConditionForColdStorage from './screen/coldStorage/termsAndConditionForColdStorage';
+import SavingVaultMenu from './screen/savingsVault/savingVaultMenu';
+
+
+
 const WalletsStack = createNativeStackNavigator();
 
 const WalletsRoot = () => {
   const theme = useTheme();
-
   return (
     <WalletsStack.Navigator screenOptions={{ headerShadowVisible: false }}>
-      <WalletsStack.Screen name="HomeScreen" component={HomeScreen} options={{
-        headerShown: false, translucent: false
-      }} />
+      <WalletsStack.Screen
+        name="HomeScreen"
+        component={HomeScreen}
+        options={{
+          headerShown: false,
+          translucent: false,
+        }}
+      />
       <WalletsStack.Screen name="WalletsList" component={WalletsList} options={WalletsList.navigationOptions(theme)} />
       <WalletsStack.Screen name="WalletTransactions" component={WalletTransactions} options={WalletTransactions.navigationOptions(theme)} />
       <WalletsStack.Screen name="LdkOpenChannel" component={LdkOpenChannel} options={LdkOpenChannel.navigationOptions(theme)} />
@@ -161,15 +173,52 @@ const WalletsRoot = () => {
           gestureEnabled: false,
         }}
       />
+      <WalletsStack.Screen
+        name="TermsAndConditionForColdStorage"
+        component={TermsAndConditionForColdStorage}
+        options={TermsAndConditionForColdStorage.navigationOptions(theme)}
+      />
+      <WalletsStack.Screen name="ConnectHardware" component={ConnectHardware} options={ConnectHardware.navigationOptions(theme)} />
+      <WalletsStack.Screen
+        name="ColdStorageCreated"
+        component={ColdStorageCreated}
+        options={ColdStorageCreated.navigationOptions(theme)}
+      />
+      <WalletsStack.Screen
+        name="SavingVaultMenu"
+        component={SavingVaultMenu}
+        options={SavingVaultMenu.navigationOptions(theme)}
+
+      />
+
       <WalletsStack.Screen name="WalletAddresses" component={WalletAddresses} options={WalletAddresses.navigationOptions(theme)} />
     </WalletsStack.Navigator>
+  );
+};
+
+const ColdStorageStack = createNativeStackNavigator();
+const ColdStorageRoot = () => {
+  const theme = useTheme();
+  return (
+    <ColdStorageStack.Navigator screenOptions={{ headerShadowVisible: false }} initialRouteName="TermsAndConditionForColdStorage">
+      <ColdStorageStack.Screen
+        name="TermsAndConditionForColdStorage"
+        component={TermsAndConditionForColdStorage}
+        options={TermsAndConditionForColdStorage.navigationOptions(theme)}
+      />
+      <ColdStorageStack.Screen name="ConnectHardware" component={ConnectHardware} options={ConnectHardware.navigationOptions(theme)} />
+      <ColdStorageStack.Screen
+        name="ColdStorageCreated"
+        component={ColdStorageCreated}
+        options={ColdStorageCreated.navigationOptions(theme)}
+      />
+    </ColdStorageStack.Navigator>
   );
 };
 
 const AddWalletStack = createNativeStackNavigator();
 const AddWalletRoot = () => {
   const theme = useTheme();
-
   return (
     <AddWalletStack.Navigator screenOptions={{ headerShadowVisible: false }}>
       <AddWalletStack.Screen name="AddWallet" component={AddWallet} options={AddWallet.navigationOptions(theme)} />
@@ -459,10 +508,13 @@ const LappBrowserStackRoot = () => {
 
 const InitStack = createStackNavigator();
 const InitRoot = () => (
-  <InitStack.Navigator initialRouteName="SplashScreen" screenOptions={{
+  <InitStack.Navigator
+    initialRouteName="SplashScreen"
+    screenOptions={{
       cardStyleInterpolator: CardStyleInterpolators.forBottomSheetAndroid,
-    }}>
-    <InitStack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false,gestureEnabled: false }}/>
+    }}
+  >
+    <InitStack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false, gestureEnabled: false }} />
     <InitStack.Screen name="WelcomeScreen" component={WelcomeScreen} options={{ headerShown: false, gestureEnabled: false }} />
     <InitStack.Screen name="UnlockWithScreenRoot" component={UnlockWithScreenRoot} options={{ headerShown: false }} />
     <InitStack.Screen
@@ -530,6 +582,9 @@ const PaymentCodeStackRoot = () => {
   );
 };
 
+
+
+
 const RootStack = createNativeStackNavigator();
 const NavigationDefaultOptions = { headerShown: false, presentation: 'modal' };
 const NavigationFormModalOptions = { headerShown: false, presentation: 'formSheet' };
@@ -544,6 +599,8 @@ const Navigation = () => {
       <RootStack.Screen name="LNDCreateInvoiceRoot" component={LNDCreateInvoiceRoot} options={NavigationDefaultOptions} />
       <RootStack.Screen name="ScanLndInvoiceRoot" component={ScanLndInvoiceRoot} options={NavigationDefaultOptions} />
       <RootStack.Screen name="AztecoRedeemRoot" component={AztecoRedeemRoot} options={NavigationDefaultOptions} />
+      <RootStack.Screen name="ColdStorageRoot" component={ColdStorageRoot} options={{ headerShown: false, translucent: false }} />
+
       {/* screens */}
       <RootStack.Screen
         name="WalletExportRoot"
@@ -585,7 +642,6 @@ const Navigation = () => {
         }}
         initialParams={ScanQRCode.initialParams}
       />
-
       <RootStack.Screen name="PaymentCodeRoot" component={PaymentCodeStackRoot} options={NavigationDefaultOptions} />
     </RootStack.Navigator>
   );

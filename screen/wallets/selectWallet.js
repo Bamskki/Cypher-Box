@@ -114,20 +114,20 @@ const SelectWallet = () => {
     setOptions(
       isModal
         ? {
-            // eslint-disable-next-line react/no-unstable-nested-components
-            headerLeft: () => (
-              <TouchableOpacity
-                accessibilityRole="button"
-                style={styles.button}
-                onPress={() => {
-                  getParent().pop();
-                }}
-                testID="NavigationCloseButton"
-              >
-                <Image source={closeImage} />
-              </TouchableOpacity>
-            ),
-          }
+          // eslint-disable-next-line react/no-unstable-nested-components
+          headerLeft: () => (
+            <TouchableOpacity
+              accessibilityRole="button"
+              style={styles.button}
+              onPress={() => {
+                getParent().pop();
+              }}
+              testID="NavigationCloseButton"
+            >
+              <Image source={closeImage} />
+            </TouchableOpacity>
+          ),
+        }
         : {},
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -2,6 +2,38 @@
   "migIndex": 1,
   "data": [
     {
+      "path": "src/assets/fonts/Archivo-Bold.ttf",
+      "sha1": "eeb875e98692cfb8295e936f98b2cc606bbd1210"
+    },
+    {
+      "path": "src/assets/fonts/Archivo-BoldItalic.ttf",
+      "sha1": "5598d8554673391d86344f2f34a3415ce656470c"
+    },
+    {
+      "path": "src/assets/fonts/Archivo-Italic.ttf",
+      "sha1": "d3e2826ff70e47910512fc124681d93c85101a67"
+    },
+    {
+      "path": "src/assets/fonts/Archivo-Medium.ttf",
+      "sha1": "e1e29026b83964144210cf70ba836d80a5431a16"
+    },
+    {
+      "path": "src/assets/fonts/Archivo-MediumItalic.ttf",
+      "sha1": "4e09bc6f53194591c70291ef2b4d87c897c4766d"
+    },
+    {
+      "path": "src/assets/fonts/Archivo-Regular.ttf",
+      "sha1": "845bd94db2c0cbd7ed6823de5d3fa932771263e7"
+    },
+    {
+      "path": "src/assets/fonts/Archivo-SemiBold.ttf",
+      "sha1": "5f2ab48db26c4202861e2d5423caf4dcbb81d7d6"
+    },
+    {
+      "path": "src/assets/fonts/Archivo-SemiBoldItalic.ttf",
+      "sha1": "1986f91df1fc6dda76049962a275ff80c5599542"
+    },
+    {
       "path": "src/assets/fonts/Lato-Black.ttf",
       "sha1": "b9c952639741f5b7479e1ff6d1561a3df7e8f83a"
     },

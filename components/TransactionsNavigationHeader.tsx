@@ -170,42 +170,41 @@ const TransactionsNavigationHeader: React.FC<TransactionsNavigationHeaderProps> 
       <ToolTipMenu
         onPress={changeWalletBalanceUnit}
         ref={menuRef}
-        title={`${loc.wallets.balance} (${
-          wallet.getPreferredBalanceUnit() === BitcoinUnit.LOCAL_CURRENCY
-            ? preferredFiatCurrency?.endPointKey ?? FiatUnit.USD
-            : wallet.getPreferredBalanceUnit()
-        })`}
+        title={`${loc.wallets.balance} (${wallet.getPreferredBalanceUnit() === BitcoinUnit.LOCAL_CURRENCY
+          ? preferredFiatCurrency?.endPointKey ?? FiatUnit.USD
+          : wallet.getPreferredBalanceUnit()
+          })`}
         onPressMenuItem={onPressMenuItem}
         actions={
           wallet.hideBalance
             ? [
-                {
-                  id: 'walletBalanceVisibility',
-                  text: loc.transactions.details_balance_show,
-                  icon: {
-                    iconType: 'SYSTEM',
-                    iconValue: 'eye',
-                  },
+              {
+                id: 'walletBalanceVisibility',
+                text: loc.transactions.details_balance_show,
+                icon: {
+                  iconType: 'SYSTEM',
+                  iconValue: 'eye',
                 },
-              ]
+              },
+            ]
             : [
-                {
-                  id: 'walletBalanceVisibility',
-                  text: loc.transactions.details_balance_hide,
-                  icon: {
-                    iconType: 'SYSTEM',
-                    iconValue: 'eye.slash',
-                  },
+              {
+                id: 'walletBalanceVisibility',
+                text: loc.transactions.details_balance_hide,
+                icon: {
+                  iconType: 'SYSTEM',
+                  iconValue: 'eye.slash',
                 },
-                {
-                  id: 'copyToClipboard',
-                  text: loc.transactions.details_copy,
-                  icon: {
-                    iconType: 'SYSTEM',
-                    iconValue: 'doc.on.doc',
-                  },
+              },
+              {
+                id: 'copyToClipboard',
+                text: loc.transactions.details_copy,
+                icon: {
+                  iconType: 'SYSTEM',
+                  iconValue: 'doc.on.doc',
                 },
-              ]
+              },
+            ]
         }
       >
         <View style={styles.walletBalance}>
@@ -289,14 +288,14 @@ const styles = StyleSheet.create({
   walletLabel: {
     backgroundColor: 'transparent',
     fontSize: 19,
-    color: '#fff',
+    color: '#FFFFFF',
     writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
   },
   walletBalance: {
     backgroundColor: 'transparent',
     fontWeight: 'bold',
     fontSize: 36,
-    color: '#fff',
+    color: '#FFFFFF',
     writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
   },
   manageFundsButton: {

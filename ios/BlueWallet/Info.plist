@@ -209,6 +209,14 @@
 		<string>Lato-SemiboldItalic.ttf</string>
 		<string>Lato-Thin.ttf</string>
 		<string>Lato-ThinItalic.ttf</string>
+		<string>Archivo-Bold.ttf</string>
+		<string>Archivo-BoldItalic.ttf</string>
+		<string>Archivo-Italic.ttf</string>
+		<string>Archivo-Medium.ttf</string>
+		<string>Archivo-MediumItalic.ttf</string>
+		<string>Archivo-Regular.ttf</string>
+		<string>Archivo-SemiBold.ttf</string>
+		<string>Archivo-SemiBoldItalic.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>

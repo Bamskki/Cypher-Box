@@ -330,6 +330,8 @@ PODS:
     - React
   - react-native-bw-file-access (1.0.0):
     - React-Core
+  - react-native-document-picker (9.1.0):
+    - React-Core
   - react-native-fingerprint-scanner (6.0.0):
     - React
   - react-native-idle-timer (2.1.6):
@@ -338,6 +340,9 @@ PODS:
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
   - react-native-ios-context-menu (1.15.3):
+    - React-Core
+  - react-native-pager-view (6.2.3):
+    - RCT-Folly (= 2021.07.22.00)
     - React-Core
   - react-native-qrcode-local-image (1.0.4):
     - React
@@ -475,6 +480,8 @@ PODS:
     - React-Core
   - RNCClipboard (1.13.2):
     - React-Core
+  - RNCMaskedView (0.1.11):
+    - React
   - RNCPushNotificationIOS (1.11.0):
     - React-Core
   - RNDefaultPreference (1.4.4):
@@ -552,10 +559,12 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - react-native-blue-crypto (from `../node_modules/react-native-blue-crypto`)
   - react-native-bw-file-access (from `../blue_modules/react-native-bw-file-access`)
+  - react-native-document-picker (from `../node_modules/react-native-document-picker`)
   - react-native-fingerprint-scanner (from `../node_modules/react-native-fingerprint-scanner`)
   - react-native-idle-timer (from `../node_modules/react-native-idle-timer`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-ios-context-menu (from `../node_modules/react-native-ios-context-menu`)
+  - react-native-pager-view (from `../node_modules/react-native-pager-view`)
   - "react-native-qrcode-local-image (from `../node_modules/@remobile/react-native-qrcode-local-image`)"
   - react-native-randombytes (from `../node_modules/react-native-randombytes`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
@@ -585,6 +594,7 @@ DEPENDENCIES:
   - rn-ldk (from `../node_modules/rn-ldk`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
+  - "RNCMaskedView (from `../node_modules/@react-native-community/masked-view`)"
   - "RNCPushNotificationIOS (from `../node_modules/@react-native-community/push-notification-ios`)"
   - RNDefaultPreference (from `../node_modules/react-native-default-preference`)
   - RNDeviceInfo (from `../node_modules/react-native-device-info`)
@@ -669,6 +679,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-blue-crypto"
   react-native-bw-file-access:
     :path: "../blue_modules/react-native-bw-file-access"
+  react-native-document-picker:
+    :path: "../node_modules/react-native-document-picker"
   react-native-fingerprint-scanner:
     :path: "../node_modules/react-native-fingerprint-scanner"
   react-native-idle-timer:
@@ -677,6 +689,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-image-picker"
   react-native-ios-context-menu:
     :path: "../node_modules/react-native-ios-context-menu"
+  react-native-pager-view:
+    :path: "../node_modules/react-native-pager-view"
   react-native-qrcode-local-image:
     :path: "../node_modules/@remobile/react-native-qrcode-local-image"
   react-native-randombytes:
@@ -735,6 +749,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNCClipboard:
     :path: "../node_modules/@react-native-clipboard/clipboard"
+  RNCMaskedView:
+    :path: "../node_modules/@react-native-community/masked-view"
   RNCPushNotificationIOS:
     :path: "../node_modules/@react-native-community/push-notification-ios"
   RNDefaultPreference:
@@ -789,8 +805,8 @@ SPEC CHECKSUMS:
   hermes-engine: 90e4033deb00bee33330a9f15eff0f874bd82f6d
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   lottie-ios: ef1be1f90d54255f08e09d767950e43714661178
-  lottie-react-native: 00ac19344296ae018260aabd14d6b36dd816b0e2
-  PasscodeAuth: 3e88093ff46c31a952d8b36c488240de980517be
+  lottie-react-native: 29362684672667b054bff412f0ea14f911b001bf
+  PasscodeAuth: 1cc99b13d8e4de4716d7e2b4069af2f1a9de30b2
   RCT-Folly: 424b8c9a7a0b9ab2886ffe9c3b041ef628fd4fb1
   RCTRequired: b4d3068afa6f52ec5260a8417053b1f1b421483d
   RCTTypeSafety: a4551b3d338c96435f63bf06d564055c1d3cc0ac
@@ -808,16 +824,18 @@ SPEC CHECKSUMS:
   React-logger: dc3a2b174d79c2da635059212747d8d929b54e06
   react-native-blue-crypto: 23f1558ad3d38d7a2edb7e2f6ed1bc520ed93e56
   react-native-bw-file-access: b232fd1d902521ca046f3fc5990ab1465e1878d7
-  react-native-fingerprint-scanner: ac6656f18c8e45a7459302b84da41a44ad96dbbe
-  react-native-idle-timer: f7f651542b39dce9b9473e4578cb64a255075f17
-  react-native-image-picker: 5e076db26cd81660cfb6db5bcf517cfa12054d45
-  react-native-ios-context-menu: e529171ba760a1af7f2ef0729f5a7f4d226171c5
+  react-native-document-picker: 0fa7991074ad812aab09200bc083ef8f1ac956c1
+  react-native-fingerprint-scanner: c68136ca57e3704d7bdf5faa554ea535ce15b1d0
+  react-native-idle-timer: 97b8283237d45146a7a5c25bdebe9e1e85f3687b
+  react-native-image-picker: f4b35af1e600eb4406c99da6791af7bab2437153
+  react-native-ios-context-menu: b522377ce20e859c96d4d508703483f028ae1844
+  react-native-pager-view: abffdc5f8e25a7aa4aec4c6dc9ffcf1e545d8591
   react-native-qrcode-local-image: 35ccb306e4265bc5545f813e54cc830b5d75bcfc
-  react-native-randombytes: 421f1c7d48c0af8dbcd471b0324393ebf8fe7846
-  react-native-safe-area-context: 0ee144a6170530ccc37a0fd9388e28d06f516a89
-  react-native-secure-key-store: 910e6df6bc33cb790aba6ee24bc7818df1fe5898
+  react-native-randombytes: 5fc412efe7b5c55b9002c0004d75fe5fabcaa507
+  react-native-safe-area-context: 5b8b7895f54d0652426f3f594643d5f5a077096c
+  react-native-secure-key-store: 4950038c47455bbab13f9397be04e5f658a314ae
   react-native-tcp-socket: c1b7297619616b4c9caae6889bcb0aba78086989
-  react-native-webview: 107961c73db53d66549c867a3b64eaa20d34c41f
+  react-native-webview: 0faac0255de45d98ee5fd1ca42a5ed4d6e9c0292
   react-native-widget-center: 12dfba20a4fa995850b52cf0afecf734397f4b9c
   React-NativeModulesApple: c3e696ff867e4bc212266cbdf7e862e48a0166fd
   React-perflogger: 43287389ea08993c300897a46f95cfac04bb6c1a
@@ -838,21 +856,22 @@ SPEC CHECKSUMS:
   ReactCommon: 38824bfffaf4c51fbe03a2730b4fd874ef34d67b
   ReactNativeCameraKit: 9d46a5d7dd544ca64aa9c03c150d2348faf437eb
   RealmJS: a62dc7a1f94b888fe9e8712cd650167ad97dc636
-  rn-ldk: 0d8749d98cc5ce67302a32831818c116b67f7643
-  RNCAsyncStorage: 618d03a5f52fbccb3d7010076bc54712844c18ef
-  RNCClipboard: 60fed4b71560d7bfe40e9d35dea9762b024da86d
-  RNCPushNotificationIOS: 64218f3c776c03d7408284a819b2abfda1834bc8
-  RNDefaultPreference: 08bdb06cfa9188d5da97d4642dac745218d7fb31
-  RNDeviceInfo: db5c64a060e66e5db3102d041ebe3ef307a85120
+  rn-ldk: 3aebed818573f270af18ee4be61dc95f3e85c3bc
+  RNCAsyncStorage: 85e2462877b7f753d5350002967c5017afb2f64c
+  RNCClipboard: c4c35c4c0a38f885c11a7b1a33c9e68bd7a63e93
+  RNCMaskedView: f127cd9652acfa31b91dcff613e07ba18b774db6
+  RNCPushNotificationIOS: 4a7aac5430e7a1e997b21f4fa4db224127606e5a
+  RNDefaultPreference: dc356c8dc839f47e4289ef72a07ccd768dde9d30
+  RNDeviceInfo: e91e6da9d0fe11b31308bdafee604dd7ff98c49d
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNGestureHandler: fe2be3be5598dc74329b211c58c9f2d231461769
   RNHandoff: d3b0754cca3a6bcd9b25f544f733f7f033ccf5fa
   RNKeychain: a65256b6ca6ba6976132cc4124b238a5b13b3d9c
-  RNLocalize: 4222a3756cdbe2dc9a5bdf445765a4d2572107cb
-  RNPermissions: 5dc64e9b0823db9b8dbddcb3ec0c7338fbb6e12e
+  RNLocalize: b381e2e124c196700fa0afc1e1ed82eb661ead2c
+  RNPermissions: 1b2aad0bb16aa8833c0c4e4ace990d42bed2156c
   RNPrivacySnapshot: 71919dde3c6a29dd332115409c2aec564afee8f4
   RNQuickAction: 6d404a869dc872cde841ad3147416a670d13fa93
-  RNRate: ef3bcff84f39bb1d1e41c5593d3eea4aab2bd73a
+  RNRate: 1d9222ebb138a9f006c5fe5b1f371ca095eeb0f1
   RNReactNativeHapticFeedback: ec56a5f81c3941206fd85625fa669ffc7b4545f9
   RNReanimated: ce6bef77caeee09d7f022532cee0c8d9bad09c9a
   RNScreens: 3c5b9f4a9dcde752466854b6109b79c0e205dad3

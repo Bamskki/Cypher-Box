@@ -63,9 +63,9 @@ const navigationStyle = (
         const handleClose = closeButtonFunc
           ? () => closeButtonFunc({ navigation, route })
           : () => {
-              Keyboard.dismiss();
-              navigation.goBack(null);
-            };
+            Keyboard.dismiss();
+            navigation.goBack(null);
+          };
         headerRight = () => (
           <TouchableOpacity
             accessibilityRole="button"
@@ -88,13 +88,16 @@ const navigationStyle = (
 
       let options: NavigationOptions = {
         headerShadowVisible: false,
+        headerStyle: {
+          backgroundColor: '#1e1e1e',
+        },
         headerTitleStyle: {
-          fontWeight: '600',
-          color: theme.colors.foregroundColor,
+          fontWeight: '700',
+          color: '#F1F1F1',
         },
         headerRight,
         headerBackTitleVisible: false,
-        headerTintColor: theme.colors.foregroundColor,
+        headerTintColor: '#FFFFFF',
         ...opts,
       };
 
