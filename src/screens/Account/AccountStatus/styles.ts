@@ -9,12 +9,18 @@ interface Style {
     description: TextStyle;
     view: ViewStyle;
     linearGradient: ViewStyle;
+    linearGradient2: ViewStyle;
     showLine: ViewStyle;
     check: TextStyle;
     sats: TextStyle;
     blink: ImageStyle;
     height: ViewStyle;
     top: ViewStyle;
+    bottom: ViewStyle;
+    text: TextStyle;
+    top2: any;
+    bottom2: any;
+    box: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -51,8 +57,17 @@ export default StyleSheet.create<Style>({
     },
     linearGradient: {
         marginTop: 50,
-        height: 102,
+        height: 105,
         justifyContent: 'flex-start',
+    },
+    linearGradient2: {
+        width: '80%',
+        paddingLeft: 15,
+        paddingRight: 15,
+        borderRadius: 5,
+        height: 5,
+        alignSelf: 'center',
+        marginTop: 10,
     },
     showLine: {
         borderWidth: 1,
@@ -78,10 +93,45 @@ export default StyleSheet.create<Style>({
         marginEnd: 15,
     },
     height: {
-        height: 102,
+        height: 105,
     },
-    top:{
+    top: {
         justifyContent: 'flex-start',
-        height: 102,
+        height: 105,
+        shadowColor: colors.pink.shadowTop,
+    },
+    bottom: {
+        justifyContent: 'flex-start',
+        height: 105,
+        shadowColor: colors.pink.shadowBottom,
+    },
+    text: {
+        alignSelf: 'flex-end',
+        marginEnd: 37.5,
+    },
+    top2: {
+        shadowOffset: { width: 0, height: 3 },
+        shadowColor: "#FFFFFF80",
+        shadowRadius: 4,
+        // borderRadius: 25,
+        width: widths - 60,
+        height: 5,
+        justifyContent: 'center',
+    },
+    bottom2: {
+        shadowOffset: { width: 0, height: -2 },
+        shadowColor: "#00000040",
+        shadowRadius: 4,
+        // borderRadius: 25,
+        width: widths - 60,
+        height: 5,
+        justifyContent: 'center',
+    },
+    box: {
+        width: 5, 
+        height: 5, 
+        backgroundColor: colors.white,
+        alignSelf: 'flex-end', 
+        marginEnd: 20,
     }
 })

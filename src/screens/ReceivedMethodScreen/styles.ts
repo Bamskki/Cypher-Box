@@ -3,15 +3,15 @@ import { ImageStyle, StyleSheet, TextStyle, ViewStyle } from "react-native";
 
 interface Style {
     container: ViewStyle;
+    container2: ViewStyle;
     innerView: ViewStyle;
     image: ImageStyle;
     title: TextStyle;
     desc: TextStyle;
-    description: TextStyle;
     view: ViewStyle;
-    linearGradient: ViewStyle;
-    showLine: ViewStyle;
     height: ViewStyle;
+    background: ViewStyle;
+    extra: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -19,6 +19,9 @@ export default StyleSheet.create<Style>({
         flex: 1,
         paddingHorizontal: 20,
         paddingBottom: 65,
+    },
+    container2: {
+        flex: 1,
     },
     innerView: {
         flex: 1,
@@ -39,13 +42,6 @@ export default StyleSheet.create<Style>({
         marginTop: 15,
         ...shadow.text25
     },
-    description: {
-        fontSize: 14,
-        fontFamily: 'Archivo-Medium',
-        lineHeight: 24,
-        marginTop: 30,
-        color: colors.white,
-    },
     view: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -55,23 +51,16 @@ export default StyleSheet.create<Style>({
         paddingStart: 10,
         width: widths - 80,
     },
-    linearGradient: {
-        borderRadius: 25,
-        height: 150,
-        justifyContent: 'space-between',
-        padding: 3,
-        marginTop: 50,
-    },
-    showLine: {
-        borderWidth: 1,
-        borderColor: colors.white,
-        padding: 5,
-        borderRadius: 5,
-        marginBottom: 20,
-        marginStart: 50,
-        marginEnd: 20,
-    },
     height: {
-        height: 146,
+        height: 132,
+    },
+    background: {
+        backgroundColor: colors.gray.dark,
+        flex: 1,
+        margin: 3,
+        borderRadius: 17.5
+    },
+    extra: {
+        height: 20,
     }
 })

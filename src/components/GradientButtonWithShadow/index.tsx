@@ -21,7 +21,11 @@ interface Props extends ButtonProps, TouchableOpacityProps {
   isShadow?: boolean;
   isTextShadow?: boolean;
   isIcon?: boolean;
+  isBorder?: boolean;
   textStyle?: TextStyle;
+  icon?: number;
+  isShadowTopColor?: boolean;
+  isShadowBottomColor?: boolean;
 }
 
 export default function GradientButtonWithShadow({
@@ -32,7 +36,11 @@ export default function GradientButtonWithShadow({
   isShadow,
   isTextShadow,
   isIcon = false,
+  isBorder = false,
   textStyle,
+  icon = 0,
+  isShadowTopColor,
+  isShadowBottomColor
 }: Props) {
   return (
     <TouchableOpacity
@@ -46,15 +54,22 @@ export default function GradientButtonWithShadow({
         colors={
           disabled
             ? [colors.gray.light, colors.gray.light]
-            : [colors.pink.light, colors.pink.default]
+            : ['#333333', '#282727']
         }
-        style={[styles.linearGradient, isIcon && styles.pureview, style]}
+        style={[styles.linearGradient, isBorder && styles.border, isIcon && styles.pureview, style]}
       >
         <Shadow
           inner // <- enable inner shadow
           useArt // <- set this prop to use non-native shadow on ios
-          style={styles.shadow}
+          style={StyleSheet.flatten([styles.shadow, isShadowTopColor && { shadowColor: '#909090', }])}
         >
+          {icon != 0 &&
+            <Image
+              style={icon == 1 ? styles.arrowLeft : styles.arrowRight}
+              resizeMode="contain"
+              source={require("../../../img/arrow-right.png")}
+            />
+          }
           <Text
             bold
             h3
@@ -62,6 +77,7 @@ export default function GradientButtonWithShadow({
             style={StyleSheet.flatten([
               isTextShadow && shadow.text25,
               textStyle,
+              icon != 0 ? icon == 1 ? { marginStart: 20 } : { marginEnd: 20 } : {}
             ])}
           >
             {title}
@@ -70,7 +86,7 @@ export default function GradientButtonWithShadow({
           <Shadow
             inner // <- enable inner shadow
             useArt // <- set this prop to use non-native shadow on ios
-            style={styles.innerShadow}/>
+            style={StyleSheet.flatten([styles.innerShadow, isShadowBottomColor && { shadowColor: '#8A8A8A', shadowOpacity: 0.64, }])} />
         </Shadow>
       </LinearGradient>
     </TouchableOpacity>

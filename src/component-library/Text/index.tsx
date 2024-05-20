@@ -15,6 +15,7 @@ export interface Props {
   subHeader?: boolean;
   bold?: boolean;
   semibold?: boolean;
+  italic?: boolean;
   numberOfLines?: number;
   center?: boolean;
   onPress?(): void;
@@ -43,6 +44,7 @@ function Text({
   subHeader = false,
   bold = false,
   semibold = false,
+  italic = false,
   numberOfLines = 99,
   center = false,
   white = false,
@@ -71,6 +73,7 @@ function Text({
         subHeader && styles.subHeader,
         bold && styles.bold,
         semibold && styles.semibold,
+        italic && styles.italic,
         center && styles.center,
         white && styles.white,
         blue && styles.blue,

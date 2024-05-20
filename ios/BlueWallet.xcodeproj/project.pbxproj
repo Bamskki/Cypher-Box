@@ -102,6 +102,7 @@
 		B4AB225D2B02AD12001F4328 /* XMLParserDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4AB225C2B02AD12001F4328 /* XMLParserDelegate.swift */; };
 		B4AB225E2B02AD12001F4328 /* XMLParserDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4AB225C2B02AD12001F4328 /* XMLParserDelegate.swift */; };
 		B4EE583C226703320003363C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B40D4E35225841ED00428FCC /* Assets.xcassets */; };
+		C1ECBEBE9F2D4DF795D8F16D /* Lato-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 071766184CB84657AE1D4F51 /* Lato-Italic.ttf */; };
 		C4C70309C6C16520141FFCEA /* libPods-BlueWallet-NoLDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B0260AB2029728A2A6BA936 /* libPods-BlueWallet-NoLDK.a */; };
 		C978A716948AB7DEC5B6F677 /* BuildFile in Frameworks */ = {isa = PBXBuildFile; };
 		CF362669663E4E3AA6DD99ED /* Lato-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E7D78598F862426E9B640B4E /* Lato-Bold.ttf */; };
@@ -247,6 +248,7 @@
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* BlueWalletTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BlueWalletTests.m; sourceTree = "<group>"; };
 		04466491BA2D4876A71222FC /* Foundation.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Foundation.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Foundation.ttf"; sourceTree = "<group>"; };
+		071766184CB84657AE1D4F51 /* Lato-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Lato-Italic.ttf"; path = "../src/assets/fonts/Lato-Italic.ttf"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* BlueWallet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BlueWallet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = BlueWallet/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = BlueWallet/Info.plist; sourceTree = "<group>"; };
@@ -560,6 +562,7 @@
 				C4B84B6924594F689A7229AB /* Archivo-Bold.ttf */,
 				CC4D22B1274D40D2A1C8D7FF /* Archivo-Medium.ttf */,
 				34058D7A36764495B12F2CE0 /* Archivo-SemiBold.ttf */,
+				071766184CB84657AE1D4F51 /* Lato-Italic.ttf */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -1065,6 +1068,7 @@
 				AD4E6C166B6B41F28BD3361C /* Archivo-Medium.ttf in Resources */,
 				A6798FC53EF440C698C534F9 /* Archivo-SemiBold.ttf in Resources */,
 				9460BA93871C46EB9A6A8F32 /* BootSplash.storyboard in Resources */,
+				C1ECBEBE9F2D4DF795D8F16D /* Lato-Italic.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

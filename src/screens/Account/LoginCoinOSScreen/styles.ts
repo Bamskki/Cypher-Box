@@ -7,6 +7,9 @@ interface Style {
     create: TextStyle;
     button: ViewStyle;
     text: TextStyle;
+    textInput: TextStyle;
+    extra: ViewStyle;
+    space: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -42,4 +45,15 @@ export default StyleSheet.create<Style>({
         fontFamily: 'Lato-Bold',
         textAlign: 'center'
     },
+    textInput: {
+        // width: '90%',
+        // paddingEnd: 0,
+        // marginTop: 20,
+    },
+    extra: {
+        height: 20,
+    },
+    space: {
+        height: 50,
+    }
 })

@@ -13,6 +13,7 @@ interface Styles {
   subHeader: TextStyle;
   bold: TextStyle;
   semibold: TextStyle;
+  italic: TextStyle;
   center: TextStyle;
   white: TextStyle;
   blue: TextStyle;
@@ -38,7 +39,7 @@ export default StyleSheet.create<Styles>({
   h2: {
     fontSize: textSizes.h2,
     lineHeight: 28,
-    fontFamily: 'Lato-Bold',
+    // fontFamily: 'Lato-Bold',
   },
   h3: {
     fontSize: textSizes.h3,
@@ -62,6 +63,9 @@ export default StyleSheet.create<Styles>({
   },
   semibold: {
     fontFamily: 'Lato-Semibold',
+  },
+  italic: {
+    fontFamily: 'Lato-Italic',
   },
   center: {
     textAlign: 'center',

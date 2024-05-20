@@ -35,7 +35,7 @@ export default function InfoBlink() {
     }
 
     return (
-        <ScreenLayout disableScroll showToolbar progress={0}>
+        <ScreenLayout showToolbar progress={0}>
             <View style={styles.container}>
                 <View style={styles.innerView}>
                     <GradientText>Checking Account</GradientText>

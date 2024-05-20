@@ -7,6 +7,10 @@ interface Style {
     create: TextStyle;
     button: ViewStyle;
     text: TextStyle;
+    textInput: TextStyle;
+    extra: ViewStyle;
+    space: ViewStyle;
+    gradient: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -22,11 +26,11 @@ export default StyleSheet.create<Style>({
         paddingHorizontal: 25,
         alignItems: 'center',
     },
-    create:{
-        fontSize:18,
-        fontFamily:'Archivo-SemiBold',
-        lineHeight:24,
-        alignSelf:'center',
+    create: {
+        fontSize: 18,
+        fontFamily: 'Archivo-SemiBold',
+        lineHeight: 24,
+        alignSelf: 'center',
         marginBottom: 15
     },
     button: {
@@ -42,4 +46,19 @@ export default StyleSheet.create<Style>({
         fontFamily: 'Lato-Bold',
         textAlign: 'center'
     },
+    textInput: {
+        textAlign: 'center',
+        // width: '90%',
+        // paddingEnd: 0,
+        // marginTop: 20,
+    },
+    extra: {
+        height: 20,
+    },
+    space: {
+        height: 50,
+    },
+    gradient: {
+        width: '100%',
+    }
 })

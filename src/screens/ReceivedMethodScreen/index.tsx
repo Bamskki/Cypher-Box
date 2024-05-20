@@ -1,5 +1,5 @@
 import React from "react";
-import { Image, StyleSheet, View } from "react-native";
+import { Image, View } from "react-native";
 import styles from "./styles";
 import { LeftArrow } from "@Cypher/assets/images";
 import { GradientCard, GradientCardWithShadow } from "@Cypher/components";
@@ -22,26 +22,31 @@ export default function ReceivedMethodScreen() {
         <ScreenLayout showToolbar isBackButton>
             <View style={styles.container}>
                 <View style={styles.innerView}>
-                    <Text subHeader bold>Choose receive method</Text>
-                    <GradientCardWithShadow style={StyleSheet.flatten([styles.height,{marginTop: 50}])} linearStyle={styles.height} shadowStyleTop={styles.height} shadowStyleBottom={styles.height} onPress={getAddressClickHandler}>
-                        <View style={styles.view}>
-                            <View style={{ marginBottom: 20 }}>
-                                <Text subHeader bold style={styles.title}>Get Address</Text>
-                                <Text h4 bold style={styles.desc}>Bitcoin or Lightning</Text>
+                    <Text subHeader bold>Receive Bitcoin</Text>
+                    <View style={styles.extra} />
+                    <GradientCard style={styles.height} linearStyle={styles.height} onPress={handleCreateInvoice}>
+                        <View style={styles.background}>
+                            <View style={styles.view}>
+                                <View style={styles.container2}>
+                                    <Text subHeader bold style={styles.title}>Bitcoin-Lightning invoice</Text>
+                                    <Text h4 bold style={styles.desc}>Highly compatible with exchanges and wallets that support the Lightning Network</Text>
+                                </View>
+                                <Image source={LeftArrow} style={styles.image} resizeMode="contain" />
                             </View>
-                            <Image source={LeftArrow} style={styles.image} resizeMode="contain" />
                         </View>
-                    </GradientCardWithShadow>
-                    <View style={{ height: 20 }} />
-                    <GradientCardWithShadow style={styles.height} linearStyle={styles.height} shadowStyleTop={styles.height} shadowStyleBottom={styles.height} onPress={handleCreateInvoice}>
-                        <View style={styles.view}>
-                            <View style={{ marginBottom: 0 }}>
-                                <Text subHeader bold style={styles.title}>Create Invoice</Text>
-                                <Text h4 bold style={styles.desc}>Highly compatible with lightning-enabled exchanges and wallets</Text>
+                    </GradientCard>
+                    <View style={styles.extra} />
+                    <GradientCard style={styles.height} linearStyle={styles.height} onPress={getAddressClickHandler}>
+                        <View style={styles.background}>
+                            <View style={styles.view}>
+                                <View style={styles.container2}>
+                                    <Text subHeader bold style={styles.title}>Bitcoin Network Address</Text>
+                                    <Text h4 bold style={styles.desc}>Deposit sizable amounts of bitcoin into your Checking Account </Text>
+                                </View>
+                                <Image source={LeftArrow} style={styles.image} resizeMode="contain" />
                             </View>
-                            <Image source={LeftArrow} style={styles.image} resizeMode="contain" />
                         </View>
-                    </GradientCardWithShadow>
+                    </GradientCard>
                 </View>
             </View>
         </ScreenLayout>

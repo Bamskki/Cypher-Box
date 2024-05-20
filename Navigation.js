@@ -85,35 +85,74 @@ import PaymentCode from './screen/wallets/paymentCode';
 import PaymentCodesList from './screen/wallets/paymentCodesList';
 import loc from './loc';
 import { useTheme } from './components/themes';
-import { AccountStatus, CheckAccount, CreateCoinOSScreen, CreateInvoice, DownloadBlink, GetAddressScreen, HomeScreen, InfoBlink, LoginBlink, LoginBlinkPhone, LoginCoinOSScreen, QrScreen, ReceivedMethodScreen, SendReceiveSuccessScreen, SendScreen, SplashScreen, VerifyPhone, WelcomeScreen } from './src/screens';
+import { AccountStatus, CheckAccount, CheckingAccount, CopyInvoice, CreateCoinOSScreen, CreateInvoice, DownloadBlink, GetAddressScreen, HomeScreen, InfoBlink, LoginBlink, LoginBlinkPhone, LoginCoinOSScreen, QrScreen, ReceivedMethodScreen, ReviewPayment, SendReceiveSuccessScreen, SendScreen, SplashScreen, ThresholdAdjust, Transaction, TransactionBroadCast, VerifyPhone, WelcomeScreen, WithdrawThreshold } from './src/screens';
 import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
+import Invoice from '@Cypher/screens/Invoice';
 
 const WalletsStack = createStackNavigator();
 
 const WalletsRoot = () => {
   const theme = useTheme();
 
+  const forFade = ({ current }) => ({
+    cardStyle: {
+      opacity: current.progress,
+    },
+  });
+  
+  const config = {
+    animation: 'timing',
+    config: {
+      stiffness: 1000,
+      damping: 500,
+      mass: 3,
+      overshootClamping: true,
+      restDisplacementThreshold: 0.01,
+      restSpeedThreshold: 0.01,
+    },
+  };
+
   return (
-    <WalletsStack.Navigator screenOptions={{ headerShadowVisible: false,gestureEnabled:false }}>
+    <WalletsStack.Navigator screenOptions={{ headerShadowVisible: false, gestureEnabled: false }}>
       <WalletsStack.Screen name="HomeScreen" component={HomeScreen} options={{
         headerShown: false, translucent: false,
         cardStyleInterpolator: CardStyleInterpolators.forBottomSheetAndroid,
       }} />
-      <WalletsStack.Screen name="CheckAccount" component={CheckAccount} options={{headerShown: false}} />
-      <WalletsStack.Screen name="InfoBlink" component={InfoBlink} options={{headerShown: false}} />
-      <WalletsStack.Screen name="DownloadBlink" component={DownloadBlink} options={{headerShown: false}} />
-      <WalletsStack.Screen name="LoginBlink" component={LoginBlink} options={{headerShown: false}} />
-      <WalletsStack.Screen name="CreateCoinOSScreen" component={CreateCoinOSScreen} options={{headerShown: false}} />
-      <WalletsStack.Screen name="LoginCoinOSScreen" component={LoginCoinOSScreen} options={{headerShown: false}} />
-      <WalletsStack.Screen name="LoginBlinkPhone" component={LoginBlinkPhone} options={{headerShown: false}} />
-      <WalletsStack.Screen name="VerifyPhone" component={VerifyPhone} options={{headerShown: false}} />
-      <WalletsStack.Screen name="AccountStatus" component={AccountStatus} options={{headerShown: false}} />
-      <WalletsStack.Screen name="ReceivedMethodScreen" component={ReceivedMethodScreen} options={{headerShown: false}} />
-      <WalletsStack.Screen name="QrScreen" component={QrScreen} options={{headerShown: false}} />
-      <WalletsStack.Screen name="CreateInvoice" component={CreateInvoice} options={{headerShown: false}} />
-      <WalletsStack.Screen name="SendReceiveSuccessScreen" component={SendReceiveSuccessScreen} options={{headerShown: false}} />
-      <WalletsStack.Screen name="GetAddressScreen" component={GetAddressScreen} options={{headerShown: false}} />
-      <WalletsStack.Screen name="SendScreen" component={SendScreen} options={{headerShown: false}} />
+      <WalletsStack.Screen name="CheckAccount" component={CheckAccount} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="InfoBlink" component={InfoBlink} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="DownloadBlink" component={DownloadBlink} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="LoginBlink" component={LoginBlink} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="CreateCoinOSScreen" component={CreateCoinOSScreen} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="LoginCoinOSScreen" component={LoginCoinOSScreen} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="LoginBlinkPhone" component={LoginBlinkPhone} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="VerifyPhone" component={VerifyPhone} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="AccountStatus" component={AccountStatus} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="ReceivedMethodScreen" component={ReceivedMethodScreen} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="QrScreen" component={QrScreen} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="CopyInvoice" component={CopyInvoice} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="ReviewPayment" component={ReviewPayment} options={{ 
+        headerShown: false, 
+        // transitionSpec: {
+        //   open: config,
+        //   close: config,
+        // },
+      }} />
+      <WalletsStack.Screen name="CheckingAccount" component={CheckingAccount} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="Invoice" component={Invoice} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="WithdrawThreshold" component={WithdrawThreshold} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="ThresholdAdjust" component={ThresholdAdjust} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="Transaction" component={Transaction} options={{
+        headerShown: false,
+        cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter,
+      }} />
+      <WalletsStack.Screen name="TransactionBroadCast" component={TransactionBroadCast} options={{ 
+        headerShown: false,
+        cardStyleInterpolator: forFade,
+      }} />
+      <WalletsStack.Screen name="CreateInvoice" component={CreateInvoice} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="SendReceiveSuccessScreen" component={SendReceiveSuccessScreen} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="GetAddressScreen" component={GetAddressScreen} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="SendScreen" component={SendScreen} options={{ headerShown: false }} />
       <WalletsStack.Screen name="WalletsList" component={WalletsList} options={WalletsList.navigationOptions(theme)} />
       <WalletsStack.Screen name="WalletTransactions" component={WalletTransactions} options={WalletTransactions.navigationOptions(theme)} />
       <WalletsStack.Screen name="LdkOpenChannel" component={LdkOpenChannel} options={LdkOpenChannel.navigationOptions(theme)} />
@@ -475,10 +514,10 @@ const LappBrowserStackRoot = () => {
 const InitStack = createStackNavigator();
 const InitRoot = () => (
   <InitStack.Navigator initialRouteName="SplashScreen" screenOptions={{
-      cardStyleInterpolator: CardStyleInterpolators.forBottomSheetAndroid,
-      gestureEnabled: false,
-    }}>
-    <InitStack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false,gestureEnabled: false }}/>
+    cardStyleInterpolator: CardStyleInterpolators.forBottomSheetAndroid,
+    gestureEnabled: false,
+  }}>
+    <InitStack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false, gestureEnabled: false }} />
     <InitStack.Screen name="WelcomeScreen" component={WelcomeScreen} options={{ headerShown: false, gestureEnabled: false }} />
     <InitStack.Screen name="UnlockWithScreenRoot" component={UnlockWithScreenRoot} options={{ headerShown: false }} />
     <InitStack.Screen

@@ -6,6 +6,9 @@ const colors = {
     light: '#F959CC',
     extralight: '#FF65DD',
     main: '#E335DC',
+    shadowBottom: '#EA49BD',
+    shadowTop: '#D64FB0',
+    dark: '#FB17A0',
   },
 
   shadow25: 'rgba(0, 0, 0, 0.25)',
@@ -16,17 +19,26 @@ const colors = {
     light: '#B6B6B6',
     text: '#8C8C8C',
     line: '#dfd6d6',
+    dark: '#171717',
+    placeholder: '#8c8c8c',
+    thin: '#B6B6B6',
+    thin2: '#B6B6B6FF',
+    disable: '#4A4A4A',
   },
   green: '#23C47F',
   silver: '#C3C3C3',
   tundora: '#2D2D2D',
   yellow: '#FFF500',
+  yellow2: '#FFD600',
   white: '#FFFFFF',
   black: {
     default: '#000000',
     light: '#202832',
+    dark: '#090909',
   },
   red: '#FF0000',
+  stroke: '#A1A1A1',
+  border: '#6F6F6F',
 };
 
 export default colors;

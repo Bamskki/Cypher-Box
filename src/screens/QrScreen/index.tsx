@@ -1,46 +1,39 @@
 import React from "react";
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Image, View } from "react-native";
 import styles from "./styles";
-import { Copy, QrCode, Share } from "@Cypher/assets/images";
-import { colors } from "@Cypher/style-guide";
+import { CoinOS, Copy, QrCode, Share, Share2 } from "@Cypher/assets/images";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 import { dispatchNavigate } from "@Cypher/helpers";
+import ImageText from "@Cypher/components/ImageText";
+import { GradientCard, ImageTextVertical } from "@Cypher/components";
 
 interface Props {
     route: any;
 }
 
 export default function QrScreen({ route }: Props) {
-    const { isBitcoinQr } = route?.params;
-
-    const copyClickHandler = () => {
-        console.log('copy click temprary');
-        dispatchNavigate('SendReceiveSuccessScreen', {
-            isReceive: false,
-            value: '10',
-            valueUsd: '0.0054',
-        })
-    }
-
     return (
-        <ScreenLayout showToolbar title='Show QR Code'>
+        <ScreenLayout showToolbar title='Receive to Bitcoin Address'>
             <View style={styles.container}>
                 <View style={styles.innerView}>
-                    <Text bold style={styles.maintitle}>{isBitcoinQr ? 'Bitcoin Network address' : 'Bitcoin Lightning QR'}</Text>
+                    {/* <Text h3 style={styles.maintitle}>Top-up your Coinos Checking Account{`\n`} using this Bitcoin Network address:</Text> */}
+                    <Image source={CoinOS} style={styles.logo} resizeMode="contain" />
                     <Image source={QrCode} resizeMode="contain" style={styles.image} />
-                    <View style={styles.imageView}>
-                        <TouchableOpacity onPress={copyClickHandler}>
-                            <Image source={Copy} resizeMode="contain" />
-                        </TouchableOpacity>
-                        <Image source={Share} resizeMode="contain" />
+                    <Text semibold style={styles.code}>bc1qt3......wmsn6u</Text>
+                    <View style={styles.imageView2}>
+                        <ImageTextVertical text="Copy" source={Copy} />
+                        <ImageTextVertical text="Share" source={Share2} />
                     </View>
-                    {isBitcoinQr ?
-                        <Text h3 style={styles.title}>Tip: it’s much faster and cheaper for the sender to send funds to lightning addresses and invoices instead of using the main Bitcoin Network, so tell them download Cypher Bank!</Text>
-                        :
-                        <Text h3 style={styles.title}>Tip: If the sender’s wallet can’t identify this code you can use other methods such as creating an invoice or receiving to your own unique<Text h3 style={StyleSheet.flatten([styles.title, {
-                            color: colors.pink.main,
-                        }])}> Lightning address</Text> on Blink.</Text>
-                    }
+                    {/* <View style={styles.imageView}>
+                        <ImageText text="Copy" source={Copy}/>
+                        <ImageText text="Share" source={Share}/>
+                    </View>
+                    <GradientCard style={{ height: 50,marginTop: 20 }} linearStyle={{ height: 50 }}>
+                        <View style={styles.background}>
+                            <Text subHeader bold>bc1qt3......wmsn6u</Text>
+                        </View>
+                    </GradientCard> */}
+                    <Text h3 style={styles.title}>Bitcoin Network transactions may take hours, or in rare case, days to confirm depending on how much fees the sender paid and how fast your bitcoin banking provider, Coinos, will credit your account.</Text>
                 </View>
             </View>
         </ScreenLayout>

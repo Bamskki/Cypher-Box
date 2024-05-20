@@ -1,4 +1,4 @@
-import { colors, widths } from "@Cypher/style-guide";
+import { colors } from "@Cypher/style-guide";
 import { ImageStyle, StyleSheet, TextStyle, ViewStyle } from "react-native";
 
 interface Style {
@@ -7,12 +7,11 @@ interface Style {
     image: ImageStyle;
     maintitle: TextStyle;
     title: TextStyle;
-    desc: TextStyle;
-    description: TextStyle;
-    view: ViewStyle;
-    linearGradient: ViewStyle;
-    showLine: ViewStyle;
     imageView: ViewStyle;
+    imageView2: ViewStyle;
+    logo: ImageStyle;
+    background: ViewStyle;
+    code: TextStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -27,69 +26,44 @@ export default StyleSheet.create<Style>({
         alignItems: 'center',
     },
     image: {
-        width: widths - 60,
-        height: widths - 60,
-        marginTop: 50,
+        width: 248,
+        height: 249,
+        marginTop: 20,
     },
     maintitle: {
-        fontSize: 24,
-        color: colors.white,
-        lineHeight: 30,
+        fontFamily: 'Lato-Regular',
     },
     title: {
         marginTop: 30,
-        paddingHorizontal:30,
-    },
-    desc: {
-        fontSize: 14,
-        fontFamily: 'Lato-Bold',
-        color: colors.white,
-        marginTop: 15,
-        textShadowColor: colors.shadow25,
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 1
-    },
-    description: {
-        fontSize: 14,
-        fontFamily: 'Archivo-Medium',
-        lineHeight: 24,
-        marginTop: 30,
-        color: colors.white,
-    },
-    view: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flex: 1,
-        margin: 10,
-        paddingHorizontal: 10,
-        width: widths - 80,
-        shadowColor: colors.black.default,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.8,
-        shadowRadius: 1,
-    },
-    linearGradient: {
-        borderRadius: 25,
-        height: 150,
-        justifyContent: 'space-between',
-        padding: 3,
-        marginTop: 50,
-    },
-    showLine: {
-        borderWidth: 1,
-        borderColor: colors.white,
-        padding: 5,
-        borderRadius: 5,
-        marginBottom: 20,
-        marginStart: 50,
-        marginEnd: 20
+        paddingHorizontal: 30,
     },
     imageView: {
         flexDirection: 'row',
-        width: '90%',
+        width: '70%',
         justifyContent: 'space-between',
-        margin: 20,
-        marginHorizontal: 40,
+    },
+    logo: {
+        height: 45,
+        width: 137,
+    },
+    background: {
+        backgroundColor: colors.primary,
+        flex: 1,
+        margin: 3,
+        borderRadius: 17.5,
+        paddingHorizontal: 30,
+        justifyContent: 'center',
+    },
+    code: {
+        fontSize: 18,
+        lineHeight: 26,
+        marginVertical: 10,
+    },
+    imageView2: {
+        flexDirection: 'row',
+        width: '95%',
+        justifyContent: 'space-evenly',
+        marginTop: 15,
+        marginBottom: 10,
     },
 })

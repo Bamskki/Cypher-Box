@@ -14,10 +14,8 @@ export default StyleSheet.create<Style>({
         paddingBottom: 65,
     },
     linearGradient: {
-        borderRadius: 25,
-        height: 150,
-        justifyContent: 'space-between',
-        padding: 3,
+        borderRadius: 20,
+        height: 60, 
     },
     shadow:{
         shadowColor: colors.black.default,
@@ -27,5 +25,8 @@ export default StyleSheet.create<Style>({
         shadowRadius: 4,
         elevation: 8,
         borderColor: "transparent", // Required to show shadows on Android for some reason !?!?
+        height: 60, 
+        borderRadius: 20,
+        // width: '100%'
     }
 })

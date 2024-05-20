@@ -13,7 +13,7 @@ interface Styles {
 export default StyleSheet.create<Styles>({
   container: {
     alignSelf: 'flex-start',
-    borderColor: colors.white,
+    borderColor: colors.pink.shadowBottom,
     borderBottomWidth: 1,
     overflow: 'hidden',
   },
@@ -23,7 +23,7 @@ export default StyleSheet.create<Styles>({
   },
   text: {
     backgroundColor: 'transparent',
-    color: colors.white,
+    color: colors.pink.shadowBottom,
     fontSize: textSizes.h4,
     fontFamily: 'Lato-Medium',
     lineHeight: 18,
