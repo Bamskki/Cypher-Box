@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default function WithdrawThreshold({ navigation, route }: Props) {
-    const { title, titleBtn } = route?.params;
+    const { title, titleBtn, index, matchedRate } = route?.params;
     const [isSats, setIsSats] = useState(true);
     const [isError, setIsError] = useState(false);
     const [isLow, setIsLow] = useState(false);
@@ -20,27 +20,28 @@ export default function WithdrawThreshold({ navigation, route }: Props) {
 
     useEffect(() => {
         if (sats.length) {
+            const amount = isSats ? sats : usd;
             const multiplier = isSats ? 0.000594 : 1683.79;
             const total = multiplier * Number(sats);
             const total_ = total.toFixed(4);
             setUSD(total_);
             console.log(multiplier, multiplier < 10000);
-            if (isSats && Number(sats) < 10000) {
+            if (index == 0 && Number(amount) < 2000000) {
                 console.log('low');
                 setIsError(true);
                 setIsLow(true);
                 setIsHigh(false);
-            } else if (isSats && Number(sats) > 300000) {
+            } else if (index == 0 && Number(amount) > 10000000) {
                 console.log('high');
                 setIsError(true);
                 setIsHigh(true);
                 setIsLow(false);
-            } else if (!isSats && Number(sats) < 5) {
+            } else if (index == 1 && Number(amount) < 100000) {
                 console.log('low');
                 setIsError(true);
                 setIsLow(true);
                 setIsHigh(false);
-            } else if (!isSats && Number(sats) > 1000) {
+            } else if (index == 1 && Number(amount) > 2000000) {
                 console.log('high');
                 setIsError(true);
                 setIsHigh(true);
@@ -61,7 +62,7 @@ export default function WithdrawThreshold({ navigation, route }: Props) {
 
     const setClickHandler = () => {
         // dispatchNavigate('ThresholdAdjust');
-        route?.params?.onSelect(sats, route?.params?.index);
+        route?.params?.onSelect(isSats ? sats : usd, route?.params?.index);
         navigation.pop();
     }
 
@@ -69,10 +70,16 @@ export default function WithdrawThreshold({ navigation, route }: Props) {
         <ScreenLayout showToolbar isBackButton title={title}>
             <View style={styles.container}>
                 <GradientInput isSats={isSats} sats={sats} setSats={setSats} usd={usd} />
-                {isError && isLow &&
+                {isError && isLow && index == 0 &&
                     <Text style={styles.error}>Withdrawal threshold is too low, indicating that you would incur a higher network fee if you intend to take self-custody of the funds in the future. We recommend keeping it between 2M to 10M sats.</Text>
                 }
-                {isError && isHigh &&
+                {isError && isLow && index == 1 &&
+                    <Text style={styles.error}>Reserve Amount is too low, indicating that you would incur a higher network fee if you intend to take self-custody of the funds in the future. We recommend keeping it between 100k to 2M sats.</Text>
+                }
+                {isError && isHigh && index == 0 &&
+                    <Text style={styles.error}>Withdraw Threshold is too high, indicating an unnecessary exposure to counter-party risk since your assets will be under the custody and control of a bitcoin custodian (Coinos) for an extended period. We recommend keeping it between 2M to 10M sats.</Text>
+                }
+                {isError && isHigh && index == 1 &&
                     <Text style={styles.error}>Reserve Amount is too high, indicating an unnecessary exposure to counter-party risk since your assets will be under the custody and control of a bitcoin custodian (Coinos) for an extended period. We recommend keeping it between 100K to 2M sats.</Text>
                 }
             </View>
@@ -84,6 +91,7 @@ export default function WithdrawThreshold({ navigation, route }: Props) {
                 setUSD={setUSD}
                 setIsSATS={setIsSats}
                 isError={isError}
+                matchedRate={matchedRate}
             />
         </ScreenLayout>
     )

@@ -6,7 +6,7 @@ import { Image, ImageStyle, StyleSheet, TextStyle, TouchableOpacity } from "reac
 interface Props {
     source: any;
     text: string;
-    onPress?(): void;
+    onPress?: () => void;
     imageStyle?: ImageStyle;
     textStyle?: TextStyle;
 }

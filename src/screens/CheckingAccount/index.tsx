@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { Image, ScrollView, SectionList, StyleSheet, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Image, RefreshControl, ScrollView, SectionList, StyleSheet, TouchableOpacity, View } from "react-native";
 import styles from "./styles";
 import { Icon } from 'react-native-elements';
+import SimpleToast from "react-native-simple-toast";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 import { GradientCard, GradientTab, GradientText } from "@Cypher/components";
 import { CoinOS, Information, Line, Time } from "@Cypher/assets/images";
@@ -10,6 +11,10 @@ import Items from "./Items";
 import Header from "./Header";
 import { dispatchNavigate } from "@Cypher/helpers";
 import Modal from "react-native-modal";
+import { getTransactionHistory } from "@Cypher/api/coinOSApis";
+import screenHeight from "@Cypher/style-guide/screenHeight";
+import { btc, formatNumber } from "@Cypher/helpers/coinosHelper";
+import useAuthStore from "@Cypher/stores/authStore";
 
 interface Transaction {
     date: string;
@@ -19,99 +24,139 @@ interface Transaction {
     fiatAmount: number;
 }
 
-export default function CheckAccount() {
+const data = [
+    {
+        sats: 2000000,
+    },
+    {
+        sats: 3000000,
+    },
+    {
+        sats: 4000000,
+    },
+    {
+        sats: 5000000,
+    },
+    {
+        sats: 6000000,
+    },
+    {
+        sats: 7000000,
+    },
+    {
+        sats: 8000000,
+    },
+    {
+        sats: 9000000,
+    },
+    {
+        sats: 10000000,
+    }
+];
+
+const reserveData = [
+    {
+        sats: 100000,
+    },
+    {
+        sats: 200000,
+    },
+    {
+        sats: 300000,
+    },
+    {
+        sats: 400000,
+    },
+    {
+        sats: 500000,
+    },
+    {
+        sats: 600000,
+    },
+    {
+        sats: 700000,
+    },
+    {
+        sats: 800000,
+    },
+    {
+        sats: 900000,
+    },
+    {
+        sats: 1000000,
+    },
+    {
+        sats: 1100000,
+    },
+    {
+        sats: 1200000,
+    },
+    {
+        sats: 1300000,
+    },
+    {
+        sats: 1400000,
+    },
+    {
+        sats: 1500000,
+    },
+    {
+        sats: 1600000,
+    },
+    {
+        sats: 1700000,
+    },
+    {
+        sats: 1800000,
+    },
+    {
+        sats: 1900000,
+    },
+    {
+        sats: 2000000,
+    }
+];
+
+export default function CheckAccount({navigation, route}: any) {
+    const {withdrawThreshold, reserveAmount, setWithdrawThreshold, setReserveAmount} = useAuthStore();
     const [isTab, setIsTab] = useState(true);
-    const [value, setValue] = useState(2);
+    const [value, setValue] = useState(Number(withdrawThreshold));
     const [isError, setIsError] = useState(false);
     const [isErrorReserve, setIsErrorReserve] = useState(false);
-    const [reserveAmt, setReserveAmt] = useState(100);
-    const transactions = [
-        {
-            title: '4th March',
-            data: [{
-                text: 'Sent to Noor@Blink.sv',
-                sats: '-65 sats',
-                usd: '$0.04',
-                type: 'bitcoin',
-            },
-            {
-                text: 'Received to Blink Account',
-                sats: '+30k sats',
-                usd: '$0.56',
-                type: 'lightning',
-            }],
-        },
-        {
-            title: '28th February',
-            data: [
-                {
-                    text: 'Sent to Noor@Blink.sv',
-                    sats: '-70 sats',
-                    usd: '$0.04',
-                    type: 'lightning',
-                },
-                {
-                    text: 'Sent to Noor@Blink.sv',
-                    sats: '-70 sats',
-                    usd: '$0.04',
-                },
-                {
-                    text: 'Sent to Noor@Blink.sv',
-                    sats: '-70 sats',
-                    usd: '$0.04',
-                    type: 'lightning',
-                },
-                {
-                    text: 'Sent to Noor@Blink.sv',
-                    sats: '-70 sats',
-                    usd: '$0.04',
-                    type: 'lightning',
-                },
-                {
-                    text: 'Sent to Noor@Blink.sv',
-                    sats: '-70 sats',
-                    usd: '$0.04',
-                    type: 'lightning',
-                },
-                {
-                    text: 'Sent to Noor@Blink.sv',
-                    sats: '-70 sats',
-                    usd: '$0.04',
-                    type: 'lightning',
-                },
-            ],
-        },
-    ];
-    const data = [{
-        sats: '1M sats',
-        usd: '~$500',
-    },
-    {
-        sats: '2M sats',
-        usd: '~$1000',
-    },
-    {
-        sats: '3M sats',
-        usd: '~$1500',
-    },
-    {
-        sats: '4M sats',
-        usd: '~$2000',
-    },
-    {
-        sats: '5M sats',
-        usd: '~$2500',
-    },
-    {
-        sats: '6M sats',
-        usd: '~$3000',
-    },
-    {
-        sats: '7M sats',
-        usd: '~$3500',
-    },]
+    const [reserveAmt, setReserveAmt] = useState(Number(reserveAmount));
+    const {matchedRate} = route.params;
+    const [isLoading, setIsLoading] = useState(false);
+    const [payments, setPayments] = useState([]);
+    const [totalCount, setTotalCount] = useState(0);
+    const [limit] = useState(7);
+    const [offset, setOffset] = useState(0);
+    const [isFetchingMore, setIsFetchingMore] = useState(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const currency = btc(1);
+  
+    useEffect(() => {
+      loadPayments();
+    }, [offset]);
+
+    useEffect(() => {
+        if (withdrawThreshold < data[0].sats || withdrawThreshold > data[data.length - 1].sats) {
+            setIsError(true);
+        } else {
+            setIsError(false);
+        }
+    }, [withdrawThreshold])
+
+    useEffect(() => {
+        if (reserveAmount < reserveData[0].sats || reserveAmount > reserveData[reserveData.length - 1].sats) {
+            setIsErrorReserve(true);
+        } else {
+            setIsErrorReserve(false);
+        }
+    }, [reserveAmount])
+
 
     const [isModalVisible, setModalVisible] = useState(false);
+    const [isModalRAVisible, setModalRAVisible] = useState(false);
 
     const toggleModal = () => {
         setModalVisible(!isModalVisible);
@@ -120,28 +165,72 @@ export default function CheckAccount() {
     const onPressHandler = (item: any) => {
         dispatchNavigate('Invoice', {
             item: item,
+            matchedRate
         });
     }
 
     const decreaseClickHandler = () => {
-        setValue(prev => prev > 1 ? prev - 1 : prev);
-    }
-
+        const currentIndex = data.findIndex(item => item.sats === value);
+        if (currentIndex > 0) {
+            const newValue = data[currentIndex - 1].sats;
+            console.log('index: ', currentIndex - 1);
+            console.log('temp: ', newValue);
+            setValue(Number(newValue));
+            setWithdrawThreshold(newValue);
+        } else {
+            SimpleToast.show("Withdraw Threshold cannot be less than 2M", SimpleToast.SHORT);
+        }
+    };
+    
     const increaseClickHandler = () => {
-        setValue(prev => prev < 7 ? prev + 1 : prev);
-    }
+        const currentIndex = data.findIndex(item => item.sats === value);
+        if (currentIndex >= 0 && currentIndex < data.length - 1) {
+            const newValue = data[currentIndex + 1].sats;
+            console.log('index: ', currentIndex + 1);
+            console.log('temp: ', newValue);
+            setValue(Number(newValue));
+            setWithdrawThreshold(newValue);
+        } else {
+            SimpleToast.show("Withdraw Threshold cannot be greater than 9M", SimpleToast.SHORT);
+        }
+    };
 
     const decreaseClickHandler_ = () => {
-        setReserveAmt(prev => prev > 10 ? prev - 10 : prev);
+        const currentIndex = reserveData.findIndex(item => item.sats === reserveAmt);
+        if (currentIndex > 0) {
+            const newValue = reserveData[currentIndex - 1].sats;
+            console.log('index: ', currentIndex - 1);
+            console.log('temp: ', newValue);
+            setReserveAmt(Number(newValue));
+            setReserveAmount(newValue);
+        } else {
+            SimpleToast.show("Reserve Amount cannot be less than 100K", SimpleToast.SHORT);
+        }
     }
 
     const increaseClickHandler_ = () => {
-        setReserveAmt(prev => prev < 1000 ? prev + 10 : prev);
+        const currentIndex = reserveData.findIndex(item => item.sats === reserveAmt);
+        if (currentIndex >= 0 && currentIndex < reserveData.length - 1) {
+            const newValue = reserveData[currentIndex + 1].sats;
+            console.log('index: ', currentIndex + 1);
+            console.log('temp: ', newValue);
+            setReserveAmt(Number(newValue));
+            setReserveAmount(newValue);
+        } else {
+            SimpleToast.show("Reserve Amount cannot be greater than 2M", SimpleToast.SHORT);
+        }
     }
 
-    const selectClickHandler = (index: number) => {
-        setValue(index + 1);
+    const selectClickHandler = (val: number) => {
+        setWithdrawThreshold(val)
+        setValue(Number(val));
         setModalVisible(false);
+    }
+
+    const selectRAClickHandler = (val: number) => {
+        setReserveAmount(val)
+        setReserveAmt(Number(val));
+        setModalRAVisible(false);
     }
 
     const customizeClickHandler = (index: number) => {
@@ -151,27 +240,81 @@ export default function CheckAccount() {
             titleBtn: index == 0 ? 'Set Threshold' : 'Set Reserve Amount',
             onSelect: onSelect,
             index,
+            matchedRate
         });
     }
 
     const onSelect = (value: number, index: number) => {
         if (index == 0) {
-            if (value < 10000 || value > 300000) {
+            if (withdrawThreshold < data[0].sats || withdrawThreshold > data[data.length - 1].sats) {
                 setIsError(true);
             } else {
                 setIsError(false);
-                setValue(value / 10000);
             }
+            setValue(Number(value));
+            setWithdrawThreshold(value)
         }else{
-            if (value < 10000 || value > 300000) {
+            if (reserveAmount < reserveData[0].sats || reserveAmount > reserveData[reserveData.length - 1].sats) {
                 setIsErrorReserve(true);
             } else {
                 setIsErrorReserve(false);
-                setReserveAmt(value / 10000);
             }
+            setReserveAmt(Number(value));
+            setReserveAmount(value)
         }
     }
 
+
+    const loadPayments = async (append = true) => {
+      offset == 0 && setIsLoading(true);
+      try {
+        const paymentList = await getTransactionHistory(offset, limit);
+        if (append && offset > 0) {
+          setPayments((prevPayments) => [...prevPayments, ...paymentList.payments]);
+        } else {
+          setPayments(paymentList.payments);
+        }
+        setTotalCount(paymentList.count);
+      } catch (error) {
+        console.error('Error loading payments:', error);
+      } finally {
+        setIsLoading(false);
+        setIsFetchingMore(false);
+        setIsRefreshing(false);
+      }
+    };
+  
+    const handleLoadMore = () => {
+      if (!isLoading && !isFetchingMore && payments.length < totalCount) {
+        setIsFetchingMore(true);
+        setOffset((prevOffset) => prevOffset + limit);
+      }
+    };
+  
+    const handleRefresh = () => {
+      setIsRefreshing(true);
+      if(offset == 0){
+        loadPayments(false)
+      } else {
+        setOffset(0);
+      }
+    };
+  
+    const groupedPayments = payments.reduce((acc: any, payment: any) => {
+      const date = new Date(payment?.created);
+      const dateString = date.toDateString();
+      if (!acc[dateString]) {
+        acc[dateString] = [];
+      }
+      acc[dateString].push(payment);
+      return acc;
+    }, {});
+  
+    const sections = Object.entries(groupedPayments).map(([date, data]) => ({
+      title: date,
+      data: data,
+    }));
+  
     return (
         <ScreenLayout disableScroll showToolbar isBackButton>
             <View style={styles.container}>
@@ -187,15 +330,40 @@ export default function CheckAccount() {
                 </View>
                 {isTab ?
                     <View style={styles.container}>
-                        <View style={styles.container}>
-                            <SectionList
-                                sections={transactions}
-                                keyExtractor={(item, index) => index.toString()}
-                                renderItem={({ item }) => <Items item={item} onPressHandler={onPressHandler} />}
-                                renderSectionHeader={({ section: { title } }) => <Header title={title} />}
-                                invertStickyHeaders
-                            />
-                        </View>
+                        {isLoading && !isRefreshing ? (
+                            <View style={styles.container}>
+                                <ActivityIndicator size={100} color={colors.white} />
+                            </View>
+                        ) : (
+                            <View style={styles.container}>
+                                <SectionList
+                                    sections={sections}
+                                    onEndReached={handleLoadMore}
+                                    onEndReachedThreshold={0.1}
+                                    ListFooterComponent={() =>
+                                      isFetchingMore ? ( // Show loader at the end of the list when loading more
+                                        <ActivityIndicator style={{ marginTop: 10, marginBottom: 20 }} color={colors.white} />
+                                      ) : null
+                                    }
+                                    ListEmptyComponent={() => (
+                                      <View style={{ height: screenHeight / 2.2, justifyContent: 'center', alignItems: 'center', marginTop: 30 }}>
+                                        <Text white h3 bold>No Transactions</Text>
+                                      </View>
+                                    )}
+                                    refreshControl={
+                                      <RefreshControl
+                                        refreshing={isRefreshing}
+                                        onRefresh={handleRefresh}
+                                        tintColor="white"
+                                      />
+                                    }
+                                    keyExtractor={(item, index) => index.toString()}
+                                    renderItem={({ item }) => <Items matchedRate={matchedRate} item={item} onPressHandler={onPressHandler} />}
+                                    renderSectionHeader={({ section: { title } }) => <Header title={title} />}
+                                    // invertStickyHeaders
+                                />
+                            </View>
+                        )}
                         <View style={styles.bottomView}>
                             <Image source={CoinOS} />
                         </View>
@@ -215,14 +383,14 @@ export default function CheckAccount() {
                                 style={styles.linearGradientStroke} linearStyle={styles.linearGradient}>
                                 <View style={styles.background}>
                                     <TouchableOpacity onPress={() => setModalVisible(true)}>
-                                        <Text bold style={{ fontSize: 18 }}>{`${value}.0 M`}</Text>
+                                        <Text bold style={{ fontSize: 18 }}>{formatNumber(value)}</Text>
                                     </TouchableOpacity>
                                     <View style={styles.straightLine} />
                                     <View>
-                                        <TouchableOpacity onPress={decreaseClickHandler}>
+                                        <TouchableOpacity onPress={increaseClickHandler}>
                                             <Icon name="angle-up" type="font-awesome" color="#FFFFFF" />
                                         </TouchableOpacity>
-                                        <TouchableOpacity onPress={increaseClickHandler}>
+                                        <TouchableOpacity onPress={decreaseClickHandler}>
                                             <Icon name="angle-down" type="font-awesome" color="#FFFFFF" />
                                         </TouchableOpacity>
                                     </View>
@@ -235,12 +403,12 @@ export default function CheckAccount() {
                                 <GradientCard disabled
                                     style={styles.modal} linearStyle={styles.linearGradient2}>
                                     <ScrollView style={styles.background2}>
-                                        {data.map((data, index) => {
+                                        {data.map((item, index) => {
                                             return (
                                                 <TouchableOpacity style={[styles.row, index % 2 == 0 && { backgroundColor: colors.primary }]}
-                                                    onPress={() => selectClickHandler(index)}>
-                                                    <Text bold style={{ fontSize: 18 }}>{data?.sats}</Text>
-                                                    <Text style={{ fontSize: 18, marginStart: 30 }}>{data?.usd}</Text>
+                                                    onPress={() => selectClickHandler(item?.sats)}>
+                                                    <Text bold style={{ fontSize: 18 }}>{formatNumber(item?.sats) + " sats"}</Text>
+                                                    <Text style={{ fontSize: 18, marginStart: 30 }}>~${(item?.sats * matchedRate * currency).toFixed(2)}</Text>
                                                 </TouchableOpacity>
                                             )
                                         })}
@@ -248,7 +416,7 @@ export default function CheckAccount() {
                                 </GradientCard>
                             </View>
                         </Modal>
-                        <Text center style={styles.usd}>$0001</Text>
+                        <Text center style={styles.usd}>${(value * matchedRate * currency).toFixed(2)}</Text>
                         <TouchableOpacity onPress={() => customizeClickHandler(0)}>
                             <GradientText style={styles.gradientText}>Customize</GradientText>
                         </TouchableOpacity>
@@ -266,15 +434,15 @@ export default function CheckAccount() {
                                     justifyContent: 'flex-end',
                                     paddingEnd: 30,
                                 }]}>
-                                    <TouchableOpacity onPress={() => setModalVisible(true)}>
-                                        <Text bold style={{ fontSize: 18 }}>{`${reserveAmt} k`}</Text>
+                                    <TouchableOpacity onPress={() => setModalRAVisible(true)}>
+                                        <Text bold style={{ fontSize: 18 }}>{formatNumber(reserveAmt)}</Text>
                                     </TouchableOpacity>
                                     <View style={styles.straightLine} />
                                     <View>
-                                        <TouchableOpacity onPress={decreaseClickHandler_}>
+                                        <TouchableOpacity onPress={increaseClickHandler_}>
                                             <Icon name="angle-up" type="font-awesome" color="#FFFFFF" />
                                         </TouchableOpacity>
-                                        <TouchableOpacity onPress={increaseClickHandler_}>
+                                        <TouchableOpacity onPress={decreaseClickHandler_}>
                                             <Icon name="angle-down" type="font-awesome" color="#FFFFFF" />
                                         </TouchableOpacity>
                                     </View>
@@ -282,10 +450,28 @@ export default function CheckAccount() {
                             </GradientCard>
                             <Text style={styles.text}>Sats</Text>
                         </View>
-                        <Text center style={styles.usd}>$0001</Text>
+                        <Text center style={styles.usd}>${(reserveAmt * matchedRate * currency).toFixed(2)}</Text>
                         <TouchableOpacity onPress={() => customizeClickHandler(1)}>
                             <GradientText style={styles.gradientText}>Customize</GradientText>
                         </TouchableOpacity>
+                        <Modal isVisible={isModalRAVisible}>
+                            <View>
+                                <GradientCard disabled
+                                    style={styles.modal} linearStyle={styles.linearGradient2}>
+                                    <ScrollView style={styles.background2}>
+                                        {reserveData.map((item, index) => {
+                                            return (
+                                                <TouchableOpacity style={[styles.row, index % 2 == 0 && { backgroundColor: colors.primary }]}
+                                                    onPress={() => selectRAClickHandler(item?.sats)}>
+                                                    <Text bold style={{ fontSize: 18 }}>{formatNumber(item?.sats) + " sats"}</Text>
+                                                    <Text style={{ fontSize: 18, marginStart: 30 }}>~${(item?.sats * matchedRate * currency).toFixed(2)}</Text>
+                                                </TouchableOpacity>
+                                            )
+                                        })}
+                                    </ScrollView>
+                                </GradientCard>
+                            </View>
+                        </Modal>
                     </View>
                 }
             </View>

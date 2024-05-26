@@ -88,6 +88,7 @@ import { useTheme } from './components/themes';
 import { AccountStatus, CheckAccount, CheckingAccount, CopyInvoice, CreateCoinOSScreen, CreateInvoice, DownloadBlink, GetAddressScreen, HomeScreen, InfoBlink, LoginBlink, LoginBlinkPhone, LoginCoinOSScreen, QrScreen, ReceivedMethodScreen, ReviewPayment, SendReceiveSuccessScreen, SendScreen, SplashScreen, ThresholdAdjust, Transaction, TransactionBroadCast, VerifyPhone, WelcomeScreen, WithdrawThreshold } from './src/screens';
 import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 import Invoice from '@Cypher/screens/Invoice';
+import ChangeUsername from '@Cypher/screens/Account/ChangeUsername';
 
 const WalletsStack = createStackNavigator();
 
@@ -123,6 +124,7 @@ const WalletsRoot = () => {
       <WalletsStack.Screen name="DownloadBlink" component={DownloadBlink} options={{ headerShown: false }} />
       <WalletsStack.Screen name="LoginBlink" component={LoginBlink} options={{ headerShown: false }} />
       <WalletsStack.Screen name="CreateCoinOSScreen" component={CreateCoinOSScreen} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="ChangeUsername" component={ChangeUsername} options={{ headerShown: false }} />
       <WalletsStack.Screen name="LoginCoinOSScreen" component={LoginCoinOSScreen} options={{ headerShown: false }} />
       <WalletsStack.Screen name="LoginBlinkPhone" component={LoginBlinkPhone} options={{ headerShown: false }} />
       <WalletsStack.Screen name="VerifyPhone" component={VerifyPhone} options={{ headerShown: false }} />

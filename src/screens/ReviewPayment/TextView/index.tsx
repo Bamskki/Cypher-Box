@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
         marginBottom:15,
         marginStart:15,
         marginEnd: 10,
-        alignItems:'center',
+        alignItems:'flex-start',
         // flex:1,
         // backgroundColor:'red'
     },

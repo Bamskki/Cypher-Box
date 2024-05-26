@@ -16,13 +16,17 @@ import Animated, {
     Easing,
     useAnimatedStyle,
 } from "react-native-reanimated";
+import { resetAndNavigate } from "@Cypher/helpers/navigation";
 
-export default function Transaction() {
+export default function Transaction({navigation, route}: any) {
+    const {matchedRate, type, value, converted, isSats, to, item} = route?.params;
+    const amountSat = isSats ? value : converted;
+    const amountUSD = !isSats ? value : converted
     const [response, setResponse] = useState(false);
     const [progress, setProgress] = useState(0.2);
     const [sats, setSats] = useState('21 sats');
     const [usd, setUsd] = useState('0.013');
-    const [to, setTo] = useState('To: Satoshi@cypherbox.io');
+    // const [to, setTo] = useState('To: Satoshi@cypherbox.io');
     const fadeInOpacity = useSharedValue(0);
 
     useEffect(() => {
@@ -46,7 +50,22 @@ export default function Transaction() {
         }
     }, [progress]);
 
-    const onPressClickHandler = () => { }
+    const onPressClickHandler = () => {
+        resetAndNavigate('HomeScreen', 'Invoice', {
+            item: item,
+            matchedRate
+        })
+        // dispatchNavigate('CheckingAccount', {matchedRate});
+    }
+
+    const shortenAddress = (address: string) => {
+        // Take the first 6 characters
+        const start = address.substring(0, 6);
+        // Take the last 6 characters
+        const end = address.substring(address.length - 6);
+        // Combine with three dots in the middle
+        return `${start}...${end}`;
+    };
 
     const fadeIn = () => {
         fadeInOpacity.value = withTiming(1, {
@@ -61,6 +80,7 @@ export default function Transaction() {
         };
     });
 
+    console.log(type, amountUSD)
     return (
         <ScreenLayout disableScroll showToolbar title={!response ? "Finding route..." : ""} isBackButton={false}>
             <View style={styles.main}>
@@ -68,10 +88,10 @@ export default function Transaction() {
                     {response &&
                         <Animated.View style={animatedStyle}>
                             <Text h1 semibold center>Payment Sent</Text>
-                            <Text semibold center style={styles.sats}>{sats}</Text>
-                            <Text subHeader bold center>{usd}</Text>
+                            <Text semibold center style={styles.sats}>{amountSat} sats</Text>
+                            <Text subHeader bold center>${amountUSD}</Text>
                             <View style={styles.extra} />
-                            <Text subHeader bold center>{to}</Text>
+                            <Text subHeader bold center>{type !== 'username' ? shortenAddress(to) : to}</Text>
                         </Animated.View>
                     }
                 </View>

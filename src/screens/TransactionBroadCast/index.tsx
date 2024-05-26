@@ -15,8 +15,12 @@ import Animated, {
     Easing,
     useAnimatedStyle,
 } from "react-native-reanimated";
+import { resetAndNavigate } from "@Cypher/helpers/navigation";
 
-export default function TransactionBroadCast() {
+export default function TransactionBroadCast({navigation, route}: any) {
+    const {matchedRate, type, value, converted, isSats, item} = route?.params;
+    const amountSat = isSats ? value : converted;
+    const amountUSD = isSats ? value : converted
     const [response, setResponse] = useState(false);
     const [progress, setProgress] = useState(0);
     const [sats, setSats] = useState('100K sats');
@@ -47,7 +51,11 @@ export default function TransactionBroadCast() {
     }, [progress]);
 
     const onPressClickHandler = () => {
-        dispatchNavigate('Transaction');
+        resetAndNavigate('HomeScreen', 'Invoice', {
+            item: item,
+            matchedRate
+        })
+        // dispatchNavigate('CheckingAccount', {matchedRate});
     }
 
     const fadeIn = () => {
@@ -71,9 +79,9 @@ export default function TransactionBroadCast() {
                         <>
                             <Text h1 bold center style={styles.title}>Transaction Broadcasted...</Text>
                             <Animated.View style={animatedStyle}>
-                                <Text semibold center style={styles.sats}>{sats}</Text>
+                                <Text semibold center style={styles.sats}>{amountSat} sats</Text>
                                 <View style={styles.extra} />
-                                <Text subHeader bold center>{usd}</Text>
+                                <Text subHeader bold center>${amountUSD}</Text>
                                 <View style={styles.extra} />
                                 <Text h2 bold center>{to}</Text>
                                 <GradientText style={styles.gradientText}>Estimated time: ~2hr</GradientText>

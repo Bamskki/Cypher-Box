@@ -3,23 +3,30 @@ import { GradientCard } from "@Cypher/components"
 import React, { useState } from "react"
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native"
 import LinearGradient from "react-native-linear-gradient"
+import SimpleToast from "react-native-simple-toast";
+
 import styles from "./styles"
 import { Bitcoin, LiquidBitCoin, Socked } from "@Cypher/assets/images"
 import { colors } from "@Cypher/style-guide"
 import { Icon } from 'react-native-elements';
 import { dispatchNavigate } from "@Cypher/helpers";
+import useAuthStore from "@Cypher/stores/authStore"
+import Clipboard from "@react-native-clipboard/clipboard"
 
 interface Props {
     refRBSheet: any;
+    matchedRate: number;
+    currency: string;
 }
 
-export default function ReceivedList({ refRBSheet }: Props) {
+export default function ReceivedList({ refRBSheet, matchedRate, currency }: Props) {
+    const {user} = useAuthStore();
     const [data, setData] = useState([
         {
             id: 1,
             name: 'Bitcoin-Lightning Address',
             type: 0,
-            description: 'Bam@coinos.io',
+            description: user+'@coinos.io',
             navigation: {},
         },
         {
@@ -29,6 +36,9 @@ export default function ReceivedList({ refRBSheet }: Props) {
             description: 'Receive from wallets and exchanges that support the Lightning Network',
             navigation: {
                 screen: 'CreateInvoice',
+                params: {
+                    matchedRate, currency
+                }
             }
         },
         {
@@ -36,7 +46,13 @@ export default function ReceivedList({ refRBSheet }: Props) {
             name: 'Liquid Federation address',
             type: 1,
             description: 'Receive from wallets and exchanges that support the Liquid Federation',
-            navigation: {},
+            navigation: {
+                screen: 'QrScreen',
+                params: {
+                    isBitcoinQr: true,
+                    type: "liquid"
+                }
+            },
         },
         {
             id: 4,
@@ -47,6 +63,7 @@ export default function ReceivedList({ refRBSheet }: Props) {
                 screen: 'QrScreen',
                 params: {
                     isBitcoinQr: true,
+                    type: "bitcoin"
                 }
             },
         },
@@ -54,6 +71,13 @@ export default function ReceivedList({ refRBSheet }: Props) {
 
     const onPress = (item: any) => { 
         refRBSheet?.current?.close();
+
+        if(item?.id == 1){
+            Clipboard.setString(user+'@coinos.io');
+            SimpleToast.show('Copied to clipboard', SimpleToast.SHORT);
+        
+        }
+        item?.navigation?.screen &&
         setTimeout(() => {
             dispatchNavigate(item?.navigation?.screen, item?.navigation?.params);
         }, 150);
@@ -81,7 +105,7 @@ export default function ReceivedList({ refRBSheet }: Props) {
                                 <View style={styles.subview}>
                                     <Text subHeader bold style={styles.title2}>{item?.name}</Text>
                                     <Text h4 bold style={StyleSheet.flatten([styles.desc, {
-                                        fontSize: item?.id == 1 ? 20 : 14,
+                                        fontSize: item?.id == 1 ? 18 : 14,
                                         lineHeight: item?.id == 1 ? 28 : 14,
                                         marginTop: item?.id == 1 ? 0 : 5,
                                     }])}>{item?.description}</Text>

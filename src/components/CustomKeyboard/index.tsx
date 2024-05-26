@@ -6,6 +6,7 @@ import LinearGradient from "react-native-linear-gradient";
 import GradientButton from "../GradientButton";
 import { Cancel, Currency, CurrencyWhite, Sats } from "@Cypher/assets/images";
 import { Text } from "@Cypher/component-library";
+import { btc } from "@Cypher/helpers/coinosHelper";
 
 interface Props {
     onPress(): void;
@@ -15,26 +16,37 @@ interface Props {
     disabled?: boolean;
     title: string;
     isError?: boolean;
+    matchedRate?: number;
+    currency?: string;
 }
 
-export default function CustomKeyBoard({ title, disabled, onPress, setSATS, setUSD, setIsSATS, isError }: Props) {
+export default function CustomKeyBoard({ title, disabled, onPress, setSATS, setUSD, setIsSATS, isError, matchedRate }: Props) {
     const KEYSARRAY = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0'];
     const [isSats, setIsSats] = useState(true);
     const [sats, setSats] = useState('');
+    const currency = btc(1);
 
     useEffect(() => {
         if (sats.length) {
-            const multiplier = isSats ? 0.000594 : 1683.79;
-            const total = multiplier * Number(sats);
-            const total_ = total.toFixed(4);
-            setSATS(sats);
-            setUSD(total_);
+            let amount = 0;
+            if(isSats){
+                amount = ((matchedRate || 0) * currency * Number(sats)).toFixed(5)
+                console.log('amount: ', amount)
+                setSATS(sats);
+                setUSD(String(amount));
+            } else {
+                amount = parseInt((Number(sats) / (matchedRate || 0)) * 100000000);
+                const multiplier = isSats ? 0.000594 : 1683.79;
+                const total = multiplier * Number(sats);
+                const total_ = total.toFixed(4);
+                setSATS(sats);
+                setUSD(String(amount));    
+            }
         } else {
             setUSD('');
             setSATS('');
         }
-    }, [sats, isSats]);
-
+    }, [sats.length, isSats]);
 
     useEffect(() => {
         setSats('');

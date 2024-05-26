@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import { Image, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Image, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import styles from "./styles";
 import {
   useFocusEffect,
@@ -25,17 +25,91 @@ import { colors, heights } from "@Cypher/style-guide";
 import RBSheet from 'react-native-raw-bottom-sheet';
 import LinearGradient from "react-native-linear-gradient";
 import ReceivedList from "./ReceivedList";
+import useAuthStore from "@Cypher/stores/authStore";
+import { getCurrencyRates, getMe, getTransactionHistory } from "@Cypher/api/coinOSApis";
+import { btc, formatNumber, matchKeyAndValue } from "@Cypher/helpers/coinosHelper";
 
 interface Props {
   route: any;
 }
 
+export const calculatePercentage = (withdrawThreshold: number, reserveAmount: number) => {
+  const threshold = Number(withdrawThreshold);
+  const reserve = Number(reserveAmount);
+  
+  const percentage = (threshold / (threshold + reserve)) * 100;
+  return Math.min(percentage, 100);
+};
+
+
 export default function HomeScreen({ route }: Props) {
   const { navigate } = useNavigation();
   const routeName = useRoute().name;
-  const [isLogin, setLogin] = useState<boolean>(true);
   // const [storage, setStorage] = useState<number>(-1);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [balance, setBalance] = useState(0);
+  const [currency, setCurrency] = useState('$');
+  const [convertedRate, setConvertedRate] = useState(0);
+  const [matchedRate, setMatchedRate] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const [payment, setPayments] = useState([])
+  const [wt, setWt] = useState<number>();
+
   const refRBSheet = useRef<any>(null);
+  const { isAuth, token, user, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
+
+  useEffect(() => {
+    async function handleToken() {
+      if(isAuth && token) {
+        handleUser();
+        loadPayments();
+      } else {
+        setIsLoading(false)
+      }
+    }
+    // async function getWithdrawal() {
+    //   const wt = await AsyncStorage.getItem('withdrawThreshold');
+    //   if(wt){
+    //     setWt(Number(wt));
+    //   }
+    // }
+    // getWithdrawal();
+    handleToken();
+  }, [isAuth, token]);
+
+
+  const handleUser = async () => {
+    try {
+      const response = await getMe();
+      console.log('response: ', response);
+      const responsetest = await getCurrencyRates();
+      const currency = btc(1);
+      const matched = matchKeyAndValue(responsetest, 'USD')
+      setMatchedRate(matched || 0)
+      console.log('converter: ', (matched || 0) * currency * response.balance);
+      setConvertedRate((matched || 0) * currency * response.balance)
+      setCurrency("USD")
+      console.log('currency: ', currency)
+      if(response?.balance) {
+        setBalance(response?.balance || 0);
+      }
+      setUser(response?.username);
+    } catch (error) {
+      console.log('error: ', error);
+    } finally {
+        setIsLoading(false)
+        setRefreshing(false);
+    }
+  }
+
+  const loadPayments = async (append = true) => {
+    try {
+      const paymentList = await getTransactionHistory(0, 5);
+        setPayments(paymentList.payments);
+    } catch (error) {
+      console.error('Error loading payments:', error);
+    }
+  };
 
   const navigateToSettings = () => {
     console.log('setting click');
@@ -51,10 +125,6 @@ export default function HomeScreen({ route }: Props) {
     console.log('login click');
     dispatchNavigate('LoginCoinOSScreen');
   };
-
-  useFocusEffect(() => {
-    if (route?.params?.isLogin_) setLogin(route?.params?.isLogin_);
-  });
 
   const onBarScanned = (value: any) => {
     if (!value) return;
@@ -79,64 +149,84 @@ export default function HomeScreen({ route }: Props) {
 
   const sendClickHandler = () => {
     console.log('send click');
-    dispatchNavigate('SendScreen');
+    dispatchNavigate('SendScreen', {currency, matchedRate});
   };
 
   const checkingAccountClickHandler = () => {
-    dispatchNavigate('CheckingAccount');
+    dispatchNavigate('CheckingAccount', {matchedRate});
   }
 
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    handleUser()
+  };
+
   return (
-    <ScreenLayout disableScroll>
+    <ScreenLayout RefreshControl={
+      <RefreshControl
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        tintColor="white"
+      />
+    }>
       <View style={styles.container}>
         <View>
-          <View style={styles.title}>
-            <Text subHeader bold>
-              Total Balance
-            </Text>
-            <View style={styles.row}>
-              <TouchableOpacity
-                style={styles.imageView}
-                onPress={navigateToSettings}
-              >
-                <Image
-                  style={styles.image}
-                  resizeMode="contain"
-                  source={require("../../../img/settings.png")}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.imageViews}
-                onPress={onScanButtonPressed}
-              >
-                <Image
-                  style={styles.scan}
-                  resizeMode="contain"
-                  source={require("../../../img/scan-new.png")}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-          <View style={styles.shadowView}>
-            <Shadow
-              style={styles.shadowTop}
-              inner
-              useArt
-            >
-              <Text subHeader bold style={styles.price}>
-                0.00000000 BTC
-              </Text>
-              <Text bold style={styles.priceusd} >
-                $0
-              </Text>
-              <Shadow
-                inner
-                useArt
-                style={styles.shadowBottom}
-              />
-            </Shadow>
-          </View>
-          {isLogin ? (
+          {isLoading ? (
+            <ActivityIndicator size="large" color="#ffffff" />
+          ) 
+          : 
+          (
+            <>
+              <View style={styles.title}>
+                <Text subHeader bold>
+                  Total Balance
+                </Text>
+                <View style={styles.row}>
+                  <TouchableOpacity
+                    style={styles.imageView}
+                    onPress={navigateToSettings}
+                  >
+                    <Image
+                      style={styles.image}
+                      resizeMode="contain"
+                      source={require("../../../img/settings.png")}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.imageViews}
+                    onPress={onScanButtonPressed}
+                  >
+                    <Image
+                      style={styles.scan}
+                      resizeMode="contain"
+                      source={require("../../../img/scan-new.png")}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={styles.shadowView}>
+                <Shadow
+                  style={styles.shadowTop}
+                  inner
+                  useArt
+                >
+                  <Text subHeader bold style={styles.price}>
+                    {btc(1) * (balance || 0)} BTC
+                  </Text>
+                  <Text bold style={styles.priceusd} >
+                    {"$"+convertedRate.toFixed(2)}
+                  </Text>
+                  <Shadow
+                    inner
+                    useArt
+                    style={styles.shadowBottom}
+                  />
+                </Shadow>
+              </View>
+            </>
+          )}
+          {isAuth ? (
             <>
               <TouchableOpacity style={styles.shadowView} onPress={checkingAccountClickHandler}>
                 <Shadow
@@ -156,12 +246,30 @@ export default function HomeScreen({ route }: Props) {
                   </View>
                   <View style={styles.view}>
                     <Text h2 bold style={styles.sats}>
-                      0   sats ~ $0
+                      {balance}   sats ~ {"$"+convertedRate.toFixed(2)}
                     </Text>
-                    <Text bold style={styles.totalsats}>2M sats</Text>
+                    <Text bold style={styles.totalsats}>
+                      {formatNumber(Number(withdrawThreshold))} sats
+                    </Text>
                   </View>
-                  <View style={styles.showLine}>
-                    <View style={styles.box} />
+                  <View>
+                    <View style={styles.showLine} />
+                    <View style={[styles.box, {left: `${calculatePercentage(withdrawThreshold, reserveAmount)}%`}]} />
+                    <LinearGradient
+                      start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
+                      colors={[colors.white, colors.pink.dark]}
+                      style={[styles.linearGradient2, {width: `${calculatePercentage(balance, reserveAmount)}%`}]}>
+                      {/* <View style={[styles.box, {marginLeft: `${Math.min((withdrawThreshold / (Number(withdrawThreshold + reserveAmount) || 0)) * 100, 100)}%`}]} /> */}
+                      {/* <Shadow
+                          inner // <- enable inner shadow
+                          useArt // <- set this prop to use non-native shadow on ios
+                          style={styles.top2} >
+                      </Shadow> */}
+                    </LinearGradient>
+
+                    {/* <View style={styles.showLine} /> */}
+                      {/* <View style={[styles.box, {marginLeft: `${Math.min((balance / (Number(withdrawThreshold) || 0)) * 100, 100)}%`}]} />
+                    </View> */}
                   </View>
                   <Shadow
                     inner
@@ -184,9 +292,21 @@ export default function HomeScreen({ route }: Props) {
                   isTextShadow
                 />
               </View>
-              <Text h4 style={styles.alert}>
-                Nice! You can now receive, send, and accumulate bitcoin using your Checking Account. New security features will be revealed once you meet the withdrawal threshold at 2 million sats
-              </Text>
+              {!isLoading && 
+              (payment.length == 0 ?
+                <Text h4 style={styles.alert}>
+                  You can receive, send, and accumulate bitcoin using your Checking Account. New security features will be revealed once you meet the withdrawal threshold at 2 million sats
+                </Text>
+              : (Number(balance) === Number(withdrawThreshold + reserveAmount)) ?
+                <Text h4 style={styles.alert}>
+                  Congrats! You've completed the bar, It's time to create your Hot Storage Savings Vault and take full self-custody of your bitcoi. Click 'Withdraw' to know more.
+                </Text>
+              :
+                <Text h4 style={styles.alertGrey}>
+                  New security upgrades will be revealed once you meet fill up the bar displayed on your Checking Account.
+                </Text>
+)
+              }
               <View style={styles.bottom}>
                 <View style={styles.bottominner}>
                   <TouchableOpacity style={styles.topup}>
@@ -343,7 +463,7 @@ export default function HomeScreen({ route }: Props) {
           enabled: false,
         }}
       >
-        <ReceivedList refRBSheet={refRBSheet} />
+        <ReceivedList refRBSheet={refRBSheet} matchedRate={matchedRate} currency={currency} />
       </RBSheet>
     </ScreenLayout>
   );

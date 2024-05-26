@@ -4,18 +4,15 @@ import styles from "./styles";
 import { CoinOSSmall } from "@Cypher/assets/images";
 import { GradientButton, GradientCardWithShadow, GradientText } from "@Cypher/components";
 import { ScreenLayout, Text } from "@Cypher/component-library";
-import { dispatchNavigate } from "@Cypher/helpers";
 import { colors, heights } from "@Cypher/style-guide";
 import LinearGradient from "react-native-linear-gradient";
-import { Shadow } from "react-native-neomorph-shadows";
+import { dispatchReset } from "@Cypher/helpers/navigation";
 
 export default function AccountStatus() {
 
     const nextClickHandler = () => {
         console.log('home click');
-        dispatchNavigate('HomeScreen', {
-            isLogin_: true
-        });
+        dispatchReset('HomeScreen');
     }
 
     return (

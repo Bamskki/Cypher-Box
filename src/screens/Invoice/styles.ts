@@ -13,6 +13,7 @@ interface Style {
 export default StyleSheet.create<Style>({
     main: {
         flex: 1,
+        justifyContent: 'space-between',
         paddingHorizontal: 25,
     },
     sats: {
@@ -30,8 +31,8 @@ export default StyleSheet.create<Style>({
         // borderTopWidth: 2,
         borderTopColor: '#333333',
         padding: 30,
-        position: 'absolute',
-        bottom: 0,
+        // position: 'absolute',
+        // bottom: 0,
         alignSelf: 'center',
     },
     button: {

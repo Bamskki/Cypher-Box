@@ -21,10 +21,12 @@ interface Style {
     login: TextStyle;
     view: ViewStyle;
     showLine: ViewStyle;
+    linearGradient2: ViewStyle;
     box: ViewStyle;
     check: TextStyle;
     sats: TextStyle;
     alert: TextStyle;
+    alertGrey: TextStyle;
     blink: ImageStyle;
     btnView: ViewStyle;
     current: ImageStyle;
@@ -184,20 +186,35 @@ export default StyleSheet.create<Style>({
     showLine: {
         // borderWidth: 1,
         // borderColor: colors.white,
+        position: 'absolute',
+        width: '100%',
         backgroundColor: '#5F5F5F',
-        height: 6,
+        height: 5,
         // padding: 5,
-        borderRadius: 2,
+        borderRadius: 5,
         marginVertical: 10,
         // marginStart: 25,
         // marginHorizontal: 20
     },
+    linearGradient2: {
+        width: '100%',
+        // paddingLeft: 15,
+        // paddingRight: 15,
+        borderRadius: 5,
+        height: 5,
+        alignSelf: 'flex-start',
+        marginVertical: 10,
+        zIndex: 99
+    },
     box: {
-        height: 6,
+        position: 'absolute',
+        top: 10,
+        height: 5,
         width: 4,
         backgroundColor: colors.white,
-        alignSelf: 'flex-end',
-        marginEnd: 25,
+        zIndex: 100,
+        // alignSelf: 'flex-end',
+        // marginEnd: 25,
     },
     blink: {
         width: 75,
@@ -215,6 +232,10 @@ export default StyleSheet.create<Style>({
     },
     alert: {
         color: colors.green,
+    },
+    alertGrey: {
+        color: colors.gray.light,
+        marginBottom: 12
     },
     btnView: {
         flexDirection: 'row',

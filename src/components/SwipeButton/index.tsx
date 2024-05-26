@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet } from 'react-native';
+import React, { forwardRef, useEffect, useImperativeHandle } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import LinearGradient from 'react-native-linear-gradient';
 
@@ -28,11 +28,28 @@ const H_WAVE_RANGE = SWIPEABLE_DIMENSIONS + 2 * BUTTON_PADDING;
 const H_SWIPE_RANGE = BUTTON_WIDTH - 2 * BUTTON_PADDING - SWIPEABLE_DIMENSIONS;
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
-const SwipeButton = ({ onToggle }) => {
+const SwipeButton = forwardRef(({ onToggle, isLoading }: {onToggle: Function, isLoading: boolean}, ref) => {
     // Animated value for X translation
     const X = useSharedValue(0);
     // Toggled State
     const [toggled, setToggled] = useState(false);
+
+    useImperativeHandle(ref, () => ({
+        reset() {
+            X.value = withSpring(0);
+            setToggled(false);
+        }
+    }));
+
+    useEffect(() => {
+        if (!isLoading && toggled) {
+            // Reset the button when isLoading is false and it is toggled
+            setTimeout(() => {
+                X.value = withSpring(0);
+                setToggled(false);
+            }, 3000)
+        }
+    }, [isLoading, toggled]);
 
     // Fires when animation ends
     const handleComplete = (isToggled) => {
@@ -127,13 +144,22 @@ const SwipeButton = ({ onToggle }) => {
             <PanGestureHandler onGestureEvent={animatedGestureHandler}>
                 <Animated.View style={[styles.swipeable, AnimatedStyles.swipeable]} />
             </PanGestureHandler>
-            <Animated.Text style={[styles.swipeText, AnimatedStyles.swipeText]}>
-                Slide to Send
-            </Animated.Text>
+            {isLoading ?
+                <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+                    <ActivityIndicator size="small" color="black" />
+                    <Text style={[styles.swipeText, {marginLeft: 10}]}>
+                        Please wait
+                    </Text>
+                </View>
+            :
+                <Animated.Text style={[styles.swipeText, AnimatedStyles.swipeText]}>
+                    Slide to Send
+                </Animated.Text>
+            }
             {/* </Animated.View> */}
         </GradientCard>
     );
-};
+});
 
 const styles = StyleSheet.create({
     swipeCont: {

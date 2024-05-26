@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
+import SimpleToast from 'react-native-simple-toast';
 import styles from "./styles";
 import { GradientButton, GradientCard, GradientText } from "@Cypher/components";
 import { useNavigation } from "@react-navigation/native";
@@ -7,22 +8,81 @@ import { InputEmailPhone } from "@Cypher/screens/Components";
 import { Button, Input, ScreenLayout, Text } from "@Cypher/component-library";
 import { dispatchNavigate } from "@Cypher/helpers";
 import { colors } from "@Cypher/style-guide";
+import { emailRegex, passwordRegex, strongPasswordMessage } from "@Cypher/helpers/regex";
+import { loginUser, registerUser } from "@Cypher/api/coinOSApis";
+import useAuthStore from "@Cypher/stores/authStore";
 
 export default function CreateCoinOSScreen() {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
     const passwordRef = useRef<TextInput>(null);
     const emailRef = useRef<TextInput>(null);
+    const { setToken, setAuth, setUser } = useAuthStore();
 
     const loginClickHandler = () => {
         console.log('login click');
-        dispatchNavigate('AccountStatus');
+        dispatchNavigate('ChangeUsername');
     }
 
-    const createClickHandler = () => {
-        console.log('create account click');
-        dispatchNavigate('AccountStatus');
+    const createClickHandler = async () => {
+        setIsLoading(true);
+        if(email == "") {
+            SimpleToast.show('Please enter your username', SimpleToast.SHORT);
+            setIsLoading(false);
+            return;
+        } else if(password == ""){
+            SimpleToast.show('Please enter your password', SimpleToast.SHORT);
+            setIsLoading(false);
+            return;
+        } 
+        // else if (!validateEmail(email)) {
+        //     SimpleToast.show('Please enter a valid email address.', SimpleToast.SHORT);
+        //     setIsLoading(false);
+        //     return;
+        // } 
+        else if (!validatePassword(password)) {
+            SimpleToast.show(strongPasswordMessage, SimpleToast.LONG);
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            const response: any = await registerUser(email, password);
+            console.log('User registration successful:', response);
+            if(response == "null user") {
+                const responseLogin: any = await loginUser(email, password);
+                console.log("User Login successful:", response);
+                if (responseLogin.token) {
+                    setAuth(true);
+                    setToken(responseLogin?.token);
+                    setUser(responseLogin?.user);
+                    loginClickHandler();                
+                    setEmail('');
+                    setPassword('');
+                } else {
+                    SimpleToast.show("Invalid usernmae or password", SimpleToast.SHORT);
+                }
+    
+            } else {
+                SimpleToast.show(response, SimpleToast.SHORT);
+            }
+        } catch (error: any) {
+            console.error('Error registering user:', error?.message);
+            SimpleToast.show(error?.message, SimpleToast.SHORT);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    const validateEmail = (email: string) => {
+        return emailRegex.test(email);
+    }
+
+    const validatePassword = (password: string) => {
+        return passwordRegex.test(password);
     }
 
     return (
@@ -36,9 +96,9 @@ export default function CreateCoinOSScreen() {
                 </View>
                 <Text style={styles.create}>Already have an an account with Coinos?</Text> */}
                 <View style={styles.innerView}>
-                    <GradientText>Login to Coinos</GradientText>
+                    <GradientText>Create Coinos Account</GradientText>
                     <View style={styles.space} />
-                    <GradientCard style={styles.gradient} colors_={username ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}>
+                    {/* <GradientCard style={styles.gradient} colors_={username ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}>
                         <Input onChange={setUsername}
                             value={username}
                             style={styles.textInput}
@@ -46,7 +106,7 @@ export default function CreateCoinOSScreen() {
                             onSubmitEditing={() => emailRef?.current?.focus() }
                             label="Username"
                         />
-                    </GradientCard>
+                    </GradientCard> */}
                     <View style={styles.extra} />
                     <GradientCard style={styles.gradient} colors_={email ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}>
                         <Input onChange={setEmail}
@@ -55,8 +115,8 @@ export default function CreateCoinOSScreen() {
                             style={styles.textInput}
                             returnKeyType="next"
                             onSubmitEditing={() => passwordRef?.current?.focus() }
-                            keyboardType="email-address"
-                            label="Email"
+                            // keyboardType="email-address"
+                            label="Username"
                         />
                     </GradientCard>
                     <View style={styles.extra} />
@@ -71,7 +131,11 @@ export default function CreateCoinOSScreen() {
                         />
                     </GradientCard>
                 </View>
-                <GradientButton title="Create Account" onPress={loginClickHandler} disabled={!email.length || !password.length}/>
+                <GradientButton 
+                    title="Create Account" 
+                    onPress={createClickHandler} 
+                    disabled={!email.length || !password.length || isLoading}
+                />
             </View>
         </ScreenLayout>
     )
