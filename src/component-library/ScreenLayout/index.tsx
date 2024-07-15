@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   StatusBar,
   StatusBarStyle,
+  Image,
 } from 'react-native';
 
 // *** Third Party Import
@@ -20,7 +21,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import Text from '../Text';
 import { colors } from '@Cypher/style-guide';
 import ImageView from '../ImageView';
-import { Back } from '@Cypher/assets/images';
+import { Back, Close } from '@Cypher/assets/images';
 import { Progress } from '@Cypher/components';
 
 // *** Custom styles
@@ -50,6 +51,8 @@ export interface Props {
   isHeader?: boolean;
   isTitleCenter?: any;
   progress?: number;
+  color?: string[];
+  isClose?: boolean;
 }
 
 function ScreenLayout({
@@ -73,6 +76,8 @@ function ScreenLayout({
   isHeader = false,
   isTitleCenter,
   progress = -1,
+  color,
+  isClose = false,
 }: Props) {
   const navigation: any = useNavigation();
 
@@ -84,7 +89,12 @@ function ScreenLayout({
     return (
       <>
         {progress > -1 &&
-          <Progress key={progress} current={progress} />
+          <Progress key={progress} current={progress} color={color} />
+        }
+        {isClose &&
+          <TouchableOpacity style={styles.closeView} onPress={handledBackPress}>
+            <Image source={Close} style={styles.closeImage} resizeMode='contain' />
+          </TouchableOpacity>
         }
         {showToolbar && !showHeader ? (
           <View style={[styles.showToolbar, { justifyContent: isTitleCenter ? 'flex-start' : 'center' }]}>
@@ -157,7 +167,7 @@ function ScreenLayout({
       <SafeAreaView
         edges={edges ? edges : ['right', 'left', 'top']}
         style={StyleSheet.flatten([styles.inner, style])}>
-          <StatusBar backgroundColor={colors.primary} barStyle={barStyle}/>
+        <StatusBar backgroundColor={colors.primary} barStyle={barStyle} />
         {renderContent()}
       </SafeAreaView>
     </LinearGradient>

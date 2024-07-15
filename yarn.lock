@@ -1873,6 +1873,11 @@
     invariant "^2.2.4"
     prop-types "^15.7.2"
 
+"@react-native-community/blur@^4.4.0":
+  version "4.4.0"
+  resolved "https://registry.npmjs.org/@react-native-community/blur/-/blur-4.4.0.tgz"
+  integrity sha512-P+xdT2LIq1ewOsF3zx7C0nu4dj7nxl2NVTsMXEzRDjM3bWMdrrEbTRA7uwPV5ngn7/BXIommBPlT/JW4SAedrw==
+
 "@react-native-community/cli-clean@11.3.10":
   version "11.3.10"
   resolved "https://registry.npmjs.org/@react-native-community/cli-clean/-/cli-clean-11.3.10.tgz"
@@ -5777,6 +5782,11 @@ hmac-drbg@^1.0.1:
     minimalistic-assert "^1.0.0"
     minimalistic-crypto-utils "^1.0.1"
 
+hoist-non-react-statics@^2.3.1:
+  version "2.5.5"
+  resolved "https://registry.npmjs.org/hoist-non-react-statics/-/hoist-non-react-statics-2.5.5.tgz"
+  integrity sha512-rqcy4pJo55FTTLWt+bU8ukscqHeE/e9KWvsOW2b/a3afxQZhwkQdT1rPPCJ0rYXdj4vNcasY8zHTH+jF/qStxw==
+
 hoist-non-react-statics@^3.3.0, hoist-non-react-statics@^3.3.2:
   version "3.3.2"
   resolved "https://registry.npmjs.org/hoist-non-react-statics/-/hoist-non-react-statics-3.3.2.tgz"
@@ -8919,6 +8929,13 @@ react-native-safe-area-context@4.8.2:
   version "4.8.2"
   resolved "https://registry.npmjs.org/react-native-safe-area-context/-/react-native-safe-area-context-4.8.2.tgz"
   integrity sha512-ffUOv8BJQ6RqO3nLml5gxJ6ab3EestPiyWekxdzO/1MQ7NF8fW1Mzh1C5QE9yq573Xefnc7FuzGXjtesZGv7cQ==
+
+react-native-safe-area-view@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.npmjs.org/react-native-safe-area-view/-/react-native-safe-area-view-1.1.1.tgz"
+  integrity sha512-bbLCtF+tqECyPWlgkWbIwx4vDPb0GEufx/ZGcSS4UljMcrpwluachDXoW9DBxhbMCc6k1V0ccqHWN7ntbRdERQ==
+  dependencies:
+    hoist-non-react-statics "^2.3.1"
 
 react-native-screens@3.29.0:
   version "3.29.0"

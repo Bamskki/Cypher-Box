@@ -117,14 +117,14 @@ const reserveData = [
     }
 ];
 
-export default function CheckAccount({navigation, route}: any) {
-    const {withdrawThreshold, reserveAmount, setWithdrawThreshold, setReserveAmount} = useAuthStore();
+export default function CheckAccount({ navigation, route }: any) {
+    const { withdrawThreshold, reserveAmount, setWithdrawThreshold, setReserveAmount } = useAuthStore();
     const [isTab, setIsTab] = useState(true);
     const [value, setValue] = useState(Number(withdrawThreshold));
     const [isError, setIsError] = useState(false);
     const [isErrorReserve, setIsErrorReserve] = useState(false);
     const [reserveAmt, setReserveAmt] = useState(Number(reserveAmount));
-    const {matchedRate} = route.params;
+    const { matchedRate } = route.params;
     const [isLoading, setIsLoading] = useState(false);
     const [payments, setPayments] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -133,9 +133,9 @@ export default function CheckAccount({navigation, route}: any) {
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const currency = btc(1);
-  
+
     useEffect(() => {
-      loadPayments();
+        loadPayments();
     }, [offset]);
 
     useEffect(() => {
@@ -181,7 +181,7 @@ export default function CheckAccount({navigation, route}: any) {
             SimpleToast.show("Withdraw Threshold cannot be less than 2M", SimpleToast.SHORT);
         }
     };
-    
+
     const increaseClickHandler = () => {
         const currentIndex = data.findIndex(item => item.sats === value);
         if (currentIndex >= 0 && currentIndex < data.length - 1) {
@@ -253,7 +253,7 @@ export default function CheckAccount({navigation, route}: any) {
             }
             setValue(Number(value));
             setWithdrawThreshold(value)
-        }else{
+        } else {
             if (reserveAmount < reserveData[0].sats || reserveAmount > reserveData[reserveData.length - 1].sats) {
                 setIsErrorReserve(true);
             } else {
@@ -266,55 +266,55 @@ export default function CheckAccount({navigation, route}: any) {
 
 
     const loadPayments = async (append = true) => {
-      offset == 0 && setIsLoading(true);
-      try {
-        const paymentList = await getTransactionHistory(offset, limit);
-        if (append && offset > 0) {
-          setPayments((prevPayments) => [...prevPayments, ...paymentList.payments]);
-        } else {
-          setPayments(paymentList.payments);
+        offset == 0 && setIsLoading(true);
+        try {
+            const paymentList = await getTransactionHistory(offset, limit);
+            if (append && offset > 0) {
+                setPayments((prevPayments) => [...prevPayments, ...paymentList.payments]);
+            } else {
+                setPayments(paymentList.payments);
+            }
+            setTotalCount(paymentList.count);
+        } catch (error) {
+            console.error('Error loading payments:', error);
+        } finally {
+            setIsLoading(false);
+            setIsFetchingMore(false);
+            setIsRefreshing(false);
         }
-        setTotalCount(paymentList.count);
-      } catch (error) {
-        console.error('Error loading payments:', error);
-      } finally {
-        setIsLoading(false);
-        setIsFetchingMore(false);
-        setIsRefreshing(false);
-      }
     };
-  
+
     const handleLoadMore = () => {
-      if (!isLoading && !isFetchingMore && payments.length < totalCount) {
-        setIsFetchingMore(true);
-        setOffset((prevOffset) => prevOffset + limit);
-      }
+        if (!isLoading && !isFetchingMore && payments.length < totalCount) {
+            setIsFetchingMore(true);
+            setOffset((prevOffset) => prevOffset + limit);
+        }
     };
-  
+
     const handleRefresh = () => {
-      setIsRefreshing(true);
-      if(offset == 0){
-        loadPayments(false)
-      } else {
-        setOffset(0);
-      }
+        setIsRefreshing(true);
+        if (offset == 0) {
+            loadPayments(false)
+        } else {
+            setOffset(0);
+        }
     };
-  
+
     const groupedPayments = payments.reduce((acc: any, payment: any) => {
-      const date = new Date(payment?.created);
-      const dateString = date.toDateString();
-      if (!acc[dateString]) {
-        acc[dateString] = [];
-      }
-      acc[dateString].push(payment);
-      return acc;
+        const date = new Date(payment?.created);
+        const dateString = date.toDateString();
+        if (!acc[dateString]) {
+            acc[dateString] = [];
+        }
+        acc[dateString].push(payment);
+        return acc;
     }, {});
-  
+
     const sections = Object.entries(groupedPayments).map(([date, data]) => ({
-      title: date,
-      data: data,
+        title: date,
+        data: data,
     }));
-  
+
     return (
         <ScreenLayout disableScroll showToolbar isBackButton>
             <View style={styles.container}>
@@ -341,26 +341,26 @@ export default function CheckAccount({navigation, route}: any) {
                                     onEndReached={handleLoadMore}
                                     onEndReachedThreshold={0.1}
                                     ListFooterComponent={() =>
-                                      isFetchingMore ? ( // Show loader at the end of the list when loading more
-                                        <ActivityIndicator style={{ marginTop: 10, marginBottom: 20 }} color={colors.white} />
-                                      ) : null
+                                        isFetchingMore ? ( // Show loader at the end of the list when loading more
+                                            <ActivityIndicator style={{ marginTop: 10, marginBottom: 20 }} color={colors.white} />
+                                        ) : null
                                     }
                                     ListEmptyComponent={() => (
-                                      <View style={{ height: screenHeight / 2.2, justifyContent: 'center', alignItems: 'center', marginTop: 30 }}>
-                                        <Text white h3 bold>No Transactions</Text>
-                                      </View>
+                                        <View style={{ height: screenHeight / 2.2, justifyContent: 'center', alignItems: 'center', marginTop: 30 }}>
+                                            <Text white h3 bold>No Transactions</Text>
+                                        </View>
                                     )}
                                     refreshControl={
-                                      <RefreshControl
-                                        refreshing={isRefreshing}
-                                        onRefresh={handleRefresh}
-                                        tintColor="white"
-                                      />
+                                        <RefreshControl
+                                            refreshing={isRefreshing}
+                                            onRefresh={handleRefresh}
+                                            tintColor="white"
+                                        />
                                     }
                                     keyExtractor={(item, index) => index.toString()}
                                     renderItem={({ item }) => <Items matchedRate={matchedRate} item={item} onPressHandler={onPressHandler} />}
                                     renderSectionHeader={({ section: { title } }) => <Header title={title} />}
-                                    // invertStickyHeaders
+                                // invertStickyHeaders
                                 />
                             </View>
                         )}

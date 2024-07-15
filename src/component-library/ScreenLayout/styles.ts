@@ -30,6 +30,8 @@ interface Styles {
   titleStyle_: ViewStyle;
   imageContainer: ViewStyle;
   imageView: ViewStyle;
+  closeView: ViewStyle;
+  closeImage: ImageStyle;
 }
 
 const styles = StyleSheet.create<Styles>({
@@ -76,7 +78,7 @@ const styles = StyleSheet.create<Styles>({
     height: 35,
     position: 'absolute',
     left: 0,
-    top:0,
+    top: 0,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -146,6 +148,19 @@ const styles = StyleSheet.create<Styles>({
     width: 17.5,
     height: 17.5,
   },
+  closeView: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'flex-end',
+    top: -20,
+    right: 10,
+  },
+  closeImage: {
+    width: 20,
+    height: 20,
+  }
 });
 
 export default styles;
