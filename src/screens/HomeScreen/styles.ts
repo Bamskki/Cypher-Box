@@ -79,6 +79,12 @@ interface Style {
     arrowRight: ImageStyle;
     topup: ViewStyle;
     shadowButton: any;
+    innerShadowStyle: any;
+    outerShadowStyle: any;
+    mainShadowStyle?: ViewStyle;
+    linearGradientStyle?: ViewStyle;
+    savingVault?: ViewStyle;
+    bitcoinText?: TextStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -96,6 +102,7 @@ export default StyleSheet.create<Style>({
         height: 62,
         marginTop: 16,
         marginBottom: 16,
+        opacity: 0.5,
     },
     container4: {
         backgroundColor: colors.gray.dark,
@@ -380,6 +387,7 @@ export default StyleSheet.create<Style>({
         marginTop: 16,
         borderColor: "transparent",
         backgroundColor: colors.tundora,
+        opacity: 0.5,
     },
     height: {
         height: 132
@@ -501,7 +509,7 @@ export default StyleSheet.create<Style>({
         // zIndex: 1,
     },
     bottom: {
-        opacity: 0.5,
+        // opacity: 0.5,
         marginTop: 15,
     },
     line: {
@@ -522,20 +530,20 @@ export default StyleSheet.create<Style>({
         paddingHorizontal: 30,
     },
     arrowLeft: {
-        width: 50,
-        height: 50,
+        width: 40,
+        height: 40,
         position: 'absolute',
         left: 10,
-        bottom: -5,
+        bottom: -2.5,
         transform: [{
             rotate: '270deg',
         }],
     },
     arrowRight: {
-        width: 50,
-        height: 50,
+        width: 40,
+        height: 40,
         position: 'absolute',
-        top: -5,
+        top: -2.5,
         right: 10,
         transform: [{
             rotate: '90deg',
@@ -546,6 +554,7 @@ export default StyleSheet.create<Style>({
         height: 47,
         justifyContent: 'center',
         width: (widths / 2) - 60,
+        opacity: 0.5,
     },
     shadowButton: {
         shadowOffset: { width: 2, height: 2 },
@@ -557,4 +566,45 @@ export default StyleSheet.create<Style>({
         height: 47,
         justifyContent: 'center',
     },
+    outerShadowStyle: {
+        shadowOffset: { width: 2, height: 2 },
+        shadowRadius: 2,
+        shadowOpacity: 2,
+        shadowColor: colors.greenShadow,
+        borderRadius: 25,
+        width: (widths / 2) - 60,
+        height: 47,
+        justifyContent: 'center',
+    },
+    innerShadowStyle: {
+        shadowOffset: { width: -2, height: -2 },
+        shadowRadius: 2,
+        shadowOpacity: 0.64,
+        shadowColor: colors.greenShadowLight,
+        borderRadius: 25,
+        width: (widths / 2) - 60,
+        height: 47,
+        justifyContent: 'center',
+        position: 'absolute',
+    },
+    mainShadowStyle: {
+        shadowColor: '#27272C',
+        shadowOffset: { width: -8, height: -8 },
+        shadowOpacity: 0.48,
+        shadowRadius: 12,
+        elevation: 8,
+    },
+    linearGradientStyle: {
+        shadowColor: '#040404',
+        shadowOffset: { width: 8, height: 8 },
+        shadowOpacity: 0.80,
+        shadowRadius: 16,
+        elevation: 8,
+    },
+    savingVault: {
+        width: widths - 40,
+    },
+    bitcoinText: {
+        fontSize: 16,
+    }
 });

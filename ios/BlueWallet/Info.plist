@@ -198,6 +198,8 @@
 		<string>Archivo-Medium.ttf</string>
 		<string>Archivo-SemiBold.ttf</string>
 		<string>Lato-Italic.ttf</string>
+		<string>Archivo-Regular.ttf</string>
+		<string>Lato-Thin.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>

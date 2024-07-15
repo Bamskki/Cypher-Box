@@ -10,6 +10,10 @@
       "sha1": "4bdd76137310b22c3263c63041e1f93734eb06bc"
     },
     {
+      "path": "src/assets/fonts/Archivo-Regular.ttf",
+      "sha1": "c14f15d27da595dcfe84fde32fdb75fc1e970e46"
+    },
+    {
       "path": "src/assets/fonts/Archivo-SemiBold.ttf",
       "sha1": "2bc6020da26a12e3f9918f076bd00854618aaceb"
     },
@@ -32,6 +36,10 @@
     {
       "path": "src/assets/fonts/Lato-Semibold.ttf",
       "sha1": "96569e2cfcc3a298bb1aea21103d0d1e3c7e2ed4"
+    },
+    {
+      "path": "src/assets/fonts/Lato-Thin.ttf",
+      "sha1": "07290446bee3f81ce501a3c3dbfde6097c70ca15"
     }
   ]
 }
