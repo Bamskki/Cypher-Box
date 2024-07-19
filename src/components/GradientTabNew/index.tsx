@@ -27,7 +27,6 @@ export default function GradientTabNew({ isSats, setIsSats, tab1, tab2, firstTab
                 <View style={styles.main}>
                     {isSats ?
                         <GradientCard
-                            // colors_={isSats ? color_ ? color_ : ['#383A46', '#464D6840'] : [colors.primary, colors.primary]}
                             colors_={[colors.green, colors.green]}
                             style={styles.linearGradientInside}
                             linearStyle={styles.linearStyle}
@@ -41,13 +40,12 @@ export default function GradientTabNew({ isSats, setIsSats, tab1, tab2, firstTab
                         <TouchableOpacity
                             style={styles.linearGradientInside}
                             onPress={() => setIsSats(true)}>
-                            <ImageText source={firstTabImg} text={tab1} imageStyle={StyleSheet.flatten([styles.image, { tintColor: colors.gray.placeholder }, imageStyle && imageStyle])}
+                            <ImageText source={firstTabImg} text={tab1} imageStyle={StyleSheet.flatten([styles.image, tab1 === 'Sats' && { tintColor: colors.gray.placeholder }, imageStyle && imageStyle])}
                                 textStyle={StyleSheet.flatten([styles.textStyle, { color: colors.gray.placeholder }, textStyle && textStyle])} isTextAfter={isTextAfter} />
                         </TouchableOpacity>
                     }
                     {!isSats ?
                         <GradientCard
-                            // colors_={!isSats ? color_ ? color_ : ['#464D6840', '#383A46'] : [colors.primary, colors.primary]}
                             colors_={[colors.green, colors.green]}
                             style={styles.linearGradientInside}
                             linearStyle={styles.linearStyle}

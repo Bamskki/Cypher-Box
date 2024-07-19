@@ -85,6 +85,8 @@ interface Style {
     linearGradientStyle?: ViewStyle;
     savingVault?: ViewStyle;
     bitcoinText?: TextStyle;
+    linearGradientbottom?: ViewStyle;
+    bottomBtn: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -100,7 +102,7 @@ export default StyleSheet.create<Style>({
     },
     container3: {
         height: 62,
-        marginTop: 16,
+        marginTop: 12.5,
         marginBottom: 16,
         opacity: 0.5,
     },
@@ -239,6 +241,7 @@ export default StyleSheet.create<Style>({
     },
     alert: {
         color: colors.green,
+        marginHorizontal: 20,
     },
     alertGrey: {
         color: colors.gray.light,
@@ -323,7 +326,7 @@ export default StyleSheet.create<Style>({
         // shadowRadius: 2,
         borderRadius: 25,
         width: widths - 40,
-        height: 128,
+        height: 113,
         backgroundColor: colors.tundora,
         padding: 15,
         paddingStart: 20,
@@ -358,7 +361,7 @@ export default StyleSheet.create<Style>({
         shadowRadius: 2,
         borderRadius: 25,
         width: widths - 40,
-        height: 128,
+        height: 113,
         justifyContent: 'center',
         position: 'absolute',
     },
@@ -383,8 +386,8 @@ export default StyleSheet.create<Style>({
         elevation: 24,
         borderRadius: 25,
         width: widths - 40,
-        height: 128,
-        marginTop: 16,
+        height: 130,
+        marginTop: 10,
         borderColor: "transparent",
         backgroundColor: colors.tundora,
         opacity: 0.5,
@@ -606,5 +609,20 @@ export default StyleSheet.create<Style>({
     },
     bitcoinText: {
         fontSize: 16,
-    }
+    },
+    linearGradientbottom: {
+        flex: 1,
+        borderRadius: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    bottomBtn: {
+        flex: 1,
+        height: 40,
+        alignSelf: 'center',
+        borderWidth: 2,
+        borderColor: colors.greenShadow,
+        marginStart: 7.5,
+        borderRadius: 25,
+    },
 });

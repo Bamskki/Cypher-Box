@@ -2,16 +2,20 @@ import React from "react";
 import { Image, ImageBackground, TouchableOpacity, View } from "react-native";
 import styles from "./styles";
 import { Text } from "@Cypher/component-library";
-import { ProgressBar5, Tag, Transaction } from "@Cypher/assets/images";
+import { ProgressBar5, Tag, Transaction, Yes } from "@Cypher/assets/images";
+import { colors } from "@Cypher/style-guide";
 
 interface Props {
     item: any;
-    onPress(): void;
+    onPress(id: number): void;
+    ids: any;
 }
 
-const ListView = ({ item, onPress }: Props) => {
+const ListView = ({ item, onPress, ids }: Props) => {
     return (
         <ImageBackground source={Transaction} style={styles.main} resizeMode="repeat">
+            {ids.includes(item?.id) && (<View style={styles.borderview} />)
+            }
             <View style={styles.container}>
                 <View style={styles.coin}>
                     <View style={styles.tab}>
@@ -26,9 +30,13 @@ const ListView = ({ item, onPress }: Props) => {
                 <View style={styles.label}>
                     <Image source={Tag} style={{}} />
                 </View>
-                <View style={styles.select}>
-                    <TouchableOpacity style={styles.checkbox} onPress={onPress} />
-                </View>
+                <TouchableOpacity style={styles.select} onPress={() => onPress(item?.id)}>
+                    <View style={styles.checkbox}>
+                        {ids.includes(item?.id) &&
+                            <Image source={Yes} />
+                        }
+                    </View>
+                </TouchableOpacity>
             </View>
         </ImageBackground>
     );

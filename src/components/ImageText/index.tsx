@@ -1,6 +1,6 @@
 import { Text } from "@Cypher/component-library";
 import React, { ReactNode } from "react";
-import { Image, ImageSourcePropType, ImageStyle, StyleSheet, TextStyle, Touchable, TouchableOpacity, View } from "react-native";
+import { Image, ImageSourcePropType, ImageStyle, StyleSheet, TextStyle, TouchableOpacity } from "react-native";
 
 interface Props {
     source: ImageSourcePropType | ReactNode;
