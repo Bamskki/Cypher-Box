@@ -1,17 +1,47 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ActivityIndicator, Image, TouchableOpacity, View } from "react-native"
 import styles from "./styles";
 import { Text } from "@Cypher/component-library";
 import { EyeVisible } from "@Cypher/assets/images";
 import { BlurView } from "@react-native-community/blur";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { BlueStorageContext } from '../../../blue_modules/storage-context';
+import { AbstractWallet } from '../../../class';
+import { useTheme } from '../../../components/themes';
 
 interface Props {
     callNext(): void;
 }
 
 export default function PrivateKeyGenerater({ callNext }: Props) {
+    const { wallets } = useContext(BlueStorageContext);
+    const { walletID } = useRoute().params as { walletID: string };
+    const wallet = wallets.find((w: AbstractWallet) => w.getID() === walletID);
+    
+    const navigation = useNavigation();
+    const { colors } = useTheme();
+
     const [isView, setIsView] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [secretList, setSecretList] = useState([]);
+
+    useEffect(() => {
+        const entries = wallet?.getSecret().split(/\s/).entries();
+        if(entries){
+            setLoading(true)
+            let arr: any = [];
+            for (const [index, secret] of entries) {
+                if (secret) {
+                    arr.push({
+                        id: index + 1,
+                        label: secret
+                    })
+                }
+            }
+            setSecretList(arr);
+            setLoading(false)
+        }
+    }, [])
 
     const viewClickHandler = () => {
         setLoading(true);
@@ -45,9 +75,9 @@ export default function PrivateKeyGenerater({ callNext }: Props) {
     return (
         <View>
             <View style={styles.container}>
-                {buttons.map((button, index) => (
+                {secretList.map((secret, index) => (
                     <TouchableOpacity key={index} style={styles.button}>
-                        <Text h4 style={styles.buttonText}>{`${button.id}. ${button.label}`}</Text>
+                        <Text h4 style={styles.buttonText}>{`${secret.id}. ${secret.label}`}</Text>
                     </TouchableOpacity>
                 ))}
             </View>

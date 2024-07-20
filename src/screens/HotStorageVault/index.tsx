@@ -8,6 +8,7 @@ import Vault from "./Vautl";
 import History from "./History";
 import Settings from "./Settings";
 import ListView from "./ListView";
+import { useRoute } from "@react-navigation/native";
 
 const initialData = [
     { id: 1, address: '3dbf...0ae3', type: 0, type2: 'Blink Settlement', value: '0.02 BTC' },
@@ -23,6 +24,7 @@ const initialData = [
 const HotStorageVault = () => {
     const [data, setData] = useState(initialData);
     const [selectedTab, setSelectedTab] = useState(0);
+    const { wallet, matchedRate } = useRoute().params as { wallet: any, matchedRate: string };
 
     const onChangeSelectedTab = useCallback((id: number) => {
         setSelectedTab(id);
@@ -87,7 +89,7 @@ const HotStorageVault = () => {
         console.log("🚀 ~ renderView ~ selectedTab:", selectedTab)
         switch (selectedTab) {
             case 0:
-                return <Vault />;
+                return <Vault wallet={wallet} matchedRate={matchedRate} />;
             case 1:
                 return (
                     <CustomFlatList
@@ -104,9 +106,9 @@ const HotStorageVault = () => {
             case 3:
                 return <Settings />;
             default:
-                return <Vault />;
+                return <Vault wallet={wallet} matchedRate={matchedRate} />;
         }
-    }, [selectedTab, data, renderItem, HeaderComponent, StickyElementComponent]);
+    }, [selectedTab, data, renderItem, HeaderComponent, StickyElementComponent, wallet, matchedRate]);
 
     return (
         <ScreenLayout showToolbar title={'Hot Storage Vault'} disableScroll>

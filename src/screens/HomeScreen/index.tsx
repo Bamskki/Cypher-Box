@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useReducer, useRef, useState } from "react";
 import { ActivityIndicator, Image, RefreshControl, StyleSheet, TouchableOpacity, View } from "react-native";
 import styles from "./styles";
 import {
@@ -30,6 +30,11 @@ import ReceivedList from "./ReceivedList";
 import useAuthStore from "@Cypher/stores/authStore";
 import { getCurrencyRates, getMe, getTransactionHistory } from "@Cypher/api/coinOSApis";
 import { btc, formatNumber, matchKeyAndValue } from "@Cypher/helpers/coinosHelper";
+import { AbstractWallet, HDSegwitBech32Wallet, HDSegwitP2SHWallet } from "../../../class";
+import loc from '../../../loc';
+import { initialState, walletReducer } from "../../../screen/wallets/add";
+import { BlueStorageContext } from '../../../blue_modules/storage-context';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Props {
   route: any;
@@ -47,6 +52,11 @@ export const calculatePercentage = (withdrawThreshold: number, reserveAmount: nu
 export default function HomeScreen({ route }: Props) {
   const { navigate } = useNavigation();
   const routeName = useRoute().name;
+  const [state, dispatch] = useReducer(walletReducer, initialState);
+  const label = state.label;
+  const { addWallet, saveToDisk, isAdvancedModeEnabled, wallets } = useContext(BlueStorageContext);
+  const A = require('../../../blue_modules/analytics');
+
   // const [storage, setStorage] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [balance, setBalance] = useState(0);
@@ -57,12 +67,23 @@ export default function HomeScreen({ route }: Props) {
   const [payment, setPayments] = useState([])
   const [wt, setWt] = useState<number>();
   const [isWithdraw, setIsWithdraw] = useState<boolean>(true);
-  const [isAllDone, setIsAllDone] = useState<boolean>(true);
+  const [isAllDone, setIsAllDone] = useState<boolean>(false);
+  const [wallet, setWallet] = useState(undefined)
+  
   console.log("🚀 ~ HomeScreen ~ route?.params?.isComplete:", route?.params?.isComplete)
 
   const refRBSheet = useRef<any>(null);
-  const { isAuth, token, user, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
+  const { isAuth, walletID, token, user, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
 
+  const getWalletID = async () => {
+    try {
+      return await AsyncStorage.getItem('wallet@ID');
+    } catch (error) {
+      console.error('Error getting auth token from AsyncStorage:', error);
+      throw error;
+    }
+  };
+  
   useFocusEffect(() => {
     if (route?.params?.isComplete) setIsAllDone(true);
   });
@@ -72,6 +93,9 @@ export default function HomeScreen({ route }: Props) {
       if (isAuth && token) {
         handleUser();
         loadPayments();
+        const wallet = wallets.find((w: AbstractWallet) => w.getID() === walletID);
+        setWallet(wallet)
+        setIsAllDone(!!wallet)
       } else {
         setIsLoading(false)
       }
@@ -177,7 +201,7 @@ export default function HomeScreen({ route }: Props) {
 
   const savingVaultClickHandler = () => {
     console.log('savingVaultClickHandler click');
-    dispatchNavigate('HotStorageVault');
+    dispatchNavigate('HotStorageVault', { wallet, matchedRate });
   };
 
   const coldStorageClickHandler = () => {
@@ -194,6 +218,31 @@ export default function HomeScreen({ route }: Props) {
     handleUser()
   };
 
+
+  const createWallet = async () => {
+    setIsLoading(true);
+
+      let w: HDSegwitBech32Wallet;
+        // btc was selected
+        // index 2 radio - hd bip84
+        w = new HDSegwitBech32Wallet();
+        w.setLabel(label || loc.wallets.details_title);
+
+        await w.generate();
+        addWallet(w);
+        await saveToDisk();
+        A(A.ENUM.CREATED_WALLET);
+        triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
+        if (w.type === HDSegwitP2SHWallet.type || w.type === HDSegwitBech32Wallet.type) {
+          // @ts-ignore: Return later to update
+          dispatchNavigate('SavingVaultIntro', {
+            walletID: w.getID(),
+          });
+        }
+  };
+
+
+  console.log('walletID: ', walletID)
   return (
     <ScreenLayout RefreshControl={
       <RefreshControl
