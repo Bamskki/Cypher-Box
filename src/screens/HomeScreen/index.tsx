@@ -258,7 +258,7 @@ export default function HomeScreen({ route }: Props) {
                 </View>
               </>
             )}
-          {true ? (
+          {isAuth ? (
             <>
               <TouchableOpacity style={styles.shadowView} onPress={checkingAccountClickHandler}>
                 <Shadow
