@@ -250,7 +250,7 @@ export default function HomeScreen({ route }: Props) {
         onRefresh={onRefresh}
         tintColor="white"
       />
-    } disableScroll>
+    } disableScroll={isAuth ? true : false}>
       <View style={styles.container}>
         <View>
           {isLoading ? (
