@@ -195,13 +195,15 @@ export default function HomeScreen({ route }: Props) {
   };
 
   return (
-    <ScreenLayout RefreshControl={
-      <RefreshControl
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-        tintColor="white"
-      />
-    }>
+    <ScreenLayout 
+      RefreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor="white"
+        />
+      } 
+      disableScroll={isAuth ? true : false}>
       <View style={styles.container}>
         <View>
           {isLoading ? (
