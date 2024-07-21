@@ -201,7 +201,7 @@ export default function HomeScreen({ route }: Props) {
         onRefresh={onRefresh}
         tintColor="white"
       />
-    } disableScroll>
+    }>
       <View style={styles.container}>
         <View>
           {isLoading ? (
@@ -258,7 +258,7 @@ export default function HomeScreen({ route }: Props) {
                 </View>
               </>
             )}
-          {true ? (
+          {isAuth ? (
             <>
               <TouchableOpacity style={styles.shadowView} onPress={checkingAccountClickHandler}>
                 <Shadow

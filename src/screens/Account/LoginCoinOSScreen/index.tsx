@@ -50,6 +50,7 @@ export default function LoginCoinOSScreen() {
         }
     };
 
+    console.log('password: ', password.length)
     return (
         <ScreenLayout disableScroll showToolbar>
             <View style={styles.container}>
@@ -70,7 +71,7 @@ export default function LoginCoinOSScreen() {
                             value={password}
                             style={styles.textInput}
                             secureTextEntry
-                            maxLength={15}
+                            // maxLength={15}
                             label="Password"
                         />
                     </GradientCard>
