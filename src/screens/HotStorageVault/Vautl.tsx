@@ -26,8 +26,8 @@ const shortenAddress = (address: string) => {
 
 export default function Vault({wallet, matchedRate}: {wallet: any, matchedRate: string}) {
     const currency = btc(1);
-    const balance = !wallet.hideBalance && formatBalance(Number(wallet.getBalance()), wallet.getPreferredBalanceUnit(), true);
-    const balanceWithoutSuffix = !wallet.hideBalance && formatBalanceWithoutSuffix(Number(wallet.getBalance()), wallet.getPreferredBalanceUnit(), true);
+    const balance = !wallet?.hideBalance && formatBalance(Number(wallet?.getBalance()), wallet?.getPreferredBalanceUnit(), true);
+    const balanceWithoutSuffix = !wallet?.hideBalance && formatBalanceWithoutSuffix(Number(wallet?.getBalance()), wallet?.getPreferredBalanceUnit(), true);
     const { wallets, saveToDisk, sleep, isElectrumDisabled } = useContext(BlueStorageContext);
     const [address, setAddress] = useState()
     const base64QrCodeRef = useRef('');

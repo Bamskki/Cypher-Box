@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { LayoutAnimation, View } from "react-native";
 import { Text, ScreenLayout } from "@Cypher/component-library";
 import { CustomFlatList, GradientView } from "@Cypher/components";
@@ -25,6 +25,15 @@ const HotStorageVault = () => {
     const [data, setData] = useState(initialData);
     const [selectedTab, setSelectedTab] = useState(0);
     const { wallet, matchedRate } = useRoute().params as { wallet: any, matchedRate: string };
+    const [utxo, setUtxo] = useState(null);
+
+    const handleCoinControl = () => {
+        const walletID = wallet.getID()
+      };
+
+    useEffect(() => {
+
+    }, [wallet])
 
     const onChangeSelectedTab = useCallback((id: number) => {
         setSelectedTab(id);
