@@ -47,12 +47,22 @@ interface Style {
     separator: ViewStyle;
     tabs: ViewStyle;
     bottomview: ViewStyle;
+    bottomView: ViewStyle;
+    blankspace: ViewStyle;
+    rowview: ViewStyle;
+    tips: TextStyle;
+    priceView: ViewStyle;
+    card: ViewStyle;
+    lGradient: ViewStyle;
+    input: TextStyle;
+    bottomViewNew: TextStyle;
+    border: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
     flex: {
         flex: 1,
-        paddingBottom: 40,
+        // paddingBottom: 40,
     },
     container: {
         flex: 1,
@@ -67,7 +77,7 @@ export default StyleSheet.create<Style>({
     },
     savingVault: {
         width: widths - 40,
-        height: 135,
+        height: 130,
     },
     bitcoinText: {
         fontSize: 16,
@@ -127,7 +137,7 @@ export default StyleSheet.create<Style>({
     base: {
         flexDirection: 'row',
         // flex: 1,
-        marginTop: 15,
+        marginTop: 20,
         // backgroundColor: 'red',
         // justifyContent: 'space-between'
         // alignSelf: 'center',
@@ -204,12 +214,11 @@ export default StyleSheet.create<Style>({
     text: {
         fontSize: 18,
         marginStart: 20,
-        marginTop: 5,
+        marginVertical: 10,
     },
     line: {
         height: 1,
         backgroundColor: colors.white,
-        marginBottom: 7.5,
     },
     linebottom: {
         height: 1,
@@ -255,7 +264,8 @@ export default StyleSheet.create<Style>({
     titleStyle: {
         flexDirection: 'row',
         marginTop: 5,
-        // marginHorizontal: 20,
+        marginStart: 20,
+        marginEnd: 15,
         backgroundColor: colors.primary,
         // backgroundColor: 'red',
         // width: '100%',
@@ -265,7 +275,7 @@ export default StyleSheet.create<Style>({
     coin: {
         flex: 1.8,
         fontSize: 18,
-        paddingStart: 20,
+        paddingStart: 30,
     },
     size: {
         flex: 1.8,
@@ -276,6 +286,7 @@ export default StyleSheet.create<Style>({
         flex: 1,
         fontSize: 18,
         textAlign: 'center',
+        marginEnd: 5,
         // backgroundColor: 'red'
     },
     select: {
@@ -317,5 +328,65 @@ export default StyleSheet.create<Style>({
     bottomview: {
         marginBottom: 40,
         flex: 1,
+    },
+    bottomView: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        // marginBottom: 25,
+        borderTopWidth: 0.5,
+        borderTopColor: '#5E5E5E',
+        height: 130,
+        // padding: 50,
+    },
+    blankspace: {
+        flex: 1,
+        height: 23,
+        backgroundColor: colors.white,
+        borderRadius: 5,
+        marginHorizontal: 20
+    },
+    rowview: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    tips: {
+        fontSize: 15,
+        marginBottom: 10,
+        marginTop: 20,
+    },
+    priceView: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 10,
+        alignItems: 'center',
+    },
+    card: {
+        width: '60%',
+        alignSelf: 'center',
+        height: 84,
+    },
+    lGradient: {
+        height: 84,
+    },
+    input: {
+        width: 162,
+        // height: 49,
+        borderRadius: 21,
+        marginStart: 100,
+        borderWidth: 1,
+        // marginBottom: 20,
+        fontSize: 16,
+        fontFamily: 'Lato-Bold',
+    },
+    bottomViewNew: {
+        marginBottom: 40,
+        paddingTop: 10,
+        paddingBottom: 15,
+        borderTopWidth: 0.5,
+        borderTopColor: '#5E5E5E',
+    },
+    border: {
+        borderTopWidth: 0.5,
+        borderTopColor: '#5E5E5E',
     },
 });

@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View } from "react-native"
+import { View } from "react-native"
 import GradientCard from "../GradientCard";
 import styles from "./styles";
 import { colors } from "@Cypher/style-guide";
@@ -30,7 +30,7 @@ export default function GradientInput({
                         textInpuetStyle={styles.input}
                     />
                 </GradientCard>
-                <Text style={StyleSheet.flatten([styles.text, { fontSize: isSats ? 35 : 50, right: isSats ? 10 : 25 }])}>{`${isSats ? 'sats' : '$'}`}</Text>
+                <Text style={isSats ? styles.btc : styles.dollar}>{`${isSats ? 'sats' : '$'}`}</Text>
             </View>
             {isSats ?
                 <Text style={styles.inDollar}>${usd}</Text>

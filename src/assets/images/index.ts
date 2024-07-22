@@ -41,3 +41,5 @@ export { default as ProgressBar4 } from './progress4.png';
 export { default as ProgressBar5 } from './progress5.png';
 export { default as Tag } from './tag.png';
 export { default as Transaction } from './transaction.png';
+export { default as Small } from './small.png';
+export { default as Yes } from './yes.png';

@@ -12,6 +12,7 @@ interface Style {
     label: TextStyle;
     select: TextStyle;
     checkbox: ViewStyle;
+    borderview: ViewStyle;
 }
 export default StyleSheet.create<Style>({
     container: {
@@ -61,6 +62,11 @@ export default StyleSheet.create<Style>({
     select: {
         flex: 1,
         alignItems: 'center',
+        width: 40,
+        height: 40,
+        alignSelf: 'center',
+        justifyContent: 'center',
+        zIndex: 1,
     },
     checkbox: {
         width: 18,
@@ -68,5 +74,17 @@ export default StyleSheet.create<Style>({
         borderRadius: 4,
         borderWidth: 1,
         borderColor: colors.white,
-    }
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    borderview: {
+        borderWidth: 1,
+        borderColor: colors.green,
+        borderRadius: 25,
+        width: '95%',
+        height: '95%',
+        top: 5,
+        start: 5,
+        position: 'absolute',
+    },
 })

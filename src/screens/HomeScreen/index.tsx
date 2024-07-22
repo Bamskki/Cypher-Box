@@ -58,7 +58,6 @@ export default function HomeScreen({ route }: Props) {
   const [wt, setWt] = useState<number>();
   const [isWithdraw, setIsWithdraw] = useState<boolean>(true);
   const [isAllDone, setIsAllDone] = useState<boolean>(true);
-  console.log("🚀 ~ HomeScreen ~ route?.params?.isComplete:", route?.params?.isComplete)
 
   const refRBSheet = useRef<any>(null);
   const { isAuth, token, user, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
@@ -415,12 +414,14 @@ export default function HomeScreen({ route }: Props) {
                 </View>
                 {isAllDone ?
                   <SavingVault
-                    container={styles.savingVault}
+                    container={StyleSheet.flatten([styles.savingVault, { marginTop: 10 }])}
                     innerContainer={styles.savingVault}
                     shadowTopBottom={styles.savingVault}
                     shadowBottomBottom={styles.savingVault}
                     bitcoinText={styles.bitcoinText}
                     onPress={savingVaultClickHandler}
+                    bitcoinValue='0.1 BTC ~ $6500'
+                    isColorable
                   />
                   :
                   <View style={styles.shadowViewBottom}>
@@ -450,44 +451,57 @@ export default function HomeScreen({ route }: Props) {
                     </Shadow>
                   </View>
                 }
-                <View style={styles.container3}>
+                <View style={[styles.container3, { opacity: isAllDone ? 1 : 0.5, }]}>
                   <GradientCard colors_={['#464D6854', '#FFF']} style={styles.container2} linearStyle={styles.main}>
                     <View style={styles.container4}>
-                      <Text h3 bold style={styles.storageText} onPress={hotStorageClickHandler}>Hot Storage</Text>
-                      <Text h3 bold style={styles.storageText} onPress={coldStorageClickHandler}>Cold Storage</Text>
-                      {/* <GradientCard
-                        colors_={[colors.gray.dark, colors.gray.dark]}
-                        // colors_={!storage ? ['#737373', '#737373'] : [colors.gray.dark, colors.gray.dark]}
-                        // onPress={() => setStorage(0)}
-                        style={styles.view2}
-                        linearStyle={styles.gradient}>
-                        <View style={styles.inside}>
-                          <Text h3 bold style={styles.storageText}>Hot Storage</Text>
+                      {!isAllDone ?
+                        <Text h3 bold style={styles.storageText} onPress={hotStorageClickHandler}>Hot Storage</Text>
+                        :
+                        <View style={styles.bottomBtn}>
+                          <LinearGradient
+                            start={{ x: 1, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            locations={[0.25, 1]}
+                            colors={['#333333', '#282727']}
+                            style={styles.linearGradientbottom}>
+                            <Text h3 bold style={{ color: '#FD7A68' }} onPress={hotStorageClickHandler}>Hot Storage</Text>
+                          </LinearGradient>
                         </View>
-                      </GradientCard>
-                      <GradientCard
-                        colors_={[colors.gray.dark, colors.gray.dark]}
-                        // onPress={() => setStorage(1)}
-                        style={styles.view2}
-                        linearStyle={styles.gradient}>
-                        <View style={styles.inside}>
-                          <Text h3 bold style={styles.storageText}>Hot Storage</Text>
+                      }
+                      {isAllDone || isWithdraw ?
+                        <Text h3 bold style={styles.storageText} onPress={coldStorageClickHandler}>Cold Storage</Text>
+                        :
+                        <View style={[styles.bottomBtn, { marginEnd: 7.5, marginStart: 0 }]}>
+                          <LinearGradient
+                            start={{ x: 1, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            locations={[0.25, 1]}
+                            colors={
+                              !isAllDone
+                                ? [colors.gray.light, colors.gray.light]
+                                : ['#333333', '#282727']
+                            }
+                            style={styles.linearGradientbottom}>
+                            <Text h3 bold onPress={hotStorageClickHandler}>Cold Storage</Text>
+                          </LinearGradient>
                         </View>
-                      </GradientCard> */}
+                      }
                     </View>
                   </GradientCard>
-                  {/* <View style={styles.circle}>
-                    <Image
-                      style={styles.arrow2}
-                      resizeMode="contain"
-                      source={require("../../../img/arrow-right.png")}
-                    />
-                    <Image
-                      style={styles.arrow3}
-                      resizeMode="contain"
-                      source={require("../../../img/arrow-right.png")}
-                    />
-                  </View> */}
+                  {isAllDone &&
+                    <View style={styles.circle}>
+                      <Image
+                        style={styles.arrow2}
+                        resizeMode="contain"
+                        source={require("../../../img/arrow-right.png")}
+                      />
+                      <Image
+                        style={styles.arrow3}
+                        resizeMode="contain"
+                        source={require("../../../img/arrow-right.png")}
+                      />
+                    </View>
+                  }
                 </View>
               </View>
             </>

@@ -105,9 +105,7 @@ export default function ColdStorage({ route }: Props) {
         return feesText;
     }
 
-    const coinThresholdClickHandler = () => {
-        dispatchNavigate('AdjustHotThreshold');
-    }
+    const coinThresholdClickHandler = () => { }
 
     const pasteClickHandler = async () => {
         const text = await Clipboard.getString();
@@ -131,9 +129,9 @@ export default function ColdStorage({ route }: Props) {
                 // onPress={savingVaultClickHandler}
                 />
                 <View style={styles.recipientView}>
-                    <TouchableOpacity onPress={coinThresholdClickHandler}>
-                        <Text bold style={styles.coinselected}>Coins selected: 3 coins</Text>
-                    </TouchableOpacity>
+                    {/* <TouchableOpacity onPress={coinThresholdClickHandler}> */}
+                    <Text bold style={styles.coinselected}>Coins selected: 3 coins</Text>
+                    {/* </TouchableOpacity> */}
                     <View style={styles.priceView}>
                         <View>
                             <Text style={styles.recipientTitle}>Recipient will get:</Text>
@@ -159,7 +157,7 @@ export default function ColdStorage({ route }: Props) {
                         </TouchableOpacity>
                         <Image source={require("../../../img/scan-new.png")} style={styles.qrcode} resizeMode="contain" />
                     </View>
-                    <View style={[styles.priceView, { flex: 1 }]}>
+                    <View style={styles.priceView}>
                         <View>
                             <Text style={styles.recipientTitle}>Network fee:</Text>
                             <Text bold style={styles.fees}>~ {networkFees} sats</Text>
