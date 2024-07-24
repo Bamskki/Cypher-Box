@@ -11,6 +11,7 @@ interface Style {
     destination: TextStyle;
     senderText: TextStyle;
     label: TextStyle;
+    btn: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -55,4 +56,13 @@ export default StyleSheet.create<Style>({
         alignSelf: 'center',
         zIndex: 1,
     },
+    btn: {
+        width: 148,
+        height: 38,
+        backgroundColor: colors.green,
+        borderRadius: 15,
+        alignItems: 'center',
+        justifyContent: 'center',
+        alignSelf: 'center',
+    }
 })

@@ -107,7 +107,7 @@ export default function ConfirmTransction({ route }: Props) {
     return (
         <ScreenLayout showToolbar disableScroll>
             <View style={styles.container}>
-                <Text style={styles.title} center>Confirm  transaction</Text>
+                <Text style={styles.title} center>Confirm transaction</Text>
                 <SavingVault
                     container={styles.savingVault}
                     innerContainer={styles.savingVault}

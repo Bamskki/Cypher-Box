@@ -12,9 +12,7 @@ import LinearGradientButton from "./LinearGradientButton";
 
 export default function CreateVault() {
 
-    const hotVaultClickHandler = () => {
-        dispatchNavigate('AdjustHotThreshold');
-    }
+    const hotVaultClickHandler = () => { }
 
     const coldVaultClickHandler = () => { }
 

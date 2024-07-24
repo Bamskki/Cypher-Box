@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Image, TouchableOpacity, View } from "react-native"
 import styles from "./styles";
 import LinearGradient from "react-native-linear-gradient";
-import { Cancel, Currency, CurrencyWhite, Sats } from "@Cypher/assets/images";
+import { Bitcoin, Cancel, Currency, CurrencyWhite, Sats, Small } from "@Cypher/assets/images";
 import { Text } from "@Cypher/component-library";
 import { btc } from "@Cypher/helpers/coinosHelper";
 import { colors } from "@Cypher/style-guide";
@@ -19,9 +19,10 @@ interface Props {
     matchedRate?: number;
     currency?: string;
     isConverter?: boolean;
+    firstTabText?: string;
 }
 
-export default function CustomKeyBoard({ title, disabled, onPress, setSATS, setUSD, setIsSATS, isError, matchedRate, isConverter = true }: Props) {
+export default function CustomKeyBoardNew({ title, disabled, onPress, setSATS, setUSD, setIsSATS, isError, matchedRate, isConverter = true, firstTabText = "Sats" }: Props) {
     const KEYSARRAY = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0'];
     const [isSats, setIsSats] = useState(true);
     const [sats, setSats] = useState('');
@@ -67,7 +68,16 @@ export default function CustomKeyBoard({ title, disabled, onPress, setSATS, setU
     return (
         <View style={styles.container}>
             {isConverter &&
-                <GradientTabNew firstTabImg={Sats} secondTabImg={isSats ? Currency : CurrencyWhite} tab1="Sats" tab2="USD" isSats={isSats} setIsSats={setIsSats} />
+                <GradientTabNew
+                    firstTabImg={firstTabText === "Sats" ? Sats : isSats ? Bitcoin : Small}
+                    secondTabImg={isSats ? Currency : CurrencyWhite}
+                    tab1={firstTabText}
+                    tab2="USD"
+                    isSats={isSats}
+                    setIsSats={setIsSats}
+                    imageStyle={{ width: 33, height: 33, marginTop: 0, marginStart: -5 }}
+                    textStyle={{ marginStart: 15, fontFamily: 'Lato-Medium' }}
+                />
             }
             <LinearGradient
                 start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
