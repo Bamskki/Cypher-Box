@@ -22,7 +22,7 @@ const withAuthToken = async (requestConfig: any) => {
     ...requestConfig,
     headers: {
       ...requestConfig.headers,
-      Authorization: `Bearer ${authToken}`,
+      Authorization: `${authToken}`,
     },
   };
 };
@@ -75,14 +75,32 @@ export const loginUser = async (username: string, password: string) => {
   }
 };
 
-export const updateUserName = async (username: string) => {
+export const forgetPassword = async (email: string) => {
   try {
-    const response = await fetch(`${BASE_URL}/user`, await withAuthToken({
+    const response = await fetch(`${BASE_URL}/forgot`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({email}),
+    });
+
+    return await response.text();
+  } catch (error) {
+    console.error('Error registering user:', error);
+    throw error;
+  }
+};
+
+export const updateUserName = async (id: string, email: string) => {
+  try {
+    const response = await fetch(`${BASE_URL}/request`, await withAuthToken({
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ username, display: username }),
+      body: JSON.stringify({ id, email }),
     }));
     return await response.text();
   } catch (error) {

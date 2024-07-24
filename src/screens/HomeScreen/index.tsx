@@ -56,8 +56,8 @@ export default function HomeScreen({ route }: Props) {
   const [refreshing, setRefreshing] = useState(false);
   const [payment, setPayments] = useState([])
   const [wt, setWt] = useState<number>();
-  const [isWithdraw, setIsWithdraw] = useState<boolean>(true);
-  const [isAllDone, setIsAllDone] = useState<boolean>(true);
+  const [isWithdraw, setIsWithdraw] = useState<boolean>(false);
+  const [isAllDone, setIsAllDone] = useState<boolean>(false);
   console.log("🚀 ~ HomeScreen ~ route?.params?.isComplete:", route?.params?.isComplete)
 
   const refRBSheet = useRef<any>(null);
@@ -203,7 +203,7 @@ export default function HomeScreen({ route }: Props) {
           tintColor="white"
         />
       } 
-      disableScroll={isAuth ? true : false}>
+      disableScroll={isAuth ? false : true}>
       <View style={styles.container}>
         <View>
           {isLoading ? (

@@ -5,17 +5,15 @@ import styles from "./styles";
 import { GradientButton, GradientCard, GradientText } from "@Cypher/components";
 import { Input, ScreenLayout, Text } from "@Cypher/component-library";
 import { colors } from "@Cypher/style-guide";
-import { getMe, updateUserName } from "@Cypher/api/coinOSApis";
+import { forgetPassword, getMe, updateUserName } from "@Cypher/api/coinOSApis";
 import useAuthStore from "@Cypher/stores/authStore";
 import { dispatchNavigate } from "@Cypher/helpers";
 import { emailRegex } from "@Cypher/helpers/regex";
 
-export default function ChangeUsername({navigation, route}: any) {
-    const username = route?.params?.username;
-    console.log('username: ', username)
+export default function ForgetPassword({navigation, route}: any) {
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const { setUser, token } = useAuthStore();
+    const [isClicked, setIsClicked] = useState(false);
 
     const validateEmail = (email: string) => {
         return emailRegex.test(email);
@@ -34,18 +32,12 @@ export default function ChangeUsername({navigation, route}: any) {
         } 
 
         try {
-            const me: any = await getMe();
-            console.log('me: ', me)
-
-            const response: any = await updateUserName(me?.id, email);
+            const response: any = await forgetPassword(email);
             console.log("User Changed successful:", response);
-            setUser(username);
-            if (response && response !== 'Username taken' && response?.startsWith('{')) {
-                const jsonResponse = JSON.parse(response);
-                if(jsonResponse.ok){
-                    SimpleToast.show("Verification Email Sent.", SimpleToast.SHORT);    
-                    dispatchNavigate('AccountStatus');    
-                }
+            if (response && response?.startsWith('{')) {
+                //SimpleToast.show("Verification Email Sent.", SimpleToast.SHORT);    
+                setIsClicked(true)
+                // dispatchNavigate('AccountStatus');    
             } else {
                 SimpleToast.show(response, SimpleToast.SHORT);
             }
@@ -57,24 +49,28 @@ export default function ChangeUsername({navigation, route}: any) {
         }
     };
     
+    console.log('isClicked: ', isClicked)
     return (
-        <ScreenLayout disableScroll showToolbar progress={username ? 1 : undefined} isBackButton={username ? false : true}>
+        <ScreenLayout disableScroll showToolbar>
             <View style={styles.container}>
                 <View style={styles.innerView}>
-                    <GradientText>Recovery Email</GradientText>
+                    <GradientText>Password Reset</GradientText>
                     <View style={styles.space} />
-                    <Text bold center style={{ fontSize: 18, lineHeight: 30, marginBottom: 20 }}>For password resets and payment notifications only.</Text>
-                    <GradientCard style={{width: '100%'}} colors_={email ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}>
-                        <Input onChange={setEmail}
-                            value={email}
-                            style={styles.textInput}
-                            // keyboardType="email-address"
-                            label="Email"
-                        />
-                    </GradientCard>
+                    {isClicked ?
+                        <Text bold center style={{ fontSize: 18, lineHeight: 30 }}>A password reset link will be sent to your email if we have it on file.</Text>
+                    :
+                        <GradientCard style={{width: '100%'}} colors_={email ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}>
+                            <Input onChange={setEmail}
+                                value={email}
+                                style={styles.textInput}
+                                // keyboardType="email-address"
+                                label="Email"
+                            />
+                        </GradientCard>
+                    }
                     <View style={styles.extra} />
                 </View>
-                <GradientButton title="Set Recovery Email" disabled={!email.length || isLoading} onPress={nextClickHandler} />
+                <GradientButton title={isClicked ? "Continue" : "Submit"} disabled={!email.length || isLoading} onPress={() => isClicked ? navigation.goBack() : nextClickHandler()} />
             </View>
         </ScreenLayout>
     )

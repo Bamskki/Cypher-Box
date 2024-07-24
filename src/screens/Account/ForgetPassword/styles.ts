@@ -7,7 +7,6 @@ interface Style {
     create: TextStyle;
     button: ViewStyle;
     text: TextStyle;
-    forgot: TextStyle;
     textInput: TextStyle;
     extra: ViewStyle;
     space: ViewStyle;
@@ -45,11 +44,6 @@ export default StyleSheet.create<Style>({
         fontSize: 16,
         fontFamily: 'Lato-Bold',
         textAlign: 'center'
-    },
-    forgot: {
-        fontSize: 18,
-        color: colors.pink.default,
-        marginStart: 5,
     },
     textInput: {
         // width: '90%',

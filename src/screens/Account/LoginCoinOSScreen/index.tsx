@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import SimpleToast from "react-native-simple-toast";
 import styles from "./styles";
 import { GradientButton, GradientCard, GradientText } from "@Cypher/components";
-import { Input, ScreenLayout } from "@Cypher/component-library";
+import { Input, ScreenLayout, Text } from "@Cypher/component-library";
 import { dispatchNavigate } from "@Cypher/helpers";
 import { colors } from "@Cypher/style-guide";
 import { dispatchReset } from "@Cypher/helpers/navigation";
@@ -50,6 +50,10 @@ export default function LoginCoinOSScreen() {
         }
     };
 
+    const forgotClickHandler = () => {
+        dispatchNavigate('ForgotCoinOSScreen')
+    }
+
     console.log('password: ', password.length)
     return (
         <ScreenLayout disableScroll showToolbar>
@@ -75,6 +79,11 @@ export default function LoginCoinOSScreen() {
                             label="Password"
                         />
                     </GradientCard>
+                    <TouchableOpacity style={{marginTop: 18, alignSelf: 'flex-end'}} onPress={forgotClickHandler}>
+                        <Text bold style={styles.forgot}>
+                            Forgot Password?
+                        </Text>
+                    </TouchableOpacity>
                 </View>
                 <GradientButton title="Login" disabled={!email.length || !password.length || isLoading} onPress={nextClickHandler} />
             </View>
