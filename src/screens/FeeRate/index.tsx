@@ -24,8 +24,8 @@ export default function FeeRate({ route, navigation }: Props) {
 
     return (
         <ScreenLayout disableScroll showToolbar isBackButton >
-            <ScrollView style={styles.container}>
-                <GradientInputNew isSats={isSats} sats={sats} setSats={setSats} usd={usd} isFeeesRate />
+            <ScrollView style={styles.container} contentContainerStyle={styles.container}>
+                <GradientInputNew isSats={isSats} sats={sats} setSats={setSats} usd={usd} title={'Customize feerate'} isFeeesRate />
             </ScrollView>
             <CustomKeyboardNew
                 title="Next"

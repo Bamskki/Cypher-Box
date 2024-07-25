@@ -115,7 +115,10 @@ export default function Settings() {
         }}>
             <RNAnimated.View style={[styles.main, { right: right }]}>
                 <View style={styles.settingView}>
-                    <Text bold style={styles.text}>Name Your Vault</Text>
+                    <View style={styles.rowview}>
+                        <Text bold style={styles.text}>Name Your Vault</Text>
+                        <View style={styles.blankspace} />
+                    </View>
                     <View style={styles.line} />
                     <TouchableOpacity onPress={backupSeedPhraseClickHandler}>
                         <Text bold style={styles.text}>Backup Seed Phrase</Text>

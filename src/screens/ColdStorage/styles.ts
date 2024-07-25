@@ -32,7 +32,7 @@ interface Style {
 export default StyleSheet.create<Style>({
     container: {
         flex: 1,
-        paddingBottom: 40,
+        paddingBottom: 30,
     },
     title: {
         fontSize: 18,
@@ -134,7 +134,7 @@ export default StyleSheet.create<Style>({
         width: 138,
         // height: 121,
         start: widths / 3 + 20,
-        top: -50,
+        top: -75,
         end: 0,
         zIndex: 1,
     },

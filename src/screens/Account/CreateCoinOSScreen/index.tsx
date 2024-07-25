@@ -11,6 +11,7 @@ import { colors } from "@Cypher/style-guide";
 import { emailRegex, passwordRegex, strongPasswordMessage } from "@Cypher/helpers/regex";
 import { loginUser, registerUser } from "@Cypher/api/coinOSApis";
 import useAuthStore from "@Cypher/stores/authStore";
+import { dispatchReset } from "@Cypher/helpers/navigation";
 
 export default function CreateCoinOSScreen() {
     const [username, setUsername] = useState('');
@@ -24,7 +25,7 @@ export default function CreateCoinOSScreen() {
 
     const loginClickHandler = () => {
         console.log('login click');
-        dispatchNavigate('ChangeUsername');
+        dispatchReset('ChangeUsername', { username: email });
     }
 
     const createClickHandler = async () => {

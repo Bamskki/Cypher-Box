@@ -2,18 +2,25 @@ import { shadow } from "@Cypher/style-guide";
 import { StyleSheet, TextStyle, ViewStyle } from "react-native";
 
 interface Style {
+    container: ViewStyle;
     priceView: ViewStyle;
     lGradient: ViewStyle;
     inDollar: TextStyle;
-    text: TextStyle;
+    dollar: TextStyle;
+    btc: TextStyle;
     input: TextStyle;
     card: ViewStyle;
     amount: ViewStyle;
     feesView: ViewStyle;
     sats: TextStyle;
+    netfee: TextStyle;
+    tips: TextStyle;
 }
 
 export default StyleSheet.create<Style>({
+    container: {
+        flex: 1,
+    },
     priceView: {
         justifyContent: 'center',
         paddingTop: 30,
@@ -28,9 +35,19 @@ export default StyleSheet.create<Style>({
         fontSize: 25,
         lineHeight: 30,
     },
-    text: {
+    dollar: {
         lineHeight: 60,
         position: 'absolute',
+        paddingTop: 30,
+        fontSize: 25,
+        right: 20,
+    },
+    btc: {
+        lineHeight: 60,
+        position: 'absolute',
+        paddingTop: 30,
+        fontSize: 50,
+        right: 25,
     },
     input: {
         height: 78,
@@ -50,12 +67,25 @@ export default StyleSheet.create<Style>({
         ...shadow.text25
     },
     feesView: {
+        flex: 1,
         alignSelf: 'center',
         marginTop: 10,
         alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 10,
     },
     sats: {
         fontSize: 25,
         lineHeight: 36,
+    },
+    netfee: {
+        fontSize: 18,
+        marginTop: 10,
+        lineHeight: 24,
+    },
+    tips: {
+        marginHorizontal: 25,
+        fontSize: 15,
+        marginBottom: 10,
     }
 })

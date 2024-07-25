@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Image, LayoutAnimation, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Text } from "@Cypher/component-library";
 import { CoinOs, Key, Settings, Time } from "@Cypher/assets/images";
 import { colors } from "@Cypher/style-guide";
@@ -13,7 +13,7 @@ interface Props {
 export default function Tabs({ onChangeSelectedTab, selectedTab }: Props) {
     const tabs = useMemo(() => [
         { id: 0, name: 'Vault', icon: Key },
-        { id: 1, name: 'Coins', icon: CoinOs },
+        { id: 1, name: 'Bars', icon: CoinOs },
         { id: 2, name: 'History', icon: Time },
         { id: 3, name: 'Settings', icon: Settings },
     ], []);

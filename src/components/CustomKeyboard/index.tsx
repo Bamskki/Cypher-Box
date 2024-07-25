@@ -29,7 +29,7 @@ export default function CustomKeyBoard({ title, disabled, onPress, setSATS, setU
     useEffect(() => {
         if (sats.length) {
             let amount = 0;
-            if(isSats){
+            if (isSats) {
                 amount = ((matchedRate || 0) * currency * Number(sats)).toFixed(5)
                 console.log('amount: ', amount)
                 setSATS(sats);
@@ -40,7 +40,7 @@ export default function CustomKeyBoard({ title, disabled, onPress, setSATS, setU
                 const total = multiplier * Number(sats);
                 const total_ = total.toFixed(4);
                 setSATS(sats);
-                setUSD(String(amount));    
+                setUSD(String(amount));
             }
         } else {
             setUSD('');

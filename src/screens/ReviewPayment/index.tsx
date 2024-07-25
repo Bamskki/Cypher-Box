@@ -374,7 +374,7 @@ export default function ReviewPayment({ route }: Props) {
                             />
                         </View>
                         <View style={styles.sats}><Text h2>{formatNumber(balance)} sats  ~  </Text><Text h3>${convertedRate.toFixed(2)}</Text></View>
-                        <Text bold style={styles.text}>{formatNumber(Number(withdrawThreshold))} sats</Text>
+                        <Text bold style={styles.text}>{formatNumber(Number(withdrawThreshold + reserveAmount))} sats</Text>
                         {(type == 'bitcoin' || type == 'liquid') &&
                             <View style={{paddingHorizontal: 25, alignItems: 'center'}}>
                                 <View style={styles.showLine} />
