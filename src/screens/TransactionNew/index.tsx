@@ -29,7 +29,7 @@ export default function Transaction() {
         const intervalId = setInterval(() => {
             setProgress((prevProgress) => {
                 if (prevProgress < 1) {
-                    return prevProgress + 0.01;
+                    return prevProgress + 0.001;
                 } else {
                     clearInterval(intervalId);
                     return 1;

@@ -4,7 +4,7 @@ import { Image, SectionList, View } from "react-native";
 import { GradientView, SavingVault } from "@Cypher/components";
 import styles from "./styles";
 import { colors, widths } from "@Cypher/style-guide";
-import { Copy, InformationNew, QrCode, Share, ShareNew } from "@Cypher/assets/images";
+import { CoinOS, Copy, InformationNew, QrCode, Share, ShareNew } from "@Cypher/assets/images";
 import Items from "./Items";
 import Header from "./Header";
 
@@ -71,7 +71,9 @@ export default function History() {
 
     return (
         <View style={{
-            flex: 1, marginTop: 5,
+            flex: 1, marginTop: 15,
+            borderTopColor: '#5E5E5E',
+            borderTopWidth: 0.5,
         }}>
             <SectionList
                 sections={transactions}
@@ -79,18 +81,19 @@ export default function History() {
                 renderItem={({ item }) => <Items item={item} onPressHandler={onPressHandler} />}
                 renderSectionHeader={({ section: { title } }) => <Header title={title} />}
                 contentContainerStyle={{
-                    borderTopColor: colors.white,
-                    borderTopWidth: 1,
-                    borderBottomColor: colors.white,
-                    borderBottomWidth: 1,
+                    // borderTopColor: colors.white,
+                    // borderTopWidth: 1,
+                    // borderBottomColor: colors.white,
+                    // borderBottomWidth: 1,
                 }}
                 style={{
                     flex: 1,
-                    marginBottom: 30,
+                    // borderTopColor: colors.white,
+                    // borderTopWidth: 1,
                 }}
                 invertStickyHeaders
             />
-
+            <View style={styles.bottomView} />
         </View>
     )
 }

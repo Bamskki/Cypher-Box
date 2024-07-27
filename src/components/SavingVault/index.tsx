@@ -25,11 +25,12 @@ interface Props extends TouchableOpacityProps {
     titleStyle?: TextStyle;
     onPress?(): void;
     title?: string;
-    bitcoinValue?: any;
+    bitcoinValue?: string | false | undefined;
     inDollars?: any;
+    isColorable?: boolean;
 }
 
-export default function SavingVault({ container, innerContainer, shadowTopBottom, shadowBottomBottom, bitcoinText, onPress, imageStyle, title = 'Savings Vault', titleStyle, bitcoinValue, inDollars }: Props) {
+export default function SavingVault({ container, innerContainer, shadowTopBottom, shadowBottomBottom, bitcoinText, onPress, imageStyle, title = 'Savings Vault', titleStyle, bitcoinValue, inDollars, isColorable = false }: Props) {
     const btc = '0.1';
     // const inDollar = '6500';
     return (
@@ -59,7 +60,7 @@ export default function SavingVault({ container, innerContainer, shadowTopBottom
                             <Text h3>~ {inDollars}</Text>
                         </View>
                     }
-                    {bitcoinValue ?
+                    {bitcoinValue && !isColorable ?
                         <View style={styles.tabs}>
                             <ProgressBar image={ProgressBar1} />
                             <ProgressBar image={ProgressBar2} />

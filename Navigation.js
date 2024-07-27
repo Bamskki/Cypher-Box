@@ -90,6 +90,7 @@ import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/
 import Invoice from '@Cypher/screens/Invoice';
 import ChangeUsername from '@Cypher/screens/Account/ChangeUsername';
 import TransactionNew from '@Cypher/screens/TransactionNew';
+import ForgetPassword from '@Cypher/screens/Account/ForgetPassword';
 
 const WalletsStack = createStackNavigator();
 
@@ -125,6 +126,7 @@ const WalletsRoot = () => {
       <WalletsStack.Screen name="DownloadBlink" component={DownloadBlink} options={{ headerShown: false }} />
       <WalletsStack.Screen name="LoginBlink" component={LoginBlink} options={{ headerShown: false }} />
       <WalletsStack.Screen name="CreateCoinOSScreen" component={CreateCoinOSScreen} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="ForgotCoinOSScreen" component={ForgetPassword} options={{ headerShown: false }} />
       <WalletsStack.Screen name="ChangeUsername" component={ChangeUsername} options={{ headerShown: false }} />
       <WalletsStack.Screen name="LoginCoinOSScreen" component={LoginCoinOSScreen} options={{ headerShown: false }} />
       <WalletsStack.Screen name="LoginBlinkPhone" component={LoginBlinkPhone} options={{ headerShown: false }} />

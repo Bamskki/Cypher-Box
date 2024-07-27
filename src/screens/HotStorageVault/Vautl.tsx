@@ -10,6 +10,9 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import { GradientView, SavingVault } from "@Cypher/components";
 import styles from "./styles";
 
+import { heights, widths } from "@Cypher/style-guide";
+import RBSheet from "react-native-raw-bottom-sheet";
+import ReceivedList from "../HomeScreen/ReceivedList";
 import { BlueStorageContext } from "../../../blue_modules/storage-context";
 import { Copy, InformationNew, QrCode, Share as Share2, ShareNew } from "@Cypher/assets/images";
 import { btc } from "@Cypher/helpers/coinosHelper";
@@ -32,6 +35,7 @@ export default function Vault({wallet, matchedRate}: {wallet: any, matchedRate: 
     const [address, setAddress] = useState()
     const base64QrCodeRef = useRef('');
 
+    console.log('Number(wallet?.getBalance(): ', wallet)
     const obtainWalletAddress = async () => {
         let newAddress;
         try {
@@ -131,6 +135,7 @@ export default function Vault({wallet, matchedRate}: {wallet: any, matchedRate: 
             </View>
             {address ?
                 <>
+                    <Text h4 style={styles.infoText}>You can use this vault address to receive coins from another vault on the Bitcoin Network</Text>
                     <View style={styles.qrcode}>
                         <View style={{ margin: 25, padding: 20, backgroundColor: 'white', borderRadius: 30 }}>
                             <QRCode
