@@ -1,5 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from "react";
-import { LayoutAnimation, View } from "react-native";
+import React, { useState, useCallback } from "react";
 import { Text, ScreenLayout } from "@Cypher/component-library";
 import { CustomFlatList, GradientView } from "@Cypher/components";
 import styles from "./styles";
@@ -27,14 +26,6 @@ const HotStorageVault = () => {
     const { wallet, matchedRate } = useRoute().params as { wallet: any, matchedRate: string };
     const [utxo, setUtxo] = useState(null);
 
-    const handleCoinControl = () => {
-        const walletID = wallet.getID()
-      };
-
-    useEffect(() => {
-
-    }, [wallet])
-
     const onChangeSelectedTab = useCallback((id: number) => {
         setSelectedTab(id);
     }, []);
@@ -47,7 +38,7 @@ const HotStorageVault = () => {
             case 1:
                 return <Bars />;
             case 2:
-                return <History />;
+                return <History wallet={wallet} matchedRate={matchedRate} />;
             case 3:
                 return <Settings />;
             default:
@@ -56,7 +47,12 @@ const HotStorageVault = () => {
     }, [selectedTab, wallet, matchedRate]);
 
     return (
-        <ScreenLayout showToolbar title={'Hot Storage Vault'} disableScroll>
+        <ScreenLayout 
+            showToolbar 
+            title={'Hot Storage Vault'} 
+            disableScroll
+            style={{paddingBottom: 20}}
+        >
             <Tabs onChangeSelectedTab={onChangeSelectedTab} selectedTab={selectedTab} />
             {renderView()}
         </ScreenLayout>

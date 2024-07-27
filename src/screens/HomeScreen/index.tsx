@@ -31,7 +31,7 @@ import useAuthStore from "@Cypher/stores/authStore";
 import { getCurrencyRates, getMe, getTransactionHistory } from "@Cypher/api/coinOSApis";
 import { btc, formatNumber, matchKeyAndValue } from "@Cypher/helpers/coinosHelper";
 import { AbstractWallet, HDSegwitBech32Wallet, HDSegwitP2SHWallet } from "../../../class";
-import loc from '../../../loc';
+import loc, { formatBalance, formatBalanceWithoutSuffix } from '../../../loc';
 import { initialState, walletReducer } from "../../../screen/wallets/add";
 import { BlueStorageContext } from '../../../blue_modules/storage-context';
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -68,10 +68,10 @@ export default function HomeScreen({ route }: Props) {
   const [wt, setWt] = useState<number>();
   const [isWithdraw, setIsWithdraw] = useState<boolean>(true);
   const [isAllDone, setIsAllDone] = useState<boolean>(false);
-  const [wallet, setWallet] = useState(undefined)
+  const [wallet, setWallet] = useState(undefined);
+  const [balanceVault, setBalanceVault] = useState<string | false | undefined>("");
+  const [balanceWithoutSuffix, setBalanceWithoutSuffix] = useState()
   
-  console.log("🚀 ~ HomeScreen ~ route?.params?.isComplete:", route?.params?.isComplete)
-
   const refRBSheet = useRef<any>(null);
   const { isAuth, walletID, token, user, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
 
@@ -93,9 +93,17 @@ export default function HomeScreen({ route }: Props) {
       if (isAuth && token) {
         handleUser();
         loadPayments();
-        const wallet = wallets.find((w: AbstractWallet) => w.getID() === walletID);
-        setWallet(wallet)
-        setIsAllDone(!!wallet)
+        if(wallets && walletID){
+          const allWallets = wallets.concat(false);
+          const walletTemp = allWallets.find((w: AbstractWallet) => w.getID() === walletID);
+          const balanceTemp = !walletTemp?.hideBalance && formatBalance(walletTemp?.getBalance(), walletTemp?.getPreferredBalanceUnit(), true);
+          const balanceWithoutSuffixTemp = !walletTemp?.hideBalance && formatBalanceWithoutSuffix(Number(walletTemp?.getBalance()), walletTemp?.getPreferredBalanceUnit(), true);
+          await walletTemp.fetchBalance()
+          setWallet(walletTemp);
+          setBalanceWithoutSuffix(balanceWithoutSuffixTemp)
+          setBalanceVault(balanceTemp)
+          setIsAllDone(!!walletTemp);
+        }
       } else {
         setIsLoading(false)
       }
@@ -108,21 +116,18 @@ export default function HomeScreen({ route }: Props) {
     // }
     // getWithdrawal();
     handleToken();
-  }, [isAuth, token]);
+  }, [isAuth, token, wallets, walletID]);
 
 
   const handleUser = async () => {
     try {
       const response = await getMe();
-      console.log('response: ', response);
       const responsetest = await getCurrencyRates();
       const currency = btc(1);
       const matched = matchKeyAndValue(responsetest, 'USD')
       setMatchedRate(matched || 0)
-      console.log('converter: ', (matched || 0) * currency * response.balance);
       setConvertedRate((matched || 0) * currency * response.balance)
       setCurrency("USD")
-      console.log('currency: ', currency)
       if (response?.balance) {
         setBalance(response?.balance || 0);
       }
@@ -145,17 +150,14 @@ export default function HomeScreen({ route }: Props) {
   };
 
   const navigateToSettings = () => {
-    console.log('setting click');
     dispatchNavigate("Settings");
   };
 
   const onScanButtonPressed = () => {
-    console.log('scan click');
     scanQrHelper(navigate, routeName).then(onBarScanned);
   };
 
   const loginClickHandler = () => {
-    console.log('login click');
     dispatchNavigate('LoginCoinOSScreen');
   };
 
@@ -171,17 +173,14 @@ export default function HomeScreen({ route }: Props) {
   };
 
   const createChekingAccountClickHandler = () => {
-    console.log('create account click');
     dispatchNavigate("CheckAccount");
   };
 
   const receiveClickHandler = () => {
-    console.log('received click');
     refRBSheet.current.open();
   };
 
   const sendClickHandler = () => {
-    console.log('send click');
     dispatchNavigate('SendScreen', { currency, matchedRate });
   };
 
@@ -200,12 +199,10 @@ export default function HomeScreen({ route }: Props) {
   };
 
   const savingVaultClickHandler = () => {
-    console.log('savingVaultClickHandler click');
     dispatchNavigate('HotStorageVault', { wallet, matchedRate });
   };
 
   const coldStorageClickHandler = () => {
-    console.log('coldStorageClickHandler click');
     dispatchNavigate('ColdStorage');
   };
 
@@ -213,8 +210,11 @@ export default function HomeScreen({ route }: Props) {
     dispatchNavigate('SavingVaultIntroNew');
   };
 
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefreshing(true);
+    if(wallet){
+      await wallet?.fetchBalance();
+    }
     handleUser()
   };
 
@@ -241,8 +241,7 @@ export default function HomeScreen({ route }: Props) {
         }
   };
 
-
-  console.log('walletID: ', walletID)
+  console.log('matchedRate: ', currency)
   return (
     <ScreenLayout 
       RefreshControl={
@@ -470,7 +469,8 @@ export default function HomeScreen({ route }: Props) {
                     shadowBottomBottom={styles.savingVault}
                     bitcoinText={styles.bitcoinText}
                     onPress={savingVaultClickHandler}
-                    bitcoinValue='0.1 BTC ~ $6500'
+                    bitcoinValue={balanceVault}
+                    inDollars={`$${(Number(balanceWithoutSuffix) * Number(matchedRate) * btc(1)).toFixed(2)}`}
                     isColorable
                   />
                   :

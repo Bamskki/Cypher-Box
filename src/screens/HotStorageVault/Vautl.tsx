@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useRef, useState } from "react";
 import { LoadingSpinner, Text } from "@Cypher/component-library";
-import { Image, InteractionManager, TouchableOpacity, View } from "react-native";
+import { Image, InteractionManager, RefreshControl, ScrollView, TouchableOpacity, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import SimpleToast from "react-native-simple-toast";
 import Share from 'react-native-share';
@@ -32,10 +32,11 @@ export default function Vault({wallet, matchedRate}: {wallet: any, matchedRate: 
     const balance = !wallet?.hideBalance && formatBalance(Number(wallet?.getBalance()), wallet?.getPreferredBalanceUnit(), true);
     const balanceWithoutSuffix = !wallet?.hideBalance && formatBalanceWithoutSuffix(Number(wallet?.getBalance()), wallet?.getPreferredBalanceUnit(), true);
     const { wallets, saveToDisk, sleep, isElectrumDisabled } = useContext(BlueStorageContext);
-    const [address, setAddress] = useState()
+    const [address, setAddress] = useState();
+    const [refreshing, setRefreshing] = useState(false);
     const base64QrCodeRef = useRef('');
 
-    console.log('Number(wallet?.getBalance(): ', wallet)
+    console.log('Number(wallet?.getBalance(): ', isElectrumDisabled)
     const obtainWalletAddress = async () => {
         let newAddress;
         try {
@@ -54,14 +55,9 @@ export default function Vault({wallet, matchedRate}: {wallet: any, matchedRate: 
 
     useFocusEffect(
         useCallback(() => {
-          const task = InteractionManager.runAfterInteractions(async () => {
             if (wallet) {
                 obtainWalletAddress();
             }
-          });
-          return () => {
-            task.cancel();
-          };
           // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [wallet]),
     );
@@ -91,10 +87,28 @@ export default function Vault({wallet, matchedRate}: {wallet: any, matchedRate: 
         }
     };
 
+    const onRefresh = async () => {
+        setRefreshing(true);
+        if(wallet){
+            obtainWalletAddress();
+            await wallet?.fetchBalance();
+        }  
+        setRefreshing(false);  
+    }
+
 
     console.log('address: ', address)
     return (
-        <View style={styles.container}>
+        <ScrollView 
+            style={styles.container}
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    tintColor="white"
+                />
+            } 
+        >
             <SavingVault
                 container={styles.savingVault}
                 innerContainer={styles.savingVault}
@@ -169,6 +183,6 @@ export default function Vault({wallet, matchedRate}: {wallet: any, matchedRate: 
                 </View>       
 
             }
-        </View>
+        </ScrollView>
     )
 }
