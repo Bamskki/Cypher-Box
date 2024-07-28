@@ -10,6 +10,7 @@ import Header from "./Header";
 import { BlueStorageContext, WalletTransactionsStatus } from "../../../blue_modules/storage-context";
 import screenHeight from "@Cypher/style-guide/screenHeight";
 import dayjs from "dayjs";
+import { dispatchNavigate } from "@Cypher/helpers";
 
 export default function History({ wallet, matchedRate }: any) {
     const transactions = [
@@ -186,7 +187,9 @@ export default function History({ wallet, matchedRate }: any) {
       };
     
 
-    const onPressHandler = () => { };
+    const onPressHandler = (item: any) => { 
+        dispatchNavigate('SendReceiveOnChain', {transaction: item, history: true, matchedRate});    
+    };
 
     const transformDataToSections = (data) => {
         const groupedData = data.reduce((acc, item) => {
@@ -213,7 +216,7 @@ export default function History({ wallet, matchedRate }: any) {
             <SectionList
                 sections={sections}
                 keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => <Items matchedRate={matchedRate}  item={item} onPressHandler={onPressHandler} />}
+                renderItem={({ item }) => <Items matchedRate={matchedRate}  item={item} onPressHandler={() => onPressHandler(item)} />}
                 renderSectionHeader={({ section: { title } }) => <Header title={title} />}
                 onEndReached={async () => {
                     // pagination in works. in this block we will add more txs to FlatList
