@@ -1,6 +1,6 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Input, Text } from "@Cypher/component-library";
-import { Animated, Dimensions, ImageBackground, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Animated, Dimensions, FlatList, ImageBackground, ScrollView, StyleSheet, View } from "react-native";
 import styles from "./styles";
 import { GradientCard, GradientView } from "@Cypher/components";
 import ListView from "./ListView";
@@ -8,91 +8,66 @@ import Svg, { Image } from 'react-native-svg';
 // import BackgroundSvg from '../../assets/svg/transaction.svg';
 // import Bitcoin from '../../assets/svg/bitcoin.svg';
 import { colors, heights, widths } from "@Cypher/style-guide";
-import { Transaction } from "@Cypher/assets/images";
-import RBSheet from "react-native-raw-bottom-sheet";
-import ReceivedList from "../HomeScreen/ReceivedList";
+import debounce from "../../../blue_modules/debounce";
+import { BlueStorageContext } from "../../../blue_modules/storage-context";
+import screenHeight from "@Cypher/style-guide/screenHeight";
+import { btc as btcHandle } from "@Cypher/helpers/coinosHelper";
 // import { Bitcoin, Transaction, TransactionN } from "@Cypher/assets/svg";
 
-export default function Bars() {
-    const [matchedRate, setMatchedRate] = useState(0);
-    const [currency, setCurrency] = useState('$');
-    const [value, setValue] = useState('');
+export default function Bars({wallet, matchedRate}: any) {
     const [ids, setIds] = useState([]);
+    const [loading, setLoading] = useState(true);
     console.log("🚀 ~ Bars ~ ids:", ids)
     const [btc, setBtc] = useState('0.00');
-    const [convertedValue, setConvertedValue] = useState('~ $6500');
+    const utxo = wallet.getUtxo(true).sort((a, b) => a.height - b.height || a.txid.localeCompare(b.txid) || a.vout - b.vout);
+    const [frozen, setFrozen] = useState(
+        utxo.filter(out => wallet.getUTXOMetadata(out.txid, out.vout).frozen).map(({ txid, vout }) => `${txid}:${vout}`),
+    );
+    const { wallets, saveToDisk, sleep } = useContext(BlueStorageContext);
+
+    const debouncedSaveFronen = useRef(
+        debounce(async frzn => {
+            utxo.forEach(({ txid, vout }) => {
+                wallet.setUTXOMetadata(txid, vout, { frozen: frzn.includes(`${txid}:${vout}`) });
+            });
+            await saveToDisk();
+        }, 500),
+    );
+
+    useEffect(() => {
+        debouncedSaveFronen.current(frozen);
+    }, [frozen]);
+    
+    useEffect(() => {
+        (async () => {
+            try {
+                await Promise.race([wallet.fetchUtxo(), sleep(10000)]);
+            } catch (e) {
+                console.log('coincontrol wallet.fetchUtxo() failed'); // either sleep expired or fetchUtxo threw an exception
+            }
+            const freshUtxo = wallet.getUtxo(true);
+            setFrozen(freshUtxo.filter(out => wallet.getUTXOMetadata(out.txid, out.vout).frozen).map(({ txid, vout }) => `${txid}:${vout}`));
+            setLoading(false);
+        })();
+    }, [wallet, setLoading, sleep]);
     // const offset = useRef(new Animated.Value(0)).current;
     // console.log("🚀 ~ Coins ~ offset:", offset);
 
-    const [data, setData] = useState([
-        {
-            id: 1,
-            address: '3dbf...0ae3',
-            type: 0,
-            type2: 'Blink Settlement',
-            value: 0.02,
-        },
-        {
-            id: 2,
-            address: '3dbf...0ae3',
-            type: 1,
-            type2: 'Blink Settlement',
-            value: 0.02,
-        },
-        {
-            id: 3,
-            address: '3dbf...0ae3',
-            type: 2,
-            type2: 'Blink Settlement',
-            value: 0.02,
-        },
-        {
-            id: 4,
-            address: '3dbf...0ae3',
-            type: 3,
-            type2: 'Blink Settlement',
-            value: 0.02,
-        },
-        {
-            id: 5,
-            address: '3dbf...0ae3',
-            type: 0,
-            type2: 'Blink Settlement',
-            value: 0.02,
-        },
-        {
-            id: 6,
-            address: '3dbf...0ae3',
-            type: 1,
-            type2: 'Blink Settlement',
-            value: 0.02,
-        },
-        {
-            id: 7,
-            address: '3dbf...0ae3',
-            type: 2,
-            type2: 'Blink Settlement',
-            value: 0.02,
-        },
-        {
-            id: 8,
-            address: '3dbf...0ae3',
-            type: 3,
-            type2: 'Blink Settlement',
-            value: 0.02,
-        },
-    ]);
     const addressClickHandler = () => { }
 
     const { total, inUSD } = useMemo(() => {
         let total = 0;
         ids.forEach(id => {
-            const result = data?.find(obj => obj.id === id)?.value;
+            const result = utxo?.find(obj => obj.txid === id)?.value;
             if (result) total += result;
         });
-        const inUSD = total * 63749.40;
+        const currency = btcHandle(1);
+        const inUSD = total * matchedRate * currency;
+        // const BTCAmount = btcHandle(total) + " BTC";
+    
+        // const inUSD = total * 63749.40;
         return { total, inUSD };
-    }, [ids, data]);
+    }, [ids, utxo]);
 
     const onPressClickHandler = (id_: number) => {
         console.log("🚀 ~ onPressClickHandler ~ id:", id_)
@@ -106,6 +81,7 @@ export default function Bars() {
         setIds(newIds);
     }
 
+    console.log('utxo: ', utxo)
     return (
         <View style={styles.flex}>
             <Text bold style={styles.desc}>Tap on your coins to label them. Select multiple coins and batch them together to optimize fees for future transactions:</Text>
@@ -116,9 +92,24 @@ export default function Bars() {
                 <Text bold style={styles.select}>Select</Text>
             </View>
             <View style={styles.border} />
-            <ScrollView>
+            {loading ?
+                <ActivityIndicator style={{ marginTop: 10, marginBottom: 20 }} color={colors.white} />
+            :
+                <FlatList
+                    data={utxo}
+                    keyExtractor={(_, index) => index.toString()}
+                    showsVerticalScrollIndicator={false}
+                    ListEmptyComponent={() => (
+                        <View style={{ height: screenHeight / 2.2, justifyContent: 'center', alignItems: 'center', marginTop: 30 }}>
+                            <Text white h3 bold>This wallet does not have any coins at the moment.</Text>
+                        </View>
+                    )}
+                    renderItem={({item, index}) => <ListView item={item} onPress={onPressClickHandler} ids={ids} />}
+                />
+            }
+            {/* <ScrollView>
                 {data.map((data_, index) => <ListView item={data_} onPress={onPressClickHandler} ids={ids} />)}
-            </ScrollView>
+            </ScrollView> */}
             <View style={styles.bottomViewNew}>
                 <Text h2 center>Size of selected bars and coins:</Text>
                 <View style={styles.priceView}>

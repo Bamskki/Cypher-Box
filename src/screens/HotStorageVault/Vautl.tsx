@@ -27,7 +27,7 @@ const shortenAddress = (address: string) => {
     return `${start}...${end}`;
 };
 
-export default function Vault({wallet, matchedRate}: {wallet: any, matchedRate: string}) {
+export default function Vault({wallet, matchedRate, setSelectedTab}: {wallet: any, matchedRate: string, setSelectedTab: (tab: number) => void}) {
     const currency = btc(1);
     const balance = !wallet?.hideBalance && formatBalance(Number(wallet?.getBalance()), wallet?.getPreferredBalanceUnit(), true);
     const balanceWithoutSuffix = !wallet?.hideBalance && formatBalanceWithoutSuffix(Number(wallet?.getBalance()), wallet?.getPreferredBalanceUnit(), true);
@@ -36,7 +36,6 @@ export default function Vault({wallet, matchedRate}: {wallet: any, matchedRate: 
     const [refreshing, setRefreshing] = useState(false);
     const base64QrCodeRef = useRef('');
 
-    console.log('Number(wallet?.getBalance(): ', isElectrumDisabled)
     const obtainWalletAddress = async () => {
         let newAddress;
         try {
@@ -68,7 +67,7 @@ export default function Vault({wallet, matchedRate}: {wallet: any, matchedRate: 
     };
 
     const addressClickHandler = () => {
-
+        setSelectedTab(1)
     }
 
     const shareQRCode = async () => {

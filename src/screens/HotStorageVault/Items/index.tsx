@@ -7,17 +7,19 @@ import { Bitcoin, Socked } from "@Cypher/assets/images";
 import { btc } from "@Cypher/helpers/coinosHelper";
 
 interface Props {
+    wallet: any;
     item: any;
     matchedRate: any;
     onPressHandler(item: any): void;
 }
 
-export default function Items({ item, matchedRate, onPressHandler }: Props) {
+export default function Items({ wallet, item, matchedRate, onPressHandler }: Props) {
     console.log('item: ', item)
     const satsAmount = item.value.toString().replace('-', ''); // Adjusted for negative sign
+    const BTCAmount = btc(satsAmount) + " BTC";
     const amountSign = item.value < 0 ? "-" : "+";
     const currency = btc(1);
-    const dollarAmount = satsAmount * matchedRate * currency;
+    const dollarAmount = Number(satsAmount) * matchedRate * currency;
 
     return <TouchableOpacity style={styles.shadowView} onPress={() => onPressHandler(item)}>
         <Shadow
@@ -37,7 +39,7 @@ export default function Items({ item, matchedRate, onPressHandler }: Props) {
                           : "Pending"
                         : "Sent"}
                     </Text>
-                    <Text h3 style={{ color: amountSign == '+' ? '#4FBF67' : '#FF7A68' }}>{amountSign+satsAmount} sats</Text>
+                    <Text h3 style={{ color: amountSign == '+' ? '#4FBF67' : '#FF7A68' }}>{amountSign+BTCAmount}</Text>
                     {/* <Text h3 style={{ color: item?.sats?.includes('+') ? '#4FBF67' : '#FF7A68' }}>{item?.sats}</Text> */}
                 </View>
                 <Text style={StyleSheet.flatten([styles.text, { color: amountSign == '+' ? '#4FBF67' : '#FF7A68' }])}>{'$'+dollarAmount.toFixed(2)}</Text>

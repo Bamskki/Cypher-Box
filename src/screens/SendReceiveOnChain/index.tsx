@@ -5,6 +5,7 @@ import styles from "./styles";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 import TextView from "./TextView";
 import { btc } from "@Cypher/helpers/coinosHelper";
+import { formatBalance } from "../../../loc";
 
 interface Props {
     route: any;
@@ -21,13 +22,14 @@ const shortenAddress = (address: string) => {
 
 
 export default function SendReceiveOnChain({ route }: Props) {
-    const { transaction, history, matchedRate } = route?.params;
+    const { transaction, history, matchedRate, wallet } = route?.params;
     const isSent = transaction.value < 0;
     const satsAmount = transaction.value.toString().replace('-', ''); // Adjusted for negative sign
     const amountSign = transaction.value < 0 ? "-" : "+";
     const currency = btc(1);
     const dollarAmount = satsAmount * matchedRate * currency;
-
+    const BTCAmount = btc(satsAmount) + " BTC";
+     
     const handleViewBtcNetExplorerClickHandler = () => {
         const url = `https://www.blockchain.com/btc/tx/${transaction?.txid}`;
         Linking.openURL(url).catch(err => console.error('An error occurred', err));
@@ -37,7 +39,7 @@ export default function SendReceiveOnChain({ route }: Props) {
         <ScreenLayout showToolbar isBackButton title="Review Transaction">
             <View style={styles.main}>
                 <View style={styles.valueView}>
-                    <Text semibold style={StyleSheet.flatten([styles.sats, { color: isSent ? '#FD7A68' : '#4FBF67' }])}>{amountSign+satsAmount} sats</Text>
+                    <Text semibold style={StyleSheet.flatten([styles.sats, { color: isSent ? '#FD7A68' : '#4FBF67' }])}>{amountSign+BTCAmount}</Text>
                     <Text bold subHeader>{'$'+dollarAmount.toFixed(2)}</Text>
                 </View>
                 <TextView keytext="Sent from: " text={`Bitcoin Address: ${shortenAddress(transaction?.inputs[0].addresses[0])}`} />

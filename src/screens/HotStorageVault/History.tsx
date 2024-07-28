@@ -13,63 +13,6 @@ import dayjs from "dayjs";
 import { dispatchNavigate } from "@Cypher/helpers";
 
 export default function History({ wallet, matchedRate }: any) {
-    const transactions = [
-        {
-            title: '4th March',
-            data: [{
-                text: 'Sent to Noor@Blink.sv',
-                sats: '-65 sats',
-                usd: '$0.04',
-                type: 'bitcoin',
-            },
-            {
-                text: 'Received to Blink Account',
-                sats: '+30k sats',
-                usd: '$0.56',
-                type: 'lightning',
-            }],
-        },
-        {
-            title: '28th February',
-            data: [
-                {
-                    text: 'Sent to Noor@Blink.sv',
-                    sats: '-70 sats',
-                    usd: '$0.04',
-                    type: 'lightning',
-                },
-                {
-                    text: 'Sent to Noor@Blink.sv',
-                    sats: '-70 sats',
-                    usd: '$0.04',
-                },
-                {
-                    text: 'Sent to Noor@Blink.sv',
-                    sats: '-70 sats',
-                    usd: '$0.04',
-                    type: 'lightning',
-                },
-                {
-                    text: 'Sent to Noor@Blink.sv',
-                    sats: '-70 sats',
-                    usd: '$0.04',
-                    type: 'lightning',
-                },
-                {
-                    text: 'Sent to Noor@Blink.sv',
-                    sats: '-70 sats',
-                    usd: '$0.04',
-                    type: 'lightning',
-                },
-                {
-                    text: 'Sent to Noor@Blink.sv',
-                    sats: '-70 sats',
-                    usd: '$0.04',
-                    type: 'lightning',
-                },
-            ],
-        },
-    ];
 
     const { wallets, saveToDisk, setSelectedWalletID, walletTransactionUpdateStatus, isElectrumDisabled } = useContext(BlueStorageContext);
     const [dataSource, setDataSource] = useState(wallet.getTransactions(10));
@@ -184,11 +127,11 @@ export default function History({ wallet, matchedRate }: any) {
           return b.sort_ts - a.sort_ts;
         });
         return txs.slice(0, lmt);
-      };
+    };
     
 
     const onPressHandler = (item: any) => { 
-        dispatchNavigate('SendReceiveOnChain', {transaction: item, history: true, matchedRate});    
+        dispatchNavigate('SendReceiveOnChain', {transaction: item, history: true, matchedRate, wallet});    
     };
 
     const transformDataToSections = (data) => {
@@ -216,7 +159,7 @@ export default function History({ wallet, matchedRate }: any) {
             <SectionList
                 sections={sections}
                 keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => <Items matchedRate={matchedRate}  item={item} onPressHandler={() => onPressHandler(item)} />}
+                renderItem={({ item }) => <Items wallet={wallet} matchedRate={matchedRate}  item={item} onPressHandler={() => onPressHandler(item)} />}
                 renderSectionHeader={({ section: { title } }) => <Header title={title} />}
                 onEndReached={async () => {
                     // pagination in works. in this block we will add more txs to FlatList

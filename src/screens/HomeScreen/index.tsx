@@ -241,7 +241,6 @@ export default function HomeScreen({ route }: Props) {
         }
   };
 
-  console.log('matchedRate: ', currency)
   return (
     <ScreenLayout 
       RefreshControl={

@@ -34,15 +34,15 @@ const HotStorageVault = () => {
         // LayoutAnimation.linear();
         switch (selectedTab) {
             case 0:
-                return <Vault wallet={wallet} matchedRate={matchedRate} />;
+                return <Vault wallet={wallet} matchedRate={matchedRate} setSelectedTab={setSelectedTab} />;
             case 1:
-                return <Bars />;
+                return <Bars wallet={wallet} matchedRate={matchedRate} />;
             case 2:
                 return <History wallet={wallet} matchedRate={matchedRate} />;
             case 3:
                 return <Settings />;
             default:
-                return <Vault wallet={wallet} matchedRate={matchedRate} />;
+                return <Vault wallet={wallet} matchedRate={matchedRate} setSelectedTab={setSelectedTab} />;
         }
     }, [selectedTab, wallet, matchedRate]);
 
