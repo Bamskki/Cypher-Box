@@ -193,7 +193,7 @@ export default function History({ wallet, matchedRate }: any) {
 
     const transformDataToSections = (data) => {
         const groupedData = data.reduce((acc, item) => {
-            const date = dayjs(item.time * 1000).format('YYYY-MM-DD');
+            const date = dayjs(item.time * 1000).format('ddd MMM DD YYYY');
             if (!acc[date]) acc[date] = [];
             acc[date].push(item);
             return acc;
