@@ -1,6 +1,5 @@
 const colors = {
   primary: '#1E1E1E',
-
   pink: {
     default: 'rgba(214, 23, 161, 0.9)',
     light: '#F959CC',
@@ -10,7 +9,6 @@ const colors = {
     shadowTop: '#D64FB0',
     dark: '#FB17A0',
   },
-
   shadow25: 'rgba(0, 0, 0, 0.25)',
   shadow50: 'rgba(0, 0, 0, 0.50)',
   shadow75: 'rgba(0, 0, 0, 0.75)',
@@ -42,6 +40,16 @@ const colors = {
     dark: '#090909',
     top: '#010101',
     bottom: '#847C7C',
+  },
+  gradient: {
+    utxo: {
+      start: '#4377FF',
+      end: '#00E0FF'
+    },
+    green: {
+      start: "#98DAA8",
+      end: "#00FF47"
+    }
   },
   red: '#FF0000',
   stroke: '#A1A1A1',

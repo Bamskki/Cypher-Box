@@ -6,7 +6,7 @@ import ReactNativeModal from "react-native-modal";
 import styles from "./styles";
 import { Input, LoadingSpinner, ScreenLayout, Text } from "@Cypher/component-library";
 import { CoinOSSmall } from "@Cypher/assets/images";
-import { GradientButton, GradientCard, GradientCardWithShadow, GradientText, ImageText, SwipeButton } from "@Cypher/components";
+import { GradientButton, GradientCard, GradientCardWithShadow, GradientText, ImageText, SwipeButton, UtxoCapsule } from "@Cypher/components";
 import { colors } from "@Cypher/style-guide";
 import { dispatchNavigate } from "@Cypher/helpers";
 import LinearGradient from "react-native-linear-gradient";
@@ -31,8 +31,8 @@ type Fees = {
     economyFee: number;
 };
 
-export default function ReviewPayment({ route }: Props) {
-    const { value, converted, isSats, to, type, recommendedFee } = route?.params;
+export default function ReviewWithdrawal({ route }: Props) {
+    const { value, converted, isSats, to, type, recommendedFee, isWithrawal } = route?.params;
     const { withdrawThreshold, reserveAmount } = useAuthStore();
     const [note, setNote] = useState('');
     const [balance, setBalance] = useState(0);
@@ -48,6 +48,7 @@ export default function ReviewPayment({ route }: Props) {
     const [feeLoading, setFeeLoading] = useState<boolean>(false);
     const [isSendLoading, setIsSendLoading] = useState<boolean>(false);
     const [isModalVisible, setModalVisible] = useState(false);
+
     const swipeButtonRef = useRef(null);
     const feeNames: Record<Fee, string> = {
         fastestFee: "Fastest",
@@ -171,12 +172,14 @@ export default function ReviewPayment({ route }: Props) {
 
     const handleToggle = (val: any) => {
         console.log("🚀 ~ handleToggle ~ value:", val)
+                         dispatchNavigate('TransactionBroadCast', {matchedRate, type, value, converted, isSats, to});        
+
         if (val) {
             handleSendSats();
             // if(type == 'lightening' || type == 'username')
             //     dispatchNavigate('Transaction', {matchedRate, type, value, converted, isSats, to});
             // else 
-            //     dispatchNavigate('TransactionBroadCast', {matchedRate, type, value, converted, isSats, to});        
+                 dispatchNavigate('TransactionBroadCast', {matchedRate, type, value, converted, isSats, to});        
         }
     }
 
@@ -324,6 +327,10 @@ export default function ReviewPayment({ route }: Props) {
         }
     };
 
+    const editAmountHandler = () => {
+        dispatchNavigate('SendToSavingsVault', { currency, matchedRate });
+    }
+
     const increaseClickHandler = () => {
         const feeKeys = Object.values(feeNames);
         const currentIndex = feeKeys.indexOf(selectedFeeName !== "Select Fee" ? selectedFeeName : '');
@@ -351,7 +358,7 @@ export default function ReviewPayment({ route }: Props) {
     };
 
     return (
-        <ScreenLayout showToolbar isBackButton title="Review Payment">
+        <ScreenLayout showToolbar isBackButton title="Review withdrawal">
             <View style={styles.topView}>
                 {isStartLoading ?
                     <ActivityIndicator style={{ marginTop: 10, marginBottom: 20 }} color={colors.white} />
@@ -384,24 +391,48 @@ export default function ReviewPayment({ route }: Props) {
                                     start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
                                     colors={[colors.white, colors.pink.dark]}
                                     style={[styles.linearGradient2, { width: `${calculatePercentage(balance, reserveAmount)}%` }]}>
-                                    {/* <View style={[styles.box, {marginLeft: `${Math.min((withdrawThreshold / (Number(withdrawThreshold + reserveAmount) || 0)) * 100, 100)}%`}]} /> */}
-                                    {/* <Shadow
-                                        inner // <- enable inner shadow
-                                        useArt // <- set this prop to use non-native shadow on ios
-                                        style={styles.top2} >
-                                    </Shadow> */}
                                 </LinearGradient>
 
-                                {/* <View style={[styles.box, {marginLeft: `${Math.min((balance / (Number(withdrawThreshold) || 0)) * 100, 100)}%`}]} />
-                                </View> */}
+
                             </View>
                         }
                     </GradientCardWithShadow>
                 }
+
+
+
                 <View style={styles.middle}>
-                    <TextViewV2 keytext="Recipient will get: " text={isSats ? `${value} sats ~ $${converted}` : `$${value} ~ $${converted} sats`} textStyle={styles.price} />
-                    <TextViewV2 keytext="Sent from: " text="Coinos Checking Account" />
-                    <TextViewV2 keytext="To: " text={to} />
+                    <View style={styles.editAmount}>
+                        <TextViewV2 keytext="Withdrawn amount:" text={isSats ? `${value} btc ~ $${converted}` : `$${value} ~ $${converted} btc`} textStyle={styles.price} />
+                        <GradientCard disabled
+                            colors_={['#FFFFFF', '#B6B6B6']}
+                            style={styles.linearGradientStroke} linearStyle={styles.linearGradient3}>
+                            <View style={styles.background}>
+                                <TouchableOpacity onPress={editAmountHandler}>
+                                    <Text bold style={{ fontSize: 16 }}>Edit amount</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </GradientCard>
+                    </View>
+                    <LinearGradient
+                        start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
+                        colors={[colors.gradient.green.start, colors.gradient.green.end]}
+                        style={[styles.utxoCapsule]}
+                    />
+
+                    <TextViewV2 keytext="Sent from: " text="My Coinos Checking Account" />
+                    <View style={styles.editAmount}>
+                        <TextViewV2 keytext="To: " text={to} />
+                        <GradientCard disabled
+                            colors_={['#FFFFFF', '#B6B6B6']}
+                            style={styles.linearGradientStroke2} linearStyle={styles.linearGradient3}>
+                            <View style={styles.background}>
+                                <TouchableOpacity onPress={() => setModalVisible(true)}>
+                                    <Text bold style={{ fontSize: 14, fontStyle: 'italic', color: "#23C47F" }}>Vault address: 1B8Du...HTzA</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </GradientCard>
+                    </View>
                     {to && value && (type === 'bitcoin' || type === 'liquid') && recommendedFee ?
                         <>
                             <View style={styles.feesView}>

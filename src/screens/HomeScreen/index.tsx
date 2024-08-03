@@ -56,7 +56,7 @@ export default function HomeScreen({ route }: Props) {
   const [refreshing, setRefreshing] = useState(false);
   const [payment, setPayments] = useState([])
   const [wt, setWt] = useState<number>();
-  const [isWithdraw, setIsWithdraw] = useState<boolean>(false);
+  const [isWithdraw, setIsWithdraw] = useState<boolean>(true);
   const [isAllDone, setIsAllDone] = useState<boolean>(false);
   console.log("🚀 ~ HomeScreen ~ route?.params?.isComplete:", route?.params?.isComplete)
 
@@ -152,12 +152,10 @@ export default function HomeScreen({ route }: Props) {
   };
 
   const receiveClickHandler = () => {
-    console.log('received click');
     refRBSheet.current.open();
   };
 
   const sendClickHandler = () => {
-    console.log('send click');
     dispatchNavigate('SendScreen', { currency, matchedRate });
   };
 
@@ -166,7 +164,7 @@ export default function HomeScreen({ route }: Props) {
   }
 
   const withdrawClickHandler = () => {
-    dispatchNavigate('SavingVaultIntro');
+    dispatchNavigate('WithdrawToSavingsVault');
   };
 
   const topupClickHandler = () => {
@@ -195,14 +193,14 @@ export default function HomeScreen({ route }: Props) {
   };
 
   return (
-    <ScreenLayout 
+    <ScreenLayout
       RefreshControl={
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
           tintColor="white"
         />
-      } 
+      }
       disableScroll={isAuth ? false : true}>
       <View style={styles.container}>
         <View>
