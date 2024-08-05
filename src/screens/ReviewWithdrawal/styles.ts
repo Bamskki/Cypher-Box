@@ -35,6 +35,8 @@ interface Style {
     price: TextStyle;
     editAmount: ViewStyle;
     utxoCapsule: ViewStyle;
+    vaultAddress: TextStyle;
+    textContainer: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -47,7 +49,7 @@ export default StyleSheet.create<Style>({
         bottom: 10
     },
     linearGradient: {
-        marginTop: 30,
+        // marginTop: 30,
         height: 140,
         justifyContent: 'flex-start',
         alignSelf: 'center',
@@ -79,7 +81,7 @@ export default StyleSheet.create<Style>({
         backgroundColor: colors.primary,
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 40
+        marginBottom: 30
     },
     invoiceButton: {
         width: '90%',
@@ -96,8 +98,8 @@ export default StyleSheet.create<Style>({
         width: '50%',
         // alignSelf: 'center',
         marginHorizontal: 30,
-        marginTop: 10,
-        marginBottom: 40
+        // marginTop: 10,
+        // marginBottom: 40
     },
     alert: {
         marginBottom: 10
@@ -135,7 +137,7 @@ export default StyleSheet.create<Style>({
         paddingHorizontal: 15,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
     },
     linearGradientStroke: {
         height: 45,
@@ -223,17 +225,21 @@ export default StyleSheet.create<Style>({
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
+        marginVertical: 10
     },
     utxoCapsule: {
         width: 70,
-        borderRadius: 2,
-        borderWidth: 1,
-        borderColor: '#FFFFFF',
-        height: 9,
         top: -20,
-        marginVertical: 10,
+        marginTop: 20,
         marginHorizontal: 20,
-
-
+    },
+    vaultAddress: {
+        fontSize: 14,
+        fontStyle: 'italic',
+        color: '#23C47F',
+        textAlign: 'center'
+    },
+    textContainer: {
+        marginBottom: 5
     }
 })

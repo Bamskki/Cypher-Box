@@ -36,6 +36,8 @@ interface Style {
     textContainer: ViewStyle;
     nextButton: ViewStyle;
     textStyle: TextStyle;
+    progressBarIndicator: ImageStyle;
+    arrowContainer: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -76,8 +78,11 @@ export default StyleSheet.create<Style>({
     view: {
         flex: 1,
         flexDirection: 'row',
-        paddingTop: 15,
+        paddingTop: 20,
         justifyContent: 'space-between',
+    },
+    blink: {
+        marginTop: 10
     },
     showLine: {
         position: 'absolute',
@@ -85,7 +90,7 @@ export default StyleSheet.create<Style>({
         backgroundColor: '#5F5F5F',
         height: 5,
         borderRadius: 5,
-        marginVertical: 10,
+        // marginVertical: 10,
 
     },
     linearGradient2: {
@@ -93,14 +98,15 @@ export default StyleSheet.create<Style>({
         borderRadius: 5,
         height: 5,
         alignSelf: 'flex-start',
-        marginVertical: 10,
+
+        // marginVertical: 10,
         zIndex: 99
     },
     bottominner: {
         flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        // alignItems: 'center',
     },
     bitcoinimg: {
         width: 35,
@@ -109,7 +115,7 @@ export default StyleSheet.create<Style>({
     },
     row: {
         flexDirection: 'row',
-        alignItems: 'center',
+        // alignItems: 'center',
     },
 
     shadow: {
@@ -201,22 +207,27 @@ export default StyleSheet.create<Style>({
         borderColor: "transparent",
         backgroundColor: colors.tundora,
         position: 'relative',
-        top: heights * 0.1,
+        top: heights * 0.102,
+    },
+    arrowContainer: {
+        right: 18,
+        bottom: heights * 0.187,
     },
     arrowConnector: {
-        right: 18,
-        bottom: heights * 0.199,
+        top: -12
     },
     progress: {
         marginBottom: 20
     },
     utxoCapsule: {
         flexDirection: 'row',
-        justifyContent: 'space-around'
+        justifyContent: 'space-around',
+        top: -20
     },
     textContainer: {
         position: 'relative',
-        bottom: 100
+        bottom: 100,
+        marginHorizontal: 10
     },
     nextButton: {
         width: '100%',
@@ -225,5 +236,12 @@ export default StyleSheet.create<Style>({
     },
     textStyle: {
         textAlign: 'center'
+    },
+    progressBarIndicator: {
+        top: -8,
+        width: '60%',
+        height: 10,
+        left: 130,
+        position: 'relative'
     }
 });

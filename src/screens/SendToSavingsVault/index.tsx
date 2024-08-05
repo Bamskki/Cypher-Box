@@ -1,13 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Image, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import React, { useState } from "react";
+import { ScrollView, View } from "react-native";
 import SimpleToast from "react-native-simple-toast";
 
 import styles from "./styles";
-import { Input, ScreenLayout, Text } from "@Cypher/component-library";
-import { CustomKeyboard, GradientCard, GradientInput } from "@Cypher/components";
-import { colors, } from "@Cypher/style-guide";
+import { ScreenLayout, Text } from "@Cypher/component-library";
+import { CustomKeyboard, GradientInput } from "@Cypher/components";
 import { dispatchNavigate } from "@Cypher/helpers";
-import { bitcoinRecommendedFee, bitcoinSendFee, sendBitcoinPayment, sendCoinsViaUsername, sendLightningPayment } from "../../api/coinOSApis";
+import { bitcoinRecommendedFee, } from "../../api/coinOSApis";
 import LinearGradient from "react-native-linear-gradient";
 
 export function startsWithLn(str: string) {
@@ -20,8 +19,6 @@ export default function SendToSavingsVault({ navigation, route }: any) {
     const [isSats, setIsSats] = useState(true);
     const [sats, setSats] = useState('');
     const [usd, setUSD] = useState('');
-    const [sender, setSender] = useState('');
-    const senderRef = useRef<TextInput>(null);
 
     const [convertedRate, setConvertedRate] = useState(0.00);
     const [isLoading, setIsLoading] = useState(false);
@@ -30,33 +27,25 @@ export default function SendToSavingsVault({ navigation, route }: any) {
 
     console.log('info: ', info)
 
-    useEffect(() => {
-        if (!sender.startsWith('ln') && !sender.includes('@') && !recommendedFee) {
-            const init = async () => {
-                const res = await bitcoinRecommendedFee();
-                setRecommendedFee(res);
-                console.log('recommendedFee: ', res)
-            }
-            init();
-        }
-    }, [sender])
+
 
 
     const handleSendNext = async () => {
         setIsLoading(true);
         const amount = isSats ? sats : usd;
+        const feeForBamskki = (0.1 / 100) * Number(0);
 
         try {
             dispatchNavigate('ReviewWithdrawal', {
                 value: sats,
-                converted: usd,
+                // converted: usd,
                 isSats: isSats,
-                to: sender,
-                fees: 0,
-                type: 'lightening',
-                matchedRate: info?.matchedRate,
-                currency: info?.curreny,
-                recommendedFee
+                to: 'sadiq',
+                fees: 100,
+                currency: 'usd',
+                type: 'bitcoin',
+                feeForBamskki,
+                recommendedFee: 10,
             });
 
         } catch (error) {
@@ -82,12 +71,24 @@ export default function SendToSavingsVault({ navigation, route }: any) {
     };
 
     const nextClickHandler = () => {
-        dispatchNavigate('ReviewPayment', {
+        // dispatchNavigate('ReviewPayment', {
+        // value: sats,
+        // converted: usd,
+        // isSats: ,
+        // to: ''
+
+        dispatchNavigate('ReviewWithdrawal', {
             value: sats,
-            converted: usd,
+            // converted: usd,
             isSats: isSats,
-            to: sender
-        })
+            to: 'sadiq',
+            fees: 100,
+            currency: 'usd',
+            type: 'bitcoin',
+            // feeForBamskki,
+            recommendedFee: 10,
+        });
+        // })
     }
 
     console.log('info: ', info)
@@ -104,7 +105,7 @@ export default function SendToSavingsVault({ navigation, route }: any) {
             <CustomKeyboard
                 title="Next"
                 onPress={handleSendNext}
-                disabled={isLoading || ((!startsWithLn(sender)) ? (sats?.length == 0 && sender?.length == 0) : sender?.length == 0)}
+                disabled={isLoading || sats?.length === 0}
                 setSATS={setSats}
                 setUSD={setUSD}
                 setIsSATS={setIsSats}

@@ -1,39 +1,29 @@
-import React, { useEffect, useState } from "react";
-import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
-import styles from "./styles";
-
-
-import { CoinOSSmall } from "@Cypher/assets/images";
-
-import { ScreenLayout, Text } from "@Cypher/component-library";
-import { dispatchNavigate } from "@Cypher/helpers";
-import { Shadow } from "react-native-neomorph-shadows";
-import { colors } from "@Cypher/style-guide";
-import LinearGradient from "react-native-linear-gradient";
-import useAuthStore from "@Cypher/stores/authStore";
-import { getCurrencyRates, getMe, getTransactionHistory } from "@Cypher/api/coinOSApis";
-import { matchKeyAndValue } from "@Cypher/helpers/coinosHelper";
-import Svg, { SvgProps, Path } from "react-native-svg"
-import UtxoCapsule from "@Cypher/components/UtxoCapsule";
-
+import React, { useEffect, useState } from 'react';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import styles from './styles';
+import { CoinOSSmall, ProgressBar1, ProgressIndicator } from '@Cypher/assets/images';
+import { ScreenLayout, Text } from '@Cypher/component-library';
+import { dispatchNavigate } from '@Cypher/helpers';
+import { Shadow } from 'react-native-neomorph-shadows';
+import { colors } from '@Cypher/style-guide';
+import LinearGradient from 'react-native-linear-gradient';
+import useAuthStore from '@Cypher/stores/authStore';
+import { getCurrencyRates, getMe, getTransactionHistory } from '@Cypher/api/coinOSApis';
+import { matchKeyAndValue } from '@Cypher/helpers/coinosHelper';
+import Svg, { SvgProps, Path } from 'react-native-svg';
+import { ProgressBar } from '@Cypher/components';
 interface Props {
     route: any;
 }
 
 const Arrow = (props: SvgProps) => (
-    <Svg
-        width={202}
-        height={211}
-        fill="none"
-        {...props}
-        style={styles.arrowConnector}
-    >
+    <Svg width={202} height={211} fill="none" {...props} style={styles.arrowConnector}>
         <Path
             fill="#fff"
             d="M201.5 1.5a1 1 0 0 0-2 0h2Zm-170 208.44c0 .552.676.943 1.155.667l7.69-4.44c.479-.276.479-1.058 0-1.334l-7.69-4.44c-.479-.276-1.155.115-1.155.667v8.88ZM199.5 1.5v75h2v-75h-2Zm-23 98H25v2h151.5v-2ZM0 124.5v57h2v-57H0Zm25 82h7.5v-2H25v2Zm-25-25c0 13.807 11.193 25 25 25v-2c-12.703 0-23-10.297-23-23H0Zm25-82c-13.807 0-25 11.193-25 25h2c0-12.703 10.297-23 23-23v-2Zm174.5-23c0 12.703-10.297 23-23 23v2c13.807 0 25-11.193 25-25h-2Z"
         />
     </Svg>
-)
+);
 
 export const calculatePercentage = (withdrawThreshold: number, reserveAmount: number) => {
     const threshold = Number(withdrawThreshold);
@@ -43,19 +33,14 @@ export const calculatePercentage = (withdrawThreshold: number, reserveAmount: nu
     return Math.min(percentage, 100);
 };
 
-
 export default function WithdrawToSavingsVault({ route }: Props) {
-
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [balance, setBalance] = useState(0);
 
     const [matchedRate, setMatchedRate] = useState(0);
-    const [payment, setPayments] = useState([])
+    const [payment, setPayments] = useState([]);
 
     const { isAuth, token, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
-
-
-
 
     useEffect(() => {
         async function handleToken() {
@@ -63,20 +48,19 @@ export default function WithdrawToSavingsVault({ route }: Props) {
                 handleUser();
                 loadPayments();
             } else {
-                setIsLoading(false)
+                setIsLoading(false);
             }
         }
 
         handleToken();
     }, [isAuth, token]);
 
-
     const handleUser = async () => {
         try {
             const response = await getMe();
             const responsetest = await getCurrencyRates();
-            const matched = matchKeyAndValue(responsetest, 'USD')
-            setMatchedRate(matched || 0)
+            const matched = matchKeyAndValue(responsetest, 'USD');
+            setMatchedRate(matched || 0);
             if (response?.balance) {
                 setBalance(response?.balance || 0);
             }
@@ -84,10 +68,10 @@ export default function WithdrawToSavingsVault({ route }: Props) {
         } catch (error) {
             console.error('error: ', error);
         } finally {
-            setIsLoading(false)
+            setIsLoading(false);
             setRefreshing(false);
         }
-    }
+    };
 
     const loadPayments = async (append = true) => {
         try {
@@ -98,15 +82,9 @@ export default function WithdrawToSavingsVault({ route }: Props) {
         }
     };
 
-
-
-
-
-
     const checkingAccountClickHandler = () => {
         dispatchNavigate('CheckingAccount', { matchedRate });
-    }
-
+    };
 
     const nextClickHandler = () => {
         const feeForBamskki = (0.1 / 100) * Number(0);
@@ -115,101 +93,85 @@ export default function WithdrawToSavingsVault({ route }: Props) {
             // converted: sats,
             isSats: withdrawThreshold,
             to: 'sadiq',
-            fees: 10,
+            fees: 100,
             currency: 'usd',
             type: 'bitcoin',
             feeForBamskki,
-            recommendedFee: 10
+            recommendedFee: 10,
         });
-    }
-
-
-
+    };
 
     return (
-        <ScreenLayout title="Coin Withdrawal" showToolbar isBackButton>
+        <ScreenLayout title="Coin Withdrawal" showToolbar isBackButton disableScroll>
             <View style={styles.container}>
                 <TouchableOpacity style={styles.shadowView} onPress={checkingAccountClickHandler}>
-                    <Shadow
-                        style={StyleSheet.flatten([styles.shadowTop, { shadowColor: colors.pink.shadowTop, padding: 0 }])}
-                        inner
-                        useArt
-                    >
+                    <Shadow style={StyleSheet.flatten([styles.shadowTop, { shadowColor: colors.pink.shadowTop, padding: 0 }])} inner useArt>
                         <View style={styles.view}>
                             <Text h2 bold style={styles.check}>
                                 Checking Account
                             </Text>
-                            <Image
-                                source={CoinOSSmall}
-                                style={styles.blink}
-                                resizeMode="contain"
-                            />
+                            <Image source={CoinOSSmall} style={styles.blink} resizeMode="contain" />
                         </View>
 
                         <View style={styles.progress}>
                             <View style={styles.showLine} />
                             <View style={[styles.box, { left: `${calculatePercentage(withdrawThreshold, reserveAmount)}%` }]} />
                             <LinearGradient
-                                start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
+                                start={{ x: 0, y: 1 }}
+                                end={{ x: 1, y: 1 }}
                                 colors={[colors.white, colors.pink.dark]}
-                                style={[styles.linearGradient2, { width: `${calculatePercentage(balance, reserveAmount)}%` }]}>
-
-                            </LinearGradient>
+                                style={[styles.linearGradient2, { width: `${calculatePercentage(balance, reserveAmount)}%` }]}
+                            />
                         </View>
-                        <Shadow
-                            inner
-                            useArt
-                            style={StyleSheet.flatten([styles.shadowBottom, { shadowColor: colors.pink.shadowBottom }])}
-                        />
+                        <Shadow inner useArt style={StyleSheet.flatten([styles.shadowBottom, { shadowColor: colors.pink.shadowBottom }])} />
                     </Shadow>
                 </TouchableOpacity>
                 <View style={styles.shadowViewBottom}>
-                    <Shadow
-                        style={styles.shadowTopBottom}
-                        inner
-                        useArt
-                    >
+                    <Shadow style={StyleSheet.flatten([styles.shadowTop, {
+                        shadowColor: colors.greenShadow, paddingStart: 20,
+                        paddingEnd: 10,
+                    }])} inner useArt>
                         <View style={styles.bottominner}>
-                            <Text h2 bold>Savings Vault</Text>
+                            <Text h2 bold>
+                                Savings Vault
+                            </Text>
                             <View style={styles.row}>
                                 <Text h3 bold style={styles.bitcointext}>
                                     Bitcoin Network
                                 </Text>
-                                <Image
-                                    style={styles.bitcoinimg}
-                                    resizeMode="contain"
-                                    source={require("../../../img/bitcoin.png")}
-                                />
+                                <Image style={styles.bitcoinimg} resizeMode="contain" source={require('../../../img/bitcoin.png')} />
                             </View>
                         </View>
                         <View style={styles.utxoCapsule}>
-                            <UtxoCapsule completed />
-                            <UtxoCapsule />
-                            <UtxoCapsule />
-                            <UtxoCapsule />
-                            <UtxoCapsule />
-
+                            <ProgressBar image={ProgressBar1} />
+                            <ProgressBar />
+                            <ProgressBar />
+                            <ProgressBar />
+                            <ProgressBar />
                         </View>
                     </Shadow>
                 </View>
-                <Arrow />
+                <View style={styles.arrowContainer}>
+                    <Image source={ProgressIndicator} style={styles.progressBarIndicator} />
+                    <Arrow />
+                </View>
+
                 <View style={styles.textContainer}>
                     <Text>
-                        The full pink bar represents the funds accumulated inside the Checking Account. By clicking ‘Withdraw’ it will convert most of the funds into a real verifiable bitcoin ‘capsule’ (also known as a UTXO) filling one of the five slots in your Hot Vault, and leaving a small amount as pocket money for quick spending (Reserve Amount).
+                        The full pink bar represents the funds accumulated inside the Checking Account. By clicking ‘Withdraw’ it will convert most of
+                        the funds into a real verifiable bitcoin ‘capsule’ (also known as a UTXO) filling one of the five slots in your Hot Vault, and
+                        leaving a small amount as pocket money for quick spending (Reserve Amount).
                     </Text>
                 </View>
 
                 <TouchableOpacity style={styles.nextButton} onPress={nextClickHandler}>
-                    <LinearGradient
-                        start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
-                        colors={['#FF65D4', '#D617A1']}
-                        style={[styles.nextButton]}
-                    >
-                        <Text bold style={styles.textStyle}>Next</Text>
+                    <LinearGradient start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }} colors={['#FF65D4', '#D617A1']} style={styles.nextButton}>
+                        <Text bold style={styles.textStyle}>
+                            Next
+                        </Text>
                     </LinearGradient>
                 </TouchableOpacity>
             </View>
-
         </ScreenLayout>
     );
 }
