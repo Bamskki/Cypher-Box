@@ -14,13 +14,13 @@ interface Props {
 }
 
 export default function Items({ wallet, item, matchedRate, onPressHandler }: Props) {
-    console.log('item: ', item)
     const satsAmount = item.value.toString().replace('-', ''); // Adjusted for negative sign
     const BTCAmount = btc(satsAmount) + " BTC";
     const amountSign = item.value < 0 ? "-" : "+";
     const currency = btc(1);
     const dollarAmount = Number(satsAmount) * matchedRate * currency;
 
+    console.log('item: ', item)
     return <TouchableOpacity style={styles.shadowView} onPress={() => onPressHandler(item)}>
         <Shadow
             style={styles.shadowTop}
@@ -33,11 +33,11 @@ export default function Items({ wallet, item, matchedRate, onPressHandler }: Pro
                         <Image source={Bitcoin} style={styles.image} />
                     </View>
                     <Text bold h4 style={styles.des}>                    
-                        {item.value > 0
-                        ? item?.confirmations > 3
+                        {item.confirmations > 0
+                        ? amountSign == '+'
                           ? "Received"
-                          : "Pending"
-                        : "Sent"}
+                          : "Sent"
+                        : "Pending"}
                     </Text>
                     <Text h3 style={{ color: amountSign == '+' ? '#4FBF67' : '#FF7A68' }}>{amountSign+BTCAmount}</Text>
                     {/* <Text h3 style={{ color: item?.sats?.includes('+') ? '#4FBF67' : '#FF7A68' }}>{item?.sats}</Text> */}

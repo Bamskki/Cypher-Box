@@ -8,6 +8,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { BlueStorageContext } from '../../../blue_modules/storage-context';
 import { AbstractWallet } from '../../../class';
 import { useTheme } from '../../../components/themes';
+import useAuthStore from "@Cypher/stores/authStore";
 
 interface Props {
     callNext(): void;
@@ -15,7 +16,7 @@ interface Props {
 
 export default function PrivateKeyGenerater({ callNext }: Props) {
     const { wallets } = useContext(BlueStorageContext);
-    const { walletID } = useRoute().params as { walletID: string };
+    const { walletID } = useAuthStore();
     const wallet = wallets.find((w: AbstractWallet) => w.getID() === walletID);
     
     const navigation = useNavigation();
@@ -26,6 +27,7 @@ export default function PrivateKeyGenerater({ callNext }: Props) {
     const [secretList, setSecretList] = useState([]);
 
     useEffect(() => {
+        console.log('wallet: ', wallet)
         const entries = wallet?.getSecret().split(/\s/).entries();
         if(entries){
             setLoading(true)
@@ -43,6 +45,7 @@ export default function PrivateKeyGenerater({ callNext }: Props) {
         }
     }, [])
 
+    console.log('secretList: ', secretList)
     const viewClickHandler = () => {
         setLoading(true);
         setTimeout(() => {

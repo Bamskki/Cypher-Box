@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Input, Text } from "@Cypher/component-library";
 import { ActivityIndicator, Animated, Dimensions, FlatList, ImageBackground, ScrollView, StyleSheet, View } from "react-native";
+import SimpleToast from "react-native-simple-toast";
 import styles from "./styles";
 import { GradientCard, GradientView } from "@Cypher/components";
 import ListView from "./ListView";
-import Svg, { Image } from 'react-native-svg';
 // import BackgroundSvg from '../../assets/svg/transaction.svg';
 // import Bitcoin from '../../assets/svg/bitcoin.svg';
 import { colors, heights, widths } from "@Cypher/style-guide";
@@ -12,6 +12,7 @@ import debounce from "../../../blue_modules/debounce";
 import { BlueStorageContext } from "../../../blue_modules/storage-context";
 import screenHeight from "@Cypher/style-guide/screenHeight";
 import { btc as btcHandle } from "@Cypher/helpers/coinosHelper";
+import { dispatchNavigate } from "@Cypher/helpers";
 // import { Bitcoin, Transaction, TransactionN } from "@Cypher/assets/svg";
 
 export default function Bars({wallet, matchedRate}: any) {
@@ -20,6 +21,7 @@ export default function Bars({wallet, matchedRate}: any) {
     console.log("🚀 ~ Bars ~ ids:", ids)
     const [btc, setBtc] = useState('0.00');
     const utxo = wallet.getUtxo(true).sort((a, b) => a.height - b.height || a.txid.localeCompare(b.txid) || a.vout - b.vout);
+  
     const [frozen, setFrozen] = useState(
         utxo.filter(out => wallet.getUTXOMetadata(out.txid, out.vout).frozen).map(({ txid, vout }) => `${txid}:${vout}`),
     );
@@ -58,18 +60,18 @@ export default function Bars({wallet, matchedRate}: any) {
     const { total, inUSD } = useMemo(() => {
         let total = 0;
         ids.forEach(id => {
-            const result = utxo?.find(obj => obj.txid === id)?.value;
+            const result = utxo?.find(obj => `${obj.txid}:${obj.vout}` === id)?.value;
             if (result) total += result;
         });
         const currency = btcHandle(1);
-        const inUSD = total * matchedRate * currency;
-        // const BTCAmount = btcHandle(total) + " BTC";
+        const inUSD = Number(total) * Number(matchedRate) * currency;
+        const BTCAmount = btcHandle(total);
     
         // const inUSD = total * 63749.40;
-        return { total, inUSD };
+        return { total: BTCAmount, inUSD };
     }, [ids, utxo]);
 
-    const onPressClickHandler = (id_: number) => {
+    const onPressClickHandler = (id_: string) => {
         console.log("🚀 ~ onPressClickHandler ~ id:", id_)
         const isExist = ids.includes(id_);
         let newIds = [];
@@ -81,7 +83,15 @@ export default function Bars({wallet, matchedRate}: any) {
         setIds(newIds);
     }
 
-    console.log('utxo: ', utxo)
+    const handleSendBars = () => {
+        if(ids.length > 0){
+            const usd = inUSD.toFixed(4);
+            dispatchNavigate('EditAmount', {wallet, utxo, ids, inUSD: inUSD.toFixed(4), total, matchedRate});
+        } else {
+            SimpleToast.show("Please select Bar to Send", SimpleToast.SHORT)
+        }
+    };
+    
     return (
         <View style={styles.flex}>
             <Text bold style={styles.desc}>Tap on your coins to label them. Select multiple coins and batch them together to optimize fees for future transactions:</Text>
@@ -100,7 +110,7 @@ export default function Bars({wallet, matchedRate}: any) {
                     keyExtractor={(_, index) => index.toString()}
                     showsVerticalScrollIndicator={false}
                     ListEmptyComponent={() => (
-                        <View style={{ height: screenHeight / 2.2, justifyContent: 'center', alignItems: 'center', marginTop: 30 }}>
+                        <View style={{ height: screenHeight / 3.2, justifyContent: 'center', alignItems: 'center', marginTop: 30 }}>
                             <Text white h3 bold>This wallet does not have any coins at the moment.</Text>
                         </View>
                     )}
@@ -128,7 +138,7 @@ export default function Bars({wallet, matchedRate}: any) {
                     alignItems: 'center',
                 }}>
                     <GradientView
-                        onPress={addressClickHandler}
+                        onPress={handleSendBars}
                         style={styles.linearGradientStyle}
                         linearGradientStyle={styles.mainShadowStyle}
                         topShadowStyle={styles.outerShadowStyle}

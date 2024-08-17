@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Image, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { Image, ScrollView, StyleSheet, TextInput, View, Button, TouchableOpacity, Platform, PermissionsAndroid } from "react-native";
 import SimpleToast from "react-native-simple-toast";
+import { PERMISSIONS, request } from "react-native-permissions";
+import QRCodeScanner from 'react-native-qrcode-scanner';
+import { RNCamera } from 'react-native-camera';
 
 import styles from "./styles";
 import { Input, ScreenLayout, Text } from "@Cypher/component-library";
@@ -26,7 +29,8 @@ export default function SendScreen({navigation, route}: any) {
     const [isLoading, setIsLoading] = useState(false);
     const [recommendedFee, setRecommendedFee] = useState<any>();
     const [selectedFee, setSelectedFee] = useState<number | null>(null);
-  
+    const [isScannerActive, setIsScannerActive] = useState(false); // State to control QR scanner visibility
+
     console.log('info: ', info)
 
     useEffect(() => {
@@ -40,7 +44,33 @@ export default function SendScreen({navigation, route}: any) {
         }
     }, [sender])
 
-    console.log('recommendedFee: ', recommendedFee)
+    async function requestCameraPermission() {
+        if (Platform.OS === 'android') {
+            const granted = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.CAMERA,
+                {
+                    title: 'Camera Permission',
+                    message: 'We need access to your camera to scan QR codes',
+                    buttonNeutral: 'Ask Me Later',
+                    buttonNegative: 'Cancel',
+                    buttonPositive: 'OK',
+                },
+            );
+            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                console.log('You can use the camera');
+            } else {
+                console.log('Camera permission denied');
+            }
+        } else {
+            const res = await request(PERMISSIONS.IOS.CAMERA);
+            console.log('Camera permission:', res);
+        }
+    }
+    
+    // useEffect(() => {
+    //     requestCameraPermission();
+    // }, []);
+
     const handleSendNext = async () => {
         setIsLoading(true);
         const amount = isSats ? sats : usd;
@@ -74,11 +104,7 @@ export default function SendScreen({navigation, route}: any) {
                 setIsLoading(false);
                 return;
             }
-            // if(selectedFee == null){
-            //     SimpleToast.show('Please select fee rate', SimpleToast.SHORT);
-            //     setIsLoading(false);
-            //     return;
-            // }
+
             const feeForBamskki = (0.1 / 100) * Number(amount);
             const remainingAmount = Number(amount) - feeForBamskki;
             console.log('feeForBamskki: ', feeForBamskki)
@@ -138,11 +164,6 @@ export default function SendScreen({navigation, route}: any) {
                 setIsLoading(false);
                 return;
             }
-            // if(selectedFee == null){
-            //     SimpleToast.show('Please select fee rate', SimpleToast.SHORT);
-            //     setIsLoading(false);
-            //     return;
-            // }
             const feeForBamskki = (0.1 / 100) * Number(amount);
             const remainingAmount = Number(amount) - feeForBamskki;
             console.log('feeForBamskki: ', feeForBamskki)
@@ -177,7 +198,6 @@ export default function SendScreen({navigation, route}: any) {
 
     const handleFeeSelect = (fee: number) => {
         setSelectedFee(fee);
-        // Now you can send the selected fee to the API or perform any other action.
     };
 
     const nextClickHandler = () => {
@@ -189,43 +209,67 @@ export default function SendScreen({navigation, route}: any) {
         })
     }
 
-    console.log('info: ', info)
-    return (
-        <ScreenLayout disableScroll showToolbar isBackButton title="Send Bitcoin">
-            <ScrollView style={styles.container}>
-                {/* {!startsWithLn(sender) &&  */}
-                    <GradientInput isSats={isSats} sats={sats} setSats={setSats} usd={usd} />
-                {/* } */}
-                <Text h2 style={styles.destination}>Destination</Text>
+    const handleScan = (e: any) => {
+        setSender(e.data);
+        setIsScannerActive(false); // Close scanner after successful scan
+    };
 
-                <View style={styles.priceView}>
-                    {sender?.length == 0 &&
-                        <Text h4 center onPress={() => senderRef?.current?.focus()} style={StyleSheet.flatten([styles.label])}>Paste any address or invoice{'\n'} (Bitcoin, Lightning, Liquid)</Text>
-                    }
-                    <GradientCard
-                        style={styles.main}
-                        linearStyle={styles.heigth}
-                        colors_={sender ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}>
-                        <Input
-                            ref={senderRef}
-                            onChange={setSender}
-                            value={sender}
-                            textInpuetStyle={styles.senderText}
+    return (
+        <>
+            {isScannerActive ? (
+                <ScreenLayout disableScroll showToolbar isBackButton onBackPress={() => setIsScannerActive(false)} title="Scan QR Code">
+                    <View style={styles.scannerContainer}>
+                        <QRCodeScanner
+                            onRead={handleScan}
+                            flashMode={RNCamera.Constants.FlashMode.auto}
+                            // topContent={<Text style={styles.centerText}>Scan the QR code</Text>}
+                            // bottomContent={
+                            //     <View style={styles.scannerFooter}>
+                            //         <Button title="Cancel" onPress={() => setIsScannerActive(false)} />
+                            //     </View>
+                            // }
                         />
-                    </GradientCard>
-                    <Image source={require('../../../img/scan-new.png')} style={styles.qrimage} />
-                </View>
-            </ScrollView>
-            <CustomKeyboard
-                title="Next"
-                onPress={handleSendNext}
-                disabled={isLoading || ((!startsWithLn(sender)) ? (sats?.length == 0 && sender?.length == 0) : sender?.length == 0)} 
-                setSATS={setSats}
-                setUSD={setUSD}
-                setIsSATS={setIsSats}
-                matchedRate={info?.matchedRate}
-                currency={info?.currency}
-            />
-        </ScreenLayout>
-    )
+                    </View>
+                </ScreenLayout>
+            )
+            : 
+            (
+                <ScreenLayout disableScroll showToolbar isBackButton title="Send Bitcoin">
+                    <ScrollView style={styles.container}>
+                        <GradientInput isSats={isSats} sats={sats} setSats={setSats} usd={usd} />
+                        <Text h2 style={styles.destination}>Destination</Text>
+                        <View style={styles.priceView}>
+                            {sender?.length == 0 &&
+                                <Text h4 center onPress={() => senderRef?.current?.focus()} style={StyleSheet.flatten([styles.label])}>Paste any address or invoice{'\n'} (Bitcoin, Lightning, Liquid)</Text>
+                            }
+                            <GradientCard
+                                style={styles.main}
+                                linearStyle={styles.heigth}
+                                colors_={sender ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}>
+                                <Input
+                                    ref={senderRef}
+                                    onChange={setSender}
+                                    value={sender}
+                                    textInpuetStyle={styles.senderText}
+                                />
+                            </GradientCard>
+                            <TouchableOpacity style={{ position: 'absolute', right: 0,}} onPress={async() => { await requestCameraPermission(); setIsScannerActive(true); }}>
+                                <Image source={require('../../../img/scan-new.png')} style={styles.qrimage} />
+                            </TouchableOpacity>
+                        </View>
+                    </ScrollView>
+                    <CustomKeyboard
+                        title="Next"
+                        onPress={handleSendNext}
+                        disabled={isLoading || ((!startsWithLn(sender)) ? (sats?.length == 0 && sender?.length == 0) : sender?.length == 0)} 
+                        setSATS={setSats}
+                        setUSD={setUSD}
+                        setIsSATS={setIsSats}
+                        matchedRate={info?.matchedRate}
+                        currency={info?.currency}
+                    />
+                </ScreenLayout>
+            )}
+        </>
+    );
 }

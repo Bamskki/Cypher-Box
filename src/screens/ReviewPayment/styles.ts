@@ -62,6 +62,16 @@ export default StyleSheet.create<Style>({
         // marginStart: 25,
         // marginHorizontal: 20
     },
+    box: {
+        position: 'absolute',
+        top: 10,
+        height: 5,
+        width: 4,
+        backgroundColor: colors.white,
+        zIndex: 100,
+        // alignSelf: 'flex-end',
+        // marginEnd: 25,
+    },
     linearGradient2: {
         width: '100%',
         // paddingLeft: 15,
@@ -114,16 +124,6 @@ export default StyleSheet.create<Style>({
         height: 20,
         marginTop: 10,
         marginEnd: 15,
-    },
-    box: {
-        position: 'absolute',
-        top: 10,
-        height: 5,
-        width: 4,
-        backgroundColor: colors.white,
-        zIndex: 100,
-        // alignSelf: 'flex-end',
-        // marginEnd: 25,
     },
     background: {
         backgroundColor: colors.gray.dark,

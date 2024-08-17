@@ -57,7 +57,8 @@ export default StyleSheet.create<Style>({
         zIndex: 1,
     },
     btn: {
-        width: 148,
+        // width: 148,
+        paddingHorizontal: 12,
         height: 38,
         backgroundColor: colors.green,
         borderRadius: 15,

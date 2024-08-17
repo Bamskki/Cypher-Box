@@ -64,7 +64,8 @@ const App = () => {
   } = useContext(BlueStorageContext);
   const appState = useRef(AppState.currentState);
   const clipboardContent = useRef();
-  const colorScheme = useColorScheme();
+  // const colorScheme = useColorScheme();
+  const colorScheme = 'dark';
 
   const onNotificationReceived = async notification => {
     const payload = Object.assign({}, notification, notification.data);

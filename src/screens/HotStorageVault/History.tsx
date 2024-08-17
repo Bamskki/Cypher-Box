@@ -15,9 +15,9 @@ import { dispatchNavigate } from "@Cypher/helpers";
 export default function History({ wallet, matchedRate }: any) {
 
     const { wallets, saveToDisk, setSelectedWalletID, walletTransactionUpdateStatus, isElectrumDisabled } = useContext(BlueStorageContext);
-    const [dataSource, setDataSource] = useState(wallet.getTransactions(10));
-    const [limit, setLimit] = useState(10);
-    const [pageSize, setPageSize] = useState(10);
+    const [dataSource, setDataSource] = useState(wallet.getTransactions(5));
+    const [limit, setLimit] = useState(5);
+    const [pageSize, setPageSize] = useState(5);
     const [isRefreshing, setIsRefreshing] = useState(false); // a simple flag to know that wallet was being updated once
     const [isLoading, setIsLoading] = useState(false);
     const [itemPriceUnit, setItemPriceUnit] = useState(wallet.getPreferredBalanceUnit());
@@ -47,8 +47,8 @@ export default function History({ wallet, matchedRate }: any) {
 
     useEffect(() => {
         setIsLoading(true);
-        setLimit(10);
-        setPageSize(10);
+        setLimit(5);
+        setPageSize(1);
         setTimeElapsed(0);
         setItemPriceUnit(wallet.getPreferredBalanceUnit());
         setIsLoading(false);
@@ -120,8 +120,9 @@ export default function History({ wallet, matchedRate }: any) {
 
     const getTransactionsSliced = (lmt = Infinity) => {
         let txs = wallet.getTransactions();
-        for (const tx of txs) {
-          tx.sort_ts = +new Date(tx.received);
+        console.log('txs: ', txs.length)
+        for (const it of txs) {
+          it.sort_ts = +new Date(it.received);
         }
         txs = txs.sort(function (a, b) {
           return b.sort_ts - a.sort_ts;
@@ -136,7 +137,7 @@ export default function History({ wallet, matchedRate }: any) {
 
     const transformDataToSections = (data) => {
         const groupedData = data.reduce((acc, item) => {
-            const date = dayjs(item.time * 1000).format('ddd MMM DD YYYY');
+            const date = dayjs(item.received).format('ddd MMM DD YYYY');
             if (!acc[date]) acc[date] = [];
             acc[date].push(item);
             return acc;
@@ -150,9 +151,12 @@ export default function History({ wallet, matchedRate }: any) {
     
     const sections = transformDataToSections(dataSource);
 
+    console.log('getTransactionsSliced(Infinity).length: ', getTransactionsSliced(Infinity).length, limit)
+
     return (
         <View style={{
-            flex: 1, marginTop: 15,
+            flex: 1, 
+            marginTop: 15,
             borderTopColor: '#5E5E5E',
             borderTopWidth: 0.5,
         }}>
@@ -179,7 +183,7 @@ export default function History({ wallet, matchedRate }: any) {
                     return (wallet.getTransactions().length > limit && <ActivityIndicator style={{ marginTop: 10, marginBottom: 20 }} color={colors.white} />) || null;
                 }}
                 ListEmptyComponent={() => (
-                    <View style={{ height: screenHeight / 2.2, justifyContent: 'center', alignItems: 'center', marginTop: 30 }}>
+                    <View style={{ height: screenHeight / 2, justifyContent: 'center', alignItems: 'center', marginTop: 30 }}>
                         <Text white h3 bold>No Transactions History</Text>
                     </View>
                 )}
@@ -201,7 +205,7 @@ export default function History({ wallet, matchedRate }: any) {
                     // borderTopColor: colors.white,
                     // borderTopWidth: 1,
                 }}
-                invertStickyHeaders
+                // invertStickyHeaders
             />
             <View style={styles.bottomView} />
         </View>

@@ -131,7 +131,7 @@ export default StyleSheet.create<Style>({
         borderColor: colors.green,
         position: 'absolute',
         alignSelf: 'center',
-        width: 138,
+        // width: 138,
         // height: 121,
         start: widths / 3 + 20,
         top: -75,

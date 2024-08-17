@@ -55,8 +55,10 @@ export default function HomeScreen({ route }: Props) {
   const [state, dispatch] = useReducer(walletReducer, initialState);
   const label = state.label;
   const { addWallet, saveToDisk, isAdvancedModeEnabled, wallets } = useContext(BlueStorageContext);
+  const { isAuth, walletID, token, user, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
   const A = require('../../../blue_modules/analytics');
 
+  console.log('walletID:  ', walletID)
   // const [storage, setStorage] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [balance, setBalance] = useState(0);
@@ -73,7 +75,6 @@ export default function HomeScreen({ route }: Props) {
   const [balanceWithoutSuffix, setBalanceWithoutSuffix] = useState()
   
   const refRBSheet = useRef<any>(null);
-  const { isAuth, walletID, token, user, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
 
   const getWalletID = async () => {
     try {
@@ -103,6 +104,8 @@ export default function HomeScreen({ route }: Props) {
           setBalanceWithoutSuffix(balanceWithoutSuffixTemp)
           setBalanceVault(balanceTemp)
           setIsAllDone(!!walletTemp);
+        } else {
+          setIsAllDone(false)
         }
       } else {
         setIsLoading(false)
@@ -118,6 +121,7 @@ export default function HomeScreen({ route }: Props) {
     handleToken();
   }, [isAuth, token, wallets, walletID]);
 
+  console.log('setIsAllDone: ', isAllDone)
 
   const handleUser = async () => {
     try {
@@ -330,16 +334,16 @@ export default function HomeScreen({ route }: Props) {
                       {balance}   sats ~ {"$" + convertedRate.toFixed(2)}
                     </Text>
                     <Text bold style={styles.totalsats}>
-                      {formatNumber(Number(withdrawThreshold + reserveAmount))} sats
+                      {formatNumber(Number(withdrawThreshold) + Number(reserveAmount))} sats
                     </Text>
                   </View>
                   <View>
                     <View style={styles.showLine} />
-                    <View style={[styles.box, { left: `${calculatePercentage(withdrawThreshold, reserveAmount)}%` }]} />
+                    <View style={[styles.box, { left: `${calculatePercentage(Number(withdrawThreshold), Number(reserveAmount))}%` }]} />
                     <LinearGradient
                       start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
                       colors={[colors.white, colors.pink.dark]}
-                      style={[styles.linearGradient2, { width: `${calculatePercentage(balance, reserveAmount)}%` }]}>
+                      style={[styles.linearGradient2, { width: `${calculatePercentage(Number(balance), (Number(reserveAmount) + Number(withdrawThreshold)))}%` }]}>
                       {/* <View style={[styles.box, {marginLeft: `${Math.min((withdrawThreshold / (Number(withdrawThreshold + reserveAmount) || 0)) * 100, 100)}%`}]} /> */}
                       {/* <Shadow
                           inner // <- enable inner shadow
@@ -469,7 +473,7 @@ export default function HomeScreen({ route }: Props) {
                     bitcoinText={styles.bitcoinText}
                     onPress={savingVaultClickHandler}
                     bitcoinValue={balanceVault}
-                    inDollars={`$${(Number(balanceWithoutSuffix) * Number(matchedRate) * btc(1)).toFixed(2)}`}
+                    inDollars={`$${(Number(balanceWithoutSuffix) * Number(matchedRate)).toFixed(2)}`}
                     isColorable
                   />
                   :

@@ -118,7 +118,7 @@ export default function Vault({wallet, matchedRate, setSelectedTab}: {wallet: an
                 titleStyle={styles.title}
                 title="Hot Savings"
                 bitcoinValue={balance}
-                inDollars={`$${(Number(balanceWithoutSuffix) * Number(matchedRate) * currency).toFixed(2)}`}
+                inDollars={`$${(Number(balanceWithoutSuffix) * Number(matchedRate)).toFixed(2)}`}
             />
             <View style={styles.base}>
                 <GradientView
@@ -150,7 +150,7 @@ export default function Vault({wallet, matchedRate, setSelectedTab}: {wallet: an
                 <>
                     <Text h4 style={styles.infoText}>You can use this vault address to receive coins from another vault on the Bitcoin Network</Text>
                     <View style={styles.qrcode}>
-                        <View style={{ margin: 25, padding: 20, backgroundColor: 'white', borderRadius: 30 }}>
+                        <View style={{ width: "80%", height: "80%", margin: 25, padding: 20, backgroundColor: 'white', borderRadius: 30 }}>
                             <QRCode
                                 getRef={c => {
                                     if (!c?.toDataURL) return;
@@ -174,7 +174,7 @@ export default function Vault({wallet, matchedRate, setSelectedTab}: {wallet: an
                             <Image source={ShareNew} style={styles.shareImage} resizeMode="contain" />
                         </TouchableOpacity>
                     </View>
-                    <Text h4 style={styles.infoText}>You can use this Bitcoin Network address of your vault to receive coins</Text>
+                    {/* <Text h4 style={styles.infoText}>You can use this Bitcoin Network address of your vault to receive coins</Text> */}
                 </>
                 :
                 <View style={{marginTop: 100}}>

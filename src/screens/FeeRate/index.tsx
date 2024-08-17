@@ -12,13 +12,14 @@ interface Props {
 }
 
 export default function FeeRate({ route, navigation }: Props) {
+    const { setCustomFee, wallet, utxo, ids, inUSD, total, matchedRate } = route?.params;
     const [isSats, setIsSats] = useState(true);
     const [sats, setSats] = useState('');
     const [usd, setUSD] = useState('');
     const [sender, setSender] = useState('');
 
     const nextClickHandler = () => {
-        route?.params?.setNetFee_(sats, usd);
+        route?.params?.setCustomFee(sats);
         navigation?.pop();
     }
 
@@ -30,7 +31,7 @@ export default function FeeRate({ route, navigation }: Props) {
             <CustomKeyboardNew
                 title="Next"
                 onPress={nextClickHandler}
-                disabled={!sats.length || !sender.length}
+                disabled={!sats.length}
                 setSATS={setSats}
                 setUSD={setUSD}
                 setIsSATS={setIsSats}

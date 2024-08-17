@@ -8,7 +8,7 @@ import { btc } from "@Cypher/helpers/coinosHelper";
 
 interface Props {
     item: any;
-    onPress(id: number): void;
+    onPress(id: string): void;
     ids: any;
 }
 const shortenAddress = (address: string) => {
@@ -25,7 +25,7 @@ const ListView = ({ item, onPress, ids }: Props) => {
 
     return (
         <ImageBackground source={Transaction} style={styles.main} resizeMode="repeat">
-            {ids.includes(item?.id) && (<View style={styles.borderview} />)
+            {ids.includes(`${item.txid}:${item.vout}`) && (<View style={styles.borderview} />)
             }
             <View style={styles.container}>
                 <View style={styles.coin}>
@@ -41,9 +41,9 @@ const ListView = ({ item, onPress, ids }: Props) => {
                 <View style={styles.label}>
                     <Image source={Tag} style={{}} />
                 </View>
-                <TouchableOpacity style={styles.select} onPress={() => onPress(item?.id)}>
+                <TouchableOpacity style={styles.select} onPress={() => onPress(`${item.txid}:${item.vout}`)}>
                     <View style={styles.checkbox}>
-                        {ids.includes(item?.id) &&
+                        {ids.includes(`${item.txid}:${item.vout}`) &&
                             <Image source={Yes} />
                         }
                     </View>
