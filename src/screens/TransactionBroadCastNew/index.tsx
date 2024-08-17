@@ -16,13 +16,15 @@ import Animated, {
     useAnimatedStyle,
 } from "react-native-reanimated";
 
-export default function TransactionBroadCastNew() {
+export default function TransactionBroadCastNew({navigation, route}) {
     const [response, setResponse] = useState(false);
     const [progress, setProgress] = useState(0);
-    const [sats, setSats] = useState('100K sats');
+    // const [sats, setSats] = useState('100K sats');
     const [usd, setUsd] = useState('$40');
     const [to, setTo] = useState('Awaiting Network Confirmation');
     const fadeInOpacity = useSharedValue(0);
+    console.log('route: ', route?.params)
+    const { sats, inUSD } =  route?.params
 
     useEffect(() => {
         const intervalId = setInterval(() => {
@@ -47,7 +49,7 @@ export default function TransactionBroadCastNew() {
     }, [progress]);
 
     const onPressClickHandler = () => {
-        dispatchNavigate('SendReceiveOnChain');
+        dispatchNavigate('HomeScreen');
     }
 
     const fadeIn = () => {
@@ -72,12 +74,12 @@ export default function TransactionBroadCastNew() {
                         <>
                             <Text h1 bold center style={styles.title}>Transaction Broadcasted...</Text>
                             <Animated.View style={animatedStyle}>
-                                <Text semibold center style={styles.sats}>{sats}</Text>
+                                <Text semibold center style={styles.sats}>{sats} sats</Text>
                                 <View style={styles.extra} />
-                                <Text subHeader bold center>{usd}</Text>
+                                <Text subHeader bold center>${inUSD}</Text>
                                 <View style={styles.extra} />
                                 <Text h2 bold center>{to}</Text>
-                                <GradientText style={styles.gradientText}>Estimated time: ~2hr</GradientText>
+                                {/* <GradientText style={styles.gradientText}>Estimated time: ~2hr</GradientText> */}
                             </Animated.View>
                         </>
                         :
@@ -98,7 +100,7 @@ export default function TransactionBroadCastNew() {
                 </View>
                 {response ?
                     <TouchableOpacity onPress={onPressClickHandler} style={styles.nextBtn}>
-                        <Text h3>Transaction Details</Text>
+                        <Text h3>Home</Text>
                     </TouchableOpacity>
                     :
                     <View style={styles.invoiceButton}>

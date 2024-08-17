@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useReducer, useRef, useState } from "react";
 import { ActivityIndicator, Image, RefreshControl, StyleSheet, TouchableOpacity, View } from "react-native";
 import styles from "./styles";
 import {
@@ -30,6 +30,11 @@ import ReceivedList from "./ReceivedList";
 import useAuthStore from "@Cypher/stores/authStore";
 import { getCurrencyRates, getMe, getTransactionHistory } from "@Cypher/api/coinOSApis";
 import { btc, formatNumber, matchKeyAndValue } from "@Cypher/helpers/coinosHelper";
+import { AbstractWallet, HDSegwitBech32Wallet, HDSegwitP2SHWallet } from "../../../class";
+import loc, { formatBalance, formatBalanceWithoutSuffix } from '../../../loc';
+import { initialState, walletReducer } from "../../../screen/wallets/add";
+import { BlueStorageContext } from '../../../blue_modules/storage-context';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Props {
   route: any;
@@ -47,6 +52,13 @@ export const calculatePercentage = (withdrawThreshold: number, reserveAmount: nu
 export default function HomeScreen({ route }: Props) {
   const { navigate } = useNavigation();
   const routeName = useRoute().name;
+  const [state, dispatch] = useReducer(walletReducer, initialState);
+  const label = state.label;
+  const { addWallet, saveToDisk, isAdvancedModeEnabled, wallets } = useContext(BlueStorageContext);
+  const { isAuth, walletID, token, user, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
+  const A = require('../../../blue_modules/analytics');
+
+  console.log('walletID:  ', walletID)
   // const [storage, setStorage] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [balance, setBalance] = useState(0);
@@ -56,13 +68,23 @@ export default function HomeScreen({ route }: Props) {
   const [refreshing, setRefreshing] = useState(false);
   const [payment, setPayments] = useState([])
   const [wt, setWt] = useState<number>();
-  const [isWithdraw, setIsWithdraw] = useState<boolean>(false);
+  const [isWithdraw, setIsWithdraw] = useState<boolean>(true);
   const [isAllDone, setIsAllDone] = useState<boolean>(false);
-  console.log("🚀 ~ HomeScreen ~ route?.params?.isComplete:", route?.params?.isComplete)
-
+  const [wallet, setWallet] = useState(undefined);
+  const [balanceVault, setBalanceVault] = useState<string | false | undefined>("");
+  const [balanceWithoutSuffix, setBalanceWithoutSuffix] = useState()
+  
   const refRBSheet = useRef<any>(null);
-  const { isAuth, token, user, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
 
+  const getWalletID = async () => {
+    try {
+      return await AsyncStorage.getItem('wallet@ID');
+    } catch (error) {
+      console.error('Error getting auth token from AsyncStorage:', error);
+      throw error;
+    }
+  };
+  
   useFocusEffect(() => {
     if (route?.params?.isComplete) setIsAllDone(true);
   });
@@ -72,6 +94,19 @@ export default function HomeScreen({ route }: Props) {
       if (isAuth && token) {
         handleUser();
         loadPayments();
+        if(wallets && walletID){
+          const allWallets = wallets.concat(false);
+          const walletTemp = allWallets.find((w: AbstractWallet) => w.getID() === walletID);
+          const balanceTemp = !walletTemp?.hideBalance && formatBalance(walletTemp?.getBalance(), walletTemp?.getPreferredBalanceUnit(), true);
+          const balanceWithoutSuffixTemp = !walletTemp?.hideBalance && formatBalanceWithoutSuffix(Number(walletTemp?.getBalance()), walletTemp?.getPreferredBalanceUnit(), true);
+          await walletTemp.fetchBalance()
+          setWallet(walletTemp);
+          setBalanceWithoutSuffix(balanceWithoutSuffixTemp)
+          setBalanceVault(balanceTemp)
+          setIsAllDone(!!walletTemp);
+        } else {
+          setIsAllDone(false)
+        }
       } else {
         setIsLoading(false)
       }
@@ -84,21 +119,19 @@ export default function HomeScreen({ route }: Props) {
     // }
     // getWithdrawal();
     handleToken();
-  }, [isAuth, token]);
+  }, [isAuth, token, wallets, walletID]);
 
+  console.log('setIsAllDone: ', isAllDone)
 
   const handleUser = async () => {
     try {
       const response = await getMe();
-      console.log('response: ', response);
       const responsetest = await getCurrencyRates();
       const currency = btc(1);
       const matched = matchKeyAndValue(responsetest, 'USD')
       setMatchedRate(matched || 0)
-      console.log('converter: ', (matched || 0) * currency * response.balance);
       setConvertedRate((matched || 0) * currency * response.balance)
       setCurrency("USD")
-      console.log('currency: ', currency)
       if (response?.balance) {
         setBalance(response?.balance || 0);
       }
@@ -121,17 +154,14 @@ export default function HomeScreen({ route }: Props) {
   };
 
   const navigateToSettings = () => {
-    console.log('setting click');
     dispatchNavigate("Settings");
   };
 
   const onScanButtonPressed = () => {
-    console.log('scan click');
     scanQrHelper(navigate, routeName).then(onBarScanned);
   };
 
   const loginClickHandler = () => {
-    console.log('login click');
     dispatchNavigate('LoginCoinOSScreen');
   };
 
@@ -147,17 +177,14 @@ export default function HomeScreen({ route }: Props) {
   };
 
   const createChekingAccountClickHandler = () => {
-    console.log('create account click');
     dispatchNavigate("CheckAccount");
   };
 
   const receiveClickHandler = () => {
-    console.log('received click');
     refRBSheet.current.open();
   };
 
   const sendClickHandler = () => {
-    console.log('send click');
     dispatchNavigate('SendScreen', { currency, matchedRate });
   };
 
@@ -176,12 +203,10 @@ export default function HomeScreen({ route }: Props) {
   };
 
   const savingVaultClickHandler = () => {
-    console.log('savingVaultClickHandler click');
-    dispatchNavigate('HotStorageVault');
+    dispatchNavigate('HotStorageVault', { wallet, matchedRate });
   };
 
   const coldStorageClickHandler = () => {
-    console.log('coldStorageClickHandler click');
     dispatchNavigate('ColdStorage');
   };
 
@@ -189,9 +214,35 @@ export default function HomeScreen({ route }: Props) {
     dispatchNavigate('SavingVaultIntroNew');
   };
 
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefreshing(true);
+    if(wallet){
+      await wallet?.fetchBalance();
+    }
     handleUser()
+  };
+
+
+  const createWallet = async () => {
+    setIsLoading(true);
+
+      let w: HDSegwitBech32Wallet;
+        // btc was selected
+        // index 2 radio - hd bip84
+        w = new HDSegwitBech32Wallet();
+        w.setLabel(label || loc.wallets.details_title);
+
+        await w.generate();
+        addWallet(w);
+        await saveToDisk();
+        A(A.ENUM.CREATED_WALLET);
+        triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
+        if (w.type === HDSegwitP2SHWallet.type || w.type === HDSegwitBech32Wallet.type) {
+          // @ts-ignore: Return later to update
+          dispatchNavigate('SavingVaultIntro', {
+            walletID: w.getID(),
+          });
+        }
   };
 
   return (
@@ -283,16 +334,16 @@ export default function HomeScreen({ route }: Props) {
                       {balance}   sats ~ {"$" + convertedRate.toFixed(2)}
                     </Text>
                     <Text bold style={styles.totalsats}>
-                      {formatNumber(Number(withdrawThreshold + reserveAmount))} sats
+                      {formatNumber(Number(withdrawThreshold) + Number(reserveAmount))} sats
                     </Text>
                   </View>
                   <View>
                     <View style={styles.showLine} />
-                    <View style={[styles.box, { left: `${calculatePercentage(withdrawThreshold, reserveAmount)}%` }]} />
+                    <View style={[styles.box, { left: `${calculatePercentage(Number(withdrawThreshold), Number(reserveAmount))}%` }]} />
                     <LinearGradient
                       start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
                       colors={[colors.white, colors.pink.dark]}
-                      style={[styles.linearGradient2, { width: `${calculatePercentage(balance, reserveAmount)}%` }]}>
+                      style={[styles.linearGradient2, { width: `${calculatePercentage(Number(balance), (Number(reserveAmount) + Number(withdrawThreshold)))}%` }]}>
                       {/* <View style={[styles.box, {marginLeft: `${Math.min((withdrawThreshold / (Number(withdrawThreshold + reserveAmount) || 0)) * 100, 100)}%`}]} /> */}
                       {/* <Shadow
                           inner // <- enable inner shadow
@@ -421,7 +472,8 @@ export default function HomeScreen({ route }: Props) {
                     shadowBottomBottom={styles.savingVault}
                     bitcoinText={styles.bitcoinText}
                     onPress={savingVaultClickHandler}
-                    bitcoinValue='0.1 BTC ~ $6500'
+                    bitcoinValue={balanceVault}
+                    inDollars={`$${(Number(balanceWithoutSuffix) * Number(matchedRate)).toFixed(2)}`}
                     isColorable
                   />
                   :

@@ -12,6 +12,7 @@ import { emailRegex } from "@Cypher/helpers/regex";
 
 export default function ChangeUsername({navigation, route}: any) {
     const username = route?.params?.username;
+    const goBack = route?.params?.goBack;
     console.log('username: ', username)
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -43,8 +44,12 @@ export default function ChangeUsername({navigation, route}: any) {
             if (response && response !== 'Username taken' && response?.startsWith('{')) {
                 const jsonResponse = JSON.parse(response);
                 if(jsonResponse.ok){
-                    SimpleToast.show("Verification Email Sent.", SimpleToast.SHORT);    
-                    dispatchNavigate('AccountStatus');    
+                    SimpleToast.show("⚠️ Please verify your email now because the the verification link will expire soon!", SimpleToast.SHORT);    
+                    if(goBack){
+                        navigation.goBack();
+                    } else {
+                        dispatchNavigate('AccountStatus');
+                    }
                 }
             } else {
                 SimpleToast.show(response, SimpleToast.SHORT);

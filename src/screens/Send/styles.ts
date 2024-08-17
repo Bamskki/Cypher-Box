@@ -11,6 +11,9 @@ interface Style {
     destination: TextStyle;
     senderText: TextStyle;
     label: TextStyle;
+    centerText: TextStyle;
+    scannerContainer: ViewStyle;
+    scannerFooter: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -30,8 +33,22 @@ export default StyleSheet.create<Style>({
     qrimage: {
         width: 51,
         height: 51,
-        position: 'absolute',
-        right: 0,
+    },
+    centerText: {
+        flex: 1,
+        fontSize: 18,
+        textAlign: 'center',
+        color: '#000',
+        marginTop: 20,
+    },
+    scannerContainer: {
+        flex: 1,
+        justifyContent: 'space-between',
+    },
+    scannerFooter: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        padding: 16,
     },
     heigth: {
         height: 84

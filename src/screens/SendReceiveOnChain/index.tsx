@@ -1,46 +1,119 @@
-import React from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import React, { useContext, useEffect, useState } from "react";
+import { Linking, StyleSheet, TouchableOpacity, View } from "react-native";
+import dayjs from "dayjs";
 import styles from "./styles";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 import TextView from "./TextView";
-import { dispatchNavigate } from "@Cypher/helpers";
+import { btc } from "@Cypher/helpers/coinosHelper";
+import { formatBalance } from "../../../loc";
+import { BlueStorageContext } from "../../../blue_modules/storage-context";
 
 interface Props {
     route: any;
 }
 
-export default function SendReceiveOnChain({ route }: Props) {
-    // const { item } = route?.params;
-    const isSent = true;
+const shortenAddress = (address: string) => {
+    // Take the first 6 characters
+    const start = address.substring(0, 6);
+    // Take the last 6 characters
+    const end = address.substring(address.length - 6);
+    // Combine with three dots in the middle
+    return `${start}...${end}`;
+};
 
+
+export default function SendReceiveOnChain({ route }: Props) {
+    const { transaction, history, matchedRate, wallet } = route?.params;
+    const isSent = transaction.value < 0;
+    const satsAmount = transaction.value.toString().replace('-', ''); // Adjusted for negative sign
+    const amountSign = transaction.value < 0 ? "-" : "+";
+    const currency = btc(1);
+    const dollarAmount = satsAmount * matchedRate * currency;
+    const BTCAmount = btc(satsAmount) + " BTC";
+    const { saveToDisk, txMetadata, wallets, getTransactions } = useContext(BlueStorageContext);
+    const [from, setFrom] = useState();
+    const [to, setTo] = useState();
+    const [isLoading, setIsLoading] = useState(true);
+    const [tx, setTX] = useState();
+    const [memo, setMemo] = useState();
+  
+
+    useEffect(() => {
+        let foundTx = {};
+        let newFrom = [];
+        let newTo = [];
+        for (const trans of getTransactions(null, Infinity, true)) {
+          if (trans.hash === transaction.hash) {
+            foundTx = trans;
+            for (const input of foundTx.inputs) {
+              newFrom = newFrom.concat(input.addresses);
+            }
+            for (const output of foundTx.outputs) {
+              if (output.addresses) newTo = newTo.concat(output.addresses);
+              if (output.scriptPubKey && output.scriptPubKey.addresses) newTo = newTo.concat(output.scriptPubKey.addresses);
+            }
+          }
+        }
+    
+        for (const w of wallets) {
+          for (const t of w.getTransactions()) {
+            if (t.hash === transaction.hash) {
+              console.log('tx', transaction.hash, 'belongs to', w.getLabel());
+            }
+          }
+        }
+        if (txMetadata[foundTx.hash]) {
+          if (txMetadata[foundTx.hash].memo) {
+            setMemo(txMetadata[foundTx.hash].memo);
+          }
+        }
+    
+        setTX(foundTx);
+        setFrom(newFrom);
+        setTo(newTo);
+        setIsLoading(false);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [transaction.hash, wallets]);
+    
     const handleViewBtcNetExplorerClickHandler = () => {
-        dispatchNavigate('HomeScreen');
+        const url = `https://www.blockchain.com/btc/tx/${transaction?.txid}`;
+        Linking.openURL(url).catch(err => console.error('An error occurred', err));
     }
 
+    console.log('transaction?.confirmations: ', transaction)
     return (
         <ScreenLayout showToolbar isBackButton title="Review Transaction">
             <View style={styles.main}>
                 <View style={styles.valueView}>
-                    <Text semibold style={StyleSheet.flatten([styles.sats, { color: isSent ? '#FD7A68' : '#4FBF67' }])}>+30K sats</Text>
-                    <Text bold subHeader>$0.03</Text>
+                    <Text semibold center style={StyleSheet.flatten([styles.sats, { color: isSent ? '#FD7A68' : '#4FBF67' }])}>{amountSign+BTCAmount}</Text>
+                    <Text bold subHeader>{'$'+dollarAmount.toFixed(2)}</Text>
                 </View>
-                <TextView keytext="Sent from to: " text="Bitcoin Address: bc1...34f" />
-                <TextView keytext="Received to: " text="Vault address: bc1...34f" />
+                <TextView keytext="Sent from: " text={`Bitcoin Address: ${shortenAddress(transaction?.inputs[0].addresses[0])}`} />
+                <TextView keytext="Received to: " text={`Bitcoin Address: ${shortenAddress(transaction?.outputs[0].scriptPubKey.addresses[0])}`} />
                 {isSent &&
                     <>
-                        <TextView keytext="Status: " text="~ 5000 sats" />
-                        <TextView keytext="Network fee: " text="~ 5000 sats" />
-                        <TextView keytext="Service fee: " text="~ 400 sats" />
-                        <TextView keytext="Total fee: " text="~ 5,400 sats (~ 0.1%)" />
+                        <TextView keytext="Status: " text={transaction.confirmations > 0
+                        ? transaction?.confirmations > 3
+                          ? "Received"
+                          : "Sent"
+                        : "Pending"} />
+                        {tx?.fee &&
+                            <TextView keytext="Network fee: " text={tx?.fee} />                        
+                        }
+                        {/* <TextView keytext="Service fee: " text="~ 400 sats" />
+                        <TextView keytext="Total fee: " text="~ 5,400 sats (~ 0.1%)" /> */}
                     </>
                 }
-                <TextView keytext="Date:  " text="19:00 UTC 4/20/2024" />
-                {!isSent && <TextView keytext="At bitcoin exchange rate: " text="$70,000" />}
-                {isSent &&
+                
+                <TextView keytext="Date:  " text={dayjs(tx?.received).format('HH:mm:ss MM/DD/YYYY')} />
+                {!isSent && <TextView keytext="At bitcoin exchange rate: " text={'$'+matchedRate} />}
+                <TextView keytext="Txid:  " text={transaction?.txid} />
+
+                {/* {isSent &&
                     <TouchableOpacity style={[styles.button, { marginBottom: 20 }]}>
                         <Text bold h4 style={styles.text}>Accelrate transaction</Text>
                     </TouchableOpacity>
-                }
+                } */}
                 <TouchableOpacity style={styles.button} onPress={handleViewBtcNetExplorerClickHandler}>
                     <Text bold h4 style={styles.text}>View in Bitcoin Network Explorer</Text>
                 </TouchableOpacity>

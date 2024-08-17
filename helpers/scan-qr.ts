@@ -15,6 +15,7 @@ import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 function scanQrHelper(
   navigateFunc: (scr: string | any, params?: any) => void,
   currentScreenName: string,
+  prevParams: any,
   showFileImportButton = true,
   onDismiss?: () => void,
 ): Promise<string | null> {
@@ -24,12 +25,13 @@ function scanQrHelper(
         showFileImportButton: Boolean(showFileImportButton),
         onBarScanned: (data: any) => {},
         onDismiss,
+        prevParams
       };
 
       params.onBarScanned = function (data: any) {
         setTimeout(() => resolve(data.data || data), 1);
-        navigateFunc(currentScreenName);
-        navigateFunc({ name: currentScreenName, params: {}, merge: true });
+        navigateFunc(currentScreenName, prevParams);
+        navigateFunc({ name: currentScreenName, ...prevParams, merge: true });
       };
 
       navigateFunc('ScanQRCodeRoot', {

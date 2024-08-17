@@ -74,7 +74,7 @@ interface Action {
   payload?: any;
 }
 
-const initialState: State = {
+export const initialState: State = {
   isLoading: true,
   walletBaseURI: '',
   selectedIndex: 0,
@@ -85,7 +85,7 @@ const initialState: State = {
   entropyButtonText: loc.wallets.add_entropy_provide,
 };
 
-const walletReducer = (state: State, action: Action): State => {
+export const walletReducer = (state: State, action: Action): State => {
   switch (action.type) {
     case ActionTypes.SET_LOADING:
       return { ...state, isLoading: action.payload };

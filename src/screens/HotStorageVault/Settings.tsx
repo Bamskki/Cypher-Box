@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import styles from "./styles";
-import { Dimensions, Image, StyleSheet, TouchableOpacity, View, Animated as RNAnimated } from "react-native";
+import { Dimensions, Image, StyleSheet, TouchableOpacity, View, Animated as RNAnimated, InteractionManager, ActivityIndicator, Alert } from "react-native";
 import { Text } from "@Cypher/component-library";
 import { colors } from "@Cypher/style-guide";
 import { Back } from "@Cypher/assets/images";
@@ -11,6 +11,14 @@ import Animated, {
     useAnimatedStyle,
 } from "react-native-reanimated";
 import { PrivateKeyGenerater, Tips } from "@Cypher/components";
+import { BlueStorageContext } from "../../../blue_modules/storage-context";
+import useAuthStore from "@Cypher/stores/authStore";
+import { AbstractHDElectrumWallet } from "../../../class/wallets/abstract-hd-electrum-wallet";
+import { dispatchNavigate } from "@Cypher/helpers";
+import Biometric from "../../../class/biometrics";
+import triggerHapticFeedback, { HapticFeedbackTypes } from "../../../blue_modules/hapticFeedback";
+import loc from "../../../loc";
+import Notifications from "../../../blue_modules/notifications";
 
 export default function Settings() {
     // const [right] = useState(new Animated.Value(0));
@@ -19,7 +27,40 @@ export default function Settings() {
     const thirdView = useSharedValue(0);
     const [right] = useState(new RNAnimated.Value(0));
     const [viewType, setViewType] = useState(0);
+    const { walletID } = useAuthStore();
+    const { wallets, isAdvancedModeEnabled, saveToDisk, deleteWallet } = useContext(BlueStorageContext);
+    const { setWalletID } = useAuthStore()
+    const wallet = useRef(wallets.find(w => w.getID() === walletID)).current;
 
+    const [hideTransactionsInWalletsList, setHideTransactionsInWalletsList] = useState(!wallet.getHideTransactionsInWalletsList());
+    const [isAdvancedModeEnabledRender, setIsAdvancedModeEnabledRender] = useState(false);
+    const [isBIP47Enabled, setIsBIP47Enabled] = useState(wallet.isBIP47Enabled());
+    const [masterFingerprint, setMasterFingerprint] = useState();
+    const [isLoading, setIsLoading] = useState(false);
+    const derivationPath = useMemo(() => {
+        try {
+          const path = wallet.getDerivationPath();
+          return path.length > 0 ? path : null;
+        } catch (e) {
+          return null;
+        }
+      }, [wallet]);
+    
+    useLayoutEffect(() => {
+        isAdvancedModeEnabled().then(setIsAdvancedModeEnabledRender);
+    
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [hideTransactionsInWalletsList, isBIP47Enabled]);
+
+    useEffect(() => {
+        if (isAdvancedModeEnabledRender && wallet.allowMasterFingerprint()) {
+            InteractionManager.runAfterInteractions(() => {
+            setMasterFingerprint(wallet.getMasterFingerprintHex());
+            });
+        }
+    }, [isAdvancedModeEnabledRender, wallet]);
+    
+      
     const nextClickInitiate = () => {
         backClickHandler();
     }
@@ -109,30 +150,124 @@ export default function Settings() {
         }).start();
     };
 
+    const navigateToAddresses = () =>
+        dispatchNavigate('WalletAddresses', {
+          walletID: wallet.getID(),
+        });
+    
+    const navigateToXPub = () =>
+        dispatchNavigate('WalletXpubRoot', {
+            screen: 'WalletXpub',
+            params: {
+            walletID: wallet.getID(),
+            },
+        });
+
+    const navigateToOverviewAndDeleteWallet = () => {
+        setIsLoading(true);
+        let externalAddresses = [];
+        try {
+            externalAddresses = wallet.getAllExternalAddresses();
+        } catch (_) {}
+        Notifications.unsubscribe(externalAddresses, [], []);
+        setWalletID(undefined);
+        dispatchNavigate('HomeScreen');
+        deleteWallet(wallet);
+        saveToDisk(true);
+        triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
+    };
+    
+    const presentWalletHasBalanceAlert = useCallback(async () => {
+        triggerHapticFeedback(HapticFeedbackTypes.NotificationWarning);
+        try {
+            const walletBalanceConfirmation = await prompt(
+                "Delete Wallet",
+                loc.formatString("This wallet has a balance. Before proceeding, please be aware that you will not be able to recover the funds without this wallet’s seed phrase. In order to avoid accidental removal, please enter your wallet’s balance of {balance} satoshis.", { balance: wallet.getBalance() }),
+                true,
+                'plain-text',
+                true,
+                "Delete",
+            );
+            if (Number(walletBalanceConfirmation) === wallet.getBalance()) {
+                navigateToOverviewAndDeleteWallet();
+            } else {
+                triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
+                setIsLoading(false)
+                alert("The provided balance amount does not match this wallet’s balance. Please try again.");
+            }
+        } catch (_) {}
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, []);
+        
+    const handleDeleteButtonTapped = () => {
+        triggerHapticFeedback(HapticFeedbackTypes.NotificationWarning);
+        Alert.alert(
+            "Delete Wallet",
+            "Are you sure?",
+            [
+            {
+                text: "Yes, delete",
+                onPress: async () => {
+                const isBiometricsEnabled = await Biometric.isBiometricUseCapableAndEnabled();
+    
+                if (isBiometricsEnabled) {
+                    if (!(await Biometric.unlockWithBiometrics())) {
+                    return;
+                    }
+                }
+                if (wallet.getBalance() > 0 && wallet.allowSend()) {
+                    presentWalletHasBalanceAlert();
+                } else {
+                    navigateToOverviewAndDeleteWallet();
+                }
+                },
+                style: 'destructive',
+            },
+            { text: "No, cancel", onPress: () => {}, style: 'cancel' },
+            ],
+            { cancelable: false },
+        );
+    };        
+    
+    console.log('wallet: ', wallet)
     return (
         <View style={{
             flex: 1,
         }}>
             <RNAnimated.View style={[styles.main, { right: right }]}>
                 <View style={styles.settingView}>
-                    <View style={styles.rowview}>
+                    {/* <View style={styles.rowview}>
                         <Text bold style={styles.text}>Name Your Vault</Text>
                         <View style={styles.blankspace} />
-                    </View>
-                    <View style={styles.line} />
+                    </View> */}
+                    {/* <View style={styles.line} /> */}
                     <TouchableOpacity onPress={backupSeedPhraseClickHandler}>
                         <Text bold style={styles.text}>Backup Seed Phrase</Text>
                     </TouchableOpacity>
                     <View style={styles.line} />
-                    <Text bold style={styles.text}>Show Addresses</Text>
-                    <View style={styles.line} />
-                    <Text bold style={styles.text}>Vault’s Public Key (xpub)</Text>
-                    <View style={styles.line} />
+                    {wallet instanceof AbstractHDElectrumWallet && (
+                        <>
+                            <TouchableOpacity onPress={navigateToAddresses}>
+                                <Text bold style={styles.text}>Show Addresses</Text>
+                            </TouchableOpacity>
+                            <View style={styles.line} />
+                        </>
+                    )}
+                    {wallet.allowXpub() && (
+                        <>
+                            <TouchableOpacity onPress={navigateToXPub}>
+                                <Text bold style={styles.text}>Vault’s Public Key (xpub)</Text>
+                            </TouchableOpacity>
+                            <View style={styles.line} />
+                        </>
+                    )}
                     <TouchableOpacity onPress={rightToLeft}>
                         <Text bold style={styles.text}>Info</Text>
                     </TouchableOpacity>
                     <View style={styles.line} />
-                    <Text bold style={StyleSheet.flatten([styles.text, { color: colors.red }])}>Delete</Text>
+                    <TouchableOpacity onPress={handleDeleteButtonTapped}>
+                        <Text bold style={StyleSheet.flatten([styles.text, { color: colors.red }])}>Delete</Text>
+                    </TouchableOpacity>
                     <View style={styles.line} />
                 </View>
                 {viewType == 0 ?
@@ -142,20 +277,26 @@ export default function Settings() {
                         </TouchableOpacity>
                         <View style={styles.typeView}>
                             <Text bold style={styles.typeText}>Type</Text>
-                            <Text h3>HD SegWit (BIP BECH32 Native)</Text>
+                            <Text h3>{wallet.typeReadable}</Text>
                         </View>
                         <View style={styles.typeView}>
                             <Text bold style={styles.typeText}>Transaction count</Text>
-                            <Text h3>0</Text>
+                            <Text h3>{wallet.getTransactions().length || 0}</Text>
                         </View>
-                        <View style={styles.typeView}>
-                            <Text bold style={styles.typeText}>Mater fingerprint</Text>
-                            <Text h3>78AD4F2A</Text>
-                        </View>
-                        <View style={styles.typeView}>
-                            <Text bold style={styles.typeText}>Derivation path</Text>
-                            <Text h3>m/84’/0’/0’</Text>
-                        </View>
+                        {isAdvancedModeEnabledRender && (
+                            <>
+                                <View style={styles.typeView}>
+                                    <Text bold style={styles.typeText}>Master fingerprint</Text>
+                                    <Text h3>{masterFingerprint ?? <ActivityIndicator />}</Text>
+                                </View>
+                                {derivationPath && (
+                                    <View style={styles.typeView}>
+                                        <Text bold style={styles.typeText}>Derivation path</Text>
+                                        <Text h3>{derivationPath}</Text>
+                                    </View>
+                                )}
+                            </>
+                        )}
                     </View>
                     :
                     <View style={styles.settingView2}>

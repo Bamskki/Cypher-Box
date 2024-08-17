@@ -15,6 +15,7 @@ interface Props {
     setIsSATS(isSats: boolean): void;
     disabled?: boolean;
     title: string;
+    prevSats?: string;
     isError?: boolean;
     matchedRate?: number;
     currency?: string;
@@ -22,26 +23,29 @@ interface Props {
     firstTabText?: string;
 }
 
-export default function CustomKeyBoardNew({ title, disabled, onPress, setSATS, setUSD, setIsSATS, isError, matchedRate, isConverter = true, firstTabText = "Sats" }: Props) {
-    const KEYSARRAY = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0'];
+export default function CustomKeyBoardNew({ prevSats, title, disabled, onPress, setSATS, setUSD, setIsSATS, isError, matchedRate, isConverter = true, firstTabText = "Sats" }: Props) {
+    const KEYSARRAY = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0'];
     const [isSats, setIsSats] = useState(true);
-    const [sats, setSats] = useState('');
+    const [sats, setSats] = useState(prevSats || '');
     const currency = btc(1);
 
     useEffect(() => {
-        if (sats.length) {
+        setSats(prevSats)
+    }, [prevSats])
+
+    useEffect(() => {
+        if (sats.length > 0) {
             let amount = 0;
             if (isSats) {
-                amount = ((matchedRate || 0) * currency * Number(sats)).toFixed(5)
-                console.log('amount: ', amount)
+                amount = (Number(matchedRate || 0) * Number(sats)).toFixed(4)
                 setSATS(sats);
                 setUSD(String(amount));
             } else {
-                amount = parseInt((Number(sats) / (matchedRate || 0)) * 100000000);
-                const multiplier = isSats ? 0.000594 : 1683.79;
-                const total = multiplier * Number(sats);
-                const total_ = total.toFixed(4);
-                setSATS(sats);
+                amount = ((Number(sats) / (Number(matchedRate) || 0))).toFixed(4);
+                // const multiplier = isSats ? 0.000594 : 1683.79;
+                // const total = multiplier * Number(sats);
+                // const total_ = total.toFixed(4);
+                setSATS(String(sats));
                 setUSD(String(amount));
             }
         } else {
@@ -93,7 +97,7 @@ export default function CustomKeyBoardNew({ title, disabled, onPress, setSATS, s
                     <Image source={Cancel} />
                 </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={onPress} style={styles.nextBtn}>
+            <TouchableOpacity onPress={onPress} disabled={disabled} style={[styles.nextBtn, disabled && {backgroundColor: colors.gray.disable}]}>
                 <Text h3>Next</Text>
             </TouchableOpacity>
         </View>

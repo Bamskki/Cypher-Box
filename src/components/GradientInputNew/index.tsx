@@ -47,16 +47,16 @@ const GradientInputNew = ({
             </View>
             {isFeeesRate ? (
                 <View style={styles.feesView}>
-                    <View style={{ alignItems: 'center' }}>
+                    {/* <View style={{ alignItems: 'center' }}>
                         <Text style={styles.sats}>sats/vb</Text>
                         <Text center style={styles.netfee}>
                             Network fee: {'\n'}~ 20000 sats (~$39){'\n'}~(0.2%)
                         </Text>
                     </View>
-                    <Text bold style={styles.tips}>Tip: The more bars and coins you select, the higher the network fees</Text>
+                    <Text bold style={styles.tips}>Tip: The more bars and coins you select, the higher the network fees</Text> */}
                 </View>
             ) : (
-                <Text style={styles.inDollar}>{isSats ? `$${usd}` : `${usd} sats`}</Text>
+                <Text style={styles.inDollar}>{isSats ? `$${usd}` : `${usd} BTC`}</Text>
             )}
         </View>
     );
