@@ -7,8 +7,10 @@ import { colors } from "@Cypher/style-guide";
 import { btc } from "@Cypher/helpers/coinosHelper";
 
 interface Props {
+    wallet: any;
     item: any;
     onPress(id: string): void;
+    handleChoose(item: any): void;
     ids: any;
 }
 const shortenAddress = (address: string) => {
@@ -20,8 +22,9 @@ const shortenAddress = (address: string) => {
     return `${start}...${end}`;
 };
 
-const ListView = ({ item, onPress, ids }: Props) => {
+const ListView = ({ wallet, item, onPress, handleChoose, ids }: Props) => {
     const BTCAmount = btc(item?.value) + " BTC";
+    const { memo } = wallet.getUTXOMetadata(item.txid, item.vout);
 
     return (
         <ImageBackground source={Transaction} style={styles.main} resizeMode="repeat">
@@ -36,11 +39,13 @@ const ListView = ({ item, onPress, ids }: Props) => {
                 </View>
                 <View style={styles.size}>
                     <Text bold style={styles.value}>{BTCAmount}</Text>
-                    <Text bold>{"Blink Settlement"}</Text>
+                    {memo && memo !== "" &&
+                        <Text bold>{memo}</Text>
+                    }
                 </View>
-                <View style={styles.label}>
+                <TouchableOpacity style={styles.label} onPress={() => handleChoose(item)}>
                     <Image source={Tag} style={{}} />
-                </View>
+                </TouchableOpacity>
                 <TouchableOpacity style={styles.select} onPress={() => onPress(`${item.txid}:${item.vout}`)}>
                     <View style={styles.checkbox}>
                         {ids.includes(`${item.txid}:${item.vout}`) &&

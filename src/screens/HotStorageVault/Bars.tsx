@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Input, Text } from "@Cypher/component-library";
-import { ActivityIndicator, Animated, Dimensions, FlatList, ImageBackground, ScrollView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Animated, Dimensions, FlatList, ImageBackground, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
 import SimpleToast from "react-native-simple-toast";
 import styles from "./styles";
 import { GradientCard, GradientView } from "@Cypher/components";
@@ -13,15 +13,20 @@ import { BlueStorageContext } from "../../../blue_modules/storage-context";
 import screenHeight from "@Cypher/style-guide/screenHeight";
 import { btc as btcHandle } from "@Cypher/helpers/coinosHelper";
 import { dispatchNavigate } from "@Cypher/helpers";
+import BottomModal from "../../../components/BottomModal";
+import { useTheme } from "../../../components/themes";
+import { OutputModalContent } from "../../../screen/send/coinControl";
 // import { Bitcoin, Transaction, TransactionN } from "@Cypher/assets/svg";
 
 export default function Bars({wallet, matchedRate}: any) {
+    const { colors: themeColors } = useTheme();
     const [ids, setIds] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [output, setOutput] = useState();
     console.log("🚀 ~ Bars ~ ids:", ids)
     const [btc, setBtc] = useState('0.00');
     const utxo = wallet.getUtxo(true).sort((a, b) => a.height - b.height || a.txid.localeCompare(b.txid) || a.vout - b.vout);
-  
+
     const [frozen, setFrozen] = useState(
         utxo.filter(out => wallet.getUTXOMetadata(out.txid, out.vout).frozen).map(({ txid, vout }) => `${txid}:${vout}`),
     );
@@ -85,12 +90,33 @@ export default function Bars({wallet, matchedRate}: any) {
 
     const handleSendBars = () => {
         if(ids.length > 0){
-            const usd = inUSD.toFixed(4);
-            dispatchNavigate('EditAmount', {wallet, utxo, ids, inUSD: inUSD.toFixed(4), total, matchedRate});
+            const usd = inUSD.toFixed(2);
+            dispatchNavigate('EditAmount', {isEdit: false, wallet, utxo, ids, maxUSD: total, inUSD: inUSD.toFixed(2), total, matchedRate});
         } else {
             SimpleToast.show("Please select Bar to Send", SimpleToast.SHORT)
         }
     };
+    
+    const handleChoose = item => setOutput(item);
+
+    const handleUseCoin = u => {
+        console.log('u: ', u[0])
+        onPressClickHandler(`${u[0].txid}:${u[0].vout}`)
+        setOutput(undefined);
+        // onUTXOChoose(u);
+    };
+    
+    const renderOutputModalContent = () => {
+        const oFrozen = frozen.includes(`${output.txid}:${output.vout}`);
+        const setOFrozen = value => {
+          if (value) {
+            setFrozen(f => [...f, `${output.txid}:${output.vout}`]);
+          } else {
+            setFrozen(f => f.filter(i => i !== `${output.txid}:${output.vout}`));
+          }
+        };
+        return <OutputModalContent output={output} wallet={wallet} onUseCoin={handleUseCoin} frozen={oFrozen} setFrozen={setOFrozen} />;
+      };
     
     return (
         <View style={styles.flex}>
@@ -114,7 +140,7 @@ export default function Bars({wallet, matchedRate}: any) {
                             <Text white h3 bold>This wallet does not have any coins at the moment.</Text>
                         </View>
                     )}
-                    renderItem={({item, index}) => <ListView item={item} onPress={onPressClickHandler} ids={ids} />}
+                    renderItem={({item, index}) => <ListView wallet={wallet} item={item} onPress={onPressClickHandler} handleChoose={handleChoose} ids={ids} />}
                 />
             }
             {/* <ScrollView>
@@ -130,7 +156,7 @@ export default function Bars({wallet, matchedRate}: any) {
                         editable={false}
                         textInpuetStyle={StyleSheet.flatten([styles.input, { borderColor: btc?.length > 0 ? colors.green : colors.gray.default }])}
                     />
-                    <Text h2 bold numberOfLines={1} style={{ marginStart: 10, width: 100, }}>~$ {inUSD.toFixed(4)}</Text>
+                    <Text h2 bold numberOfLines={1} style={{ marginStart: 10, width: 100, }}>~$ {inUSD.toFixed(2)}</Text>
                 </View>
                 <Text bold center style={styles.tips}>Tip: Selecting dust coins will increase network fees</Text>
                 <View style={{
@@ -159,6 +185,18 @@ export default function Bars({wallet, matchedRate}: any) {
                     </GradientView>
                 </View>
             </View>
+            <BottomModal
+                isVisible={Boolean(output)}
+                onClose={() => {
+                Keyboard.dismiss();
+                setOutput(undefined);
+                }}
+            >
+                <KeyboardAvoidingView enabled={!Platform?.isPad} behavior={Platform.OS === 'ios' ? 'position' : null}>
+                <View style={[styles.modalContent, { backgroundColor: themeColors.elevated }]}>{output && renderOutputModalContent()}</View>
+                </KeyboardAvoidingView>
+            </BottomModal>
+
         </View>
     )
 }

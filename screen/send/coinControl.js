@@ -196,7 +196,7 @@ const mStyles = StyleSheet.create({
   },
 });
 
-const OutputModalContent = ({ output, wallet, onUseCoin, frozen, setFrozen }) => {
+export const OutputModalContent = ({ output, wallet, onUseCoin, frozen, setFrozen }) => {
   const { colors } = useTheme();
   const { txMetadata, saveToDisk } = useContext(BlueStorageContext);
   const [memo, setMemo] = useState(wallet.getUTXOMetadata(output.txid, output.vout).memo || txMetadata[output.txid]?.memo || '');
@@ -233,10 +233,10 @@ const OutputModalContent = ({ output, wallet, onUseCoin, frozen, setFrozen }) =>
         ]}
         onChangeText={onMemoChange}
       />
-      <ListItem title={loc.cc.freezeLabel} Component={TouchableWithoutFeedback} switch={switchValue} />
+      {/* <ListItem title={loc.cc.freezeLabel} Component={TouchableWithoutFeedback} switch={switchValue} /> */}
       <BlueSpacing20 />
       <View style={mStyles.buttonContainer}>
-        <Button testID="UseCoin" title={loc.cc.use_coin} onPress={() => onUseCoin([output])} />
+        <Button testID="UseCoin" title={loc.cc.use_coin} backgroundColor='#23C47F' onPress={() => onUseCoin([output])} />
       </View>
       <BlueSpacing20 />
     </>

@@ -79,14 +79,13 @@ export default function ColdStorage({ route, navigation }: Props) {
     const [feeUSD, setFeeUSD] = useState(1);
     const [feesEditable, setFeesEditable] = useState(false);
     const [satsEditable, setSatsEditable] = useState(false);
-    const {wallet, utxo, ids, inUSD, total, matchedRate} = route?.params;
+    const {wallet, utxo, ids, maxUSD, inUSD, total, matchedRate} = route?.params;
     const fUtxo = utxo.filter(({ txid, vout }) => ids.includes(`${txid}:${vout}`));
     const balance = fUtxo ? fUtxo.reduce((prev, curr) => prev + curr.value, 0) : wallet?.getBalance();
     const allBalance = formatBalanceWithoutSuffix(balance, BitcoinUnit.BTC, true);
     const balanceWallet = !wallet?.hideBalance && formatBalance(Number(wallet?.getBalance()), wallet?.getPreferredBalanceUnit(), true);
     const balanceWithoutSuffix = !wallet?.hideBalance && formatBalanceWithoutSuffix(Number(wallet?.getBalance()), wallet?.getPreferredBalanceUnit(), true);
 
-    console.log('feeUnit: ', feeUnit)
     const formatFee = fee => formatBalance(fee, feeUnit, true);
 
     const feeRate = useMemo(() => {
@@ -532,7 +531,7 @@ export default function ColdStorage({ route, navigation }: Props) {
     }
 
     const editAmountClickHandler = () => {
-        navigation.push('EditAmount', { wallet, utxo, ids, inUSD, total, matchedRate, setSatsEdit: setSats_ });
+        navigation.push('EditAmount', {isEdit: true, wallet, utxo, ids, maxUSD, inUSD, total, matchedRate, setSatsEdit: setSats_ });
     }
 
     const editFeesClickHandler = () => {
@@ -699,7 +698,6 @@ export default function ColdStorage({ route, navigation }: Props) {
         },
     ];
 
-    console.log('feePrecalc: ', feePrecalc)
     return (
         <ScreenLayout showToolbar disableScroll>
             <View style={styles.container}>
@@ -724,7 +722,7 @@ export default function ColdStorage({ route, navigation }: Props) {
                     <View style={styles.priceView}>
                         <View>
                             <Text style={styles.recipientTitle}>Recipient will get:</Text>
-                            <Text bold style={styles.value}>{parseInt(Number(inUSD) / Number(matchedRate) * 100000000) + ' sats ~$' + Number(inUSD).toFixed(4)}</Text>
+                            <Text bold style={styles.value}>{parseInt(Number(inUSD) / Number(matchedRate) * 100000000) + ' sats ~$' + Number(inUSD).toFixed(2)}</Text>
                         </View>
                         <TouchableOpacity style={[styles.editAmount, { borderColor: satsEditable ? colors.green : '#B6B6B6' }]} onPress={editAmountClickHandler}>
                             <Text>Edit amount</Text>

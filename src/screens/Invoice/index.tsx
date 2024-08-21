@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, Linking, StyleSheet, TouchableOpacity, View } from "react-native";
 import styles from "./styles";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 import TextView from "./TextView";
@@ -49,11 +49,15 @@ export default function Invoice({ route }: Props) {
       }
     };
   
+    const handleViewBtcNetExplorerClickHandler = () => {
+        const url = `https://www.blockchain.com/btc/tx/${historyDetail?.ref || historyDetail?.hash}`;
+        Linking.openURL(url).catch(err => console.error('An error occurred', err));
+    }
+
     const amountSent = (Number(satsAmount) + ((0.1 / 100) * Number(satsAmount)));
     const totalFee = (Number(((Number(satsAmount) + ((0.1 / 100) * Number(satsAmount))) * (0.1 / 100))) + Number((historyDetail?.fee + (historyDetail?.ourfee || 0))))
     const percentageFee = ((totalFee / amountSent) * 100).toFixed(2)
   
-    console.log('historyDetail: ', historyDetail)
     return (
         <ScreenLayout showToolbar isBackButton title="Review Payment">
             {!!isLoading ? (
@@ -75,7 +79,7 @@ export default function Invoice({ route }: Props) {
                             {historyDetail?.ourfee > 0 && (
                                 <TextView keytext="Coinos Fee:  " text={`~${(historyDetail?.ourfee || 0)} sats`} />
                             )}
-                            <TextView keytext={`Service Fee (0.1%):  `} text={`~${((Number(satsAmount) + ((0.1 / 100) * Number(satsAmount))) * (0.1 / 100)).toFixed(2)} sats`} />
+                            {/* <TextView keytext={`Service Fee (0.1%):  `} text={`~${((Number(satsAmount) + ((0.1 / 100) * Number(satsAmount))) * (0.1 / 100)).toFixed(2)} sats`} /> */}
                             <TextView keytext={`Total Fee:  `} text={`~${(Number(((Number(satsAmount) + ((0.1 / 100) * Number(satsAmount))) * (0.1 / 100)).toFixed(2)) + Number((historyDetail?.fee + (historyDetail?.ourfee || 0)))).toFixed(2)} sats ${" ("+percentageFee+"%)"}`} />
                         </>
                         :
@@ -86,7 +90,7 @@ export default function Invoice({ route }: Props) {
                     <TextView keytext="At bitcoin exchange rate:  " text={formattedCurrency} />
 
                     {item?.type === 'bitcoin' ?
-                        <TouchableOpacity style={styles.button}>
+                        <TouchableOpacity style={styles.button} onPress={handleViewBtcNetExplorerClickHandler}>
                             <Text bold h4 style={styles.text}>View in Bitcoin Network Explorer</Text>
                         </TouchableOpacity>
                         :

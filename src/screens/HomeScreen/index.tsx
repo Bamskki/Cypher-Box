@@ -48,6 +48,17 @@ export const calculatePercentage = (withdrawThreshold: number, reserveAmount: nu
   return Math.min(percentage, 100);
 };
 
+export function calculateBalancePercentage(balance: number, withdrawThreshold: number, reserveAmount: number) {
+  const total = withdrawThreshold + reserveAmount;
+  
+  if (total === 0) {
+      return 0; // Prevent division by zero
+  }
+  
+  const percentage = (balance / total) * 100;
+  const resPercentage = percentage > 100 ? 100 : percentage;
+  return parseFloat(resPercentage.toFixed(2)); // Return percentage rounded to 2 decimal places
+}
 
 export default function HomeScreen({ route }: Props) {
   const { navigate } = useNavigation();
@@ -245,6 +256,7 @@ export default function HomeScreen({ route }: Props) {
         }
   };
 
+  console.log('calculatePercentage(Number(withdrawThreshold), (Number(reserveAmount))): ', calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount)))
   return (
     <ScreenLayout 
       RefreshControl={
@@ -339,11 +351,11 @@ export default function HomeScreen({ route }: Props) {
                   </View>
                   <View>
                     <View style={styles.showLine} />
-                    <View style={[styles.box, { left: `${calculatePercentage(Number(withdrawThreshold), Number(reserveAmount))}%` }]} />
+                    <View style={[styles.box, { left: `${calculatePercentage(Number(withdrawThreshold), (Number(reserveAmount)))}%` }]} />
                     <LinearGradient
                       start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
                       colors={[colors.white, colors.pink.dark]}
-                      style={[styles.linearGradient2, { width: `${calculatePercentage(Number(balance), (Number(reserveAmount) + Number(withdrawThreshold)))}%` }]}>
+                      style={[styles.linearGradient2, { width: `${calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount))}%` }]}>
                       {/* <View style={[styles.box, {marginLeft: `${Math.min((withdrawThreshold / (Number(withdrawThreshold + reserveAmount) || 0)) * 100, 100)}%`}]} /> */}
                       {/* <Shadow
                           inner // <- enable inner shadow

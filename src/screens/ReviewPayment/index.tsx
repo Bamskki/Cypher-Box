@@ -17,7 +17,7 @@ import { bitcoinSendFee, getCurrencyRates, getMe, sendBitcoinPayment, sendCoinsV
 import { btc, formatNumber, matchKeyAndValue } from "@Cypher/helpers/coinosHelper";
 import { FeeSelection } from "./FeeSelection/FeeSelection";
 import { startsWithLn } from "../Send";
-import { calculatePercentage } from "../HomeScreen";
+import { calculateBalancePercentage, calculatePercentage } from "../HomeScreen";
 
 interface Props {
     route: any;
@@ -95,7 +95,8 @@ export default function ReviewPayment({ route }: Props) {
         const amount = isSats ? value : converted;
         if(to.startsWith('bc')){ //bitcoin onchain
             const feeForBamskki = (0.1 / 100) * Number(amount);
-            const remainingAmount = Number(amount) - feeForBamskki;
+            // const remainingAmount = Number(amount) - feeForBamskki;
+            const remainingAmount = Number(amount);
             console.log('feeForBamskki: ', feeForBamskki)
             console.log('remainingAmount: ', remainingAmount)
             if (remainingAmount <= 0) {
@@ -222,7 +223,8 @@ export default function ReviewPayment({ route }: Props) {
                 return;
             }
             const feeForBamskki = (0.1 / 100) * Number(amount);
-            const remainingAmount = Number(amount) - feeForBamskki;
+            // const remainingAmount = Number(amount) - feeForBamskki;
+            const remainingAmount = Number(amount);
             console.log('feeForBamskki: ', feeForBamskki)
             console.log('remainingAmount: ', remainingAmount)
             if (remainingAmount <= 0) {
@@ -242,8 +244,8 @@ export default function ReviewPayment({ route }: Props) {
 
                     console.log('jsonSend: ', jsonSend)
                     //send 0.1% fee to bamskii
-                    const response = await sendCoinsViaUsername("bamskki@coinos.io", feeForBamskki, '');
-                    console.log('response username: ', response, typeof response)
+                    // const response = await sendCoinsViaUsername("bamskki@coinos.io", feeForBamskki, '');
+                    // console.log('response username: ', response, typeof response)
                     dispatchNavigate('TransactionBroadCast', {matchedRate, type, value, converted, isSats, to, item: jsonSend});        
 
                 } else {
@@ -265,16 +267,18 @@ export default function ReviewPayment({ route }: Props) {
             try {
                 const response = await sendCoinsViaUsername(to, Number(amount), note);
                 console.log('response username: ', response, typeof response)
-                const jsonResponse = JSON.parse(response);
-                if(response?.startsWith('{')){
+                if(typeof response == 'object' && response?.hash) {
+                    dispatchNavigate('Transaction', {matchedRate, type, value, converted, isSats, to, item: response});
+                } else if(response?.startsWith('{')){
+                    const jsonResponse = JSON.parse(response);
+                    console.log('jsonResponse: ', jsonResponse)
                     dispatchNavigate('Transaction', {matchedRate, type, value, converted, isSats, to, item: jsonResponse});
                 } else {
                     SimpleToast.show(response, SimpleToast.SHORT);
                 }
-        
             } catch (error) {
                 console.error('Error Send Lightening:', error);
-                SimpleToast.show('Failed to Send Lightening. Please try again.', SimpleToast.SHORT);
+                SimpleToast.show('Failed Send to User. Please try again.', SimpleToast.SHORT);
             } finally {
                 setIsSendLoading(false);
             }
@@ -290,7 +294,8 @@ export default function ReviewPayment({ route }: Props) {
                 return;
             }
             const feeForBamskki = (0.1 / 100) * Number(amount);
-            const remainingAmount = Number(amount) - feeForBamskki;
+            // const remainingAmount = Number(amount) - feeForBamskki;
+            const remainingAmount = Number(amount);
             console.log('feeForBamskki: ', feeForBamskki)
             console.log('remainingAmount: ', remainingAmount)
             if (remainingAmount <= 0) {
@@ -308,8 +313,8 @@ export default function ReviewPayment({ route }: Props) {
                     jsonSend = JSON.parse(sendResponse);
 
                     //send 0.1% fee to bamskii
-                    const response = await sendCoinsViaUsername("bamskki@coinos.io", feeForBamskki, '');
-                    console.log('response username: ', response)
+                    // const response = await sendCoinsViaUsername("bamskki@coinos.io", feeForBamskki, '');
+                    // console.log('response username: ', response)
                     dispatchNavigate('TransactionBroadCast', {matchedRate, type, value, converted, isSats, to, item: jsonSend});
                 } else {
                     SimpleToast.show(sendResponse, SimpleToast.SHORT);
@@ -378,12 +383,12 @@ export default function ReviewPayment({ route }: Props) {
                         {(type == 'bitcoin' || type == 'liquid') &&
                             <View style={{paddingHorizontal: 25, alignItems: 'center'}}>
                                 <View style={styles.showLine} />
-                                <View style={[styles.box, {left: `${calculatePercentage(Number(withdrawThreshold), Number(reserveAmount))}%`}]} />
+                                <View style={[styles.box, {left: `${calculatePercentage(Number(withdrawThreshold), Number(reserveAmount)) + 7}%`}]} />
                                 {/* <View style={[styles.box, {left: `${Math.min((withdrawThreshold / ((Number(withdrawThreshold) + Number(reserveAmount)) || 0)) * 100, 100)}%`}]} /> */}
                                 <LinearGradient
                                     start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
                                     colors={[colors.white, colors.pink.dark]}
-                                    style={[styles.linearGradient2, {width: `${calculatePercentage(balance, (Number(withdrawThreshold) + Number(reserveAmount)))}%`}]}>
+                                    style={[styles.linearGradient2, { width: `${calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount))}%` }]}>
                                     {/* <View style={[styles.box, {marginLeft: `${Math.min((withdrawThreshold / (Number(withdrawThreshold + reserveAmount) || 0)) * 100, 100)}%`}]} /> */}
                                     {/* <Shadow
                                         inner // <- enable inner shadow
@@ -424,8 +429,9 @@ export default function ReviewPayment({ route }: Props) {
                                         </View>
                                     </GradientCard>
                             </View>
-                            <TextViewV2 keytext="Coinos Fee + Service Fee:  " text={` ~   ${(networkFee || 0) + (bamskiiFee || 0)} sats`} />
-                            <TextViewV2 keytext="Total Fee:  " text={` ~   ${(networkFee || 0) + (bamskiiFee || 0) + (estimatedFee || 0) } sats (~0.2%)`} />
+                            {/* <TextViewV2 keytext="Coinos Fee + Service Fee:  " text={` ~   ${(networkFee || 0) + (bamskiiFee || 0)} sats`} /> */}
+                            <TextViewV2 keytext="Coinos Fee:  " text={` ~   ${(networkFee || 0)} sats`} />
+                            <TextViewV2 keytext="Total Fee:  " text={` ~   ${(networkFee || 0) + (estimatedFee || 0) } sats (~0.2%)`} />
                         </>
                     :
                         <TextView keytext="Fees:  " text={` ~   ${estimatedFee} sats`} />

@@ -521,22 +521,23 @@ const WalletTransactions = ({ navigation }) => {
           } else if (wallet.type === LightningCustodianWallet.type) {
             if (wallet.getUserHasSavedExport()) {
               onManageFundsPressed({ id });
-            } else {
-              BlueAlertWalletExportReminder({
-                onSuccess: async () => {
-                  wallet.setUserHasSavedExport(true);
-                  await saveToDisk();
-                  onManageFundsPressed({ id });
-                },
-                onFailure: () =>
-                  navigate('WalletExportRoot', {
-                    screen: 'WalletExport',
-                    params: {
-                      walletID: wallet.getID(),
-                    },
-                  }),
-              });
-            }
+            } 
+            // else {
+            //   BlueAlertWalletExportReminder({
+            //     onSuccess: async () => {
+            //       wallet.setUserHasSavedExport(true);
+            //       await saveToDisk();
+            //       onManageFundsPressed({ id });
+            //     },
+            //     onFailure: () =>
+            //       navigate('WalletExportRoot', {
+            //         screen: 'WalletExport',
+            //         params: {
+            //           walletID: wallet.getID(),
+            //         },
+            //       }),
+            //   });
+            // }
           }
         }}
       />

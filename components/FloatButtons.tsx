@@ -116,9 +116,10 @@ interface FButtonProps {
   first?: boolean;
   last?: boolean;
   disabled?: boolean;
+  backgroundColor?: boolean;
 }
 
-export const FButton = ({ text, icon, width, first, last, ...props }: FButtonProps) => {
+export const FButton = ({ backgroundColor, text, icon, width, first, last, ...props }: FButtonProps) => {
   const { colors } = useTheme();
   const bStylesHook = StyleSheet.create({
     root: {
@@ -139,6 +140,10 @@ export const FButton = ({ text, icon, width, first, last, ...props }: FButtonPro
     style.paddingRight = paddingRight;
     style.paddingLeft = paddingLeft;
     style.width = width + paddingRight + paddingLeft;
+  }
+
+  if(backgroundColor){
+    style.backgroundColor = "#23C47F"
   }
 
   return (
