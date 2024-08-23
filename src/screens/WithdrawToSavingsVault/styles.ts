@@ -242,9 +242,9 @@ export default StyleSheet.create<Style>({
     },
     progressBarIndicator: {
         top: -18,
-        width: '72%',
+        width: '75%',
         height: 14,
-        left: 75,
+        left: 70,
         position: 'relative'
     }
 });
