@@ -18,7 +18,7 @@ import { useTheme } from "../../../components/themes";
 import { OutputModalContent } from "../../../screen/send/coinControl";
 // import { Bitcoin, Transaction, TransactionN } from "@Cypher/assets/svg";
 
-export default function Bars({wallet, matchedRate}: any) {
+export default function Bars({ wallet, matchedRate }: any) {
     const { colors: themeColors } = useTheme();
     const [ids, setIds] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -44,7 +44,7 @@ export default function Bars({wallet, matchedRate}: any) {
     useEffect(() => {
         debouncedSaveFronen.current(frozen);
     }, [frozen]);
-    
+
     useEffect(() => {
         (async () => {
             try {
@@ -71,7 +71,7 @@ export default function Bars({wallet, matchedRate}: any) {
         const currency = btcHandle(1);
         const inUSD = Number(total) * Number(matchedRate) * currency;
         const BTCAmount = btcHandle(total);
-    
+
         // const inUSD = total * 63749.40;
         return { total: BTCAmount, inUSD };
     }, [ids, utxo]);
@@ -89,14 +89,14 @@ export default function Bars({wallet, matchedRate}: any) {
     }
 
     const handleSendBars = () => {
-        if(ids.length > 0){
+        if (ids.length > 0) {
             const usd = inUSD.toFixed(2);
-            dispatchNavigate('EditAmount', {isEdit: false, wallet, utxo, ids, maxUSD: total, inUSD: inUSD.toFixed(2), total, matchedRate});
+            dispatchNavigate('EditAmount', { isEdit: false, wallet, utxo, ids, maxUSD: total, inUSD: inUSD.toFixed(2), total, matchedRate });
         } else {
             SimpleToast.show("Please select Bar to Send", SimpleToast.SHORT)
         }
     };
-    
+
     const handleChoose = item => setOutput(item);
 
     const handleUseCoin = u => {
@@ -105,19 +105,19 @@ export default function Bars({wallet, matchedRate}: any) {
         setOutput(undefined);
         // onUTXOChoose(u);
     };
-    
+
     const renderOutputModalContent = () => {
         const oFrozen = frozen.includes(`${output.txid}:${output.vout}`);
         const setOFrozen = value => {
-          if (value) {
-            setFrozen(f => [...f, `${output.txid}:${output.vout}`]);
-          } else {
-            setFrozen(f => f.filter(i => i !== `${output.txid}:${output.vout}`));
-          }
+            if (value) {
+                setFrozen(f => [...f, `${output.txid}:${output.vout}`]);
+            } else {
+                setFrozen(f => f.filter(i => i !== `${output.txid}:${output.vout}`));
+            }
         };
         return <OutputModalContent output={output} wallet={wallet} onUseCoin={handleUseCoin} frozen={oFrozen} setFrozen={setOFrozen} />;
-      };
-    
+    };
+
     return (
         <View style={styles.flex}>
             <Text bold style={styles.desc}>Tap on your coins to label them. Select multiple coins and batch them together to optimize fees for future transactions:</Text>
@@ -130,7 +130,7 @@ export default function Bars({wallet, matchedRate}: any) {
             <View style={styles.border} />
             {loading ?
                 <ActivityIndicator style={{ marginTop: 10, marginBottom: 20 }} color={colors.white} />
-            :
+                :
                 <FlatList
                     data={utxo}
                     keyExtractor={(_, index) => index.toString()}
@@ -140,7 +140,7 @@ export default function Bars({wallet, matchedRate}: any) {
                             <Text white h3 bold>This wallet does not have any coins at the moment.</Text>
                         </View>
                     )}
-                    renderItem={({item, index}) => <ListView wallet={wallet} item={item} onPress={onPressClickHandler} handleChoose={handleChoose} ids={ids} />}
+                    renderItem={({ item, index }) => <ListView wallet={wallet} item={item} onPress={onPressClickHandler} handleChoose={handleChoose} ids={ids} />}
                 />
             }
             {/* <ScrollView>
@@ -154,7 +154,7 @@ export default function Bars({wallet, matchedRate}: any) {
                         value={`${total} BTC`}
                         keyboardType="number-pad"
                         editable={false}
-                        textInpuetStyle={StyleSheet.flatten([styles.input, { borderColor: btc?.length > 0 ? colors.green : colors.gray.default }])}
+                        textInputStyle={StyleSheet.flatten([styles.input, { borderColor: btc?.length > 0 ? colors.green : colors.gray.default }])}
                     />
                     <Text h2 bold numberOfLines={1} style={{ marginStart: 10, width: 100, }}>~$ {inUSD.toFixed(2)}</Text>
                 </View>
@@ -188,12 +188,12 @@ export default function Bars({wallet, matchedRate}: any) {
             <BottomModal
                 isVisible={Boolean(output)}
                 onClose={() => {
-                Keyboard.dismiss();
-                setOutput(undefined);
+                    Keyboard.dismiss();
+                    setOutput(undefined);
                 }}
             >
                 <KeyboardAvoidingView enabled={!Platform?.isPad} behavior={Platform.OS === 'ios' ? 'position' : null}>
-                <View style={[styles.modalContent, { backgroundColor: themeColors.elevated }]}>{output && renderOutputModalContent()}</View>
+                    <View style={[styles.modalContent, { backgroundColor: themeColors.elevated }]}>{output && renderOutputModalContent()}</View>
                 </KeyboardAvoidingView>
             </BottomModal>
 

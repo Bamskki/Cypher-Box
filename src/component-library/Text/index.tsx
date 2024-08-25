@@ -1,5 +1,5 @@
-import React, {ReactNode} from 'react';
-import {LayoutChangeEvent, Text as RNText, TextStyle} from 'react-native';
+import React, { ReactNode } from 'react';
+import { LayoutChangeEvent, Text as RNText, TextStyle } from 'react-native';
 
 import styles from './styles';
 

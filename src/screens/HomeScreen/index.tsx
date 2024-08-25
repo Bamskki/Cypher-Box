@@ -174,6 +174,10 @@ export default function HomeScreen({ route }: Props) {
     dispatchNavigate('LoginCoinOSScreen');
   };
 
+  const handleRecoverSavingVault = () => {
+    dispatchNavigate('RecoverSavingVault');
+  };
+
   const onBarScanned = (value: any) => {
     if (!value) return;
     DeeplinkSchemaMatch.navigationRouteFor({ url: value }, completionValue => {
@@ -382,7 +386,7 @@ export default function HomeScreen({ route }: Props) {
                     isColorable
                   />
                 }
-                {isAllDone ?
+                {isAllDone &&
                   <View style={[styles.container3, { opacity: isAllDone ? 1 : 0.5 }]}>
                     <GradientCard colors_={['#464D6854', '#FFF']} style={styles.container2} linearStyle={styles.main}>
                       <View style={styles.container4}>
@@ -433,34 +437,8 @@ export default function HomeScreen({ route }: Props) {
                       </View>
                     )}
                   </View>
-                  :
-                  <View style={styles.createVaultContainer}>
-                    <TouchableOpacity
-                      onPress={handleCreateVault}
-                    >
-                      <LinearGradient
-                        colors={['#1E1E1E', '#6D6D6D']}
-                        start={{ x: 0, y: -0.1 }}
-                        end={{ x: 0, y: 2 }}
-                        locations={[0, 1]}
-                        style={styles.createVault}>
-                        <Text h3 style={styles.advancedText}>⚠  Advanced</Text>
-                        <Text h2 style={styles.createVaultText}>
-                          Create Vault
-                        </Text>
-                      </LinearGradient>
-                    </TouchableOpacity>
-                    <View style={styles.alreadyView}>
-                      <Text bold style={styles.text}>
-                        Already have a vault?
-                      </Text>
-                      <TouchableOpacity onPress={loginClickHandler}>
-                        <Text bold style={[styles.login, { color: colors.green }]}>
-                          Recover
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
+
+
                 }
               </View>
             </>
@@ -483,6 +461,33 @@ export default function HomeScreen({ route }: Props) {
                     Login
                   </Text>
                 </TouchableOpacity>
+              </View>
+              <View style={styles.createVaultContainer}>
+                <TouchableOpacity
+                  onPress={handleCreateVault}
+                >
+                  <LinearGradient
+                    colors={['#1E1E1E', '#6D6D6D']}
+                    start={{ x: 0, y: -0.1 }}
+                    end={{ x: 0, y: 2 }}
+                    locations={[0, 1]}
+                    style={styles.createVault}>
+                    <Text h3 style={styles.advancedText}>⚠  Advanced</Text>
+                    <Text h2 style={styles.createVaultText}>
+                      Create Vault
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+                <View style={styles.alreadyView}>
+                  <Text bold style={styles.text}>
+                    Already have a vault?
+                  </Text>
+                  <TouchableOpacity onPress={handleRecoverSavingVault}>
+                    <Text bold style={[styles.login, { color: colors.green }]}>
+                      Recover
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </>
           )}

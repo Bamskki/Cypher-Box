@@ -17,7 +17,7 @@ export function startsWithLn(str: string) {
     return str.startsWith("ln");
 }
 
-export default function SendScreen({navigation, route}: any) {
+export default function SendScreen({ navigation, route }: any) {
     const info = route.params;
     const [isSats, setIsSats] = useState(true);
     const [sats, setSats] = useState('');
@@ -34,8 +34,8 @@ export default function SendScreen({navigation, route}: any) {
     console.log('info: ', info)
 
     useEffect(() => {
-        if(!sender.startsWith('ln') && !sender.includes('@') && !recommendedFee){
-            const init = async () => { 
+        if (!sender.startsWith('ln') && !sender.includes('@') && !recommendedFee) {
+            const init = async () => {
                 const res = await bitcoinRecommendedFee();
                 setRecommendedFee(res);
                 console.log('recommendedFee: ', res)
@@ -66,7 +66,7 @@ export default function SendScreen({navigation, route}: any) {
             console.log('Camera permission:', res);
         }
     }
-    
+
     // useEffect(() => {
     //     requestCameraPermission();
     // }, []);
@@ -74,11 +74,11 @@ export default function SendScreen({navigation, route}: any) {
     const handleSendNext = async () => {
         setIsLoading(true);
         const amount = isSats ? sats : usd;
-        if(sender == '') {
+        if (sender == '') {
             SimpleToast.show('Please enter an address or username', SimpleToast.SHORT);
             setIsLoading(false);
             return;
-        } else if(startsWithLn(sender)){ //lightening invoice
+        } else if (startsWithLn(sender)) { //lightening invoice
             try {
                 dispatchNavigate('ReviewPayment', {
                     value: sats,
@@ -91,15 +91,15 @@ export default function SendScreen({navigation, route}: any) {
                     currency: info?.curreny,
                     recommendedFee
                 });
-        
+
             } catch (error) {
                 console.error('Error Send Lightening:', error);
                 SimpleToast.show('Failed to Send Lightening. Please try again.', SimpleToast.SHORT);
             } finally {
                 setIsLoading(false);
             }
-        } else if(sender.startsWith('bc')){ //bitcoin onchain
-            if(sats == '') {
+        } else if (sender.startsWith('bc')) { //bitcoin onchain
+            if (sats == '') {
                 SimpleToast.show('Please enter an amount', SimpleToast.SHORT);
                 setIsLoading(false);
                 return;
@@ -123,19 +123,19 @@ export default function SendScreen({navigation, route}: any) {
                     to: sender,
                     fees: 0,
                     matchedRate: info?.matchedRate,
-                    currency: info?.curreny,    
+                    currency: info?.curreny,
                     type: 'bitcoin',
                     feeForBamskki,
                     recommendedFee
                 });
-            } catch(error) {
+            } catch (error) {
                 console.error('Error Send to bitcoin:', error);
                 SimpleToast.show('Failed to Send to bitcoin. Please try again.', SimpleToast.SHORT);
             } finally {
                 setIsLoading(false);
             }
-        } else if(sender.includes("@")) { //username
-            if(sats == '') {
+        } else if (sender.includes("@")) { //username
+            if (sats == '') {
                 SimpleToast.show('Please enter an amount', SimpleToast.SHORT);
                 setIsLoading(false);
                 return;
@@ -159,7 +159,7 @@ export default function SendScreen({navigation, route}: any) {
                 setIsLoading(false);
             }
         } else { //liquid address
-            if(sats == '') {
+            if (sats == '') {
                 SimpleToast.show('Please enter an amount', SimpleToast.SHORT);
                 setIsLoading(false);
                 return;
@@ -182,18 +182,18 @@ export default function SendScreen({navigation, route}: any) {
                     to: sender,
                     fees: 0,
                     matchedRate: info?.matchedRate,
-                    currency: info?.curreny,    
+                    currency: info?.curreny,
                     type: 'liquid',
                     feeForBamskki,
                     recommendedFee
                 });
-            } catch(error) {
+            } catch (error) {
                 console.error('Error Send to liquid:', error);
                 SimpleToast.show('Failed to Send to Liquid. Please try again.', SimpleToast.SHORT);
             } finally {
                 setIsLoading(false);
             }
-        }  
+        }
     };
 
     const handleFeeSelect = (fee: number) => {
@@ -222,54 +222,54 @@ export default function SendScreen({navigation, route}: any) {
                         <QRCodeScanner
                             onRead={handleScan}
                             flashMode={RNCamera.Constants.FlashMode.auto}
-                            // topContent={<Text style={styles.centerText}>Scan the QR code</Text>}
-                            // bottomContent={
-                            //     <View style={styles.scannerFooter}>
-                            //         <Button title="Cancel" onPress={() => setIsScannerActive(false)} />
-                            //     </View>
-                            // }
+                        // topContent={<Text style={styles.centerText}>Scan the QR code</Text>}
+                        // bottomContent={
+                        //     <View style={styles.scannerFooter}>
+                        //         <Button title="Cancel" onPress={() => setIsScannerActive(false)} />
+                        //     </View>
+                        // }
                         />
                     </View>
                 </ScreenLayout>
             )
-            : 
-            (
-                <ScreenLayout disableScroll showToolbar isBackButton title="Send Bitcoin">
-                    <ScrollView style={styles.container}>
-                        <GradientInput isSats={isSats} sats={sats} setSats={setSats} usd={usd} />
-                        <Text h2 style={styles.destination}>Destination</Text>
-                        <View style={styles.priceView}>
-                            {sender?.length == 0 &&
-                                <Text h4 center onPress={() => senderRef?.current?.focus()} style={StyleSheet.flatten([styles.label])}>Paste any address or invoice{'\n'} (Bitcoin, Lightning, Liquid)</Text>
-                            }
-                            <GradientCard
-                                style={styles.main}
-                                linearStyle={styles.heigth}
-                                colors_={sender ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}>
-                                <Input
-                                    ref={senderRef}
-                                    onChange={setSender}
-                                    value={sender}
-                                    textInpuetStyle={styles.senderText}
-                                />
-                            </GradientCard>
-                            <TouchableOpacity style={{ position: 'absolute', right: 0,}} onPress={async() => { await requestCameraPermission(); setIsScannerActive(true); }}>
-                                <Image source={require('../../../img/scan-new.png')} style={styles.qrimage} />
-                            </TouchableOpacity>
-                        </View>
-                    </ScrollView>
-                    <CustomKeyboard
-                        title="Next"
-                        onPress={handleSendNext}
-                        disabled={isLoading || ((!startsWithLn(sender)) ? (sats?.length == 0 && sender?.length == 0) : sender?.length == 0)} 
-                        setSATS={setSats}
-                        setUSD={setUSD}
-                        setIsSATS={setIsSats}
-                        matchedRate={info?.matchedRate}
-                        currency={info?.currency}
-                    />
-                </ScreenLayout>
-            )}
+                :
+                (
+                    <ScreenLayout disableScroll showToolbar isBackButton title="Send Bitcoin">
+                        <ScrollView style={styles.container}>
+                            <GradientInput isSats={isSats} sats={sats} setSats={setSats} usd={usd} />
+                            <Text h2 style={styles.destination}>Destination</Text>
+                            <View style={styles.priceView}>
+                                {sender?.length == 0 &&
+                                    <Text h4 center onPress={() => senderRef?.current?.focus()} style={StyleSheet.flatten([styles.label])}>Paste any address or invoice{'\n'} (Bitcoin, Lightning, Liquid)</Text>
+                                }
+                                <GradientCard
+                                    style={styles.main}
+                                    linearStyle={styles.heigth}
+                                    colors_={sender ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}>
+                                    <Input
+                                        ref={senderRef}
+                                        onChange={setSender}
+                                        value={sender}
+                                        textInputStyle={styles.senderText}
+                                    />
+                                </GradientCard>
+                                <TouchableOpacity style={{ position: 'absolute', right: 0, }} onPress={async () => { await requestCameraPermission(); setIsScannerActive(true); }}>
+                                    <Image source={require('../../../img/scan-new.png')} style={styles.qrimage} />
+                                </TouchableOpacity>
+                            </View>
+                        </ScrollView>
+                        <CustomKeyboard
+                            title="Next"
+                            onPress={handleSendNext}
+                            disabled={isLoading || ((!startsWithLn(sender)) ? (sats?.length == 0 && sender?.length == 0) : sender?.length == 0)}
+                            setSATS={setSats}
+                            setUSD={setUSD}
+                            setIsSATS={setIsSats}
+                            matchedRate={info?.matchedRate}
+                            currency={info?.currency}
+                        />
+                    </ScreenLayout>
+                )}
         </>
     );
 }
