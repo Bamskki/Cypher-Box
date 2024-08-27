@@ -298,7 +298,14 @@ export const getMe = async () => {
         'Content-Type': 'application/json',
       },
     }));
-    return await response.json();
+    console.log('response: ', response?.status)
+    if(response?.status === 401){
+      SimpleToast.show("Authorization expired. Please login again to continue", SimpleToast.SHORT)
+      useAuthStore.getState().clearAuth();
+    }
+    const result = await response.json()
+    console.log('result: ', result)
+    return result;
   } catch (error) {
     console.error('Error getting me:', error);
     throw error;
