@@ -22,7 +22,7 @@ export default function SendScreen({navigation, route}: any) {
     const [isSats, setIsSats] = useState(true);
     const [sats, setSats] = useState('');
     const [usd, setUSD] = useState('');
-    const [sender, setSender] = useState('');
+    const [sender, setSender] = useState(info?.to || '');
     const senderRef = useRef<TextInput>(null);
 
     const [convertedRate, setConvertedRate] = useState(0.00);
@@ -31,7 +31,12 @@ export default function SendScreen({navigation, route}: any) {
     const [selectedFee, setSelectedFee] = useState<number | null>(null);
     const [isScannerActive, setIsScannerActive] = useState(false); // State to control QR scanner visibility
 
-    console.log('info: ', info)
+    useEffect(() => {
+        if(info?.isWithdrawal){
+            setSats(String(info?.value))
+            setUSD(info?.converted)
+        }
+    }, [info?.isWithdrawal])
 
     useEffect(() => {
         if(!sender.startsWith('ln') && !sender.includes('@') && !recommendedFee){
@@ -74,17 +79,18 @@ export default function SendScreen({navigation, route}: any) {
     const handleSendNext = async () => {
         setIsLoading(true);
         const amount = isSats ? sats : usd;
-        if(sender == '') {
+        if(sender == '' && (!info?.to || info?.to == '')) {
             SimpleToast.show('Please enter an address or username', SimpleToast.SHORT);
             setIsLoading(false);
             return;
         } else if(startsWithLn(sender)){ //lightening invoice
             try {
                 dispatchNavigate('ReviewPayment', {
+                    ...info,
                     value: sats,
                     converted: usd,
                     isSats: isSats,
-                    to: sender,
+                    to: info?.isWithdrawal ? info?.to : sender,
                     fees: 0,
                     type: 'lightening',
                     matchedRate: info?.matchedRate,
@@ -116,11 +122,15 @@ export default function SendScreen({navigation, route}: any) {
             }
 
             try {
+                if(info && info?.editAmount){
+                    info?.editAmount()
+                }
                 dispatchNavigate('ReviewPayment', {
+                    ...info,
                     value: sats,
                     converted: usd,
                     isSats: isSats,
-                    to: sender,
+                    to: info?.isWithdrawal ? info?.to : sender,
                     fees: 0,
                     matchedRate: info?.matchedRate,
                     currency: info?.curreny,    
@@ -142,10 +152,11 @@ export default function SendScreen({navigation, route}: any) {
             }
             try {
                 dispatchNavigate('ReviewPayment', {
+                    ...info,
                     value: sats,
                     converted: usd,
                     isSats: isSats,
-                    to: sender,
+                    to: info?.isWithdrawal ? info?.to : sender,
                     fees: 0,
                     type: 'username',
                     matchedRate: info?.matchedRate,
@@ -176,10 +187,11 @@ export default function SendScreen({navigation, route}: any) {
 
             try {
                 dispatchNavigate('ReviewPayment', {
+                    ...info,
                     value: sats,
                     converted: usd,
                     isSats: isSats,
-                    to: sender,
+                    to: info?.isWithdrawal ? info?.to : sender,
                     fees: 0,
                     matchedRate: info?.matchedRate,
                     currency: info?.curreny,    
@@ -234,32 +246,37 @@ export default function SendScreen({navigation, route}: any) {
             )
             : 
             (
-                <ScreenLayout disableScroll showToolbar isBackButton title="Send Bitcoin">
+                <ScreenLayout disableScroll showToolbar isBackButton title={info?.isWithdrawal ? "Edit Amount" : "Send Bitcoin"}>
                     <ScrollView style={styles.container}>
                         <GradientInput isSats={isSats} sats={sats} setSats={setSats} usd={usd} />
-                        <Text h2 style={styles.destination}>Destination</Text>
-                        <View style={styles.priceView}>
-                            {sender?.length == 0 &&
-                                <Text h4 center onPress={() => senderRef?.current?.focus()} style={StyleSheet.flatten([styles.label])}>Paste any address or invoice{'\n'} (Bitcoin, Lightning, Liquid)</Text>
-                            }
-                            <GradientCard
-                                style={styles.main}
-                                linearStyle={styles.heigth}
-                                colors_={sender ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}>
-                                <Input
-                                    ref={senderRef}
-                                    onChange={setSender}
-                                    value={sender}
-                                    textInpuetStyle={styles.senderText}
-                                />
-                            </GradientCard>
-                            <TouchableOpacity style={{ position: 'absolute', right: 0,}} onPress={async() => { await requestCameraPermission(); setIsScannerActive(true); }}>
-                                <Image source={require('../../../img/scan-new.png')} style={styles.qrimage} />
-                            </TouchableOpacity>
-                        </View>
+                        {!info?.isWithdrawal &&
+                            <>
+                                <Text h2 style={styles.destination}>Destination</Text>
+                                <View style={styles.priceView}>
+                                    {sender?.length == 0 &&
+                                        <Text h4 center onPress={() => senderRef?.current?.focus()} style={StyleSheet.flatten([styles.label])}>Paste any address or invoice{'\n'} (Bitcoin, Lightning, Liquid)</Text>
+                                    }
+                                    <GradientCard
+                                        style={styles.main}
+                                        linearStyle={styles.heigth}
+                                        colors_={sender ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}>
+                                        <Input
+                                            ref={senderRef}
+                                            onChange={setSender}
+                                            value={sender}
+                                            textInpuetStyle={styles.senderText}
+                                        />
+                                    </GradientCard>
+                                    <TouchableOpacity style={{ position: 'absolute', right: 0,}} onPress={async() => { await requestCameraPermission(); setIsScannerActive(true); }}>
+                                        <Image source={require('../../../img/scan-new.png')} style={styles.qrimage} />
+                                    </TouchableOpacity>
+                                </View>
+                            </>
+                        }
                     </ScrollView>
                     <CustomKeyboard
                         title="Next"
+                        prevSats={info?.value ? String(info?.value) : false}
                         onPress={handleSendNext}
                         disabled={isLoading || ((!startsWithLn(sender)) ? (sats?.length == 0 && sender?.length == 0) : sender?.length == 0)} 
                         setSATS={setSats}

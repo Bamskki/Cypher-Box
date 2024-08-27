@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useReducer, useRef, useState } from "react";
 import { ActivityIndicator, Image, RefreshControl, StyleSheet, TouchableOpacity, View } from "react-native";
 import styles from "./styles";
 import {
@@ -28,7 +28,7 @@ import RBSheet from 'react-native-raw-bottom-sheet';
 import LinearGradient from "react-native-linear-gradient";
 import ReceivedList from "./ReceivedList";
 import useAuthStore from "@Cypher/stores/authStore";
-import { getCurrencyRates, getMe, getTransactionHistory } from "@Cypher/api/coinOSApis";
+import { bitcoinRecommendedFee, getCurrencyRates, getMe, getTransactionHistory } from "@Cypher/api/coinOSApis";
 import { btc, formatNumber, matchKeyAndValue } from "@Cypher/helpers/coinosHelper";
 import { AbstractWallet, HDSegwitBech32Wallet, HDSegwitP2SHWallet } from "../../../class";
 import loc, { formatBalance, formatBalanceWithoutSuffix } from '../../../loc';
@@ -65,7 +65,7 @@ export default function HomeScreen({ route }: Props) {
   const routeName = useRoute().name;
   const [state, dispatch] = useReducer(walletReducer, initialState);
   const label = state.label;
-  const { addWallet, saveToDisk, isAdvancedModeEnabled, wallets } = useContext(BlueStorageContext);
+  const { addWallet, saveToDisk, isAdvancedModeEnabled, wallets, sleep, isElectrumDisabled } = useContext(BlueStorageContext);
   const { isAuth, walletID, token, user, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
   const A = require('../../../blue_modules/analytics');
 
@@ -84,7 +84,9 @@ export default function HomeScreen({ route }: Props) {
   const [wallet, setWallet] = useState(undefined);
   const [balanceVault, setBalanceVault] = useState<string | false | undefined>("");
   const [balanceWithoutSuffix, setBalanceWithoutSuffix] = useState()
-  
+  const [recommendedFee, setRecommendedFee] = useState<any>();
+  const [vaultAddress, setVaultAddress] = useState('')
+
   const refRBSheet = useRef<any>(null);
 
   const getWalletID = async () => {
@@ -132,7 +134,39 @@ export default function HomeScreen({ route }: Props) {
     handleToken();
   }, [isAuth, token, wallets, walletID]);
 
-  console.log('setIsAllDone: ', isAllDone)
+  useEffect(() => {
+    if(!vaultAddress.startsWith('ln') && !vaultAddress.includes('@') && !recommendedFee){
+      const init = async () => { 
+        const res = await bitcoinRecommendedFee();
+        setRecommendedFee(res);
+      }
+      init();
+    }
+  }, [vaultAddress])
+
+  const obtainWalletAddress = async () => {
+    let newAddress;
+    try {
+        if (!isElectrumDisabled && wallet) newAddress = await Promise.race([wallet?.getAddressAsync(), sleep(1000)]);
+    } catch (_) {}
+    if (newAddress === undefined && wallet) {
+        // either sleep expired or getAddressAsync threw an exception
+        console.warn('either sleep expired or getAddressAsync threw an exception');
+        newAddress = wallet._getExternalAddressByIndex(wallet.getNextFreeAddressIndex());
+    } else {
+        saveToDisk(); // caching whatever getAddressAsync() generated internally
+    }
+    setVaultAddress(newAddress);
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+        if (wallet) {
+            obtainWalletAddress();
+        }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [wallet]),
+  );
 
   const handleUser = async () => {
     try {
@@ -204,7 +238,25 @@ export default function HomeScreen({ route }: Props) {
   }
 
   const withdrawClickHandler = () => {
-    dispatchNavigate('SavingVaultIntro');
+    if(wallet){
+      const amount = withdrawThreshold > balance ? balance : withdrawThreshold;
+      dispatchNavigate('ReviewPayment', {
+        value: amount,
+        converted: ((Number(matchedRate) || 0) * btc(1) * Number(amount)).toFixed(2),
+        isSats: true,
+        to: vaultAddress,
+        fees: 0,
+        matchedRate: matchedRate,
+        currency: currency,    
+        type: 'bitcoin',
+        feeForBamskki: 0,
+        recommendedFee,
+        wallet,
+        isWithdrawal: true
+      });
+    } else {
+      dispatchNavigate('SavingVaultIntro');
+    }
   };
 
   const topupClickHandler = () => {
@@ -256,7 +308,6 @@ export default function HomeScreen({ route }: Props) {
         }
   };
 
-  console.log('calculatePercentage(Number(withdrawThreshold), (Number(reserveAmount))): ', calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount)))
   return (
     <ScreenLayout 
       RefreshControl={
