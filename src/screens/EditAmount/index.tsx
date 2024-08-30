@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function SendScreen({ route, navigation }: Props) {
-    const { isEdit, wallet, utxo, ids, maxUSD, inUSD, total, matchedRate, setSatsEdit } = route?.params;
+    const { isEdit, wallet, utxo, ids, maxUSD, inUSD, total, matchedRate, setSatsEdit, capsulesData = null,  to = null } = route?.params;
     const [isSats, setIsSats] = useState(true);
     const [sats, setSats] = useState('0');
     const [usd, setUSD] = useState('0');
@@ -28,14 +28,14 @@ export default function SendScreen({ route, navigation }: Props) {
 
     const nextClickHandler = () => {
         setSatsEdit && setSatsEdit();
-        dispatchNavigate('ColdStorage', {wallet, utxo, ids, maxUSD, inUSD: isSats ? usd : sats, total: isSats ? sats : usd, matchedRate});
+        dispatchNavigate('ColdStorage', {wallet, utxo, ids, maxUSD, inUSD: isSats ? usd : sats, total: isSats ? sats : usd, matchedRate, capsulesData, to});
         // // route?.params?.setSats(sats, usd);
         // navigation?.pop();
     }
 
     const maxSendClickHandler = () => {
         setSatsEdit && setSatsEdit();
-        dispatchNavigate('ColdStorage', {wallet, utxo, ids, maxUSD, inUSD: inUSD, total: total, matchedRate});
+        dispatchNavigate('ColdStorage', {wallet, utxo, ids, maxUSD, inUSD: inUSD, total: total, matchedRate, capsulesData, to});
     }
 
     return (
