@@ -27,7 +27,7 @@ interface Props {
 
 export default function ConfirmTransction({ route }: Props) {
     const { data } = route?.params;
-    const { recipients = [], walletID, fee, memo, tx, satoshiPerByte, psbt } = data;
+    const { recipients = [], walletID, fee, memo, tx, satoshiPerByte, psbt, capsulesData = null, to = null} = data;
 
     const [usd, setUSD] = useState('40');
     const [sats, setSats] = useState('100K sats  ~$' + usd);
@@ -169,7 +169,7 @@ export default function ConfirmTransction({ route }: Props) {
                     <Text bold style={styles.coinselected}>Coins selected: {data?.coinsSelected} coins</Text>
                     <View style={styles.priceView}>
                         <View>
-                            <Text style={styles.recipientTitle}>Recipient will get:</Text>
+                            <Text style={styles.recipientTitle}>{to ? "Top-up amount:" : "Recipient will get:"}</Text>
                             <Text bold style={styles.value}>{data?.sats + ' sats ~$'+ data?.inUSD}</Text>
                         </View>
                         {/* <TouchableOpacity style={styles.editAmount} onPress={editAmountClickHandler}>
@@ -184,7 +184,7 @@ export default function ConfirmTransction({ route }: Props) {
                     </View>
                     <View style={styles.priceView}>
                         <View>
-                            <Text style={styles.recipientTitle}>To:</Text>
+                            <Text style={styles.recipientTitle}>{to ? "To Coinos Bitcoin address" : "To:"}</Text>
                             <Text style={StyleSheet.flatten([styles.fees, { color: colors.green }])}>Bitcoin Address: {shortenAddress(data?.destinationAddress)}</Text>
                         </View>
                     </View>

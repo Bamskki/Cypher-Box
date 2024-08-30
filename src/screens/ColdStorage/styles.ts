@@ -27,6 +27,7 @@ interface Style {
     fourth: ViewStyle;
     border: ViewStyle;
     pasteview: ViewStyle;
+    tabs: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -81,6 +82,13 @@ export default StyleSheet.create<Style>({
     fees: {
         fontSize: 18,
         marginTop: 5,
+    },
+    tabs: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginTop: 20,
+        marginHorizontal: 12
     },
     recipientView: {
         padding: 20,

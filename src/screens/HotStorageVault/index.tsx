@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Text, ScreenLayout } from "@Cypher/component-library";
 import { CustomFlatList, GradientView } from "@Cypher/components";
 import styles from "./styles";
@@ -21,10 +21,17 @@ const initialData = [
     { id: 8, address: '3dbf...0ae3', type: 3, type2: 'Blink Settlement', value: '0.02 BTC' },
 ];
 
-const HotStorageVault = () => {
+const HotStorageVault = ({_, route}: any) => {
+    const { wallet, matchedRate, to = null } = useRoute().params as { wallet: any, matchedRate: string, to: null | string };
     const [selectedTab, setSelectedTab] = useState(0);
-    const { wallet, matchedRate } = useRoute().params as { wallet: any, matchedRate: string };
     const [utxo, setUtxo] = useState(null);
+    console.log('selectedTab: ', selectedTab)
+    
+    useEffect(() => {
+        if(to){
+            setSelectedTab(1)
+        }
+    }, [to])
 
     const onChangeSelectedTab = useCallback((id: number) => {
         setSelectedTab(id);
@@ -36,7 +43,7 @@ const HotStorageVault = () => {
             case 0:
                 return <Vault wallet={wallet} matchedRate={matchedRate} setSelectedTab={setSelectedTab} />;
             case 1:
-                return <Bars wallet={wallet} matchedRate={matchedRate} />;
+                return <Bars wallet={wallet} matchedRate={matchedRate} to={to} />;
             case 2:
                 return <History wallet={wallet} matchedRate={matchedRate} />;
             case 3:
@@ -44,7 +51,7 @@ const HotStorageVault = () => {
             default:
                 return <Vault wallet={wallet} matchedRate={matchedRate} setSelectedTab={setSelectedTab} />;
         }
-    }, [selectedTab, wallet, matchedRate]);
+    }, [selectedTab, wallet, matchedRate, to]);
 
     return (
         <ScreenLayout 
