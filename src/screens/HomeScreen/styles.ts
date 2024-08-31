@@ -38,6 +38,7 @@ interface Style {
     scan: ImageStyle;
     shadow: TextStyle;
     shadowTop: any;
+    shadowPopUp: any;
     shadow10: any;
     shadow11: any;
     shadowBottom: any;
@@ -80,6 +81,8 @@ interface Style {
     topup: ViewStyle;
     shadowButton: any;
     innerShadowStyle: any;
+    innerShadowStyle2: any;
+    outerShadowStyle2: any;
     outerShadowStyle: any;
     mainShadowStyle?: ViewStyle;
     linearGradientStyle?: ViewStyle;
@@ -297,6 +300,18 @@ export default StyleSheet.create<Style>({
         padding: 15,
         paddingHorizontal: 30,
     },
+    shadowPopUp: {
+        shadowOffset: { width: 3, height: 3 },
+        shadowOpacity: 1,
+        shadowColor: colors.white,
+        shadowRadius: 2,
+        borderRadius: 24,
+        width: widths - 40,
+        height: 170,
+        backgroundColor: colors.primary,
+        padding: 15,
+        paddingHorizontal: 30,
+      },
     shadow10: {
         // shadowOffset: { width: 3, height: 4 },
         // shadowOpacity: 0.25,
@@ -590,6 +605,27 @@ export default StyleSheet.create<Style>({
         justifyContent: 'center',
         position: 'absolute',
     },
+    outerShadowStyle2: {
+        shadowOffset: { width: 2, height: 2 },
+        shadowRadius: 2,
+        shadowOpacity: 2,
+        shadowColor: colors.greenShadow,
+        borderRadius: 14,
+        width: 85,
+        height: 26,
+        justifyContent: "center",
+      },
+      innerShadowStyle2: {
+        shadowOffset: { width: -2, height: -2 },
+        shadowRadius: 2,
+        shadowOpacity: 0.64,
+        shadowColor: colors.greenShadowLight,
+        borderRadius: 14,
+        width: 85,
+        height: 26,
+        justifyContent: "center",
+        position: "absolute",
+      },
     mainShadowStyle: {
         shadowColor: '#27272C',
         shadowOffset: { width: -8, height: -8 },

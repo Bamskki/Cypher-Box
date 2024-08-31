@@ -22,3 +22,5 @@ export { default as Tips } from './Tips';
 export { default as CustomKeyboardNew } from './CustomKeyboardNew';
 export { default as ProgressBar } from './ProgressBar';
 export { default as CustomFlatList } from './CustomFlatList';
+export { default as BorderButton } from "./BorderButton";
+export { default as CommonBtn } from "./CommonBtn";

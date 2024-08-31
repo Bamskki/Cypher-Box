@@ -35,6 +35,7 @@ import loc, { formatBalance, formatBalanceWithoutSuffix } from '../../../loc';
 import { initialState, walletReducer } from "../../../screen/wallets/add";
 import { BlueStorageContext } from '../../../blue_modules/storage-context';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import CapsulesModal from "@Cypher/components/CapsulesModal";
 
 interface Props {
   route: any;
@@ -47,6 +48,19 @@ export const calculatePercentage = (withdrawThreshold: number, reserveAmount: nu
   const percentage = (threshold / (threshold + reserve)) * 100;
   return Math.min(percentage, 100);
 };
+
+const capsulesArray = [
+  { value: 1000, isSelected: false },
+  { value: 1000, isSelected: false },
+  { value: 1000, isSelected: false },
+  { value: 1000, isSelected: false },
+  { value: 1000, isSelected: false },
+  { value: 1000, isSelected: false },
+  { value: 1000, isSelected: false },
+  { value: 1000, isSelected: false },
+  { value: 1000, isSelected: false },
+  { value: 1000, isSelected: false },
+];
 
 export function calculateBalancePercentage(balance: number, withdrawThreshold: number, reserveAmount: number) {
   const total = withdrawThreshold + reserveAmount;
@@ -77,6 +91,7 @@ export default function HomeScreen({ route }: Props) {
   const [matchedRate, setMatchedRate] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [payment, setPayments] = useState([])
+  const [capsules, setCapsules] = useState(capsulesArray);
   const [wt, setWt] = useState<number>();
   const [isWithdraw, setIsWithdraw] = useState<boolean>(true);
   const [isAllDone, setIsAllDone] = useState<boolean>(false);
@@ -87,6 +102,13 @@ export default function HomeScreen({ route }: Props) {
   const [vaultAddress, setVaultAddress] = useState('')
 
   const refRBSheet = useRef<any>(null);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [clickPostion, setClickPosition] = useState<any>({ posX: 0, posY: 0 });
+  console.log(
+    "🚀 ~ HomeScreen ~ route?.params?.isComplete:",
+    route?.params?.isComplete
+  );
+  console.log("clickPostion ", clickPostion);
 
   const getWalletID = async () => {
     try {
@@ -133,6 +155,18 @@ export default function HomeScreen({ route }: Props) {
     handleToken();
   }, [isAuth, token, wallets, walletID]);
 
+  const onSelectCapsule = (index: number) => {
+    console.log("index: ", index);
+    const newCapsules = capsules.map((item, i) => {
+      if (i === index) {
+        console.log("item: ", item);
+        return { ...item, isSelected: !item.isSelected };
+      }
+      return item;
+    });
+    setCapsules(newCapsules);
+    console.log("newCapsules: ", newCapsules);
+  };
   useEffect(() => {
     if(!vaultAddress.startsWith('ln') && !vaultAddress.includes('@') && !recommendedFee){
       const init = async () => { 
@@ -265,21 +299,38 @@ export default function HomeScreen({ route }: Props) {
     }
   };
 
-  const topupClickHandler = async () => {
-    // dispatchNavigate('PurchaseVault', {
-    //   data: {}
-    // });
-    try {
-      const response = await createInvoice({
-        type: 'bitcoin',
+  const topupClickHandler = async (isAnyCapsuleSelected) => {
+    if (isAnyCapsuleSelected) {
+      setModalVisible(false);
+      setTimeout(() => {
+        try {
+          const response = await createInvoice({
+            type: 'bitcoin',
+          });
+          dispatchNavigate('HotStorageVault', { wallet, matchedRate, to: response.hash });
+          console.log('response: ', response)
+        } catch (error) {
+          console.error('Error generating bitcoin address:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }, 10);
+    } else {
+      const newCapsules = capsules.map((item, i) => {
+        return { ...item, isSelected: true };
       });
-      dispatchNavigate('HotStorageVault', { wallet, matchedRate, to: response.hash });
-      console.log('response: ', response)
-    } catch (error) {
-      console.error('Error generating bitcoin address:', error);
-    } finally {
-      setIsLoading(false);
-    }
+      setCapsules(newCapsules);
+      setTimeout(() => {
+        const newCapsuleItem = newCapsules.map((item, i) => {
+          return { ...item, isSelected: false };
+        });
+        setCapsules(newCapsuleItem);
+      }, 10);
+    }    
+  };
+
+  const topupClickHandlerDisabled = () => {
+    setModalVisible(true);
   };
 
   const savingVaultClickHandler = () => {
@@ -491,7 +542,7 @@ export default function HomeScreen({ route }: Props) {
                       <Text bold h3 center style={{ marginStart: 20 }}>Top-up</Text>
                     </GradientView>
                     :
-                    <TouchableOpacity style={styles.topup}>
+                    <TouchableOpacity style={styles.topup} onPress={topupClickHandlerDisabled}>
                       <LinearGradient colors={['#333333', '#282727']} style={styles.topup}>
                         <Image
                           style={styles.arrowLeft}
@@ -668,6 +719,14 @@ export default function HomeScreen({ route }: Props) {
             </>
           )}
         </View>
+        {modalVisible && (
+          <CapsulesModal
+            modalVisible={modalVisible}
+            capsules={capsules}
+            onSelectCapsule={onSelectCapsule}
+            topupClickHandler={topupClickHandler}
+          />
+        )}
       </View>
       <RBSheet
         ref={refRBSheet}
