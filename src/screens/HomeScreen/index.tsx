@@ -19,12 +19,12 @@ import { dispatchNavigate } from '@Cypher/helpers';
 import { Shadow } from 'react-native-neomorph-shadows';
 import { colors, heights } from '@Cypher/style-guide';
 import RBSheet from 'react-native-raw-bottom-sheet';
-import LinearGradient from "react-native-linear-gradient";
-import ReceivedList from "./ReceivedList";
-import useAuthStore from "@Cypher/stores/authStore";
-import { bitcoinRecommendedFee, createInvoice, getCurrencyRates, getMe, getTransactionHistory } from "@Cypher/api/coinOSApis";
-import { btc, formatNumber, matchKeyAndValue } from "@Cypher/helpers/coinosHelper";
-import { AbstractWallet, HDSegwitBech32Wallet, HDSegwitP2SHWallet } from "../../../class";
+import LinearGradient from 'react-native-linear-gradient';
+import ReceivedList from './ReceivedList';
+import useAuthStore from '@Cypher/stores/authStore';
+import { getCurrencyRates, getMe, getTransactionHistory } from '@Cypher/api/coinOSApis';
+import { btc, formatNumber, matchKeyAndValue } from '@Cypher/helpers/coinosHelper';
+import { AbstractWallet, HDSegwitBech32Wallet, HDSegwitP2SHWallet } from '../../../class';
 import loc, { formatBalance, formatBalanceWithoutSuffix } from '../../../loc';
 import { initialState, walletReducer } from '../../../screen/wallets/add';
 import { BlueStorageContext } from '../../../blue_modules/storage-context';
@@ -59,14 +59,18 @@ export default function HomeScreen({ route }: Props) {
   const routeName = useRoute().name;
   const [state, dispatch] = useReducer(walletReducer, initialState);
   const label = state.label;
-  const { addWallet, saveToDisk, isAdvancedModeEnabled, wallets, sleep, isElectrumDisabled } = useContext(BlueStorageContext);
+  const { addWallet, saveToDisk, isAdvancedModeEnabled, wallets } = useContext(BlueStorageContext);
   const { isAuth, walletID, token, user, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
   const A = require('../../../blue_modules/analytics');
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   console.log('walletID:  ', walletID);
 =======
 >>>>>>> 6ec6414 (Topup Transaction flow implemented)
+=======
+  console.log('walletID:  ', walletID);
+>>>>>>> fb0ea7c (resolve conflic)
   // const [storage, setStorage] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [balance, setBalance] = useState(0);
@@ -79,10 +83,8 @@ export default function HomeScreen({ route }: Props) {
   const [isWithdraw, setIsWithdraw] = useState<boolean>(true);
   const [isAllDone, setIsAllDone] = useState<boolean>(false);
   const [wallet, setWallet] = useState(undefined);
-  const [balanceVault, setBalanceVault] = useState<string | false | undefined>("");
-  const [balanceWithoutSuffix, setBalanceWithoutSuffix] = useState()
-  const [recommendedFee, setRecommendedFee] = useState<any>();
-  const [vaultAddress, setVaultAddress] = useState('')
+  const [balanceVault, setBalanceVault] = useState<string | false | undefined>('');
+  const [balanceWithoutSuffix, setBalanceWithoutSuffix] = useState();
 
   const refRBSheet = useRef<any>(null);
 
@@ -134,6 +136,7 @@ export default function HomeScreen({ route }: Props) {
     handleToken();
   }, [isAuth, token, wallets, walletID]);
 
+<<<<<<< HEAD
   useEffect(() => {
     if (!vaultAddress.startsWith('ln') && !vaultAddress.includes('@') && !recommendedFee) {
       const init = async () => {
@@ -180,6 +183,9 @@ export default function HomeScreen({ route }: Props) {
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [wallet, sleep]),
   );
+=======
+  console.log('setIsAllDone: ', isAllDone);
+>>>>>>> fb0ea7c (resolve conflic)
 
   const handleUser = async () => {
     try {
@@ -250,6 +256,7 @@ export default function HomeScreen({ route }: Props) {
 
   const checkingAccountClickHandler = () => {
     dispatchNavigate('CheckingAccount', { matchedRate });
+<<<<<<< HEAD
   };
 
   const withdrawClickHandler = () => {
@@ -272,6 +279,20 @@ export default function HomeScreen({ route }: Props) {
     } else {
       dispatchNavigate('SavingVaultIntro');
     }
+=======
+>>>>>>> fb0ea7c (resolve conflic)
+  };
+  const handleCreateVault = () => {
+    dispatchNavigate('SavingVaultIntro');
+
+<<<<<<< HEAD
+  }
+
+
+<<<<<<< HEAD
+=======
+  const withdrawClickHandler = () => {
+    dispatchNavigate('WithdrawToSavingsVault');
   };
   const handleCreateVault = () => {
     dispatchNavigate('SavingVaultIntro');
@@ -279,11 +300,12 @@ export default function HomeScreen({ route }: Props) {
   }
 
 
-<<<<<<< HEAD
+>>>>>>> fb0ea7c (resolve conflic)
   const topupClickHandler = () => {
     dispatchNavigate('PurchaseVault', {
       data: {},
     });
+<<<<<<< HEAD
 =======
   const topupClickHandler = async () => {
     // dispatchNavigate('PurchaseVault', {
@@ -301,6 +323,8 @@ export default function HomeScreen({ route }: Props) {
       setIsLoading(false);
     }
 >>>>>>> 6ec6414 (Topup Transaction flow implemented)
+=======
+>>>>>>> fb0ea7c (resolve conflic)
   };
 
   const savingVaultClickHandler = () => {
@@ -321,6 +345,7 @@ export default function HomeScreen({ route }: Props) {
       await wallet?.fetchBalance();
     }
     handleUser();
+<<<<<<< HEAD
   };
 
 
@@ -344,8 +369,12 @@ export default function HomeScreen({ route }: Props) {
         walletID: w.getID(),
       });
     }
+=======
+>>>>>>> fb0ea7c (resolve conflic)
   };
 
+  console.log(withdrawThreshold, 'withdrawThreshold');
+  console.log(reserveAmount, 'reserveAmount');
   return (
     <ScreenLayout
       RefreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" />}
