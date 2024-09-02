@@ -40,7 +40,7 @@ export interface Props {
   isInputWithBorder?: boolean;
   mask?: any;
   textContentType?: any;
-  textInpuetStyle?: TextStyle;
+  textInputStyle?: TextStyle;
   editable?: boolean;
 }
 
@@ -70,7 +70,7 @@ function Input(
     isInputWithBorder = false,
     mask,
     textContentType = undefined,
-    textInpuetStyle,
+    textInputStyle,
     editable = true,
   }: Props,
   ref: Ref<RNTextInput>,
@@ -129,7 +129,7 @@ function Input(
           //   : styles.textInputFocussed,
           // isInputWithBorder && !focussed && styles.normalInput,
           error ? styles.textInputError : {},
-          textInpuetStyle && textInpuetStyle,
+          textInputStyle && textInputStyle,
         ]}
         value={value}
         onFocus={setFocussedTrue}

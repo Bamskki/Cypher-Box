@@ -630,7 +630,7 @@ export default StyleSheet.create<Style>({
         borderRadius: 25,
     },
     createVaultContainer: {
-        top: '50%'
+        top: '30%'
 
     },
     createVault: {

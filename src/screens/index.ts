@@ -39,3 +39,4 @@ export { default as TransactionBroadCastNew } from './TransactionBroadCastNew';
 export { default as PurchaseVault } from './PurchaseVault';
 export { default as WithdrawToSavingsVault } from './WithdrawToSavingsVault';
 export { default as ReviewWithdrawal } from './ReviewWithdrawal';
+export { default as RecoverSavingVault } from './RecoverSavingVault';
