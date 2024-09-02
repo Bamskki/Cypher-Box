@@ -32,7 +32,7 @@ type Fees = {
 };
 
 export default function ReviewPayment({ route }: Props) {
-    const { value, converted, isSats, to, type, recommendedFee } = route?.params;
+    const { value, converted, isSats, to, type, recommendedFee, isWithdrawal = false, wallet = null } = route?.params;
     const { withdrawThreshold, reserveAmount } = useAuthStore();
     const [note, setNote] = useState('');
     const [balance, setBalance] = useState(0);
@@ -48,6 +48,7 @@ export default function ReviewPayment({ route }: Props) {
     const [feeLoading, setFeeLoading] = useState<boolean>(false);
     const [isSendLoading, setIsSendLoading] = useState<boolean>(false);
     const [isModalVisible, setModalVisible] = useState(false);
+    const [isEditAmount, setIsEditAmount] = useState(false)
     const swipeButtonRef = useRef(null);
     const feeNames: Record<Fee, string> = {
         fastestFee: "Fastest",
@@ -355,6 +356,41 @@ export default function ReviewPayment({ route }: Props) {
         handleFeeEstimate(newFeeKey)
     };
 
+    const editAmountClickHandler = () => {
+        dispatchNavigate('SendScreen', {
+            currency,
+            matchedRate,
+            walletID: wallet.getID(),
+            value,
+            converted,
+            isSats,
+            to,
+            type,
+            recommendedFee,
+            isWithdrawal,
+            wallet,
+            editAmount: () => {
+                setIsEditAmount(true)
+            }
+        });
+    };
+
+    const addressHandler = () => {
+        dispatchNavigate('WalletAddresses', {
+            walletID: wallet.getID(),
+            isTouchable: true,
+            value,
+            converted,
+            isSats,
+            to,
+            type,
+            recommendedFee,
+            isWithdrawal,
+            wallet
+        });
+    }
+
+    console.log('isEditAmount: ', isEditAmount)
     return (
         <ScreenLayout showToolbar isBackButton title="Review Payment">
             <View style={styles.topView}>
@@ -403,10 +439,24 @@ export default function ReviewPayment({ route }: Props) {
                         }
                     </GradientCardWithShadow>
                 }
+
                 <View style={styles.middle}>
+                    {balance < withdrawThreshold && isWithdrawal &&
+                        <Text style={{ color: colors.yellow2, marginLeft: 15, marginBottom: 25 }}>You haven't reached your withdrawal threshold yet.</Text>
+                    }
                     <TextViewV2 keytext="Recipient will get: " text={isSats ? `${value} sats ~ $${converted}` : `$${value} ~ $${converted} sats`} textStyle={styles.price} />
+                    {isWithdrawal &&
+                        <TouchableOpacity onPress={editAmountClickHandler}>
+                            <Text style={{ marginLeft: 10, fontSize: 18, marginBottom: 20, textDecorationLine: 'underline', color: isEditAmount ? colors.green : colors.white }}>Edit Amount</Text>
+                        </TouchableOpacity>
+                    }
                     <TextViewV2 keytext="Sent from: " text="Coinos Checking Account" />
                     <TextViewV2 keytext="To: " text={to} />
+                    {isWithdrawal &&
+                        <TouchableOpacity onPress={addressHandler}>
+                            <Text style={{ marginLeft: 10, fontSize: 18, marginBottom: 20, textDecorationLine: 'underline' }}>Add Address</Text>
+                        </TouchableOpacity>
+                    }
                     {to && value && (type === 'bitcoin' || type === 'liquid') && recommendedFee ?
                         <>
                             <View style={styles.feesView}>

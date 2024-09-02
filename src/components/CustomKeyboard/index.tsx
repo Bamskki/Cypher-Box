@@ -15,15 +15,16 @@ interface Props {
     setIsSATS(isSats: boolean): void;
     disabled?: boolean;
     title: string;
+    prevSats: string | boolean;
     isError?: boolean;
     matchedRate?: number;
     currency?: string;
 }
 
-export default function CustomKeyBoard({ title, disabled, onPress, setSATS, setUSD, setIsSATS, isError, matchedRate }: Props) {
+export default function CustomKeyBoard({ title, prevSats, disabled, onPress, setSATS, setUSD, setIsSATS, isError, matchedRate }: Props) {
     const KEYSARRAY = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0'];
     const [isSats, setIsSats] = useState(true);
-    const [sats, setSats] = useState('');
+    const [sats, setSats] = useState(prevSats ? String(prevSats) : '');
     const currency = btc(1);
 
     useEffect(() => {
@@ -31,7 +32,6 @@ export default function CustomKeyBoard({ title, disabled, onPress, setSATS, setU
             let amount = 0;
             if (isSats) {
                 amount = ((matchedRate || 0) * currency * Number(sats)).toFixed(5)
-                console.log('amount: ', amount)
                 setSATS(sats);
                 setUSD(String(amount));
             } else {
@@ -49,11 +49,13 @@ export default function CustomKeyBoard({ title, disabled, onPress, setSATS, setU
     }, [sats.length, isSats]);
 
     useEffect(() => {
-        setSats('');
-        setSATS('');
-        setUSD('');
+        if(!prevSats){
+            setSats('');
+            setSATS('');
+            setUSD('');    
+        }
         setIsSATS(isSats);
-    }, [isSats]);
+    }, [isSats, prevSats]);
 
     const handlePress = (value: string) => {
         setSats((prev) => prev + value);

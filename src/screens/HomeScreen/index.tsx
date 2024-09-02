@@ -19,12 +19,12 @@ import { dispatchNavigate } from '@Cypher/helpers';
 import { Shadow } from 'react-native-neomorph-shadows';
 import { colors, heights } from '@Cypher/style-guide';
 import RBSheet from 'react-native-raw-bottom-sheet';
-import LinearGradient from 'react-native-linear-gradient';
-import ReceivedList from './ReceivedList';
-import useAuthStore from '@Cypher/stores/authStore';
-import { getCurrencyRates, getMe, getTransactionHistory } from '@Cypher/api/coinOSApis';
-import { btc, formatNumber, matchKeyAndValue } from '@Cypher/helpers/coinosHelper';
-import { AbstractWallet, HDSegwitBech32Wallet, HDSegwitP2SHWallet } from '../../../class';
+import LinearGradient from "react-native-linear-gradient";
+import ReceivedList from "./ReceivedList";
+import useAuthStore from "@Cypher/stores/authStore";
+import { bitcoinRecommendedFee, getCurrencyRates, getMe, getTransactionHistory } from "@Cypher/api/coinOSApis";
+import { btc, formatNumber, matchKeyAndValue } from "@Cypher/helpers/coinosHelper";
+import { AbstractWallet, HDSegwitBech32Wallet, HDSegwitP2SHWallet } from "../../../class";
 import loc, { formatBalance, formatBalanceWithoutSuffix } from '../../../loc';
 import { initialState, walletReducer } from '../../../screen/wallets/add';
 import { BlueStorageContext } from '../../../blue_modules/storage-context';
@@ -59,7 +59,7 @@ export default function HomeScreen({ route }: Props) {
   const routeName = useRoute().name;
   const [state, dispatch] = useReducer(walletReducer, initialState);
   const label = state.label;
-  const { addWallet, saveToDisk, isAdvancedModeEnabled, wallets } = useContext(BlueStorageContext);
+  const { addWallet, saveToDisk, isAdvancedModeEnabled, wallets, sleep, isElectrumDisabled } = useContext(BlueStorageContext);
   const { isAuth, walletID, token, user, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
   const A = require('../../../blue_modules/analytics');
 
@@ -76,8 +76,10 @@ export default function HomeScreen({ route }: Props) {
   const [isWithdraw, setIsWithdraw] = useState<boolean>(true);
   const [isAllDone, setIsAllDone] = useState<boolean>(false);
   const [wallet, setWallet] = useState(undefined);
-  const [balanceVault, setBalanceVault] = useState<string | false | undefined>('');
-  const [balanceWithoutSuffix, setBalanceWithoutSuffix] = useState();
+  const [balanceVault, setBalanceVault] = useState<string | false | undefined>("");
+  const [balanceWithoutSuffix, setBalanceWithoutSuffix] = useState()
+  const [recommendedFee, setRecommendedFee] = useState<any>();
+  const [vaultAddress, setVaultAddress] = useState('')
 
   const refRBSheet = useRef<any>(null);
 
@@ -129,7 +131,39 @@ export default function HomeScreen({ route }: Props) {
     handleToken();
   }, [isAuth, token, wallets, walletID]);
 
-  console.log('setIsAllDone: ', isAllDone);
+  useEffect(() => {
+    if (!vaultAddress.startsWith('ln') && !vaultAddress.includes('@') && !recommendedFee) {
+      const init = async () => {
+        const res = await bitcoinRecommendedFee();
+        setRecommendedFee(res);
+      }
+      init();
+    }
+  }, [vaultAddress])
+
+  const obtainWalletAddress = async () => {
+    let newAddress;
+    try {
+      if (!isElectrumDisabled && wallet) newAddress = await Promise.race([wallet?.getAddressAsync(), sleep(1000)]);
+    } catch (_) { }
+    if (newAddress === undefined && wallet) {
+      // either sleep expired or getAddressAsync threw an exception
+      console.warn('either sleep expired or getAddressAsync threw an exception');
+      newAddress = wallet._getExternalAddressByIndex(wallet.getNextFreeAddressIndex());
+    } else {
+      saveToDisk(); // caching whatever getAddressAsync() generated internally
+    }
+    setVaultAddress(newAddress);
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      if (wallet) {
+        obtainWalletAddress();
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [wallet]),
+  );
 
   const handleUser = async () => {
     try {
@@ -203,7 +237,25 @@ export default function HomeScreen({ route }: Props) {
   };
 
   const withdrawClickHandler = () => {
-    dispatchNavigate('WithdrawToSavingsVault');
+    if (wallet) {
+      const amount = withdrawThreshold > balance ? balance : withdrawThreshold;
+      dispatchNavigate('ReviewPayment', {
+        value: amount,
+        converted: ((Number(matchedRate) || 0) * btc(1) * Number(amount)).toFixed(2),
+        isSats: true,
+        to: vaultAddress,
+        fees: 0,
+        matchedRate: matchedRate,
+        currency: currency,
+        type: 'bitcoin',
+        feeForBamskki: 0,
+        recommendedFee,
+        wallet,
+        isWithdrawal: true
+      });
+    } else {
+      dispatchNavigate('SavingVaultIntro');
+    }
   };
   const handleCreateVault = () => {
     dispatchNavigate('SavingVaultIntro');
@@ -237,8 +289,29 @@ export default function HomeScreen({ route }: Props) {
     handleUser();
   };
 
-  console.log(withdrawThreshold, 'withdrawThreshold');
-  console.log(reserveAmount, 'reserveAmount');
+
+  const createWallet = async () => {
+    setIsLoading(true);
+
+    let w: HDSegwitBech32Wallet;
+    // btc was selected
+    // index 2 radio - hd bip84
+    w = new HDSegwitBech32Wallet();
+    w.setLabel(label || loc.wallets.details_title);
+
+    await w.generate();
+    addWallet(w);
+    await saveToDisk();
+    A(A.ENUM.CREATED_WALLET);
+    triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
+    if (w.type === HDSegwitP2SHWallet.type || w.type === HDSegwitBech32Wallet.type) {
+      // @ts-ignore: Return later to update
+      dispatchNavigate('SavingVaultIntro', {
+        walletID: w.getID(),
+      });
+    }
+  };
+
   return (
     <ScreenLayout
       RefreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" />}

@@ -84,7 +84,7 @@ export default function History({ wallet, matchedRate }: any) {
           const oldTxLen = wallet.getTransactions().length;
           let immatureTxsConfs = ''; // a silly way to keep track if anything changed in immature transactions
           for (const tx of wallet.getTransactions()) {
-            if (tx.confirmations < 7) immatureTxsConfs += tx.txid + ':' + tx.confirmations + ';';
+            if (tx?.confirmations < 7) immatureTxsConfs += tx.txid + ':' + tx.confirmations + ';';
           }
           await wallet.fetchTransactions();
           if (wallet.fetchPendingTransactions) {
@@ -96,7 +96,7 @@ export default function History({ wallet, matchedRate }: any) {
           if (oldTxLen !== wallet.getTransactions().length) smthChanged = true;
           let unconfirmedTxsConfs2 = ''; // a silly way to keep track if anything changed in immature transactions
           for (const tx of wallet.getTransactions()) {
-            if (tx.confirmations < 7) unconfirmedTxsConfs2 += tx.txid + ':' + tx.confirmations + ';';
+            if (tx?.confirmations < 7) unconfirmedTxsConfs2 += tx.txid + ':' + tx.confirmations + ';';
           }
           if (unconfirmedTxsConfs2 !== immatureTxsConfs) {
             smthChanged = true;
@@ -105,7 +105,7 @@ export default function History({ wallet, matchedRate }: any) {
           console.log(wallet.getLabel(), 'fetch tx took', (end - start) / 1000, 'sec');
         } catch (err) {
           noErr = false;
-          alert(err.message);
+          // alert(err.message);
           setIsLoading(false);
           setTimeElapsed(prev => prev + 1);
         }
