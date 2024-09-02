@@ -629,4 +629,23 @@ export default StyleSheet.create<Style>({
         marginStart: 7.5,
         borderRadius: 25,
     },
+<<<<<<< HEAD
+=======
+    createVaultContainer: {
+        top: '30%'
+
+    },
+    createVault: {
+        borderRadius: 25,
+        marginTop: 20,
+        height: 132,
+        justifyContent: 'flex-start',
+    },
+    createVaultText: {
+        textAlign: 'center'
+    },
+    advancedText: {
+        margin: 10
+    }
+>>>>>>> 906e3b9 (resolve conflic)
 });

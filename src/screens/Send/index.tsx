@@ -80,6 +80,10 @@ export default function SendScreen({ navigation, route }: any) {
         setIsLoading(true);
         const amount = isSats ? sats : usd;
         if (sender == '' && (!info?.to || info?.to == '')) {
+<<<<<<< HEAD
+=======
+
+>>>>>>> 906e3b9 (resolve conflic)
             SimpleToast.show('Please enter an address or username', SimpleToast.SHORT);
             setIsLoading(false);
             return;
