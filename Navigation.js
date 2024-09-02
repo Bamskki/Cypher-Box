@@ -85,7 +85,7 @@ import PaymentCode from './screen/wallets/paymentCode';
 import PaymentCodesList from './screen/wallets/paymentCodesList';
 import loc from './loc';
 import { useTheme } from './components/themes';
-import { AccountStatus, AdjustHotThreshold, CheckAccount, CheckingAccount, ColdStorage, ConfirmTransction, CopyInvoice, CreateCoinOSScreen, CreateInvoice, CreateVault, DownloadBlink, EditAmount, FeeRate, GetAddressScreen, HomeScreen, HotStorageVault, InfoBlink, LoginBlink, LoginBlinkPhone, LoginCoinOSScreen, PurchaseVault, QrScreen, ReceivedMethodScreen, ReviewPayment, SavingVault, SavingVaultCreated, SavingVaultIntro, SavingVaultIntroNew, SendReceiveOnChain, SendReceiveSuccessScreen, SendScreen, SplashScreen, ThresholdAdjust, Transaction, TransactionBroadCast, TransactionBroadCastNew, VerifyPhone, WelcomeScreen, WithdrawThreshold } from './src/screens';
+import { AccountStatus, AdjustHotThreshold, CheckAccount, CheckingAccount, ColdStorage, ConfirmTransction, CopyInvoice, CreateCoinOSScreen, CreateInvoice, CreateVault, DownloadBlink, EditAmount, FeeRate, GetAddressScreen, HomeScreen, HotStorageVault, InfoBlink, LoginBlink, LoginBlinkPhone, LoginCoinOSScreen, PurchaseVault, QrScreen, ReceivedMethodScreen, ReviewPayment, SavingVault, SavingVaultCreated, SavingVaultIntro, SavingVaultIntroNew, SendReceiveOnChain, SendReceiveSuccessScreen, SendScreen, SplashScreen, ThresholdAdjust, Transaction, TransactionBroadCast, TransactionBroadCastNew, VerifyPhone, WelcomeScreen, WithdrawThreshold, WithdrawToSavingsVault, ReviewWithdrawal, RecoverSavingVault } from './src/screens';
 import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 import Invoice from '@Cypher/screens/Invoice';
 import ChangeUsername from '@Cypher/screens/Account/ChangeUsername';
@@ -125,6 +125,7 @@ const WalletsRoot = () => {
       <WalletsStack.Screen name="InfoBlink" component={InfoBlink} options={{ headerShown: false }} />
       <WalletsStack.Screen name="DownloadBlink" component={DownloadBlink} options={{ headerShown: false }} />
       <WalletsStack.Screen name="LoginBlink" component={LoginBlink} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="RecoverSavingVault" component={RecoverSavingVault} options={{ headerShown: false }} />
       <WalletsStack.Screen name="CreateCoinOSScreen" component={CreateCoinOSScreen} options={{ headerShown: false }} />
       <WalletsStack.Screen name="ForgotCoinOSScreen" component={ForgetPassword} options={{ headerShown: false }} />
       <WalletsStack.Screen name="ChangeUsername" component={ChangeUsername} options={{ headerShown: false }} />
@@ -136,6 +137,17 @@ const WalletsRoot = () => {
       <WalletsStack.Screen name="QrScreen" component={QrScreen} options={{ headerShown: false }} />
       <WalletsStack.Screen name="CopyInvoice" component={CopyInvoice} options={{ headerShown: false }} />
       <WalletsStack.Screen name="ReviewPayment" component={ReviewPayment} options={{
+        headerShown: false,
+        // transitionSpec: {
+        //   open: config,
+        //   close: config,
+        // },
+      }} />
+
+      <WalletsStack.Screen name="WithdrawToSavingsVault" component={WithdrawToSavingsVault} options={{ headerShown: false }} />
+
+
+      <WalletsStack.Screen name="ReviewWithdrawal" component={ReviewWithdrawal} options={{
         headerShown: false,
         // transitionSpec: {
         //   open: config,

@@ -10,7 +10,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import Share from 'react-native-share';
 import { useTheme } from '../themes';
 
-const AddressItem = ({ item, balanceUnit, walletID, allowSignVerifyMessage }) => {
+const AddressItem = ({ item, balanceUnit, walletID, allowSignVerifyMessage, isTouchable, navigateToReceive }) => {
   const { colors } = useTheme();
 
   const hasTransactions = item.transactions > 0;
@@ -37,16 +37,16 @@ const AddressItem = ({ item, balanceUnit, walletID, allowSignVerifyMessage }) =>
   const { navigate } = useNavigation();
 
   const menuRef = useRef();
-  const navigateToReceive = () => {
-    menuRef.current?.dismissMenu();
-    navigate('ReceiveDetailsRoot', {
-      screen: 'ReceiveDetails',
-      params: {
-        walletID,
-        address: item.address,
-      },
-    });
-  };
+  // const navigateToReceive = () => {
+  //   menuRef.current?.dismissMenu();
+  //   navigate('ReceiveDetailsRoot', {
+  //     screen: 'ReceiveDetails',
+  //     params: {
+  //       walletID,
+  //       address: item.address,
+  //     },
+  //   });
+  // };
 
   const navigateToSignVerify = () => {
     menuRef.current?.dismissMenu();
@@ -113,7 +113,10 @@ const AddressItem = ({ item, balanceUnit, walletID, allowSignVerifyMessage }) =>
         onPressMenuItem={onToolTipPress}
         previewQRCode
         previewValue={item.address}
-        onPress={navigateToReceive}
+        {...isTouchable && { onPress: () => {
+          menuRef.current?.dismissMenu();
+          navigateToReceive(item) 
+        }}}
       >
         <ListItem key={item.key} containerStyle={stylesHook.container}>
           <ListItem.Content style={stylesHook.list}>

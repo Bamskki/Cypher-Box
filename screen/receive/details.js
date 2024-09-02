@@ -340,22 +340,22 @@ const ReceiveDetails = () => {
     useCallback(() => {
       const task = InteractionManager.runAfterInteractions(async () => {
         if (wallet) {
-          if (!wallet.getUserHasSavedExport()) {
-            BlueAlertWalletExportReminder({
-              onSuccess: obtainWalletAddress,
-              onFailure: () => {
-                goBack();
-                navigate('WalletExportRoot', {
-                  screen: 'WalletExport',
-                  params: {
-                    walletID: wallet.getID(),
-                  },
-                });
-              },
-            });
-          } else {
+          // if (!wallet.getUserHasSavedExport()) {
+          //   BlueAlertWalletExportReminder({
+          //     onSuccess: obtainWalletAddress,
+          //     onFailure: () => {
+          //       goBack();
+          //       navigate('WalletExportRoot', {
+          //         screen: 'WalletExport',
+          //         params: {
+          //           walletID: wallet.getID(),
+          //         },
+          //       });
+          //     },
+          //   });
+          // } else {
             obtainWalletAddress();
-          }
+          // }
         } else if (!wallet && address) {
           setAddressBIP21Encoded(address);
         }

@@ -57,6 +57,7 @@ interface Style {
     input: TextStyle;
     bottomViewNew: TextStyle;
     border: ViewStyle;
+    modalContent: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -75,6 +76,13 @@ export default StyleSheet.create<Style>({
         justifyContent: 'center',
         // backgroundColor: 'green',
     },
+    modalContent: {
+        padding: 22,
+        justifyContent: 'center',
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16,
+        borderColor: 'rgba(0, 0, 0, 0.1)',
+    },    
     savingVault: {
         width: widths - 40,
         height: 130,

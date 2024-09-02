@@ -21,27 +21,30 @@ interface Props {
     currency?: string;
     isConverter?: boolean;
     firstTabText?: string;
+    isEdit?: string;
 }
 
-export default function CustomKeyBoardNew({ prevSats, title, disabled, onPress, setSATS, setUSD, setIsSATS, isError, matchedRate, isConverter = true, firstTabText = "Sats" }: Props) {
+export default function CustomKeyBoardNew({ isEdit, prevSats, title, disabled, onPress, setSATS, setUSD, setIsSATS, isError, matchedRate, isConverter = true, firstTabText = "Sats" }: Props) {
     const KEYSARRAY = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0'];
     const [isSats, setIsSats] = useState(true);
     const [sats, setSats] = useState(prevSats || '');
     const currency = btc(1);
 
-    useEffect(() => {
-        setSats(prevSats)
-    }, [prevSats])
+    // useEffect(() => {
+    //     console.log('prevSats: ', prevSats)
+    //     if(sats !== prevSats && prevSats)
+    //         setSats(prevSats)
+    // }, [prevSats])
 
     useEffect(() => {
         if (sats.length > 0) {
             let amount = 0;
             if (isSats) {
-                amount = (Number(matchedRate || 0) * Number(sats)).toFixed(4)
+                amount = (Number(matchedRate || 0) * Number(sats)).toFixed(2)
                 setSATS(sats);
                 setUSD(String(amount));
             } else {
-                amount = ((Number(sats) / (Number(matchedRate) || 0))).toFixed(4);
+                amount = ((Number(sats) / (Number(matchedRate) || 0))).toFixed(6);
                 // const multiplier = isSats ? 0.000594 : 1683.79;
                 // const total = multiplier * Number(sats);
                 // const total_ = total.toFixed(4);
@@ -49,17 +52,19 @@ export default function CustomKeyBoardNew({ prevSats, title, disabled, onPress, 
                 setUSD(String(amount));
             }
         } else {
-            setUSD('');
-            setSATS('');
+            setUSD('0');
+            setSATS('0');
         }
     }, [sats.length, isSats]);
 
     useEffect(() => {
-        setSats('');
-        setSATS('');
-        setUSD('');
-        setIsSATS(isSats);
-    }, [isSats]);
+        if(!isEdit){
+            setSats('');
+            setSATS('0');
+            setUSD('0');
+        }
+        setIsSATS(isSats);    
+    }, [isSats, isEdit]);
 
     const handlePress = (value: string) => {
         setSats((prev) => prev + value);

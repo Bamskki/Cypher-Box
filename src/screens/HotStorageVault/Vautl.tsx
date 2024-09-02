@@ -17,6 +17,7 @@ import { BlueStorageContext } from "../../../blue_modules/storage-context";
 import { Copy, InformationNew, QrCode, Share as Share2, ShareNew } from "@Cypher/assets/images";
 import { btc } from "@Cypher/helpers/coinosHelper";
 import { formatBalance, formatBalanceWithoutSuffix } from "../../../loc";
+import { dispatchNavigate } from "@Cypher/helpers";
 
 const shortenAddress = (address: string) => {
     // Take the first 6 characters
@@ -65,6 +66,12 @@ export default function Vault({wallet, matchedRate, setSelectedTab}: {wallet: an
         Clipboard.setString(text);
         SimpleToast.show('Copied to clipboard', SimpleToast.SHORT);
     };
+
+    const addressHandler = () => {
+        dispatchNavigate('WalletAddresses', {
+            walletID: wallet.getID(),
+        });    
+    }
 
     const addressClickHandler = () => {
         setSelectedTab(1)
@@ -122,7 +129,7 @@ export default function Vault({wallet, matchedRate, setSelectedTab}: {wallet: an
             />
             <View style={styles.base}>
                 <GradientView
-                    onPress={addressClickHandler}
+                    onPress={addressHandler}
                     style={styles.linearGradientStyle}
                     linearGradientStyle={styles.mainShadowStyle}
                     topShadowStyle={styles.outerShadowStyle}

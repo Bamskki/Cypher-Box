@@ -9,6 +9,7 @@ import { AddressItem } from '../../components/addresses/AddressItem';
 import { AddressTypeTabs, TABS } from '../../components/addresses/AddressTypeTabs';
 import { WatchOnlyWallet } from '../../class';
 import { useTheme } from '../../components/themes';
+import { dispatchNavigate } from '@Cypher/helpers';
 
 export const totalBalance = ({ c, u } = { c: 0, u: 0 }) => c + u;
 
@@ -60,7 +61,17 @@ const WalletAddresses = () => {
 
   const { wallets } = useContext(BlueStorageContext);
 
-  const { walletID } = useRoute().params;
+  const { 
+    walletID, 
+    isTouchable,
+    value, 
+    converted, 
+    isSats, 
+    to, 
+    type, 
+    recommendedFee, 
+    isWithdrawal, 
+} = useRoute().params;
 
   const addressList = useRef();
 
@@ -76,7 +87,7 @@ const WalletAddresses = () => {
 
   const { colors } = useTheme();
 
-  const { setOptions } = useNavigation();
+  const { setOptions, navigate } = useNavigation();
 
   const [search, setSearch] = React.useState('');
 
@@ -134,11 +145,33 @@ const WalletAddresses = () => {
     }, []),
   );
 
+  const navigateToReceive = (item) => {
+    dispatchNavigate('ReviewPayment', {
+      value: value,
+      converted: converted,
+      isSats: isSats,
+      to: item.address,
+      fees: 0,
+      type: type,
+      feeForBamskki: 0,
+      recommendedFee,
+      wallet,
+      isWithdrawal: isWithdrawal
+    });
+    // navigate('ReceiveDetailsRoot', {
+    //   screen: 'ReceiveDetails',
+    //   params: {
+    //     walletID,
+    //     address: item.address,
+    //   },
+    // });
+  };
+
   const data =
     search.length > 0 ? filteredAddresses.filter(item => item.address.toLowerCase().includes(search.toLowerCase())) : filteredAddresses;
 
   const renderRow = item => {
-    return <AddressItem {...item} balanceUnit={balanceUnit} walletID={walletID} allowSignVerifyMessage={allowSignVerifyMessage} />;
+    return <AddressItem {...item} balanceUnit={balanceUnit} walletID={walletID} allowSignVerifyMessage={allowSignVerifyMessage} isTouchable={isTouchable} navigateToReceive={navigateToReceive} />;
   };
 
   return (
