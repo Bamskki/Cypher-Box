@@ -545,7 +545,7 @@ export default function ReviewWithdrawal({ route }: Props) {
                     linearStyle={styles.heigth}
                     colors_={note ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}
                 >
-                    <Input onChange={setNote} value={note} textInpuetStyle={styles.heigth2} label="Add note" />
+                    <Input onChange={setNote} value={note} textInputStyle={styles.heigth2} label="Add note" />
                 </GradientCard>
             </View>
             <View style={styles.container}>

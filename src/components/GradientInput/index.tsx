@@ -27,7 +27,7 @@ export default function GradientInput({
                         value={sats}
                         keyboardType="number-pad"
                         editable={false}
-                        textInpuetStyle={styles.input}
+                        textInputStyle={styles.input}
                     />
                 </GradientCard>
                 <Text style={isSats ? styles.btc : styles.dollar}>{`${isSats ? 'sats' : '$'}`}</Text>
