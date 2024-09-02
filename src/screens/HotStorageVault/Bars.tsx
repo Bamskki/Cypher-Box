@@ -18,7 +18,11 @@ import { useTheme } from "../../../components/themes";
 import { OutputModalContent } from "../../../screen/send/coinControl";
 // import { Bitcoin, Transaction, TransactionN } from "@Cypher/assets/svg";
 
+<<<<<<< HEAD
 export default function Bars({ wallet, matchedRate }: any) {
+=======
+export default function Bars({wallet, matchedRate, to}: any) {
+>>>>>>> 6ec6414 (Topup Transaction flow implemented)
     const { colors: themeColors } = useTheme();
     const [ids, setIds] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -91,7 +95,23 @@ export default function Bars({ wallet, matchedRate }: any) {
     const handleSendBars = () => {
         if (ids.length > 0) {
             const usd = inUSD.toFixed(2);
+<<<<<<< HEAD
             dispatchNavigate('EditAmount', { isEdit: false, wallet, utxo, ids, maxUSD: total, inUSD: inUSD.toFixed(2), total, matchedRate });
+=======
+            let capsulesData: any = [];
+            ids.forEach(id => {
+                const result = utxo?.find(obj => `${obj.txid}:${obj.vout}` === id)?.value;
+                if (result) capsulesData.push({
+                    id, value: result
+                });
+            });
+    
+            if(to){
+                dispatchNavigate('ColdStorage', {wallet, utxo, ids, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to});
+            } else {
+                dispatchNavigate('EditAmount', {isEdit: false, wallet, utxo, ids, maxUSD: total, inUSD: inUSD.toFixed(2), total, matchedRate, to});
+            }
+>>>>>>> 6ec6414 (Topup Transaction flow implemented)
         } else {
             SimpleToast.show("Please select Bar to Send", SimpleToast.SHORT)
         }

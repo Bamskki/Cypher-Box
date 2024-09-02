@@ -22,7 +22,7 @@ import RBSheet from 'react-native-raw-bottom-sheet';
 import LinearGradient from "react-native-linear-gradient";
 import ReceivedList from "./ReceivedList";
 import useAuthStore from "@Cypher/stores/authStore";
-import { bitcoinRecommendedFee, getCurrencyRates, getMe, getTransactionHistory } from "@Cypher/api/coinOSApis";
+import { bitcoinRecommendedFee, createInvoice, getCurrencyRates, getMe, getTransactionHistory } from "@Cypher/api/coinOSApis";
 import { btc, formatNumber, matchKeyAndValue } from "@Cypher/helpers/coinosHelper";
 import { AbstractWallet, HDSegwitBech32Wallet, HDSegwitP2SHWallet } from "../../../class";
 import loc, { formatBalance, formatBalanceWithoutSuffix } from '../../../loc';
@@ -63,7 +63,10 @@ export default function HomeScreen({ route }: Props) {
   const { isAuth, walletID, token, user, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
   const A = require('../../../blue_modules/analytics');
 
+<<<<<<< HEAD
   console.log('walletID:  ', walletID);
+=======
+>>>>>>> 6ec6414 (Topup Transaction flow implemented)
   // const [storage, setStorage] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [balance, setBalance] = useState(0);
@@ -158,11 +161,24 @@ export default function HomeScreen({ route }: Props) {
 
   useFocusEffect(
     useCallback(() => {
+<<<<<<< HEAD
       if (wallet) {
         obtainWalletAddress();
       }
+=======
+        if (wallet) {
+            obtainWalletAddress();
+            (async () => {
+              try {
+                  await Promise.race([wallet?.fetchUtxo(), sleep(10000)]);
+              } catch (e) {
+                  console.log('coincontrol wallet.fetchUtxo() failed'); // either sleep expired or fetchUtxo threw an exception
+              }
+            })();
+        }
+>>>>>>> 6ec6414 (Topup Transaction flow implemented)
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [wallet]),
+    }, [wallet, sleep]),
   );
 
   const handleUser = async () => {
@@ -263,10 +279,28 @@ export default function HomeScreen({ route }: Props) {
   }
 
 
+<<<<<<< HEAD
   const topupClickHandler = () => {
     dispatchNavigate('PurchaseVault', {
       data: {},
     });
+=======
+  const topupClickHandler = async () => {
+    // dispatchNavigate('PurchaseVault', {
+    //   data: {}
+    // });
+    try {
+      const response = await createInvoice({
+        type: 'bitcoin',
+      });
+      dispatchNavigate('HotStorageVault', { wallet, matchedRate, to: response.hash });
+      console.log('response: ', response)
+    } catch (error) {
+      console.error('Error generating bitcoin address:', error);
+    } finally {
+      setIsLoading(false);
+    }
+>>>>>>> 6ec6414 (Topup Transaction flow implemented)
   };
 
   const savingVaultClickHandler = () => {

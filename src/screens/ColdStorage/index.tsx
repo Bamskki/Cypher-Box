@@ -5,7 +5,7 @@ import SimpleToast from "react-native-simple-toast";
 
 import styles from "./styles";
 import { ScreenLayout, Text } from "@Cypher/component-library";
-import { SavingVault } from "@Cypher/components";
+import { ProgressBar, SavingVault } from "@Cypher/components";
 import { colors } from "@Cypher/style-guide";
 import { dispatchNavigate } from "@Cypher/helpers";
 import Clipboard from '@react-native-clipboard/clipboard'
@@ -24,6 +24,8 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { btc } from "@Cypher/helpers/coinosHelper";
 import { scanQrHelper } from "../../../helpers/scan-qr";
 import DeeplinkSchemaMatch from "../../../class/deeplink-schema-match";
+import { ProgressBar5 } from "@Cypher/assets/images";
+
 const prompt = require('../../../helpers/prompt');
 const btcAddressRx = /^[a-zA-Z0-9]{26,35}$/;
 
@@ -43,6 +45,7 @@ export const shortenAddress = (address: string) => {
 
 
 export default function ColdStorage({ route, navigation }: Props) {
+    const {wallet, utxo, ids, maxUSD, inUSD, total, matchedRate, capsulesData = null, to = null} = route?.params;
     const [usd, setUSD] = useState('40');
     const [sats, setSats] = useState('100K sats  ~$' + usd);
     const [address, setAddress] = useState();
@@ -79,7 +82,6 @@ export default function ColdStorage({ route, navigation }: Props) {
     const [feeUSD, setFeeUSD] = useState(1);
     const [feesEditable, setFeesEditable] = useState(false);
     const [satsEditable, setSatsEditable] = useState(false);
-    const {wallet, utxo, ids, maxUSD, inUSD, total, matchedRate} = route?.params;
     const fUtxo = utxo.filter(({ txid, vout }) => ids.includes(`${txid}:${vout}`));
     const balance = fUtxo ? fUtxo.reduce((prev, curr) => prev + curr.value, 0) : wallet?.getBalance();
     const allBalance = formatBalanceWithoutSuffix(balance, BitcoinUnit.BTC, true);
@@ -102,6 +104,12 @@ export default function ColdStorage({ route, navigation }: Props) {
         return initialFee;
     }, [customFee, feePrecalc, networkTransactionFees]);
     
+    useEffect(() => {
+      if(to){
+        setDestinationAddress(to)
+      }
+    }, [to])
+
     useEffect(() => {
         if (!wallet) return;
         setSelectedWalletID(wallet.getID());
@@ -445,6 +453,8 @@ export default function ColdStorage({ route, navigation }: Props) {
             tx: tx.toHex(),
             recipients,
             psbt,
+            capsulesData,
+            to,
             fee: new BigNumber(fee).dividedBy(100000000).toNumber(),          
         }
         console.log('data: ', data)
@@ -531,7 +541,7 @@ export default function ColdStorage({ route, navigation }: Props) {
     }
 
     const editAmountClickHandler = () => {
-        navigation.push('EditAmount', {isEdit: true, wallet, utxo, ids, maxUSD, inUSD, total, matchedRate, setSatsEdit: setSats_ });
+        navigation.push('EditAmount', {isEdit: true, wallet, utxo, ids, maxUSD, inUSD, total, matchedRate, capsulesData, to, setSatsEdit: setSats_ });
     }
 
     const editFeesClickHandler = () => {
@@ -701,7 +711,7 @@ export default function ColdStorage({ route, navigation }: Props) {
     return (
         <ScreenLayout showToolbar disableScroll>
             <View style={styles.container}>
-                <Text style={styles.title} center>Construct transaction</Text>
+                <Text style={styles.title} center>{to ? "Top-up Transaction" : "Construct transaction"}</Text>
                 {/* <SavingVault
                     container={styles.savingVault}
                     innerContainer={styles.savingVault}
@@ -717,11 +727,25 @@ export default function ColdStorage({ route, navigation }: Props) {
                 /> */}
                 <View style={styles.recipientView}>
                     {/* <TouchableOpacity onPress={coinThresholdClickHandler}> */}
-                    <Text bold style={styles.coinselected}>Coins selected: {ids.length} coins</Text>
+                    {to ?
+                      <View>
+                        <Text bold style={styles.coinselected}>Capsules selected: {ids.length}</Text>
+                          {capsulesData.map((item, i) => (
+                            <View style={styles.tabs}>
+                              <ProgressBar image={ProgressBar5} />
+                              <View style={{ width: '80%', alignItems: 'flex-end' }}>
+                              <Text bold style={styles.coinselected}>Total: {formatBalance(item?.value, BitcoinUnit.BTC, true)}</Text>
+                              </View>
+                            </View>
+                          ))}
+                      </View>
+                    :
+                      <Text bold style={styles.coinselected}>Coins selected: {ids.length} coins</Text>
+                    }
                     {/* </TouchableOpacity> */}
                     <View style={styles.priceView}>
                         <View>
-                            <Text style={styles.recipientTitle}>Recipient will get:</Text>
+                            <Text style={styles.recipientTitle}>{to ? "Top-up amount" : "Recipient will get:"}</Text>
                             <Text bold style={styles.value}>{parseInt(Number(inUSD) / Number(matchedRate) * 100000000) + ' sats ~$' + Number(inUSD).toFixed(2)}</Text>
                         </View>
                         <TouchableOpacity style={[styles.editAmount, { borderColor: satsEditable ? colors.green : '#B6B6B6' }]} onPress={editAmountClickHandler}>
@@ -736,23 +760,33 @@ export default function ColdStorage({ route, navigation }: Props) {
                             </View>
                         </View>
                     }
-                    <View style={styles.pasteview}>
-                        <TouchableOpacity style={[styles.button, { borderColor: destinationAddress?.length > 0 ? colors.green : '#B6B6B6' }]} onPress={pasteClickHandler}>
-                            {destinationAddress ?
-                                <Text h3 bold>{destinationAddress}</Text>
-                                :
-                                <Text bold>Paste destination address</Text>
-                            }
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={async () => {
-                            // await scanButtonTapped();
-                            Keyboard.dismiss();
-                            // @ts-ignore: Fix later
-                            scanQrHelper(navigate, "ColdStorage", { wallet, utxo, ids, inUSD, total, matchedRate }).then(processAddressData);
-                        }}>
-                            <Image source={require("../../../img/scan-new.png")} style={styles.qrcode} resizeMode="contain" />
-                        </TouchableOpacity>
-                    </View>
+                    {to ?
+                        <View style={styles.priceView}>
+                          <View>
+                              <Text style={styles.recipientTitle}>Sent to:</Text>
+                              <Text style={{...styles.fees, color: colors.pink.main}} italic>My Coinos Checking Account</Text>
+                              <Text style={{...styles.fees, color: colors.pink.main}} italic>Deposit address: {shortenAddress(to)}</Text>
+                          </View>
+                        </View>
+                    :
+                      <View style={styles.pasteview}>
+                          <TouchableOpacity style={[styles.button, { borderColor: destinationAddress?.length > 0 ? colors.green : '#B6B6B6' }]} onPress={pasteClickHandler}>
+                              {destinationAddress ?
+                                  <Text h3 bold>{destinationAddress}</Text>
+                                  :
+                                  <Text bold>Paste destination address</Text>
+                              }
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={async () => {
+                              // await scanButtonTapped();
+                              Keyboard.dismiss();
+                              // @ts-ignore: Fix later
+                              scanQrHelper(navigate, "ColdStorage", { wallet, utxo, ids, inUSD, total, matchedRate }).then(processAddressData);
+                          }}>
+                              <Image source={require("../../../img/scan-new.png")} style={styles.qrcode} resizeMode="contain" />
+                          </TouchableOpacity>
+                      </View>
+                    }
                     <View style={styles.priceView}>
                         <View>
                             <Text style={styles.recipientTitle}>Network fee:</Text>
