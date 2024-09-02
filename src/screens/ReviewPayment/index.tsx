@@ -57,7 +57,6 @@ export default function ReviewPayment({ route }: Props) {
         economyFee: "Slow",
     };
 
-
     useEffect(() => {
         handleUser();
     }, []);

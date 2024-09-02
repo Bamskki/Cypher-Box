@@ -63,14 +63,7 @@ export default function HomeScreen({ route }: Props) {
   const { isAuth, walletID, token, user, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
   const A = require('../../../blue_modules/analytics');
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-  console.log('walletID:  ', walletID);
-=======
->>>>>>> 6ec6414 (Topup Transaction flow implemented)
-=======
-  console.log('walletID:  ', walletID);
->>>>>>> fb0ea7c (resolve conflic)
+  console.log('walletID:  ', walletID)
   // const [storage, setStorage] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [balance, setBalance] = useState(0);
@@ -136,56 +129,7 @@ export default function HomeScreen({ route }: Props) {
     handleToken();
   }, [isAuth, token, wallets, walletID]);
 
-<<<<<<< HEAD
-  useEffect(() => {
-    if (!vaultAddress.startsWith('ln') && !vaultAddress.includes('@') && !recommendedFee) {
-      const init = async () => {
-        const res = await bitcoinRecommendedFee();
-        setRecommendedFee(res);
-      }
-      init();
-    }
-  }, [vaultAddress])
-
-  const obtainWalletAddress = async () => {
-    let newAddress;
-    try {
-      if (!isElectrumDisabled && wallet) newAddress = await Promise.race([wallet?.getAddressAsync(), sleep(1000)]);
-    } catch (_) { }
-    if (newAddress === undefined && wallet) {
-      // either sleep expired or getAddressAsync threw an exception
-      console.warn('either sleep expired or getAddressAsync threw an exception');
-      newAddress = wallet._getExternalAddressByIndex(wallet.getNextFreeAddressIndex());
-    } else {
-      saveToDisk(); // caching whatever getAddressAsync() generated internally
-    }
-    setVaultAddress(newAddress);
-  }
-
-  useFocusEffect(
-    useCallback(() => {
-<<<<<<< HEAD
-      if (wallet) {
-        obtainWalletAddress();
-      }
-=======
-        if (wallet) {
-            obtainWalletAddress();
-            (async () => {
-              try {
-                  await Promise.race([wallet?.fetchUtxo(), sleep(10000)]);
-              } catch (e) {
-                  console.log('coincontrol wallet.fetchUtxo() failed'); // either sleep expired or fetchUtxo threw an exception
-              }
-            })();
-        }
->>>>>>> 6ec6414 (Topup Transaction flow implemented)
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [wallet, sleep]),
-  );
-=======
-  console.log('setIsAllDone: ', isAllDone);
->>>>>>> fb0ea7c (resolve conflic)
+  console.log('setIsAllDone: ', isAllDone)
 
   const handleUser = async () => {
     try {
@@ -256,51 +200,12 @@ export default function HomeScreen({ route }: Props) {
 
   const checkingAccountClickHandler = () => {
     dispatchNavigate('CheckingAccount', { matchedRate });
-<<<<<<< HEAD
-  };
-
-  const withdrawClickHandler = () => {
-    if (wallet) {
-      const amount = withdrawThreshold > balance ? balance : withdrawThreshold;
-      dispatchNavigate('ReviewPayment', {
-        value: amount,
-        converted: ((Number(matchedRate) || 0) * btc(1) * Number(amount)).toFixed(2),
-        isSats: true,
-        to: vaultAddress,
-        fees: 0,
-        matchedRate: matchedRate,
-        currency: currency,
-        type: 'bitcoin',
-        feeForBamskki: 0,
-        recommendedFee,
-        wallet,
-        isWithdrawal: true
-      });
-    } else {
-      dispatchNavigate('SavingVaultIntro');
-    }
-=======
->>>>>>> fb0ea7c (resolve conflic)
-  };
-  const handleCreateVault = () => {
-    dispatchNavigate('SavingVaultIntro');
-
-<<<<<<< HEAD
   }
 
-
-<<<<<<< HEAD
-=======
   const withdrawClickHandler = () => {
-    dispatchNavigate('WithdrawToSavingsVault');
-  };
-  const handleCreateVault = () => {
     dispatchNavigate('SavingVaultIntro');
+  };
 
-  }
-
-
->>>>>>> fb0ea7c (resolve conflic)
   const topupClickHandler = () => {
     dispatchNavigate('PurchaseVault', {
       data: {},
@@ -344,8 +249,7 @@ export default function HomeScreen({ route }: Props) {
     if (wallet) {
       await wallet?.fetchBalance();
     }
-    handleUser();
-<<<<<<< HEAD
+    handleUser()
   };
 
 
@@ -369,12 +273,9 @@ export default function HomeScreen({ route }: Props) {
         walletID: w.getID(),
       });
     }
-=======
->>>>>>> fb0ea7c (resolve conflic)
   };
 
-  console.log(withdrawThreshold, 'withdrawThreshold');
-  console.log(reserveAmount, 'reserveAmount');
+  console.log('calculatePercentage(Number(withdrawThreshold), (Number(reserveAmount))): ', calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount)))
   return (
     <ScreenLayout
       RefreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" />}
