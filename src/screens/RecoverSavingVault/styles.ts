@@ -40,7 +40,8 @@ export default StyleSheet.create<Style>({
     bottominner: {
         flex: 1,
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     shadow: {
         ...shadow.text25,

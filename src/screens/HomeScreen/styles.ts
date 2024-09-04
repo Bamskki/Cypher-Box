@@ -87,10 +87,11 @@ interface Style {
     bitcoinText?: TextStyle;
     linearGradientbottom?: ViewStyle;
     bottomBtn: ViewStyle;
-    createVaultContainer: ViewStyle;
     createVault: ViewStyle;
     createVaultText: TextStyle;
     advancedText: TextStyle;
+    createVaultContainer: ViewStyle;
+
 }
 
 export default StyleSheet.create<Style>({
@@ -630,8 +631,8 @@ export default StyleSheet.create<Style>({
         borderRadius: 25,
     },
     createVaultContainer: {
-        top: '30%'
-
+        top: '-10%',
+        paddingHorizontal: 20,
     },
     createVault: {
         borderRadius: 25,
