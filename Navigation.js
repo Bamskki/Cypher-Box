@@ -2,7 +2,6 @@ import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { Platform, useWindowDimensions, Dimensions, I18nManager } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Settings from './screen/settings/settings';
 import About from './screen/settings/about';
@@ -551,32 +550,12 @@ const LappBrowserStackRoot = () => {
 
 const InitStack = createStackNavigator();
 const InitRoot = () => {
-  const [initialRoute, setInitialRoute] = useState(null);
-
-  useEffect(() => {
-    const checkTermsAccepted = async () => {
-      try {
-        const hasAcceptedTerms = await AsyncStorage.removeItem('hasAcceptedTermsOfService')
-        if (hasAcceptedTerms === 'true') {
-          setInitialRoute('SplashScreen');
-        } else {
-          setInitialRoute('GetStartedScreen');
-        }
-      } catch (error) {
-        console.error('Error checking terms of service:', error);
-      }
-    };
-
-    checkTermsAccepted();
-  }, []);
 
 
-  if (!initialRoute) {
-    return null;
-  }
-  // 
+
+
   return (
-    <InitStack.Navigator initialRouteName={initialRoute} screenOptions={{
+    <InitStack.Navigator initialRouteName={'SplashScreen'} screenOptions={{
       cardStyleInterpolator: CardStyleInterpolators.forBottomSheetAndroid,
       gestureEnabled: false,
     }}>
