@@ -34,7 +34,7 @@ const GradientInputNew = ({
                         value={sats}
                         keyboardType="number-pad"
                         editable={false}
-                        textInpuetStyle={styles.input}
+                        textInputStyle={styles.input}
                     />
                 </GradientCard>
                 {!isFeeesRate && (

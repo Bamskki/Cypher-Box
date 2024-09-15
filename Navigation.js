@@ -1,7 +1,8 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { Platform, useWindowDimensions, Dimensions, I18nManager } from 'react-native';
+
 import Settings from './screen/settings/settings';
 import About from './screen/settings/about';
 import ReleaseNotes from './screen/settings/releasenotes';
@@ -85,7 +86,7 @@ import PaymentCode from './screen/wallets/paymentCode';
 import PaymentCodesList from './screen/wallets/paymentCodesList';
 import loc from './loc';
 import { useTheme } from './components/themes';
-import { AccountStatus, AdjustHotThreshold, CheckAccount, CheckingAccount, ColdStorage, ConfirmTransction, CopyInvoice, CreateCoinOSScreen, CreateInvoice, CreateVault, DownloadBlink, EditAmount, FeeRate, GetAddressScreen, HomeScreen, HotStorageVault, InfoBlink, LoginBlink, LoginBlinkPhone, LoginCoinOSScreen, PurchaseVault, QrScreen, ReceivedMethodScreen, ReviewPayment, SavingVault, SavingVaultCreated, SavingVaultIntro, SavingVaultIntroNew, SendReceiveOnChain, SendReceiveSuccessScreen, SendScreen, SplashScreen, ThresholdAdjust, Transaction, TransactionBroadCast, TransactionBroadCastNew, VerifyPhone, WelcomeScreen, WithdrawThreshold } from './src/screens';
+import { AccountStatus, AdjustHotThreshold, CheckAccount, CheckingAccount, ColdStorage, ConfirmTransction, CopyInvoice, CreateCoinOSScreen, CreateInvoice, CreateVault, DownloadBlink, EditAmount, FeeRate, GetAddressScreen, HomeScreen, HotStorageVault, InfoBlink, LoginBlink, LoginBlinkPhone, LoginCoinOSScreen, PurchaseVault, QrScreen, ReceivedMethodScreen, ReviewPayment, SavingVault, SavingVaultCreated, SavingVaultIntro, SavingVaultIntroNew, SendReceiveOnChain, SendReceiveSuccessScreen, SendScreen, SplashScreen, ThresholdAdjust, Transaction, TransactionBroadCast, TransactionBroadCastNew, VerifyPhone, WelcomeScreen, WithdrawThreshold, WithdrawToSavingsVault, ReviewWithdrawal, RecoverSavingVault, GetStartedScreen, TermOfService } from './src/screens';
 import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 import Invoice from '@Cypher/screens/Invoice';
 import ChangeUsername from '@Cypher/screens/Account/ChangeUsername';
@@ -121,10 +122,15 @@ const WalletsRoot = () => {
         headerShown: false, translucent: false,
         cardStyleInterpolator: CardStyleInterpolators.forBottomSheetAndroid,
       }} />
+      <WalletsStack.Screen name="TermOfService" component={TermOfService} options={{
+        headerShown: false, translucent: false,
+        cardStyleInterpolator: CardStyleInterpolators.forBottomSheetAndroid,
+      }} />
       <WalletsStack.Screen name="CheckAccount" component={CheckAccount} options={{ headerShown: false }} />
       <WalletsStack.Screen name="InfoBlink" component={InfoBlink} options={{ headerShown: false }} />
       <WalletsStack.Screen name="DownloadBlink" component={DownloadBlink} options={{ headerShown: false }} />
       <WalletsStack.Screen name="LoginBlink" component={LoginBlink} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="RecoverSavingVault" component={RecoverSavingVault} options={{ headerShown: false }} />
       <WalletsStack.Screen name="CreateCoinOSScreen" component={CreateCoinOSScreen} options={{ headerShown: false }} />
       <WalletsStack.Screen name="ForgotCoinOSScreen" component={ForgetPassword} options={{ headerShown: false }} />
       <WalletsStack.Screen name="ChangeUsername" component={ChangeUsername} options={{ headerShown: false }} />
@@ -136,6 +142,17 @@ const WalletsRoot = () => {
       <WalletsStack.Screen name="QrScreen" component={QrScreen} options={{ headerShown: false }} />
       <WalletsStack.Screen name="CopyInvoice" component={CopyInvoice} options={{ headerShown: false }} />
       <WalletsStack.Screen name="ReviewPayment" component={ReviewPayment} options={{
+        headerShown: false,
+        // transitionSpec: {
+        //   open: config,
+        //   close: config,
+        // },
+      }} />
+
+      <WalletsStack.Screen name="WithdrawToSavingsVault" component={WithdrawToSavingsVault} options={{ headerShown: false }} />
+
+
+      <WalletsStack.Screen name="ReviewWithdrawal" component={ReviewWithdrawal} options={{
         headerShown: false,
         // transitionSpec: {
         //   open: config,
@@ -532,26 +549,34 @@ const LappBrowserStackRoot = () => {
 };
 
 const InitStack = createStackNavigator();
-const InitRoot = () => (
-  <InitStack.Navigator initialRouteName="SplashScreen" screenOptions={{
-    cardStyleInterpolator: CardStyleInterpolators.forBottomSheetAndroid,
-    gestureEnabled: false,
-  }}>
-    <InitStack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false, gestureEnabled: false }} />
-    <InitStack.Screen name="WelcomeScreen" component={WelcomeScreen} options={{ headerShown: false, gestureEnabled: false }} />
-    <InitStack.Screen name="UnlockWithScreenRoot" component={UnlockWithScreenRoot} options={{ headerShown: false }} />
-    <InitStack.Screen
-      name="ReorderWallets"
-      component={ReorderWalletsStackRoot}
-      options={{ headerShown: false, gestureEnabled: false, presentation: 'modal' }}
-    />
-    <InitStack.Screen
-      name={isHandset ? 'Navigation' : 'DrawerRoot'}
-      component={isHandset ? Navigation : DrawerRoot}
-      options={{ headerShown: false, replaceAnimation: 'push' }}
-    />
-  </InitStack.Navigator>
-);
+const InitRoot = () => {
+
+
+
+
+  return (
+    <InitStack.Navigator initialRouteName={'SplashScreen'} screenOptions={{
+      cardStyleInterpolator: CardStyleInterpolators.forBottomSheetAndroid,
+      gestureEnabled: false,
+    }}>
+      <InitStack.Screen name="TermOfService" component={TermOfService} options={{ headerShown: false, gestureEnabled: false, }} />
+      <InitStack.Screen name="GetStartedScreen" component={GetStartedScreen} options={{ headerShown: false, gestureEnabled: false, }} />
+      <InitStack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false, gestureEnabled: false }} />
+      <InitStack.Screen name="WelcomeScreen" component={WelcomeScreen} options={{ headerShown: false, gestureEnabled: false }} />
+      <InitStack.Screen name="UnlockWithScreenRoot" component={UnlockWithScreenRoot} options={{ headerShown: false }} />
+      <InitStack.Screen
+        name="ReorderWallets"
+        component={ReorderWalletsStackRoot}
+        options={{ headerShown: false, gestureEnabled: false, presentation: 'modal' }}
+      />
+      <InitStack.Screen
+        name={isHandset ? 'Navigation' : 'DrawerRoot'}
+        component={isHandset ? Navigation : DrawerRoot}
+        options={{ headerShown: false, replaceAnimation: 'push' }}
+      />
+    </InitStack.Navigator>
+  );
+}
 
 const ViewEditMultisigCosignersStack = createStackNavigator();
 const ViewEditMultisigCosignersRoot = () => {
