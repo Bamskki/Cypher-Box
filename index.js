@@ -7,7 +7,7 @@ import { BlueStorageProvider } from './blue_modules/storage-context';
 const A = require('./blue_modules/analytics');
 if (!Error.captureStackTrace) {
   // captureStackTrace is only available when debugging
-  Error.captureStackTrace = () => {};
+  Error.captureStackTrace = () => { };
 }
 
 const BlueAppComponent = () => {
@@ -22,4 +22,4 @@ const BlueAppComponent = () => {
   );
 };
 
-AppRegistry.registerComponent('BlueWallet', () => BlueAppComponent);
+AppRegistry.registerComponent('Cypher Box', () => BlueAppComponent);

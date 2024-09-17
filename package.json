@@ -1,10 +1,10 @@
 {
-  "name": "bluewallet",
+  "name": "cypherbox",
   "version": "6.5.1",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/BlueWallet/BlueWallet.git"
+    "url": "https://github.com/Bamskki/Cypher-Box"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
