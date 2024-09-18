@@ -22,4 +22,4 @@ const BlueAppComponent = () => {
   );
 };
 
-AppRegistry.registerComponent('CypherBox', () => BlueAppComponent);
+AppRegistry.registerComponent('BlueWallet', () => BlueAppComponent);
