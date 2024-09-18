@@ -71,13 +71,11 @@ export default StyleSheet.create<Style>({
     },
 
     inputStyle: {
-        // flex: 1,
-        width: 100,
+        width: 120,
         height: 40,
         borderWidth: 1,
         borderRadius: 30,
         borderColor: '#23C47F',
-        // paddingHorizontal: 15,
     },
     labelText: {
         width: 30,
@@ -88,6 +86,7 @@ export default StyleSheet.create<Style>({
         width: '100%',
         height: '100%',
         borderRadius: 30,
+        fontSize: 16
     },
     button: {
         width: '100%',
