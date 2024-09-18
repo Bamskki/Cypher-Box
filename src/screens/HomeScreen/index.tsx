@@ -102,7 +102,6 @@ export default function HomeScreen({ route }: Props) {
 
 
   const getWallet = async () => {
-    console.log('getWallet called')
     const allWallets = wallets.concat(false);
     const walletTemp = allWallets.find((w: AbstractWallet) => w.getID() === walletID);
     const balanceTemp = !walletTemp?.hideBalance && formatBalance(walletTemp?.getBalance(), walletTemp?.getPreferredBalanceUnit(), true);
@@ -113,7 +112,11 @@ export default function HomeScreen({ route }: Props) {
     setBalanceVault(balanceTemp)
     const hasVault = walletTemp.secret ? true : false;
     setHasSavingVault(hasVault)
-
+    if (wallets && walletID) {
+      setIsAllDone(!!walletTemp);
+    } else {
+      setIsAllDone(false)
+    }
   }
 
   useEffect(() => {
@@ -121,12 +124,7 @@ export default function HomeScreen({ route }: Props) {
       if (isAuth && token) {
         handleUser();
         loadPayments();
-        if (wallets && walletID) {
 
-          setIsAllDone(!!walletTemp);
-        } else {
-          setIsAllDone(false)
-        }
       } else {
         setIsLoading(false)
       }
