@@ -34,7 +34,7 @@ export default function RecoverSavingVault({ route }: Props) {
     const [password, setPassword] = useState();
     const [loading, setLoading] = useState(false);
     const importing = useRef(false);
-
+    const inputRefs = useRef<Array<any>>(new Array(inputs.length));
 
 
     const saveWallet = (wallet: any) => {
@@ -125,67 +125,65 @@ export default function RecoverSavingVault({ route }: Props) {
             });
     };
 
-
+    const handleKeyPress = (event: any, index: number) => {
+        if (event.nativeEvent.key === ' ' || event.nativeEvent.key === 'Enter') {
+            if (index < inputRefs.current.length - 1) {
+                inputRefs.current[index + 1].focus();
+            }
+        }
+    };
 
 
 
     return (
-        <ScreenLayout title="Recover Savings Vault" showToolbar isBackButton disableScroll>
+        <ScreenLayout title="Enter Your Seed phrase" showToolbar isBackButton disableScroll>
             <View style={styles.container}>
                 {loading ?
                     <ActivityIndicator style={{ marginTop: 10, marginBottom: 20 }} color={colors.white} />
                     :
                     <>
-                        <View style={styles.shadowViewBottom}>
-                            <Shadow
-                                style={StyleSheet.flatten([
-                                    styles.shadowTop,
-                                    {
-                                        shadowColor: colors.greenShadow,
-                                        paddingStart: 20,
-                                        paddingEnd: 10,
-                                    },
-                                ])}
-                                inner
-                                useArt
-                            >
-                                <View style={styles.bottominner}>
-                                    <Text h2 bold>
-                                        Enter Your Seedphrase
-                                    </Text>
-                                </View>
-                            </Shadow>
-                        </View>
-
                         <View style={styles.inputsContainer}>
                             {/* First Column */}
-                            <View style={styles.column}>
+                            <View style={styles.inputColumn}>
                                 {inputs.slice(0, 6).map((input, index) => (
                                     <View key={input} style={styles.inputContainer}>
                                         <Text h2 style={styles.labelText}>{input}.</Text>
                                         <Input
+                                            ref={el => inputRefs.current[index] = el}
                                             style={styles.inputStyle}
                                             onChange={(value) => handleSecretWordChange(index, value)}
                                             value={secretWords[index]}
                                             textInputStyle={styles.textInputStyle}
                                             autoCapitalize='none'
+                                            onKeyPress={(event) => handleKeyPress(event, index)}
+                                            onSubmitEditing={() => {
+                                                if (index < inputRefs.current.length - 1) {
+                                                    inputRefs.current[index + 1].focus();
+                                                }
+                                            }}
                                         />
                                     </View>
                                 ))}
                             </View>
 
                             {/* Second Column */}
-                            <View style={styles.column}>
+                            <View style={styles.inputColumn}>
                                 {inputs.slice(6).map((input, index) => (
                                     <View key={input} style={styles.inputContainer}>
                                         <Text h2 style={styles.labelText}>{input}.</Text>
                                         <Input
+                                            ref={el => inputRefs.current[index + 6] = el}
                                             style={styles.inputStyle}
                                             onChange={(value) => handleSecretWordChange(index + 6, value)}
                                             value={secretWords[index + 6]}
                                             textInputStyle={styles.textInputStyle}
                                             autoCapitalize='none'
-
+                                            onKeyPress={(event) => handleKeyPress(event, index + 6)}
+                                            onSubmitEditing={() => {
+                                                if (index + 6 < inputRefs.current.length - 1) {
+                                                    inputRefs.current[index + 7].focus();
+                                                }
+                                            }}
                                         />
                                     </View>
                                 ))}

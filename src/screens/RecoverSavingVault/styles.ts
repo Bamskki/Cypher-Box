@@ -1,4 +1,4 @@
-import { colors, widths, shadow } from "@Cypher/style-guide";
+import { colors, widths, heights, shadow } from "@Cypher/style-guide";
 import { StyleProp, ImageStyle, StyleSheet, TextStyle, ViewStyle } from "react-native";
 
 interface Style {
@@ -20,6 +20,7 @@ interface Style {
     login: TextStyle;
     alreadyView: ViewStyle;
     inputsContainer: ViewStyle;
+    inputColumn: ViewStyle;
     inputContainer: ViewStyle;
     inputStyle: ViewStyle;
     leftContainer: ViewStyle;
@@ -43,39 +44,9 @@ export default StyleSheet.create<Style>({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    shadow: {
-        ...shadow.text25,
-    },
-    shadowTop: {
-        shadowOffset: { width: 3, height: 3 },
-        shadowOpacity: 1,
-        shadowColor: colors.white,
-        shadowRadius: 2,
-        borderRadius: 24,
-        width: widths - 40,
-        height: 128,
-        backgroundColor: colors.primary,
-        padding: 15,
-        paddingHorizontal: 30,
-    },
-    shadowViewBottom: {
-        shadowOffset: { width: 8, height: 8 },
-        shadowOpacity: 0.71,
-        shadowColor: '#0C0C0C',
-        shadowRadius: 12,
-        elevation: 24,
-        borderRadius: 25,
-        width: widths - 40,
-        height: 130,
-        borderColor: "transparent",
-        backgroundColor: colors.tundora,
-        position: 'relative',
-        marginTop: 20
 
-    },
     inputsContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+        flexDirection: 'col',
         width: '100%',
         marginVertical: 20
     },
@@ -88,11 +59,21 @@ export default StyleSheet.create<Style>({
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 10,
+        justifyContent: 'space-between',
+        marginVertical: 3,
+        flexWrap: 'wrap',
     },
+    inputColumn:
+    {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between'
+    },
+
     inputStyle: {
-        flex: 1,
-        height: 50,
+        // flex: 1,
+        width: 100,
+        height: 40,
         borderWidth: 1,
         borderRadius: 30,
         borderColor: '#23C47F',
@@ -113,10 +94,11 @@ export default StyleSheet.create<Style>({
         backgroundColor: colors.green,
         borderWidth: 0,
         marginHorizontal: 40,
+        top: heights * 0.32
     },
     btnText: {
         fontFamily: 'Archivo-Bold',
         color: colors.white,
-        fontSize: 16,
+        fontSize: 14,
     },
 });
