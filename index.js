@@ -22,4 +22,4 @@ const BlueAppComponent = () => {
   );
 };
 
-AppRegistry.registerComponent('Cypher Box', () => BlueAppComponent);
+AppRegistry.registerComponent('CypherBox', () => BlueAppComponent);
