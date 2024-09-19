@@ -341,6 +341,7 @@ export default function HomeScreen({ route }: Props) {
   };
 
 
+  const hasFilledTheBar = calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount)) === 100
 
 
   return (
@@ -477,7 +478,7 @@ export default function HomeScreen({ route }: Props) {
                 />
               </View>
               {!isLoading &&
-                (payment.length == 0 ?
+                (hasFilledTheBar ?
                   <Text h4 style={styles.alert}>
                     Your sats have materialized! You can create a Hot Storage Savings Vault and take full self-custody of your money by withdrawing a large chunk of a bitcoin from your custodian Checking Account. Click the Withdraw button to know more
                     {/* You can receive, send, and accumulate bitcoin using your Checking Account. New security features will be revealed once you meet the withdrawal threshold at 2 million sats */}
