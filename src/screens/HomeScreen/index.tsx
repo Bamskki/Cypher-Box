@@ -124,7 +124,6 @@ export default function HomeScreen({ route }: Props) {
       if (isAuth && token) {
         handleUser();
         loadPayments();
-
       } else {
         setIsLoading(false)
       }
@@ -410,7 +409,8 @@ export default function HomeScreen({ route }: Props) {
                 </View>
               </>
             )}
-          {isAuth ? (
+
+          {isAuth &&
             <>
               <TouchableOpacity style={styles.shadowView} onPress={checkingAccountClickHandler}>
                 <Shadow
@@ -492,112 +492,151 @@ export default function HomeScreen({ route }: Props) {
                     </Text>
                 )
               }
-              <View style={styles.bottom}>
-                <View style={styles.bottominner}>
-                  {(hasSavingVault && walletID) &&
-                    <GradientView
-                      onPress={topupClickHandler}
-                      topShadowStyle={styles.outerShadowStyle}
-                      bottomShadowStyle={styles.innerShadowStyle}
-                      style={styles.linearGradientStyle}
-                      linearGradientStyle={styles.mainShadowStyle}
-                    >
-                      <Image
-                        style={styles.arrowLeft}
-                        resizeMode="contain"
-                        source={require("../../../img/arrow-right.png")}
-                      />
-                      <Text bold h3 center style={{ marginStart: 20 }}>Top-up</Text>
-                    </GradientView>
-                  }
-                  {(hasSavingVault && walletID) &&
-                    <GradientView
-                      onPress={withdrawClickHandler}
-                      topShadowStyle={styles.outerShadowStyle}
-                      bottomShadowStyle={styles.innerShadowStyle}
-                      style={styles.linearGradientStyle}
-                      linearGradientStyle={styles.mainShadowStyle}
-                    >
-                      <Text bold h3 center style={{ marginEnd: 20 }}>Withdraw</Text>
-                      <Image
-                        style={styles.arrowRight}
-                        resizeMode="contain"
-                        source={require("../../../img/arrow-right.png")}
-                      />
-                    </GradientView>
+            </>
+          }
 
-                  }
-                </View>
-                {(hasSavingVault && walletID) &&
-                  <SavingVault
-                    container={StyleSheet.flatten([styles.savingVault, { marginTop: 10 }])}
-                    innerContainer={styles.savingVault}
-                    shadowTopBottom={styles.savingVault}
-                    shadowBottomBottom={styles.savingVault}
-                    bitcoinText={styles.bitcoinText}
-                    onPress={savingVaultClickHandler}
-                    bitcoinValue={balanceVault}
-                    inDollars={`$${(Number(balanceWithoutSuffix) * Number(matchedRate)).toFixed(2)}`}
-                    isColorable
+          {/* {isAuth ? (
+            <> */}
+
+          {!isAuth &&
+            <View style={{ height: '42%' }}>
+              <GradientCardWithShadow
+                style={styles.createView}
+                onPress={createChekingAccountClickHandler}
+              >
+                <View style={styles.middle}>
+                  <Image
+                    style={styles.arrow}
+                    resizeMode="contain"
+                    source={require("../../../img/arrow-right.png")}
                   />
+                  <Text h2 style={styles.shadow}>
+                    Create Your Checking Account
+                  </Text>
+                </View>
+              </GradientCardWithShadow>
+              <View style={styles.alreadyView}>
+                <Text bold style={styles.text}>
+                  Already have an account?
+                </Text>
+                <TouchableOpacity onPress={loginClickHandler}>
+                  <Text bold style={styles.login}>
+                    Login
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          }
+          <View style={styles.bottom}>
+            {isAuth &&
+              <View style={styles.bottominner}>
+                {(hasSavingVault && walletID) &&
+                  <GradientView
+                    onPress={topupClickHandler}
+                    topShadowStyle={styles.outerShadowStyle}
+                    bottomShadowStyle={styles.innerShadowStyle}
+                    style={styles.linearGradientStyle}
+                    linearGradientStyle={styles.mainShadowStyle}
+                  >
+                    <Image
+                      style={styles.arrowLeft}
+                      resizeMode="contain"
+                      source={require("../../../img/arrow-right.png")}
+                    />
+                    <Text bold h3 center style={{ marginStart: 20 }}>Top-up</Text>
+                  </GradientView>
+                }
+                {(hasSavingVault && walletID) &&
+                  <GradientView
+                    onPress={withdrawClickHandler}
+                    topShadowStyle={styles.outerShadowStyle}
+                    bottomShadowStyle={styles.innerShadowStyle}
+                    style={styles.linearGradientStyle}
+                    linearGradientStyle={styles.mainShadowStyle}
+                  >
+                    <Text bold h3 center style={{ marginEnd: 20 }}>Withdraw</Text>
+                    <Image
+                      style={styles.arrowRight}
+                      resizeMode="contain"
+                      source={require("../../../img/arrow-right.png")}
+                    />
+                  </GradientView>
 
                 }
-                <View style={[styles.container3, { opacity: hasSavingVault ? 1 : 0.5, }]}>
-                  {(hasSavingVault && walletID) &&
-                    <GradientCard colors_={['#464D6854', '#FFF']} style={styles.container2} linearStyle={styles.main}>
-                      <View style={styles.container4}>
-                        {!hasSavingVault ?
-                          <Text h3 bold style={styles.storageText} onPress={hotStorageClickHandler}>Hot Storage</Text>
-                          :
-                          <View style={styles.bottomBtn}>
-                            <LinearGradient
-                              start={{ x: 1, y: 0 }}
-                              end={{ x: 1, y: 1 }}
-                              locations={[0.25, 1]}
-                              colors={['#333333', '#282727']}
-                              style={styles.linearGradientbottom}>
-                              <Text h3 bold style={{ color: '#FD7A68' }} onPress={hotStorageClickHandler}>Hot Storage</Text>
-                            </LinearGradient>
-                          </View>
-                        }
-                        {isAllDone || isWithdraw ?
-                          <Text h3 bold style={styles.storageText} onPress={coldStorageClickHandler}>Cold Storage</Text>
-                          :
-                          <View style={[styles.bottomBtn, { marginEnd: 7.5, marginStart: 0 }]}>
-                            <LinearGradient
-                              start={{ x: 1, y: 0 }}
-                              end={{ x: 1, y: 1 }}
-                              locations={[0.25, 1]}
-                              colors={
-                                !isAllDone
-                                  ? [colors.gray.light, colors.gray.light]
-                                  : ['#333333', '#282727']
-                              }
-                              style={styles.linearGradientbottom}>
-                              <Text h3 bold onPress={hotStorageClickHandler}>Cold Storage</Text>
-                            </LinearGradient>
-                          </View>
-                        }
-                      </View>
-                    </GradientCard>
-                  }
-                  {isAllDone &&
-                    <View style={styles.circle}>
-                      <Image
-                        style={styles.arrow2}
-                        resizeMode="contain"
-                        source={require("../../../img/arrow-right.png")}
-                      />
-                      <Image
-                        style={styles.arrow3}
-                        resizeMode="contain"
-                        source={require("../../../img/arrow-right.png")}
-                      />
-                    </View>
-                  }
-                </View>
               </View>
-            </>
+            }
+
+            {(hasSavingVault && walletID) &&
+              <SavingVault
+                container={StyleSheet.flatten([styles.savingVault, { marginTop: 10 }])}
+                innerContainer={styles.savingVault}
+                shadowTopBottom={styles.savingVault}
+                shadowBottomBottom={styles.savingVault}
+                bitcoinText={styles.bitcoinText}
+                onPress={savingVaultClickHandler}
+                bitcoinValue={balanceVault}
+                inDollars={`$${(Number(balanceWithoutSuffix) * Number(matchedRate)).toFixed(2)}`}
+                isColorable
+              />
+
+            }
+            <View style={[styles.container3, { opacity: hasSavingVault ? 1 : 0.5, }]}>
+              {(hasSavingVault && walletID) &&
+                <GradientCard colors_={['#464D6854', '#FFF']} style={styles.container2} linearStyle={styles.main}>
+                  <View style={styles.container4}>
+                    {!hasSavingVault ?
+                      <Text h3 bold style={styles.storageText} onPress={hotStorageClickHandler}>Hot Storage</Text>
+                      :
+                      <View style={styles.bottomBtn}>
+                        <LinearGradient
+                          start={{ x: 1, y: 0 }}
+                          end={{ x: 1, y: 1 }}
+                          locations={[0.25, 1]}
+                          colors={['#333333', '#282727']}
+                          style={styles.linearGradientbottom}>
+                          <Text h3 bold style={{ color: '#FD7A68' }} onPress={hotStorageClickHandler}>Hot Storage</Text>
+                        </LinearGradient>
+                      </View>
+                    }
+                    {isAllDone || isWithdraw ?
+                      <Text h3 bold style={styles.storageText} onPress={coldStorageClickHandler}>Cold Storage</Text>
+                      :
+                      <View style={[styles.bottomBtn, { marginEnd: 7.5, marginStart: 0 }]}>
+                        <LinearGradient
+                          start={{ x: 1, y: 0 }}
+                          end={{ x: 1, y: 1 }}
+                          locations={[0.25, 1]}
+                          colors={
+                            !isAllDone
+                              ? [colors.gray.light, colors.gray.light]
+                              : ['#333333', '#282727']
+                          }
+                          style={styles.linearGradientbottom}>
+                          <Text h3 bold onPress={hotStorageClickHandler}>Cold Storage</Text>
+                        </LinearGradient>
+                      </View>
+                    }
+                  </View>
+                </GradientCard>
+              }
+              {isAllDone &&
+                <View style={styles.circle}>
+                  <Image
+                    style={styles.arrow2}
+                    resizeMode="contain"
+                    source={require("../../../img/arrow-right.png")}
+                  />
+                  <Image
+                    style={styles.arrow3}
+                    resizeMode="contain"
+                    source={require("../../../img/arrow-right.png")}
+                  />
+                </View>
+              }
+            </View>
+          </View>
+
+          {/* </>
           ) : (
             <>
               <GradientCardWithShadow
@@ -626,7 +665,7 @@ export default function HomeScreen({ route }: Props) {
                 </TouchableOpacity>
               </View>
             </>
-          )}
+          )} */}
         </View>
       </View>
       <>

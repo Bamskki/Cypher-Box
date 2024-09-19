@@ -519,6 +519,7 @@ export default StyleSheet.create<Style>({
     bottom: {
         // opacity: 0.5,
         marginTop: 15,
+        top: heights * 0.04
     },
     line: {
         height: 2,
