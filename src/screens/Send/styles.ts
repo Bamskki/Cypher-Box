@@ -69,7 +69,7 @@ export default StyleSheet.create<Style>({
     },
     label: {
         position: 'absolute',
-        alignSelf:'center',
+        alignSelf: 'center',
         zIndex: 1,
     },
 })

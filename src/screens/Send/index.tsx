@@ -264,7 +264,7 @@ export default function SendScreen({ navigation, route }: any) {
                                                 ref={senderRef}
                                                 onChange={setSender}
                                                 value={sender}
-                                                textInpuetStyle={styles.senderText}
+                                                textInputStyle={styles.senderText}
                                             />
                                         </GradientCard>
                                         <TouchableOpacity style={{ position: 'absolute', right: 0, }} onPress={async () => { await requestCameraPermission(); setIsScannerActive(true); }}>
