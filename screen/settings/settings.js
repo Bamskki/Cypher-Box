@@ -36,14 +36,14 @@ const Settings = ({ navigation }) => {
       <ScrollView style={styles.root} contentInsetAdjustmentBehavior="automatic" automaticallyAdjustContentInsets>
         <View style={{ height: 45 }} />
         {Platform.OS === 'android' ? <BlueHeaderDefaultSub leftText={loc.settings.header} /> : <></>}
-        <ListItem title={loc.settings.general} onPress={() => navigate('GeneralSettings')} testID="GeneralSettings" chevron />
-        <ListItem title={loc.settings.currency} onPress={() => navigate('Currency')} testID="Currency" chevron />
-        <ListItem title={loc.settings.language} onPress={() => navigate('Language')} testID="Language" chevron />
-        <ListItem title={loc.settings.encrypt_title} onPress={() => navigate('EncryptStorage')} testID="SecurityButton" chevron />
+        {/* <ListItem title={loc.settings.general} onPress={() => navigate('GeneralSettings')} testID="GeneralSettings" chevron /> */}
+        {/* <ListItem title={loc.settings.currency} onPress={() => navigate('Currency')} testID="Currency" chevron /> */}
+        {/* <ListItem title={loc.settings.language} onPress={() => navigate('Language')} testID="Language" chevron /> */}
+        {/* <ListItem title={loc.settings.encrypt_title} onPress={() => navigate('EncryptStorage')} testID="SecurityButton" chevron /> */}
         <ListItem title={loc.settings.network} onPress={() => navigate('NetworkSettings')} testID="NetworkSettings" chevron />
         <ListItem title={"Recover Email"} onPress={() => navigate('ChangeUsername', { goBack: true })} testID="ChangeUsername" chevron />
-        <ListItem title={loc.settings.tools} onPress={() => navigate('Tools')} testID="Tools" chevron />
-        <ListItem title={loc.settings.about} onPress={() => navigate('About')} testID="AboutButton" chevron />
+        {/* <ListItem title={loc.settings.tools} onPress={() => navigate('Tools')} testID="Tools" chevron /> */}
+        {/* <ListItem title={loc.settings.about} onPress={() => navigate('About')} testID="AboutButton" chevron /> */}
         <ListItem title={"Term of service & Privacy Policy"} onPress={() => navigate('TermOfService')} testID="TermOfServiceButton" chevron />
 
         {isAuth && <ListItem title={"Logout"} onPress={handleLogout} testID="LogoutButton" chevron />}
