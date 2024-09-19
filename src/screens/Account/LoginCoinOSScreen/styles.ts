@@ -11,6 +11,7 @@ interface Style {
     textInput: TextStyle;
     extra: ViewStyle;
     space: ViewStyle;
+    coinOsImage: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -26,11 +27,11 @@ export default StyleSheet.create<Style>({
         paddingHorizontal: 25,
         alignItems: 'center',
     },
-    create:{
-        fontSize:18,
-        fontFamily:'Archivo-SemiBold',
-        lineHeight:24,
-        alignSelf:'center',
+    create: {
+        fontSize: 18,
+        fontFamily: 'Archivo-SemiBold',
+        lineHeight: 24,
+        alignSelf: 'center',
         marginBottom: 15
     },
     button: {
@@ -61,5 +62,9 @@ export default StyleSheet.create<Style>({
     },
     space: {
         height: 50,
+    },
+    coinOsImage: {
+        alignItems: 'center',
+        marginVertical: 60
     }
 })

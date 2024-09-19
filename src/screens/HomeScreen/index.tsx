@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useReducer, useRef, useState } from "react";
-import { ActivityIndicator, Image, RefreshControl, StyleSheet, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, Linking, RefreshControl, StyleSheet, TouchableOpacity, View } from "react-native";
 import styles from "./styles";
 import {
   useFocusEffect,
@@ -234,7 +234,8 @@ export default function HomeScreen({ route }: Props) {
   };
 
   const createChekingAccountClickHandler = () => {
-    dispatchNavigate("CheckAccount");
+    Linking.openURL('https://coinos.io/register')
+    // dispatchNavigate("CheckAccount");
   };
 
   const receiveClickHandler = () => {
@@ -503,7 +504,7 @@ export default function HomeScreen({ route }: Props) {
             <View style={{ height: '42%' }}>
               <GradientCardWithShadow
                 style={styles.createView}
-                onPress={createChekingAccountClickHandler}
+                onPress={loginClickHandler}
               >
                 <View style={styles.middle}>
                   <Image
@@ -512,17 +513,17 @@ export default function HomeScreen({ route }: Props) {
                     source={require("../../../img/arrow-right.png")}
                   />
                   <Text h2 style={styles.shadow}>
-                    Create Your Checking Account
+                    Login to Your Checking Account
                   </Text>
                 </View>
               </GradientCardWithShadow>
-              <View style={styles.alreadyView}>
+              <View style={styles.createAccount}>
                 <Text bold style={styles.text}>
-                  Already have an account?
+                  Don’t have an account?
                 </Text>
-                <TouchableOpacity onPress={loginClickHandler}>
+                <TouchableOpacity onPress={createChekingAccountClickHandler}>
                   <Text bold style={styles.login}>
-                    Login
+                    Create on Coinos.io
                   </Text>
                 </TouchableOpacity>
               </View>
