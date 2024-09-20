@@ -28,7 +28,7 @@ const shortenAddress = (address: string) => {
     return `${start}...${end}`;
 };
 
-export default function Vault({wallet, matchedRate, setSelectedTab}: {wallet: any, matchedRate: string, setSelectedTab: (tab: number) => void}) {
+export default function Vault({ wallet, matchedRate, setSelectedTab }: { wallet: any, matchedRate: string, setSelectedTab: (tab: number) => void }) {
     const currency = btc(1);
     const balance = !wallet?.hideBalance && formatBalance(Number(wallet?.getBalance()), wallet?.getPreferredBalanceUnit(), true);
     const balanceWithoutSuffix = !wallet?.hideBalance && formatBalanceWithoutSuffix(Number(wallet?.getBalance()), wallet?.getPreferredBalanceUnit(), true);
@@ -41,7 +41,7 @@ export default function Vault({wallet, matchedRate, setSelectedTab}: {wallet: an
         let newAddress;
         try {
             if (!isElectrumDisabled) newAddress = await Promise.race([wallet.getAddressAsync(), sleep(1000)]);
-        } catch (_) {}
+        } catch (_) { }
         if (newAddress === undefined) {
             // either sleep expired or getAddressAsync threw an exception
             console.warn('either sleep expired or getAddressAsync threw an exception');
@@ -58,7 +58,7 @@ export default function Vault({wallet, matchedRate, setSelectedTab}: {wallet: an
             if (wallet) {
                 obtainWalletAddress();
             }
-          // eslint-disable-next-line react-hooks/exhaustive-deps
+            // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [wallet]),
     );
 
@@ -70,7 +70,7 @@ export default function Vault({wallet, matchedRate, setSelectedTab}: {wallet: an
     const addressHandler = () => {
         dispatchNavigate('WalletAddresses', {
             walletID: wallet.getID(),
-        });    
+        });
     }
 
     const addressClickHandler = () => {
@@ -80,32 +80,32 @@ export default function Vault({wallet, matchedRate, setSelectedTab}: {wallet: an
     const shareQRCode = async () => {
         try {
             console.log('base64QrCodeRef: ', base64QrCodeRef)
-        
+
             const shareOptions = {
                 message: `Bitcoin: ${address}`,
                 url: `data:image/jpeg;base64,${base64QrCodeRef?.current}`,
             };
-        
+
             await Share.open(shareOptions);
-    
+
         } catch (error) {
-              console.error('Error sharing QR code:', error);
+            console.error('Error sharing QR code:', error);
         }
     };
 
     const onRefresh = async () => {
         setRefreshing(true);
-        if(wallet){
+        if (wallet) {
             obtainWalletAddress();
             await wallet?.fetchBalance();
-        }  
-        setRefreshing(false);  
+        }
+        setRefreshing(false);
     }
 
 
     console.log('address: ', address)
     return (
-        <ScrollView 
+        <ScrollView
             style={styles.container}
             refreshControl={
                 <RefreshControl
@@ -113,7 +113,7 @@ export default function Vault({wallet, matchedRate, setSelectedTab}: {wallet: an
                     onRefresh={onRefresh}
                     tintColor="white"
                 />
-            } 
+            }
         >
             <SavingVault
                 container={styles.savingVault}
@@ -138,7 +138,7 @@ export default function Vault({wallet, matchedRate, setSelectedTab}: {wallet: an
                 >
                     <Text h3 center>Vault Addresses</Text>
                 </GradientView>
-                <GradientView
+                {/* <GradientView
                     onPress={addressClickHandler}
                     topShadowStyle={styles.outerShadowStyle}
                     bottomShadowStyle={styles.innerShadowStyle}
@@ -147,7 +147,7 @@ export default function Vault({wallet, matchedRate, setSelectedTab}: {wallet: an
                     linearGradientStyleMain={styles.linearGradientStyleMain}
                 >
                     <Text h3 center>Send Coins</Text>
-                </GradientView>
+                </GradientView> */}
             </View>
             <View style={[styles.base, { marginHorizontal: 20 }]}>
                 <Image style={styles.info} source={InformationNew} />
@@ -161,14 +161,14 @@ export default function Vault({wallet, matchedRate, setSelectedTab}: {wallet: an
                             <QRCode
                                 getRef={c => {
                                     if (!c?.toDataURL) return;
-                                        c?.toDataURL((base64Image: string) => {
+                                    c?.toDataURL((base64Image: string) => {
                                         base64QrCodeRef.current = base64Image?.replace(/(\r\n|\n|\r)/gm, '');
                                     });
                                 }}
                                 value={address}
-                                    size={150}
-                                    color="black"
-                                    backgroundColor="white"
+                                size={150}
+                                color="black"
+                                backgroundColor="white"
                             />
                         </View>
                     </View>
@@ -177,16 +177,16 @@ export default function Vault({wallet, matchedRate, setSelectedTab}: {wallet: an
                             <Image source={Copy} style={styles.copyImage} resizeMode="contain" />
                             <Text semibold style={styles.address}>{shortenAddress(address)}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={shareQRCode}>
+                        {/* <TouchableOpacity onPress={shareQRCode}>
                             <Image source={ShareNew} style={styles.shareImage} resizeMode="contain" />
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                     </View>
                     {/* <Text h4 style={styles.infoText}>You can use this Bitcoin Network address of your vault to receive coins</Text> */}
                 </>
                 :
-                <View style={{marginTop: 100}}>
+                <View style={{ marginTop: 100 }}>
                     <LoadingSpinner />
-                </View>       
+                </View>
 
             }
         </ScrollView>
