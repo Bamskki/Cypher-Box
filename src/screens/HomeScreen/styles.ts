@@ -35,6 +35,7 @@ interface Style {
     row: ViewStyle;
     row2: ViewStyle;
     alreadyView: ViewStyle;
+    createAccount: ViewStyle;
     scan: ImageStyle;
     shadow: TextStyle;
     shadowTop: any;
@@ -118,6 +119,11 @@ export default StyleSheet.create<Style>({
         justifyContent: 'center',
         flexDirection: 'row',
     },
+    createAccount: {
+        flexDirection: 'column',
+        marginTop: 10,
+        alignSelf: 'center'
+    },
     alreadyView: {
         flexDirection: 'row',
         marginTop: 10,
@@ -165,11 +171,14 @@ export default StyleSheet.create<Style>({
     },
     text: {
         fontSize: 18,
+        textAlign: 'center'
     },
     login: {
         fontSize: 18,
-        color: colors.pink.default,
+        color: colors.pink.light,
+        textAlign: 'center',
         marginStart: 5,
+
     },
     bitcointext: {
         marginEnd: 7,

@@ -18,12 +18,12 @@ import { useTheme } from "../../../components/themes";
 import { OutputModalContent } from "../../../screen/send/coinControl";
 // import { Bitcoin, Transaction, TransactionN } from "@Cypher/assets/svg";
 
-export default function Bars({ wallet, matchedRate }: any) {
+export default function Capsules({ wallet, matchedRate }: any) {
     const { colors: themeColors } = useTheme();
     const [ids, setIds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [output, setOutput] = useState();
-    console.log("🚀 ~ Bars ~ ids:", ids)
+    console.log("🚀 ~ Capsules ~ ids:", ids)
     const [btc, setBtc] = useState('0.00');
     const utxo = wallet.getUtxo(true).sort((a, b) => a.height - b.height || a.txid.localeCompare(b.txid) || a.vout - b.vout);
 
@@ -93,7 +93,7 @@ export default function Bars({ wallet, matchedRate }: any) {
             const usd = inUSD.toFixed(2);
             dispatchNavigate('EditAmount', { isEdit: false, wallet, utxo, ids, maxUSD: total, inUSD: inUSD.toFixed(2), total, matchedRate });
         } else {
-            SimpleToast.show("Please select Bar to Send", SimpleToast.SHORT)
+            SimpleToast.show("Please select Capsules to Send", SimpleToast.SHORT)
         }
     };
 
@@ -122,7 +122,7 @@ export default function Bars({ wallet, matchedRate }: any) {
         <View style={styles.flex}>
             <Text bold style={styles.desc}>Tap on your coins to label them. Select multiple coins and batch them together to optimize fees for future transactions:</Text>
             <View style={styles.titleStyle}>
-                <Text bold style={styles.coin}>Bars</Text>
+                <Text bold style={styles.coin}>Capsules</Text>
                 <Text bold style={styles.size}>Size</Text>
                 <Text bold style={styles.label}>Label</Text>
                 <Text bold style={styles.select}>Select</Text>
@@ -165,21 +165,21 @@ export default function Bars({ wallet, matchedRate }: any) {
                 }}>
                     <GradientView
                         onPress={handleSendBars}
-                        style={styles.linearGradientStyle}
-                        linearGradientStyle={styles.mainShadowStyle}
-                        topShadowStyle={styles.outerShadowStyle}
-                        bottomShadowStyle={styles.innerShadowStyle}
-                        linearGradientStyleMain={styles.linearGradientStyleMain}
+                        style={styles.capsuleLinearGradientStyle}
+                        linearGradientStyle={styles.capsuleMainShadowStyle}
+                        topShadowStyle={styles.capsuleOuterShadowStyle}
+                        bottomShadowStyle={styles.capsuleInnerShadowStyle}
+                        linearGradientStyleMain={styles.capsuleLinearGradientStyleMain}
                     >
-                        <Text h3 center>Send Bars</Text>
+                        <Text h3 center>Send Capsule</Text>
                     </GradientView>
                     <GradientView
                         onPress={addressClickHandler}
-                        topShadowStyle={styles.outerShadowStyle}
-                        bottomShadowStyle={styles.innerShadowStyle}
-                        style={[styles.linearGradientStyle, { marginStart: 25 }]}
-                        linearGradientStyle={styles.mainShadowStyle}
-                        linearGradientStyleMain={styles.linearGradientStyleMain}
+                        topShadowStyle={styles.capsuleOuterShadowStyle}
+                        bottomShadowStyle={styles.capsuleInnerShadowStyle}
+                        style={[styles.capsuleLinearGradientStyle, { marginStart: 25 }]}
+                        linearGradientStyle={styles.capsuleMainShadowStyle}
+                        linearGradientStyleMain={styles.capsuleLinearGradientStyleMain}
                     >
                         <Text h3 center>Move to Cold Vault</Text>
                     </GradientView>
