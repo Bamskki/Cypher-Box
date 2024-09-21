@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function SendScreen({ route, navigation }: Props) {
-    const { isEdit, wallet, utxo, ids, maxUSD, inUSD, total, matchedRate, setSatsEdit, capsulesData = null,  to = null } = route?.params;
+    const { isEdit, wallet, utxo, ids, maxUSD, inUSD, total, matchedRate, setSatsEdit, capsulesData = null, to = null } = route?.params;
     const [isSats, setIsSats] = useState(true);
     const [sats, setSats] = useState('0');
     const [usd, setUSD] = useState('0');
@@ -20,28 +20,30 @@ export default function SendScreen({ route, navigation }: Props) {
     const senderRef = useRef<TextInput>(null);
 
     useEffect(() => {
-        if(total && inUSD && isEdit){
+        if (total && inUSD && isEdit) {
             setSats(String(total) || "0")
-            setUSD(String(inUSD) || "0")    
+            setUSD(String(inUSD) || "0")
         }
     }, [total, inUSD, isEdit])
 
     const nextClickHandler = () => {
         setSatsEdit && setSatsEdit();
-        dispatchNavigate('ColdStorage', {wallet, utxo, ids, maxUSD, inUSD: isSats ? usd : sats, total: isSats ? sats : usd, matchedRate, capsulesData, to});
+        dispatchNavigate('ColdStorage', { wallet, utxo, ids, maxUSD, inUSD: isSats ? usd : sats, total: isSats ? sats : usd, matchedRate, capsulesData, to });
         // // route?.params?.setSats(sats, usd);
         // navigation?.pop();
     }
 
     const maxSendClickHandler = () => {
         setSatsEdit && setSatsEdit();
-        dispatchNavigate('ColdStorage', {wallet, utxo, ids, maxUSD, inUSD: inUSD, total: total, matchedRate, capsulesData, to});
+        dispatchNavigate('ColdStorage', { wallet, utxo, ids, maxUSD, inUSD: inUSD, total: total, matchedRate, capsulesData, to });
     }
 
     return (
         <ScreenLayout disableScroll showToolbar isBackButton >
             <ScrollView style={styles.container}>
-                <GradientInputNew isSats={isSats} sats={sats} setSats={setSats} usd={usd} title={'Specify  Amount'} />
+                <GradientInputNew isSats={isSats} sats={sats} setSats={setSats} usd={usd} title={'Specify  Amount'}
+                    _colors={[colors.green, colors.green]}
+                />
                 <Text bold h2 center style={{ marginTop: 30, marginBottom: 25 }}>Total size of selected bars:{'\n'}{maxUSD} BTC</Text>
                 <TouchableOpacity onPress={maxSendClickHandler} style={styles.btn}>
                     <Text bold style={{ fontSize: 13 }}>Send Max: {maxUSD} BTC</Text>

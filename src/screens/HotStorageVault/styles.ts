@@ -429,7 +429,6 @@ export default StyleSheet.create<Style>({
         borderRadius: 25,
         width: (widths / 2) - 30,
         height: 47,
-        // flex: 1,
         justifyContent: 'center',
         position: 'absolute',
     },
@@ -439,11 +438,8 @@ export default StyleSheet.create<Style>({
         shadowOpacity: 0.80,
         shadowRadius: 16,
         elevation: 8,
-        // flex: 1,
         marginHorizontal: 20,
-        // alignItems: 'center',
-        // backgroundColor: 'blue',
-        // marginHorizontal: 0
+
     },
     capsuleMainShadowStyle: {
         shadowColor: '#27272C',
@@ -452,7 +448,6 @@ export default StyleSheet.create<Style>({
         shadowRadius: 12,
         elevation: 8,
         flex: 1,
-        // backgroundColor: 'green'
     },
 
     capsuleLinearGradientStyleMain: {

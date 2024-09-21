@@ -49,10 +49,10 @@ export default function CustomKeyBoard({ title, prevSats, disabled, onPress, set
     }, [sats.length, isSats]);
 
     useEffect(() => {
-        if(!prevSats){
+        if (!prevSats) {
             setSats('');
             setSATS('');
-            setUSD('');    
+            setUSD('');
         }
         setIsSATS(isSats);
     }, [isSats, prevSats]);

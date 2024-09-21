@@ -24,15 +24,15 @@ export default StyleSheet.create<Style>({
     priceView: {
         justifyContent: 'center',
         paddingTop: 30,
-        marginTop: 30,
+        // marginTop: 30,
     },
     lGradient: {
         height: 84,
     },
     inDollar: {
         alignSelf: 'center',
-        marginTop: 10,
-        fontSize: 25,
+        marginTop: 5,
+        fontSize: 20,
         lineHeight: 30,
     },
     dollar: {

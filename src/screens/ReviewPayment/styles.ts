@@ -35,7 +35,7 @@ interface Style {
 }
 
 export default StyleSheet.create<Style>({
-    topView:{
+    topView: {
         flex: 1,
     },
     text: {
@@ -175,7 +175,7 @@ export default StyleSheet.create<Style>({
     },
     sats: {
         flexDirection: 'row',
-        alignItems:'flex-end',
+        alignItems: 'flex-end',
         top: 8,
         marginHorizontal: 30,
     },
