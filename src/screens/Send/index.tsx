@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Image, ScrollView, StyleSheet, TextInput, View, Button, TouchableOpacity, Platform, PermissionsAndroid } from "react-native";
+import { Image, ScrollView, StyleSheet, TextInput, View, Clipboard, Platform, PermissionsAndroid } from "react-native";
 import SimpleToast from "react-native-simple-toast";
 import { PERMISSIONS, request } from "react-native-permissions";
 import QRCodeScanner from 'react-native-qrcode-scanner';
@@ -7,15 +7,20 @@ import { RNCamera } from 'react-native-camera';
 
 import styles from "./styles";
 import { Input, ScreenLayout, Text } from "@Cypher/component-library";
-import { CustomKeyboard, GradientCard, GradientInput } from "@Cypher/components";
+import { CustomKeyboard, GradientCard, GradientInput, GradientInputNew } from "@Cypher/components";
 import { colors, } from "@Cypher/style-guide";
 import { dispatchNavigate } from "@Cypher/helpers";
-import { bitcoinRecommendedFee, bitcoinSendFee, sendBitcoinPayment, sendCoinsViaUsername, sendLightningPayment } from "../../api/coinOSApis";
+import { bitcoinRecommendedFee } from "../../api/coinOSApis";
+
 
 export function startsWithLn(str: string) {
-    // Check if the string starts with "ln"
     return str.startsWith("ln");
 }
+
+export const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+};
 
 export default function SendScreen({ navigation, route }: any) {
     const info = route.params;
@@ -29,8 +34,8 @@ export default function SendScreen({ navigation, route }: any) {
     const [isLoading, setIsLoading] = useState(false);
     const [recommendedFee, setRecommendedFee] = useState<any>();
     const [selectedFee, setSelectedFee] = useState<number | null>(null);
-    const [isScannerActive, setIsScannerActive] = useState(false); // State to control QR scanner visibility
-
+    const [isScannerActive, setIsScannerActive] = useState(false);
+    const [addressFocused, setAddressFocused] = useState(false);
     useEffect(() => {
         if (info?.isWithdrawal) {
             setSats(String(info?.value))
@@ -71,6 +76,12 @@ export default function SendScreen({ navigation, route }: any) {
             console.log('Camera permission:', res);
         }
     }
+
+    const handlePaste = async () => {
+        const clipboardContent = await Clipboard.getString();
+        setSender(clipboardContent);
+        SimpleToast.show('Pasted from clipboard', SimpleToast.SHORT);
+    };
 
     // useEffect(() => {
     //     requestCameraPermission();
@@ -247,15 +258,22 @@ export default function SendScreen({ navigation, route }: any) {
                 :
                 (
                     <ScreenLayout disableScroll showToolbar isBackButton title={info?.isWithdrawal ? "Edit Amount" : "Send Bitcoin"}>
-                        <ScrollView style={styles.container}>
-                            <GradientInput isSats={isSats} sats={sats} setSats={setSats} usd={usd} />
+                        <View style={styles.container}>
+                            <GradientInputNew isSats={isSats} sats={sats} setSats={setSats} usd={usd}
+                                _colors={[colors.pink.extralight, colors.pink.default]}
+                                showTitle={false}
+                            />
+
+                            {/* <GradientInput isSats={isSats} sats={sats} setSats={setSats} usd={usd} /> */}
                             {!info?.isWithdrawal &&
                                 <>
-                                    <Text h2 style={styles.destination}>Destination</Text>
+                                    {/* <Text h2 style={styles.destination}>Destination</Text> */}
                                     <View style={styles.priceView}>
-                                        {sender?.length == 0 &&
+                                        {addressFocused || sender?.length == 0 &&
                                             <Text h4 center onPress={() => senderRef?.current?.focus()} style={StyleSheet.flatten([styles.label])}>Paste any address or invoice{'\n'} (Bitcoin, Lightning, Liquid)</Text>
                                         }
+                                        {/* <GradientInputNew isSats={isSats} sats={sats} setSats={setSats} usd={usd} title={'Specify  Amount'} /> */}
+
                                         <GradientCard
                                             style={styles.main}
                                             linearStyle={styles.heigth}
@@ -263,17 +281,41 @@ export default function SendScreen({ navigation, route }: any) {
                                             <Input
                                                 ref={senderRef}
                                                 onChange={setSender}
-                                                value={sender}
+                                                value={isValidEmail(sender) ? sender : sender.slice(0, 5) + '...' + sender.slice(-7)}
                                                 textInputStyle={styles.senderText}
+                                                onFocus={() => {
+                                                    setAddressFocused(true);
+                                                }}
+                                                onBlur={() => {
+                                                    setAddressFocused(false);
+                                                }}
+
                                             />
                                         </GradientCard>
-                                        <TouchableOpacity style={{ position: 'absolute', right: 0, }} onPress={async () => { await requestCameraPermission(); setIsScannerActive(true); }}>
-                                            <Image source={require('../../../img/scan-new.png')} style={styles.qrimage} />
-                                        </TouchableOpacity>
+                                        <View style={styles.buttonsContainer}>
+                                            <GradientCard
+                                                style={styles.linearGradientInside}
+                                                linearStyle={styles.linearStyle}
+                                                onPress={handlePaste}>
+                                                <View style={styles.insideView}>
+                                                    <Image source={require('../../../img/paste-icon.png')} style={styles.qrimage} resizeMode="contain" />
+                                                    <Text h2>Paste</Text>
+                                                </View>
+                                            </GradientCard>
+                                            <GradientCard
+                                                style={styles.linearGradientInside}
+                                                linearStyle={styles.linearStyle}
+                                                onPress={async () => { await requestCameraPermission(); setIsScannerActive(true); }}>
+                                                <View style={styles.insideView}>
+                                                    <Image source={require('../../../img/scan-qr.png')} style={[styles.qrimage, { width: 35, marginEnd: 5, marginTop: 4 }]} />
+                                                    <Text h2 style={{ paddingRight: 6 }}>Scan</Text>
+                                                </View>
+                                            </GradientCard>
+                                        </View>
                                     </View>
                                 </>
                             }
-                        </ScrollView>
+                        </View >
                         <CustomKeyboard
                             title="Next"
                             prevSats={info?.value ? String(info?.value) : false}
@@ -285,8 +327,9 @@ export default function SendScreen({ navigation, route }: any) {
                             matchedRate={info?.matchedRate}
                             currency={info?.currency}
                         />
-                    </ScreenLayout>
-                )}
+                    </ScreenLayout >
+                )
+            }
         </>
     );
 }

@@ -17,7 +17,7 @@ export default StyleSheet.create<Style>({
         marginTop: 30,
     },
     lGradient: {
-        height: 84,
+        height: 78,
     },
     inDollar: {
         alignSelf: 'center',
@@ -30,13 +30,13 @@ export default StyleSheet.create<Style>({
         position: 'absolute',
     },
     input: {
-        height: 78,
+        height: 72,
         fontSize: 48,
     },
     card: {
         width: '60%',
         alignSelf: 'center',
-        height: 84,
+        height: 78,
     },
     btc: {
         lineHeight: 60,
