@@ -281,7 +281,7 @@ export default function SendScreen({ navigation, route }: any) {
                                             <Input
                                                 ref={senderRef}
                                                 onChange={setSender}
-                                                value={isValidEmail(sender) ? sender : sender.slice(0, 5) + '...' + sender.slice(-7)}
+                                            value={!isValidEmail(sender) && sender.length > 15 ? sender.slice(0, 5) + '...' + sender.slice(-7) : sender}
                                                 textInputStyle={styles.senderText}
                                                 onFocus={() => {
                                                     setAddressFocused(true);
