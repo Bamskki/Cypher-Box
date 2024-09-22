@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { ActivityIndicator, Image, RefreshControl, StyleSheet, TouchableOpacity, View } from 'react-native';
 import styles from './styles';
@@ -6,6 +7,22 @@ import { scanQrHelper } from '../../../helpers/scan-qr';
 import DeeplinkSchemaMatch from '../../../class/deeplink-schema-match';
 import triggerHapticFeedback, { HapticFeedbackTypes } from '../../../blue_modules/hapticFeedback';
 import { CoinOSSmall } from '@Cypher/assets/images';
+=======
+import React, { useCallback, useContext, useEffect, useReducer, useRef, useState } from "react";
+import { ActivityIndicator, Image, Linking, RefreshControl, StyleSheet, TouchableOpacity, View } from "react-native";
+import styles from "./styles";
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
+import { scanQrHelper } from "../../../helpers/scan-qr";
+import DeeplinkSchemaMatch from "../../../class/deeplink-schema-match";
+import triggerHapticFeedback, {
+  HapticFeedbackTypes,
+} from "../../../blue_modules/hapticFeedback";
+import { CoinOSSmall } from "@Cypher/assets/images";
+>>>>>>> main
 import {
   GradientButtonWithShadow,
   GradientCard,
@@ -62,8 +79,11 @@ export default function HomeScreen({ route }: Props) {
   const { addWallet, saveToDisk, isAdvancedModeEnabled, wallets } = useContext(BlueStorageContext);
   const { isAuth, walletID, token, user, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
   const A = require('../../../blue_modules/analytics');
+<<<<<<< HEAD
 
   console.log('walletID:  ', walletID)
+=======
+>>>>>>> main
   // const [storage, setStorage] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [balance, setBalance] = useState(0);
@@ -76,9 +96,17 @@ export default function HomeScreen({ route }: Props) {
   const [isWithdraw, setIsWithdraw] = useState<boolean>(true);
   const [isAllDone, setIsAllDone] = useState<boolean>(false);
   const [wallet, setWallet] = useState(undefined);
+<<<<<<< HEAD
   const [balanceVault, setBalanceVault] = useState<string | false | undefined>('');
   const [balanceWithoutSuffix, setBalanceWithoutSuffix] = useState();
 
+=======
+  const [balanceVault, setBalanceVault] = useState<string | false | undefined>("");
+  const [balanceWithoutSuffix, setBalanceWithoutSuffix] = useState()
+  const [recommendedFee, setRecommendedFee] = useState<any>();
+  const [vaultAddress, setVaultAddress] = useState('')
+  const [hasSavingVault, setHasSavingVault] = useState<boolean | null>()
+>>>>>>> main
   const refRBSheet = useRef<any>(null);
 
   const getWalletID = async () => {
@@ -94,11 +122,31 @@ export default function HomeScreen({ route }: Props) {
     if (route?.params?.isComplete) setIsAllDone(true);
   });
 
+
+  const getWallet = async () => {
+    const allWallets = wallets.concat(false);
+    const walletTemp = allWallets.find((w: AbstractWallet) => w.getID() === walletID);
+    const balanceTemp = !walletTemp?.hideBalance && formatBalance(walletTemp?.getBalance(), walletTemp?.getPreferredBalanceUnit(), true);
+    const balanceWithoutSuffixTemp = !walletTemp?.hideBalance && formatBalanceWithoutSuffix(Number(walletTemp?.getBalance()), walletTemp?.getPreferredBalanceUnit(), true);
+    await walletTemp.fetchBalance()
+    setWallet(walletTemp);
+    setBalanceWithoutSuffix(balanceWithoutSuffixTemp)
+    setBalanceVault(balanceTemp)
+    const hasVault = walletTemp.secret ? true : false;
+    setHasSavingVault(hasVault)
+    if (wallets && walletID) {
+      setIsAllDone(!!walletTemp);
+    } else {
+      setIsAllDone(false)
+    }
+  }
+
   useEffect(() => {
     async function handleToken() {
       if (isAuth && token) {
         handleUser();
         loadPayments();
+<<<<<<< HEAD
         if (wallets && walletID) {
           const allWallets = wallets.concat(false);
           const walletTemp = allWallets.find((w: AbstractWallet) => w.getID() === walletID);
@@ -115,6 +163,8 @@ export default function HomeScreen({ route }: Props) {
         } else {
           setIsAllDone(false);
         }
+=======
+>>>>>>> main
       } else {
         setIsLoading(false);
       }
@@ -126,10 +176,54 @@ export default function HomeScreen({ route }: Props) {
     //   }
     // }
     // getWithdrawal();
+    getWallet()
     handleToken();
   }, [isAuth, token, wallets, walletID]);
 
+<<<<<<< HEAD
   console.log('setIsAllDone: ', isAllDone)
+=======
+  useEffect(() => {
+    if (isAuth && token && !vaultAddress.startsWith('ln') && !vaultAddress.includes('@') && !recommendedFee) {
+      const init = async () => {
+        const res = await bitcoinRecommendedFee();
+        setRecommendedFee(res);
+      }
+      init();
+    }
+  }, [vaultAddress])
+
+  const obtainWalletAddress = async () => {
+    let newAddress;
+    try {
+      if (!isElectrumDisabled && wallet) newAddress = await Promise.race([wallet?.getAddressAsync(), sleep(1000)]);
+    } catch (_) { }
+    if (newAddress === undefined && wallet) {
+      // either sleep expired or getAddressAsync threw an exception
+      console.warn('either sleep expired or getAddressAsync threw an exception');
+      newAddress = wallet._getExternalAddressByIndex(wallet.getNextFreeAddressIndex());
+    } else {
+      saveToDisk(); // caching whatever getAddressAsync() generated internally
+    }
+    setVaultAddress(newAddress);
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      if (wallet) {
+        obtainWalletAddress();
+        (async () => {
+          try {
+            await Promise.race([wallet?.fetchUtxo(), sleep(10000)]);
+          } catch (e) {
+            console.log('coincontrol wallet.fetchUtxo() failed'); // either sleep expired or fetchUtxo threw an exception
+          }
+        })();
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [wallet, sleep]),
+  );
+>>>>>>> main
 
   const handleUser = async () => {
     try {
@@ -187,7 +281,12 @@ export default function HomeScreen({ route }: Props) {
   };
 
   const createChekingAccountClickHandler = () => {
+<<<<<<< HEAD
     dispatchNavigate('CheckAccount');
+=======
+    Linking.openURL('https://coinos.io/register')
+    // dispatchNavigate("CheckAccount");
+>>>>>>> main
   };
 
   const receiveClickHandler = () => {
@@ -203,7 +302,29 @@ export default function HomeScreen({ route }: Props) {
   }
 
   const withdrawClickHandler = () => {
+<<<<<<< HEAD
     dispatchNavigate('SavingVaultIntro');
+=======
+    if (wallet) {
+      const amount = withdrawThreshold > balance ? balance : withdrawThreshold;
+      dispatchNavigate('ReviewPayment', {
+        value: amount,
+        converted: ((Number(matchedRate) || 0) * btc(1) * Number(amount)).toFixed(2),
+        isSats: true,
+        to: vaultAddress,
+        fees: 0,
+        matchedRate: matchedRate,
+        currency: currency,
+        type: 'bitcoin',
+        feeForBamskki: 0,
+        recommendedFee,
+        wallet,
+        isWithdrawal: true
+      });
+    } else {
+      dispatchNavigate('SavingVaultIntro');
+    }
+>>>>>>> main
   };
 
   const topupClickHandler = () => {
@@ -244,6 +365,15 @@ export default function HomeScreen({ route }: Props) {
     dispatchNavigate('SavingVaultIntroNew');
   };
 
+  const handleCreateVault = () => {
+    dispatchNavigate('SavingVaultIntro');
+  }
+
+  const handleRecoverSavingVault = () => {
+    dispatchNavigate('RecoverSavingVault');
+  };
+
+
   const onRefresh = async () => {
     setRefreshing(true);
     if (wallet) {
@@ -275,12 +405,29 @@ export default function HomeScreen({ route }: Props) {
     }
   };
 
+<<<<<<< HEAD
   console.log('calculatePercentage(Number(withdrawThreshold), (Number(reserveAmount))): ', calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount)))
   return (
     <ScreenLayout
       RefreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="white" />}
       disableScroll={!isAuth}
     >
+=======
+
+  const hasFilledTheBar = calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount)) === 100
+
+
+  return (
+    <ScreenLayout
+      RefreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor="white"
+        />
+      }
+      disableScroll={isAuth ? false : true}>
+>>>>>>> main
       <View style={styles.container}>
         <View>
           {isLoading ? (
@@ -305,6 +452,7 @@ export default function HomeScreen({ route }: Props) {
                   <Text subHeader bold style={styles.price}>
                     {btc(1) * (balance || 0)} BTC
                   </Text>
+<<<<<<< HEAD
                   <Text bold style={styles.priceusd}>
                     {'$' + convertedRate.toFixed(2)}
                   </Text>
@@ -314,6 +462,54 @@ export default function HomeScreen({ route }: Props) {
             </>
           )}
           {isAuth ? (
+=======
+                  <View style={styles.row}>
+                    <TouchableOpacity
+                      style={styles.imageView}
+                      onPress={navigateToSettings}
+                    >
+                      <Image
+                        style={styles.image}
+                        resizeMode="contain"
+                        source={require("../../../img/settings.png")}
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.imageViews}
+                      onPress={onScanButtonPressed}
+                    >
+                      <Image
+                        style={styles.scan}
+                        resizeMode="contain"
+                        source={require("../../../img/scan-new.png")}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                <View style={styles.shadowView}>
+                  <Shadow
+                    style={styles.shadowTop}
+                    inner
+                    useArt
+                  >
+                    <Text subHeader bold style={styles.price}>
+                      {btc(1) * (balance || 0)} BTC
+                    </Text>
+                    <Text bold style={styles.priceusd} >
+                      {"$" + convertedRate.toFixed(2)}
+                    </Text>
+                    <Shadow
+                      inner
+                      useArt
+                      style={styles.shadowBottom}
+                    />
+                  </Shadow>
+                </View>
+              </>
+            )}
+
+          {isAuth &&
+>>>>>>> main
             <>
               <TouchableOpacity style={styles.shadowView} onPress={checkingAccountClickHandler}>
                 <Shadow style={StyleSheet.flatten([styles.shadowTop, { shadowColor: colors.pink.shadowTop, padding: 0 }])} inner useArt>
@@ -363,12 +559,17 @@ export default function HomeScreen({ route }: Props) {
                 <GradientButtonWithShadow title="Send" onPress={sendClickHandler} isShadow isTextShadow />
               </View>
               {!isLoading &&
+<<<<<<< HEAD
                 (calculatePercentage(balance, reserveAmount) == 100 ? (
+=======
+                (hasFilledTheBar ?
+>>>>>>> main
                   <Text h4 style={styles.alert}>
                     Congrats, your balance is large enough to be materialized! You can take full self-custody of your money by withdrawing a
                     Bitcoin ‘capsule’ from your checking account. Click ‘Create Vault’ to learn more!
                     {/* You can receive, send, and accumulate bitcoin using your Checking Account. New security features will be revealed once you meet the withdrawal threshold at 2 million sats */}
                   </Text>
+<<<<<<< HEAD
                 ) : Number(balance) === Number(withdrawThreshold + reserveAmount) ? (
                   <Text h4 style={StyleSheet.flatten([styles.alert, { color: colors.green }])}>
                     Congrats, your balance is large enough to be materialized! You can take full self-custody of your money by withdrawing a
@@ -478,7 +679,163 @@ export default function HomeScreen({ route }: Props) {
 
                 }
               </View>
+=======
+                  : (Number(balance) === Number(withdrawThreshold + reserveAmount)) ?
+                    <Text h4 style={styles.alert}>
+                      Congrats! You've completed the bar, It's time to create your Hot Storage Savings Vault and take full self-custody of your bitcoi. Click 'Withdraw' to know more.
+                    </Text>
+                    :
+                    <Text h4 style={styles.alertGrey}>
+                      New security upgrades will be revealed once you meet fill up the bar displayed on your Checking Account.
+                    </Text>
+                )
+              }
+>>>>>>> main
             </>
+          }
+
+          {/* {isAuth ? (
+            <> */}
+
+          {!isAuth &&
+            <View style={{ height: '42%' }}>
+              <GradientCardWithShadow
+                style={styles.createView}
+                onPress={loginClickHandler}
+              >
+                <View style={styles.middle}>
+                  <Image
+                    style={styles.arrow}
+                    resizeMode="contain"
+                    source={require("../../../img/arrow-right.png")}
+                  />
+                  <Text h2 style={styles.shadow}>
+                    Login to Your Checking Account
+                  </Text>
+                </View>
+              </GradientCardWithShadow>
+              <View style={styles.createAccount}>
+                <Text bold style={styles.text}>
+                  Don’t have an account?
+                </Text>
+                <TouchableOpacity onPress={createChekingAccountClickHandler}>
+                  <Text bold style={styles.login}>
+                    Create on Coinos.io
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          }
+          <View style={styles.bottom}>
+            {isAuth &&
+              <View style={styles.bottominner}>
+                {(hasSavingVault && walletID) &&
+                  <GradientView
+                    onPress={topupClickHandler}
+                    topShadowStyle={styles.outerShadowStyle}
+                    bottomShadowStyle={styles.innerShadowStyle}
+                    style={styles.linearGradientStyle}
+                    linearGradientStyle={styles.mainShadowStyle}
+                  >
+                    <Image
+                      style={styles.arrowLeft}
+                      resizeMode="contain"
+                      source={require("../../../img/arrow-right.png")}
+                    />
+                    <Text bold h3 center style={{ marginStart: 20 }}>Top-up</Text>
+                  </GradientView>
+                }
+                {(hasSavingVault && walletID) &&
+                  <GradientView
+                    onPress={withdrawClickHandler}
+                    topShadowStyle={styles.outerShadowStyle}
+                    bottomShadowStyle={styles.innerShadowStyle}
+                    style={styles.linearGradientStyle}
+                    linearGradientStyle={styles.mainShadowStyle}
+                  >
+                    <Text bold h3 center style={{ marginEnd: 20 }}>Withdraw</Text>
+                    <Image
+                      style={styles.arrowRight}
+                      resizeMode="contain"
+                      source={require("../../../img/arrow-right.png")}
+                    />
+                  </GradientView>
+
+                }
+              </View>
+            }
+
+            {(hasSavingVault && walletID) &&
+              <SavingVault
+                container={StyleSheet.flatten([styles.savingVault, { marginTop: 10 }])}
+                innerContainer={styles.savingVault}
+                shadowTopBottom={styles.savingVault}
+                shadowBottomBottom={styles.savingVault}
+                bitcoinText={styles.bitcoinText}
+                onPress={savingVaultClickHandler}
+                bitcoinValue={balanceVault}
+                inDollars={`$${(Number(balanceWithoutSuffix) * Number(matchedRate)).toFixed(2)}`}
+                isColorable
+              />
+
+            }
+            <View style={[styles.container3, { opacity: hasSavingVault ? 1 : 0.5, }]}>
+              {(hasSavingVault && walletID) &&
+                <GradientCard colors_={['#464D6854', '#FFF']} style={styles.container2} linearStyle={styles.main}>
+                  <View style={styles.container4}>
+                    {!hasSavingVault ?
+                      <Text h3 bold style={styles.storageText} onPress={hotStorageClickHandler}>Hot Storage</Text>
+                      :
+                      <View style={styles.bottomBtn}>
+                        <LinearGradient
+                          start={{ x: 1, y: 0 }}
+                          end={{ x: 1, y: 1 }}
+                          locations={[0.25, 1]}
+                          colors={['#333333', '#282727']}
+                          style={styles.linearGradientbottom}>
+                          <Text h3 bold style={{ color: '#FD7A68' }} onPress={hotStorageClickHandler}>Hot Storage</Text>
+                        </LinearGradient>
+                      </View>
+                    }
+                    {isAllDone || isWithdraw ?
+                      <Text h3 bold style={styles.storageText} onPress={coldStorageClickHandler}>Cold Storage</Text>
+                      :
+                      <View style={[styles.bottomBtn, { marginEnd: 7.5, marginStart: 0 }]}>
+                        <LinearGradient
+                          start={{ x: 1, y: 0 }}
+                          end={{ x: 1, y: 1 }}
+                          locations={[0.25, 1]}
+                          colors={
+                            !isAllDone
+                              ? [colors.gray.light, colors.gray.light]
+                              : ['#333333', '#282727']
+                          }
+                          style={styles.linearGradientbottom}>
+                          <Text h3 bold onPress={hotStorageClickHandler}>Cold Storage</Text>
+                        </LinearGradient>
+                      </View>
+                    }
+                  </View>
+                </GradientCard>
+              }
+              {isAllDone &&
+                <View style={styles.circle}>
+                  <Image
+                    style={styles.arrow2}
+                    resizeMode="contain"
+                    source={require("../../../img/arrow-right.png")}
+                  />
+                  <Image
+                    style={styles.arrow3}
+                    resizeMode="contain"
+                    source={require("../../../img/arrow-right.png")}
+                  />
+                </View>
+              }
+            </View>
+          </View>
+
+          {/* </>
           ) : (
             <>
               <GradientCardWithShadow style={styles.createView} onPress={createChekingAccountClickHandler}>
@@ -527,9 +884,42 @@ export default function HomeScreen({ route }: Props) {
                 </View>
               </View>
             </>
-          )}
+          )} */}
         </View>
       </View>
+      <>
+
+
+        {!walletID &&
+          <View style={styles.createVaultContainer}>
+            <TouchableOpacity
+              onPress={handleCreateVault}
+            >
+              <LinearGradient
+                colors={['#1E1E1E', '#6D6D6D']}
+                start={{ x: 0, y: -0.1 }}
+                end={{ x: 0, y: 2 }}
+                locations={[0, 1]}
+                style={styles.createVault}>
+                <Text h3 style={styles.advancedText}>⚠  Advanced</Text>
+                <Text h2 style={styles.createVaultText}>
+                  Create Vault
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+            <View style={styles.alreadyView}>
+              <Text bold style={styles.text}>
+                Already have a vault?
+              </Text>
+              <TouchableOpacity onPress={handleRecoverSavingVault}>
+                <Text bold style={[styles.login, { color: colors.green }]}>
+                  Recover
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        }
+      </>
       <RBSheet
         ref={refRBSheet}
         customStyles={{

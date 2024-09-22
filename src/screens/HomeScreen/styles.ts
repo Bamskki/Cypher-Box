@@ -35,6 +35,7 @@ interface Style {
     row: ViewStyle;
     row2: ViewStyle;
     alreadyView: ViewStyle;
+    createAccount: ViewStyle;
     scan: ImageStyle;
     shadow: TextStyle;
     shadowTop: any;
@@ -87,10 +88,11 @@ interface Style {
     bitcoinText?: TextStyle;
     linearGradientbottom?: ViewStyle;
     bottomBtn: ViewStyle;
-    createVaultContainer: ViewStyle;
     createVault: ViewStyle;
     createVaultText: TextStyle;
     advancedText: TextStyle;
+    createVaultContainer: ViewStyle;
+
 }
 
 export default StyleSheet.create<Style>({
@@ -116,6 +118,11 @@ export default StyleSheet.create<Style>({
         borderRadius: 26,
         justifyContent: 'center',
         flexDirection: 'row',
+    },
+    createAccount: {
+        flexDirection: 'column',
+        marginTop: 10,
+        alignSelf: 'center'
     },
     alreadyView: {
         flexDirection: 'row',
@@ -164,11 +171,14 @@ export default StyleSheet.create<Style>({
     },
     text: {
         fontSize: 18,
+        textAlign: 'center'
     },
     login: {
         fontSize: 18,
-        color: colors.pink.default,
+        color: colors.pink.light,
+        textAlign: 'center',
         marginStart: 5,
+
     },
     bitcointext: {
         marginEnd: 7,
@@ -518,6 +528,7 @@ export default StyleSheet.create<Style>({
     bottom: {
         // opacity: 0.5,
         marginTop: 15,
+        top: heights * 0.04
     },
     line: {
         height: 2,
@@ -629,11 +640,9 @@ export default StyleSheet.create<Style>({
         marginStart: 7.5,
         borderRadius: 25,
     },
-<<<<<<< HEAD
-=======
     createVaultContainer: {
-        top: '30%'
-
+        top: '-10%',
+        paddingHorizontal: 20,
     },
     createVault: {
         borderRadius: 25,
@@ -647,5 +656,4 @@ export default StyleSheet.create<Style>({
     advancedText: {
         margin: 10
     }
->>>>>>> 906e3b9 (resolve conflic)
 });

@@ -11,23 +11,29 @@ interface Props {
     usd: string;
     isSats: boolean;
     title?: string;
+    _colors?: string[];
     isFeeesRate?: boolean;
+    showTitle?: boolean;
 }
 
 const GradientInputNew = ({
     sats,
     setSats,
+    _colors,
     usd,
     isSats,
     title,
     isFeeesRate = false,
+    showTitle = true
 }: Props) => {
-    const gradientColors = sats ? [colors.green, colors.green] : [colors.gray.thin, colors.gray.thin2];
+    const gradientColors = sats ? _colors : [colors.gray.thin, colors.gray.thin2];
 
     return (
         <View style={styles.container}>
             <View style={styles.priceView}>
-                <Text center style={styles.amount}>{title || 'Amount'}</Text>
+                {showTitle &&
+                    <Text center style={styles.amount}>{title || 'Amount'}</Text>
+                }
                 <GradientCard style={styles.card} colors_={gradientColors} linearStyle={styles.lGradient}>
                     <Input
                         onChange={setSats}

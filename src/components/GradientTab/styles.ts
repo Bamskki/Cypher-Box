@@ -34,7 +34,7 @@ export default StyleSheet.create<Style>({
         height: 64,
         borderRadius: 25
     },
-    linearGradientInside:{
+    linearGradientInside: {
         height: 54,
         width: 140,
         borderRadius: 25,

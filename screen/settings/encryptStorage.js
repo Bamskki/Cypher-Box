@@ -156,7 +156,7 @@ const EncryptStorage = () => {
         Component={TouchableWithoutFeedback}
         switch={{ onValueChange: onEncryptStorageSwitch, value: storageIsEncryptedSwitchEnabled }}
       />
-      {storageIsEncryptedSwitchEnabled && (
+      {/* {storageIsEncryptedSwitchEnabled && (
         <ListItem
           onPress={navigateToPlausibleDeniability}
           title={loc.settings.plausible_deniability}
@@ -164,7 +164,7 @@ const EncryptStorage = () => {
           testID="PlausibleDeniabilityButton"
           Component={TouchableOpacity}
         />
-      )}
+      )} */}
     </ScrollView>
   );
 };
