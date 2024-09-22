@@ -161,7 +161,7 @@ function DeviceQuickActions(): JSX.Element | null {
                   ? ''
                   : formatBalance(Number(wallet.getBalance()), wallet.getPreferredBalanceUnit(), true),
               userInfo: {
-                url: `bluewallet://wallet/${wallet.getID()}`, // Provide any custom data like deep linking URL
+                url: `cypherbox://wallet/${wallet.getID()}`, // Provide any custom data like deep linking URL
               },
               icon: Platform.select({ android: 'quickactions', ios: 'bookmark' }),
             });
