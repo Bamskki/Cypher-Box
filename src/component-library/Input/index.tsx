@@ -30,9 +30,11 @@ export interface Props {
   returnKeyType?: ReturnKeyTypeOptions;
   onKeyPress?(e: NativeSyntheticEvent<TextInputKeyPressEventData>): void;
   blurOnSubmit?: boolean;
+  onFocus?: () => void;
+  onBlur?: () => void;
   style?: ViewStyle;
   isEditable?: boolean;
-  onInputFocussed?(isFocussed: boolean): void;
+  onInputFocused?(isFocussed: boolean): void;
   isRequired?: boolean;
   displayRemainingCount?: boolean;
   isWhite?: boolean;
@@ -62,7 +64,7 @@ function Input(
     blurOnSubmit,
     style,
     isEditable = true,
-    onInputFocussed,
+    onInputFocused,
     isRequired,
     displayRemainingCount,
     isWhite,
@@ -72,23 +74,25 @@ function Input(
     textContentType = undefined,
     textInputStyle,
     editable = true,
+    onBlur,
+    onFocus
   }: Props,
   ref: Ref<RNTextInput>,
 ) {
-  const [focussed, setFocussed] = useState(false);
+  // const [focused, setFocused] = useState(false);
 
-  const setFocussedTrue = () => {
-    if (onInputFocussed) {
-      onInputFocussed(true);
-    }
-    setFocussed(true);
-  };
-  const setFocussedFalse = () => {
-    if (onInputFocussed) {
-      onInputFocussed(false);
-    }
-    setFocussed(false);
-  };
+  // const setFocussedTrue = () => {
+  //   if (onInputFocused) {
+  //     onInputFocused(true);
+  //   }
+  //   setFocused(true);
+  // };
+  // const setFocussedFalse = () => {
+  //   if (onInputFocused) {
+  //     onInputFocused(false);
+  //   }
+  //   setFocused(false);
+  // };
 
   const returnIndexForTest = () => {
     if (label) {
@@ -132,8 +136,8 @@ function Input(
           textInputStyle && textInputStyle,
         ]}
         value={value}
-        onFocus={setFocussedTrue}
-        onBlur={setFocussedFalse}
+        onFocus={onFocus}
+        onBlur={onBlur}
         blurOnSubmit={blurOnSubmit}
         onChangeText={handleChange}
         onSubmitEditing={onSubmitEditing}

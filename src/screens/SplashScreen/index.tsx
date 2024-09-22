@@ -7,6 +7,7 @@ import { BlueStorageContext } from "../../../blue_modules/storage-context";
 import BootSplash from 'react-native-bootsplash';
 import { heights } from "@Cypher/style-guide";
 import { dispatchNavigate } from "@Cypher/helpers";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SplashScreen_() {
     const [isLoading, setIsLoading] = useState(true);
@@ -45,9 +46,15 @@ export default function SplashScreen_() {
     };
 
     const successfullyAuthenticated = async () => {
+        const hasAcceptedTerms = await AsyncStorage.getItem('hasAcceptedTermsOfService')
+
         if (await startAndDecrypt()) {
             setWalletsInitialized(true);
-            dispatch(StackActions.replace(isHandset ? 'Navigation' : 'DrawerRoot'));
+            if (hasAcceptedTerms === 'true') {
+                dispatch(StackActions.replace(isHandset ? 'Navigation' : 'DrawerRoot'));
+            } else {
+                dispatch(StackActions.replace('GetStartedScreen'));
+            }
         } else {
             dispatchNavigate('WelcomeScreen')
         }

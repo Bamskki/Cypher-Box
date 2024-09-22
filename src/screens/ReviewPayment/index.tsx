@@ -415,27 +415,27 @@ export default function ReviewPayment({ route }: Props) {
                         </View>
                         <View style={styles.sats}><Text h2>{formatNumber(balance)} sats  ~  </Text><Text h3>${convertedRate.toFixed(2)}</Text></View>
                         <Text bold style={styles.text}>{formatNumber(Number(withdrawThreshold) + Number(reserveAmount))} sats</Text>
-                        {(type == 'bitcoin' || type == 'liquid') &&
-                            <View style={{ paddingHorizontal: 25, alignItems: 'center' }}>
-                                <View style={styles.showLine} />
-                                <View style={[styles.box, { left: `${calculatePercentage(Number(withdrawThreshold), Number(reserveAmount)) + 7}%` }]} />
-                                {/* <View style={[styles.box, {left: `${Math.min((withdrawThreshold / ((Number(withdrawThreshold) + Number(reserveAmount)) || 0)) * 100, 100)}%`}]} /> */}
-                                <LinearGradient
-                                    start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
-                                    colors={[colors.white, colors.pink.dark]}
-                                    style={[styles.linearGradient2, { width: `${calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount))}%` }]}>
-                                    {/* <View style={[styles.box, {marginLeft: `${Math.min((withdrawThreshold / (Number(withdrawThreshold + reserveAmount) || 0)) * 100, 100)}%`}]} /> */}
-                                    {/* <Shadow
+                        {/* {(type == 'bitcoin' || type == 'liquid') && */}
+                        <View style={{ paddingHorizontal: 25, alignItems: 'center' }}>
+                            <View style={styles.showLine} />
+                            <View style={[styles.box, { left: `${calculatePercentage(Number(withdrawThreshold), Number(reserveAmount)) + 7}%` }]} />
+                            {/* <View style={[styles.box, {left: `${Math.min((withdrawThreshold / ((Number(withdrawThreshold) + Number(reserveAmount)) || 0)) * 100, 100)}%`}]} /> */}
+                            <LinearGradient
+                                start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
+                                colors={[colors.white, colors.pink.dark]}
+                                style={[styles.linearGradient2, { width: `${calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount))}%` }]}>
+                                {/* <View style={[styles.box, {marginLeft: `${Math.min((withdrawThreshold / (Number(withdrawThreshold + reserveAmount) || 0)) * 100, 100)}%`}]} /> */}
+                                {/* <Shadow
                                         inner // <- enable inner shadow
                                         useArt // <- set this prop to use non-native shadow on ios
                                         style={styles.top2} >
                                     </Shadow> */}
-                                </LinearGradient>
+                            </LinearGradient>
 
-                                {/* <View style={[styles.box, {marginLeft: `${Math.min((balance / (Number(withdrawThreshold) || 0)) * 100, 100)}%`}]} />
+                            {/* <View style={[styles.box, {marginLeft: `${Math.min((balance / (Number(withdrawThreshold) || 0)) * 100, 100)}%`}]} />
                                 </View> */}
-                            </View>
-                        }
+                        </View>
+                        {/* } */}
                     </GradientCardWithShadow>
                 }
 
@@ -519,7 +519,17 @@ export default function ReviewPayment({ route }: Props) {
             </View>
             <View style={styles.container}>
                 <Text bold style={styles.alert}>Causion: Bitcoin payments are irriversable</Text>
-                <SwipeButton ref={swipeButtonRef} onToggle={handleToggle} isLoading={isSendLoading} />
+                {type === 'bitcoin' ?
+                    <SwipeButton ref={swipeButtonRef} onToggle={handleToggle} isLoading={isSendLoading} />
+                    :
+                    <GradientButton style={styles.invoiceButton} textStyle={{ fontFamily: 'Lato-Medium', }}
+                        title={'Send'}
+                        disabled={isSendLoading}
+                        onPress={handleSendSats}
+
+                    />
+                }
+                {/* <SwipeButton ref={swipeButtonRef} onToggle={handleToggle} isLoading={isSendLoading} /> */}
                 {/* <GradientButton style={styles.invoiceButton} textStyle={{ fontFamily: 'Lato-Medium', }} title="Send" onPress={sendClickHandler} /> */}
             </View>
         </ScreenLayout>

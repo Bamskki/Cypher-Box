@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View, Image } from "react-native";
 import SimpleToast from "react-native-simple-toast";
 import styles from "./styles";
 import { GradientButton, GradientCard, GradientText } from "@Cypher/components";
@@ -9,6 +9,7 @@ import { colors } from "@Cypher/style-guide";
 import { dispatchReset } from "@Cypher/helpers/navigation";
 import { loginUser } from "@Cypher/api/coinOSApis";
 import useAuthStore from "@Cypher/stores/authStore";
+import { CoinOS } from "@Cypher/assets/images";
 
 export default function LoginCoinOSScreen() {
     const [email, setEmail] = useState('');
@@ -28,7 +29,7 @@ export default function LoginCoinOSScreen() {
             setIsLoading(false);
             return;
         }
-    
+
         try {
             const response: any = await loginUser(email, password);
             console.log("User Login successful:", response);
@@ -40,7 +41,7 @@ export default function LoginCoinOSScreen() {
             } else {
                 SimpleToast.show("Invalid usernmae or password", SimpleToast.SHORT);
             }
-    
+
             // await AsyncStorage.setItem("viewWithdraw", "1");
         } catch (error: any) {
             console.error("Error login user:", error?.message);
@@ -61,7 +62,7 @@ export default function LoginCoinOSScreen() {
                 <View style={styles.innerView}>
                     <GradientText>Login to Coinos</GradientText>
                     <View style={styles.space} />
-                    <GradientCard style={{width: '100%'}} colors_={email ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}>
+                    <GradientCard style={{ width: '100%' }} colors_={email ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}>
                         <Input onChange={setEmail}
                             value={email}
                             style={styles.textInput}
@@ -79,11 +80,14 @@ export default function LoginCoinOSScreen() {
                             label="Password"
                         />
                     </GradientCard>
-                    <TouchableOpacity style={{marginTop: 18, alignSelf: 'flex-end'}} onPress={forgotClickHandler}>
+                    <TouchableOpacity style={{ marginTop: 18, alignSelf: 'flex-end' }} onPress={forgotClickHandler}>
                         <Text bold style={styles.forgot}>
                             Forgot Password?
                         </Text>
                     </TouchableOpacity>
+                </View>
+                <View style={styles.coinOsImage}>
+                    <Image source={CoinOS} />
                 </View>
                 <GradientButton title="Login" disabled={!email.length || !password.length || isLoading} onPress={nextClickHandler} />
             </View>

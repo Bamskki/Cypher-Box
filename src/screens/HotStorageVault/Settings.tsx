@@ -19,6 +19,7 @@ import Biometric from "../../../class/biometrics";
 import triggerHapticFeedback, { HapticFeedbackTypes } from "../../../blue_modules/hapticFeedback";
 import loc from "../../../loc";
 import Notifications from "../../../blue_modules/notifications";
+import showPrompt from "@Cypher/helpers/prompt";
 
 export default function Settings() {
     // const [right] = useState(new Animated.Value(0));
@@ -39,28 +40,28 @@ export default function Settings() {
     const [isLoading, setIsLoading] = useState(false);
     const derivationPath = useMemo(() => {
         try {
-          const path = wallet.getDerivationPath();
-          return path.length > 0 ? path : null;
+            const path = wallet.getDerivationPath();
+            return path.length > 0 ? path : null;
         } catch (e) {
-          return null;
+            return null;
         }
-      }, [wallet]);
-    
+    }, [wallet]);
+
     useLayoutEffect(() => {
         isAdvancedModeEnabled().then(setIsAdvancedModeEnabledRender);
-    
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [hideTransactionsInWalletsList, isBIP47Enabled]);
 
     useEffect(() => {
         if (isAdvancedModeEnabledRender && wallet.allowMasterFingerprint()) {
             InteractionManager.runAfterInteractions(() => {
-            setMasterFingerprint(wallet.getMasterFingerprintHex());
+                setMasterFingerprint(wallet.getMasterFingerprintHex());
             });
         }
     }, [isAdvancedModeEnabledRender, wallet]);
-    
-      
+
+
     const nextClickInitiate = () => {
         backClickHandler();
     }
@@ -142,7 +143,7 @@ export default function Settings() {
     };
 
     const rightToLeft = async () => {
-        await setViewType(0);
+        setViewType(0);
         RNAnimated.timing(right, {
             toValue: Dimensions.get('window').width * 1.32,
             duration: 250,
@@ -152,14 +153,14 @@ export default function Settings() {
 
     const navigateToAddresses = () =>
         dispatchNavigate('WalletAddresses', {
-          walletID: wallet.getID(),
+            walletID: wallet.getID(),
         });
-    
+
     const navigateToXPub = () =>
         dispatchNavigate('WalletXpubRoot', {
             screen: 'WalletXpub',
             params: {
-            walletID: wallet.getID(),
+                walletID: wallet.getID(),
             },
         });
 
@@ -168,68 +169,66 @@ export default function Settings() {
         let externalAddresses = [];
         try {
             externalAddresses = wallet.getAllExternalAddresses();
-        } catch (_) {}
+        } catch (_) { }
         Notifications.unsubscribe(externalAddresses, [], []);
         setWalletID(undefined);
-        dispatchNavigate('HomeScreen');
         deleteWallet(wallet);
+        dispatchNavigate('HomeScreen');
         saveToDisk(true);
         triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
     };
-    
+
     const presentWalletHasBalanceAlert = useCallback(async () => {
         triggerHapticFeedback(HapticFeedbackTypes.NotificationWarning);
         try {
-            const walletBalanceConfirmation = await prompt(
-                "Delete Wallet",
-                loc.formatString("This wallet has a balance. Before proceeding, please be aware that you will not be able to recover the funds without this wallet’s seed phrase. In order to avoid accidental removal, please enter your wallet’s balance of {balance} satoshis.", { balance: wallet.getBalance() }),
+            const walletBalanceConfirmation = await showPrompt(
+                "Delete Vault",
+                loc.formatString("This vault has a balance. Before proceeding, please be aware that you will not be able to recover the funds without this vault’s seed phrase. In order to avoid accidental removal, please enter your vault’s balance of {balance} satoshis.", { balance: wallet.getBalance() }),
                 true,
                 'plain-text',
                 true,
-                "Delete",
+                "Delete"
             );
             if (Number(walletBalanceConfirmation) === wallet.getBalance()) {
                 navigateToOverviewAndDeleteWallet();
             } else {
                 triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
                 setIsLoading(false)
-                alert("The provided balance amount does not match this wallet’s balance. Please try again.");
+                // alert("The provided balance amount does not match this wallet’s balance. Please try again.");
             }
-        } catch (_) {}
+        } catch (_) { }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, []);
-        
+    }, []);
+
     const handleDeleteButtonTapped = () => {
         triggerHapticFeedback(HapticFeedbackTypes.NotificationWarning);
         Alert.alert(
-            "Delete Wallet",
+            "Delete Vault",
             "Are you sure?",
             [
-            {
-                text: "Yes, delete",
-                onPress: async () => {
-                const isBiometricsEnabled = await Biometric.isBiometricUseCapableAndEnabled();
-    
-                if (isBiometricsEnabled) {
-                    if (!(await Biometric.unlockWithBiometrics())) {
-                    return;
-                    }
-                }
-                if (wallet.getBalance() > 0 && wallet.allowSend()) {
-                    presentWalletHasBalanceAlert();
-                } else {
-                    navigateToOverviewAndDeleteWallet();
-                }
+                {
+                    text: "Yes, delete",
+                    onPress: async () => {
+                        const isBiometricsEnabled = await Biometric.isBiometricUseCapableAndEnabled();
+                        if (isBiometricsEnabled) {
+                            if (!(await Biometric.unlockWithBiometrics())) {
+                                return;
+                            }
+                        }
+                        if (wallet.getBalance() > 0 && wallet.allowSend()) {
+                            presentWalletHasBalanceAlert();
+                        } else {
+                            navigateToOverviewAndDeleteWallet();
+                        }
+                    },
+                    style: 'destructive',
                 },
-                style: 'destructive',
-            },
-            { text: "No, cancel", onPress: () => {}, style: 'cancel' },
+                { text: "No, cancel", onPress: () => { }, style: 'cancel' },
             ],
             { cancelable: false },
         );
-    };        
-    
-    console.log('wallet: ', wallet)
+    };
+
     return (
         <View style={{
             flex: 1,

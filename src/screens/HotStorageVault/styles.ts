@@ -58,6 +58,11 @@ interface Style {
     bottomViewNew: TextStyle;
     border: ViewStyle;
     modalContent: ViewStyle;
+    capsuleOuterShadowStyle: ViewStyle;
+    capsuleInnerShadowStyle: ViewStyle;
+    capsuleLinearGradientStyle: ViewStyle;
+    capsuleMainShadowStyle: ViewStyle;
+    capsuleLinearGradientStyleMain: ViewStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -82,7 +87,7 @@ export default StyleSheet.create<Style>({
         borderTopLeftRadius: 16,
         borderTopRightRadius: 16,
         borderColor: 'rgba(0, 0, 0, 0.1)',
-    },    
+    },
     savingVault: {
         width: widths - 40,
         height: 130,
@@ -103,7 +108,8 @@ export default StyleSheet.create<Style>({
         shadowOpacity: 2,
         shadowColor: colors.greenShadow,
         borderRadius: 25,
-        width: (widths / 2) - 30,
+        width: widths - 40,
+
         height: 47,
         // flex: 1,
         justifyContent: 'center',
@@ -115,7 +121,8 @@ export default StyleSheet.create<Style>({
         shadowOpacity: 0.64,
         shadowColor: colors.greenShadowLight,
         borderRadius: 25,
-        width: (widths / 2) - 30,
+        width: widths - 40,
+
         height: 47,
         // flex: 1,
         justifyContent: 'center',
@@ -127,8 +134,9 @@ export default StyleSheet.create<Style>({
         shadowOpacity: 0.80,
         shadowRadius: 16,
         elevation: 8,
-        // flex: 1,
+        //flex: 1,
         marginHorizontal: 20,
+
         // alignItems: 'center',
         // backgroundColor: 'blue',
         // marginHorizontal: 0
@@ -140,21 +148,25 @@ export default StyleSheet.create<Style>({
         shadowRadius: 12,
         elevation: 8,
         flex: 1,
+
         // backgroundColor: 'green'
     },
     base: {
         flexDirection: 'row',
-        // flex: 1,
+        flex: 1,
         marginTop: 20,
+
         // backgroundColor: 'red',
         // justifyContent: 'space-between'
         // alignSelf: 'center',
     },
     linearGradientStyleMain: {
         borderRadius: 25,
+
         height: 47,
         justifyContent: 'center',
-        width: (widths / 2) - 30,
+        width: widths - 40,
+        // width: (widths / 1) - 30,
     },
     info: {
         width: 17,
@@ -201,7 +213,7 @@ export default StyleSheet.create<Style>({
         width: widths - 150,
         alignItems: 'center',
         justifyContent: 'center',
-        marginStart: 35,
+        // marginStart: 35,
         height: 44,
     },
     copyImage: {
@@ -396,5 +408,50 @@ export default StyleSheet.create<Style>({
     border: {
         borderTopWidth: 0.5,
         borderTopColor: '#5E5E5E',
+    },
+    capsuleOuterShadowStyle: {
+        shadowOffset: { width: 2, height: 2 },
+        shadowRadius: 2,
+        shadowOpacity: 2,
+        shadowColor: colors.greenShadow,
+        borderRadius: 25,
+        width: (widths / 2) - 30,
+        height: 47,
+        justifyContent: 'center',
+    },
+    capsuleInnerShadowStyle: {
+        shadowOffset: { width: -2, height: -2 },
+        shadowRadius: 2,
+        shadowOpacity: 0.64,
+        shadowColor: colors.greenShadowLight,
+        borderRadius: 25,
+        width: (widths / 2) - 30,
+        height: 47,
+        justifyContent: 'center',
+        position: 'absolute',
+    },
+    capsuleLinearGradientStyle: {
+        shadowColor: '#040404',
+        shadowOffset: { width: 8, height: 8 },
+        shadowOpacity: 0.80,
+        shadowRadius: 16,
+        elevation: 8,
+        marginHorizontal: 20,
+
+    },
+    capsuleMainShadowStyle: {
+        shadowColor: '#27272C',
+        shadowOffset: { width: -8, height: -8 },
+        shadowOpacity: 0.48,
+        shadowRadius: 12,
+        elevation: 8,
+        flex: 1,
+    },
+
+    capsuleLinearGradientStyleMain: {
+        borderRadius: 25,
+        height: 47,
+        justifyContent: 'center',
+        width: (widths / 2) - 30,
     },
 });

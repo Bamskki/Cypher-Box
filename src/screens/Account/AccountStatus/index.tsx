@@ -44,7 +44,7 @@ export default function AccountStatus() {
                             </Shadow> */}
                         </LinearGradient>
                     </GradientCardWithShadow>
-                    <Text h4 style={styles.description}>Your Cecking Account has been created. The interactive bar display helps you in visualizing your Checking Account's balance, indicating a threshold above which storing bitcoin in a bank carries increased counter-party risk.{'\n'}{'\n'}
+                    <Text h4 style={styles.description}>Your Checking Account has been created. The interactive bar display helps you in visualizing your Checking Account's balance, indicating a threshold above which storing bitcoin in a bank carries increased counter-party risk.{'\n'}{'\n'}
                         You can deposit money beyond the threshold, but remember, you are technically not the owner of it; you are relying on a third-party custodian. Cypher Box will enable you to become the sole owner of your money once you max out the bar slot (set to 2.1 million sats by default but you can adjust it in the settings).</Text>
                 </View>
                 <GradientButton title="Home" onPress={nextClickHandler} />
