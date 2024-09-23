@@ -730,7 +730,7 @@ export default function ColdStorage({ route, navigation }: Props) {
                     {to ?
                       <View>
                         <Text bold style={styles.coinselected}>Capsules selected: {ids.length}</Text>
-                          {capsulesData.map((item, i) => (
+                          {capsulesData && capsulesData.map((item, i) => (
                             <View style={styles.tabs}>
                               <ProgressBar image={ProgressBar5} />
                               <View style={{ width: '80%', alignItems: 'flex-end' }}>

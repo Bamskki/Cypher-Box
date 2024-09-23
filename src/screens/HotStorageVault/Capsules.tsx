@@ -16,13 +16,15 @@ import { dispatchNavigate } from "@Cypher/helpers";
 import BottomModal from "../../../components/BottomModal";
 import { useTheme } from "../../../components/themes";
 import { OutputModalContent } from "../../../screen/send/coinControl";
+import { createInvoice } from "@Cypher/api/coinOSApis";
 // import { Bitcoin, Transaction, TransactionN } from "@Cypher/assets/svg";
 
-export default function Capsules({ wallet, matchedRate }: any) {
+export default function Capsules({ wallet, matchedRate, to }: any) {
     const { colors: themeColors } = useTheme();
     const [ids, setIds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [output, setOutput] = useState();
+    const [bitcoinHash, setBitcoinHash] = useState();
     console.log("🚀 ~ Capsules ~ ids:", ids)
     const [btc, setBtc] = useState('0.00');
     const utxo = wallet.getUtxo(true).sort((a, b) => a.height - b.height || a.txid.localeCompare(b.txid) || a.vout - b.vout);
@@ -60,7 +62,36 @@ export default function Capsules({ wallet, matchedRate }: any) {
     // const offset = useRef(new Animated.Value(0)).current;
     // console.log("🚀 ~ Coins ~ offset:", offset);
 
-    const addressClickHandler = () => { }
+    useEffect(() => {
+        (async () => {
+            try {
+                const response = await createInvoice({
+                type: 'bitcoin',
+                });
+                setBitcoinHash(response.hash)
+                console.log('response: ', response)
+            } catch (error) {
+                console.error('Error generating bitcoin address:', error);
+            }
+        })();
+    }, [])
+
+    const addressClickHandler = async () => {
+        let capsulesData: any = [];
+        ids.forEach(id => {
+            const result = utxo?.find(obj => `${obj.txid}:${obj.vout}` === id)?.value;
+            if (result) capsulesData.push({
+                id, value: result
+            });
+        });
+        if (ids.length > 0) {
+            dispatchNavigate('ColdStorage', {wallet, utxo, ids, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to: bitcoinHash});
+        } else {
+            SimpleToast.show("Please select Capsules to Send", SimpleToast.SHORT)
+        }
+    };
+    
+    // const addressClickHandler = () => { }
 
     const { total, inUSD } = useMemo(() => {
         let total = 0;
@@ -91,7 +122,7 @@ export default function Capsules({ wallet, matchedRate }: any) {
     const handleSendBars = () => {
         if (ids.length > 0) {
             const usd = inUSD.toFixed(2);
-            dispatchNavigate('EditAmount', { isEdit: false, wallet, utxo, ids, maxUSD: total, inUSD: inUSD.toFixed(2), total, matchedRate });
+            dispatchNavigate('EditAmount', { isEdit: false, wallet, utxo, ids, maxUSD: total, inUSD: inUSD.toFixed(2), total, matchedRate, to });
         } else {
             SimpleToast.show("Please select Capsules to Send", SimpleToast.SHORT)
         }
@@ -181,7 +212,7 @@ export default function Capsules({ wallet, matchedRate }: any) {
                         linearGradientStyle={styles.capsuleMainShadowStyle}
                         linearGradientStyleMain={styles.capsuleLinearGradientStyleMain}
                     >
-                        <Text h3 center>Move to Cold Vault</Text>
+                        <Text h3 center>Top-up</Text>
                     </GradientView>
                 </View>
             </View>
