@@ -8,9 +8,10 @@ import styles from "./styles";
 interface Props {
     onChangeSelectedTab(id: number): void;
     selectedTab: number;
+    vaultTab: boolean;
 }
 
-export default function Tabs({ onChangeSelectedTab, selectedTab }: Props) {
+export default function Tabs({ onChangeSelectedTab, selectedTab, vaultTab }: Props) {
     const tabs = useMemo(() => [
         { id: 0, name: 'Vault', icon: Key },
         { id: 1, name: 'Capsules', icon: CoinOs },
@@ -24,10 +25,12 @@ export default function Tabs({ onChangeSelectedTab, selectedTab }: Props) {
         onChangeSelectedTab(id);
     }, []);
 
+    const primaryColor = vaultTab ? colors.blueText : colors.greenNew
+
     const getTabStyle = (id: number) => ({
-        backgroundColor: selectedTab === id ? colors.greenNew : colors.primary,
+        backgroundColor: selectedTab === id ? primaryColor : colors.primary,
         tintColor: selectedTab === id ? colors.white : colors.gray.text,
-        color: selectedTab === id ? colors.greenNew : colors.gray.text,
+        color: selectedTab === id ? primaryColor : colors.gray.text,
     });
 
     return (
@@ -35,7 +38,7 @@ export default function Tabs({ onChangeSelectedTab, selectedTab }: Props) {
             {tabs.map(tab => (
                 <View key={tab.id} style={styles.container}>
                     <TouchableOpacity
-                        style={[styles.inner, { backgroundColor: getTabStyle(tab.id).backgroundColor }]}
+                        style={[styles.inner, { backgroundColor: getTabStyle(tab.id).backgroundColor }, vaultTab && { borderColor: colors.blueText}]}
                         onPress={() => tabClickListener(tab.id)}
                         activeOpacity={1}
                     >

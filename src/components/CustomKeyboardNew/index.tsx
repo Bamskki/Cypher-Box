@@ -22,9 +22,10 @@ interface Props {
     isConverter?: boolean;
     firstTabText?: string;
     isEdit?: string;
+    vaultTab?: boolean;
 }
 
-export default function CustomKeyBoardNew({ isEdit, prevSats, title, disabled, onPress, setSATS, setUSD, setIsSATS, isError, matchedRate, isConverter = true, firstTabText = "Sats" }: Props) {
+export default function CustomKeyBoardNew({ vaultTab, isEdit, prevSats, title, disabled, onPress, setSATS, setUSD, setIsSATS, isError, matchedRate, isConverter = true, firstTabText = "Sats" }: Props) {
     const KEYSARRAY = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0'];
     const [isSats, setIsSats] = useState(true);
     const [sats, setSats] = useState(prevSats || '');
@@ -86,11 +87,12 @@ export default function CustomKeyBoardNew({ isEdit, prevSats, title, disabled, o
                     setIsSats={setIsSats}
                     imageStyle={{ width: 33, height: 33, marginTop: 0, marginStart: -5 }}
                     textStyle={{ marginStart: 15, fontFamily: 'Lato-Medium' }}
+                    vaultTab={vaultTab}
                 />
             }
             <LinearGradient
                 start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
-                colors={[colors.green, colors.green]}
+                colors={vaultTab ? [colors.blueText, colors.blueText] : [colors.green, colors.green]}
                 style={styles.linearGradient} />
             <View style={styles.keypad}>
                 {KEYSARRAY.map((key) => (
@@ -102,7 +104,7 @@ export default function CustomKeyBoardNew({ isEdit, prevSats, title, disabled, o
                     <Image source={Cancel} />
                 </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={onPress} disabled={disabled} style={[styles.nextBtn, disabled && {backgroundColor: colors.gray.disable}]}>
+            <TouchableOpacity onPress={onPress} disabled={disabled} style={[styles.nextBtn, vaultTab && { backgroundColor: colors.blueText }, disabled && {backgroundColor: colors.gray.disable}]}>
                 <Text h3>Next</Text>
             </TouchableOpacity>
         </View>

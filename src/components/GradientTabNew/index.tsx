@@ -16,9 +16,10 @@ interface Props {
     textStyle?: TextStyle;
     imageStyle?: ImageStyle;
     color_?: any;
+    vaultTab?: boolean
 }
 
-export default function GradientTabNew({ isSats, setIsSats, tab1, tab2, firstTabImg, secondTabImg, isTextAfter = false, textStyle, imageStyle, color_ }: Props) {
+export default function GradientTabNew({ vaultTab, isSats, setIsSats, tab1, tab2, firstTabImg, secondTabImg, isTextAfter = false, textStyle, imageStyle, color_ }: Props) {
     return (
         <GradientCard
             colors_={color_ ? color_ : ['#383A46', '#464D6840']}
@@ -27,7 +28,7 @@ export default function GradientTabNew({ isSats, setIsSats, tab1, tab2, firstTab
                 <View style={styles.main}>
                     {isSats ?
                         <GradientCard
-                            colors_={[colors.green, colors.green]}
+                            colors_={vaultTab ? [colors.blueText, colors.blueText] : [colors.green, colors.green]}
                             style={styles.linearGradientInside}
                             linearStyle={styles.linearStyle}
                             onPress={() => setIsSats(true)}>
@@ -46,7 +47,7 @@ export default function GradientTabNew({ isSats, setIsSats, tab1, tab2, firstTab
                     }
                     {!isSats ?
                         <GradientCard
-                            colors_={[colors.green, colors.green]}
+                            colors_={vaultTab ? [colors.blueText, colors.blueText] : [colors.green, colors.green]}
                             style={styles.linearGradientInside}
                             linearStyle={styles.linearStyle}
                             onPress={() => setIsSats(false)}>
