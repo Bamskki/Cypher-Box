@@ -272,8 +272,8 @@ export default function ColdStorage({ route, navigation }: Props) {
         const requestedSatPerByte = feeRate;
         let addresses = [{ address: destinationAddress, key: String(Math.random()), amount: Number(inUSD).toFixed(4), amountSats: parseInt(Number(inUSD) / Number(matchedRate) * 100000000) }]
         for (const [index, transaction] of addresses.entries()) {
-            console.log('balance: ', balance, ' transaction.amountSats: ', transaction.amountSats, parseInt(Number(inUSD) / Number(matchedRate) * 100000000))
-            let error;
+          console.log('balance: ', balance, ' transaction.amountSats: ', transaction.amountSats, parseInt(Number(inUSD) / Number(matchedRate) * 100000000))
+          let error;
           if (!transaction.amount || transaction.amount < 0 || parseFloat(transaction.amount) === 0) {
             error = loc.send.details_amount_field_is_not_valid;
             console.log('validation error');
@@ -356,7 +356,7 @@ export default function ColdStorage({ route, navigation }: Props) {
         const requestedSatPerByte = Number(feeRate);
         const lutxo = utxo || wallet.getUtxo();
         console.log({ requestedSatPerByte, lutxo: lutxo.length });
-    
+
         const targets = [];
         let addresses = [{ address: destinationAddress, key: String(Math.random()), amount: Number(inUSD).toFixed(4), amountSats: parseInt(Number(inUSD) / Number(matchedRate) * 100000000) }]
         for (const transaction of addresses) {
@@ -378,6 +378,7 @@ export default function ColdStorage({ route, navigation }: Props) {
         console.log('targets: ', targets)
         console.log('requestedSatPerByte: ', requestedSatPerByte)
         console.log('change: ' ,change)
+
         // coinThresholdClickHandler.log('lutxo: ', lutxo)
         const { tx, outputs, psbt, fee } = wallet.createTransaction(
           lutxo,
@@ -396,12 +397,21 @@ export default function ColdStorage({ route, navigation }: Props) {
           // watch-only wallets with enabled HW wallet support have different flow. we have to show PSBT to user as QR code
           // so he can scan it and sign it. then we have to scan it back from user (via camera and QR code), and ask
           // user whether he wants to broadcast it
-        //   navigation.navigate('PsbtWithHardwareWallet', {
-        //     memo: transactionMemo,
-        //     fromWallet: wallet,
-        //     psbt,
-        //     launchedBy: routeParams.launchedBy,
-        //   });
+          const selectedFee = options.find(item => item.active);
+          navigation.navigate('HardwareWalletTransaction', {
+            memo: transactionMemo,
+            fromWallet: wallet,
+            psbt,
+            sats: parseInt(Number(inUSD) / Number(matchedRate) * 100000000),
+            inUSD: Number(inUSD).toFixed(4),
+            sentFrom: address,
+            destinationAddress: destinationAddress,
+            networkFees: isCustomFee ? customFee : selectedFee?.fee,
+            serviceFees: serviceFees,
+            totalFees: totalFees,
+            isCustomFee: isCustomFee,
+            walletID: wallet.getID(),
+          });
           setIsLoading(false);
           return;
         }

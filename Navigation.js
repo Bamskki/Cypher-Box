@@ -92,6 +92,9 @@ import Invoice from '@Cypher/screens/Invoice';
 import ChangeUsername from '@Cypher/screens/Account/ChangeUsername';
 import TransactionNew from '@Cypher/screens/TransactionNew';
 import ForgetPassword from '@Cypher/screens/Account/ForgetPassword';
+import HardwareWalletTransaction from '@Cypher/screens/HardwareWalletTransaction';
+import HardwareWalletTransactionContinue from '@Cypher/screens/HardwareWalletTransactionContinue';
+import ConfirmHardwareTransaction from '@Cypher/screens/ConfirmHardwareTransaction';
 
 const WalletsStack = createStackNavigator();
 
@@ -188,6 +191,9 @@ const WalletsRoot = () => {
       <WalletsStack.Screen name="EditAmount" component={EditAmount} options={{ headerShown: false }} />
       <WalletsStack.Screen name="FeeRate" component={FeeRate} options={{ headerShown: false }} />
       <WalletsStack.Screen name="ConfirmTransction" component={ConfirmTransction} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="HardwareWalletTransaction" component={HardwareWalletTransaction} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="HardwareWalletTransactionContinue" component={HardwareWalletTransactionContinue} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="ConfirmHardwareTransaction" component={ConfirmHardwareTransaction} options={{ headerShown: false }} />
       <WalletsStack.Screen name="TransactionBroadCastNew" component={TransactionBroadCastNew} options={{ headerShown: false }} />
       <WalletsStack.Screen name="PurchaseVault" component={PurchaseVault} options={{ headerShown: false }} />
       <WalletsStack.Screen name="TransactionNew" component={TransactionNew} options={{ headerShown: false }} />
