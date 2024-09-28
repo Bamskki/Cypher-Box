@@ -27,7 +27,7 @@ export interface Props {
    * This ensures we only use agreed Text styles from the designer.
    * If you need to add another, discuss with designer.
    */
-  style?: TextStyle;
+  style?: TextStyle | TextStyle[];
   onLayout?: ((event: LayoutChangeEvent) => void) | undefined;
 }
 

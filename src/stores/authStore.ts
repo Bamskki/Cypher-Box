@@ -9,9 +9,13 @@ export type AuthStateType = {
     isAuth: boolean | undefined;
     walletID: string | undefined;
     reserveAmount: number;
+    coldStorageWalletID: string | undefined;
+    vaultTab: boolean;
+    setVaultTab: (state: boolean) => void;
     setReserveAmount: (state: number) => void;
     setAuth: (state: boolean | undefined) => void;
     setWalletID: (state: string | undefined) => void;
+    setColdStorageWalletID: (state: string | undefined) => void;
     setToken: (token: string) => void;
     setUser: (state: any) => void;
     setWithdrawThreshold: (state: any) => void;
@@ -28,14 +32,19 @@ const createAuthStore = (
     reserveAmount: 100000,
     isAuth: undefined,
     walletID: undefined,
+    vaultTab: false,
+    coldStorageWalletID: undefined,
     setAuth: (state: boolean | undefined) => set({ isAuth: state }),
+    setVaultTab: (state: boolean) => set({ vaultTab: state }),
     setToken: (token: string) => set({ token: token }),
     setUser: (state: any) => set({ user: state }),
     setWalletID: (state: string | undefined) => set({walletID: state}),
+    setColdStorageWalletID: (state: string | undefined) => set({coldStorageWalletID: state}),
     setReserveAmount: (state: any) => set({ reserveAmount: state }),
     setWithdrawThreshold: (state: any) => set({ withdrawThreshold: state }),
     clearAuth: () =>
         set({
+            vaultTab: false,
             isAuth: undefined,
             user: null,
             token: null,

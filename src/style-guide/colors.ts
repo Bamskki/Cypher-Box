@@ -30,6 +30,7 @@ const colors = {
   greenShadow: '#6DFFD3',
   greenShadowLight: '#095E44',
   greenText: '#13E1A2',
+  blueText: '#1693ED',
   silver: '#C3C3C3',
   tundora: '#2D2D2D',
   yellow: '#FFF500',

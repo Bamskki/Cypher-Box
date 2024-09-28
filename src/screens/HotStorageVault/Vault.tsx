@@ -10,7 +10,7 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import { GradientView, SavingVault } from "@Cypher/components";
 import styles from "./styles";
 
-import { heights, widths } from "@Cypher/style-guide";
+import { colors, heights, widths } from "@Cypher/style-guide";
 import RBSheet from "react-native-raw-bottom-sheet";
 import ReceivedList from "../HomeScreen/ReceivedList";
 import { BlueStorageContext } from "../../../blue_modules/storage-context";
@@ -18,6 +18,7 @@ import { Copy, InformationNew, QrCode, Share as Share2, ShareNew } from "@Cypher
 import { btc } from "@Cypher/helpers/coinosHelper";
 import { formatBalance, formatBalanceWithoutSuffix } from "../../../loc";
 import { dispatchNavigate } from "@Cypher/helpers";
+import useAuthStore from "@Cypher/stores/authStore";
 
 const shortenAddress = (address: string) => {
     // Take the first 6 characters
@@ -30,6 +31,7 @@ const shortenAddress = (address: string) => {
 
 export default function Vault({ wallet, matchedRate, setSelectedTab }: { wallet: any, matchedRate: string, setSelectedTab: (tab: number) => void }) {
     const currency = btc(1);
+    const { vaultTab } = useAuthStore();
     const balance = !wallet?.hideBalance && formatBalance(Number(wallet?.getBalance()), wallet?.getPreferredBalanceUnit(), true);
     const balanceWithoutSuffix = !wallet?.hideBalance && formatBalanceWithoutSuffix(Number(wallet?.getBalance()), wallet?.getPreferredBalanceUnit(), true);
     const { wallets, saveToDisk, sleep, isElectrumDisabled } = useContext(BlueStorageContext);
@@ -102,8 +104,6 @@ export default function Vault({ wallet, matchedRate, setSelectedTab }: { wallet:
         setRefreshing(false);
     }
 
-
-    console.log('address: ', address)
     return (
         <ScrollView
             style={styles.container}
@@ -132,8 +132,8 @@ export default function Vault({ wallet, matchedRate, setSelectedTab }: { wallet:
                     onPress={addressHandler}
                     style={styles.linearGradientStyle}
                     linearGradientStyle={styles.mainShadowStyle}
-                    topShadowStyle={styles.outerShadowStyle}
-                    bottomShadowStyle={styles.innerShadowStyle}
+                    topShadowStyle={[styles.outerShadowStyle, vaultTab && { shadowColor: colors.blueText }]}
+                    bottomShadowStyle={[styles.innerShadowStyle, vaultTab && { shadowColor: colors.blueText }]}
                     linearGradientStyleMain={styles.linearGradientStyleMain}
                 >
                     <Text h3 center>Vault Addresses</Text>
@@ -156,7 +156,7 @@ export default function Vault({ wallet, matchedRate, setSelectedTab }: { wallet:
             {address ?
                 <>
                     <Text h4 style={styles.infoText}>You can use this vault address to receive coins from another vault on the Bitcoin Network</Text>
-                    <View style={styles.qrcode}>
+                    <View style={[styles.qrcode, vaultTab && { borderColor: colors.blueText }]}>
                         <View style={{ width: "80%", height: "80%", margin: 25, padding: 20, backgroundColor: 'white', borderRadius: 30 }}>
                             <QRCode
                                 getRef={c => {
@@ -173,7 +173,7 @@ export default function Vault({ wallet, matchedRate, setSelectedTab }: { wallet:
                         </View>
                     </View>
                     <View style={styles.codeViewMain}>
-                        <TouchableOpacity style={styles.codeView} onPress={() => copyToClipboard(address)}>
+                        <TouchableOpacity style={[styles.codeView, vaultTab && { borderColor: colors.blueText }]} onPress={() => copyToClipboard(address)}>
                             <Image source={Copy} style={styles.copyImage} resizeMode="contain" />
                             <Text semibold style={styles.address}>{shortenAddress(address)}</Text>
                         </TouchableOpacity>
