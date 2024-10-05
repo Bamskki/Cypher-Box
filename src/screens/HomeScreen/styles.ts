@@ -635,6 +635,8 @@ export default StyleSheet.create<Style>({
         flex: 1,
         height: 40,
         alignSelf: 'center',
+        borderWidth: 2,
+        borderColor: colors.greenShadow,
         marginStart: 7.5,
         borderRadius: 25,
     },

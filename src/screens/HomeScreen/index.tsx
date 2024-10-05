@@ -66,7 +66,7 @@ export default function HomeScreen({ route }: Props) {
   const [state, dispatch] = useReducer(walletReducer, initialState);
   const label = state.label;
   const { addWallet, saveToDisk, isAdvancedModeEnabled, wallets, sleep, isElectrumDisabled } = useContext(BlueStorageContext);
-  const { isAuth, walletID, coldStorageWalletID, token, user, withdrawThreshold, reserveAmount, vaultTab, setUser, setVaultTab } = useAuthStore();
+  const { isAuth, walletID, token, user, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
   const A = require('../../../blue_modules/analytics');
   // const [storage, setStorage] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -82,13 +82,9 @@ export default function HomeScreen({ route }: Props) {
   const [wallet, setWallet] = useState(undefined);
   const [balanceVault, setBalanceVault] = useState<string | false | undefined>("");
   const [balanceWithoutSuffix, setBalanceWithoutSuffix] = useState()
-  const [coldStorageWallet, setColdStorageWallet] = useState(undefined);
-  const [ColdStorageBalanceVault, setColdStorageBalanceVault] = useState<string | false | undefined>("");
-  const [coldStorageBalanceWithoutSuffix, setColdStorageBalanceWithoutSuffix] = useState()
   const [recommendedFee, setRecommendedFee] = useState<any>();
   const [vaultAddress, setVaultAddress] = useState('')
   const [hasSavingVault, setHasSavingVault] = useState<boolean | null>()
-  const [hasColdStorage, setHasColdStorage] = useState<boolean>(false);
   const refRBSheet = useRef<any>(null);
 
   const getWalletID = async () => {
@@ -123,24 +119,6 @@ export default function HomeScreen({ route }: Props) {
     }
   }
 
-  const getColdStorageWallet = async () => {
-    const allWallets = wallets.concat(false);
-    const walletTemp = allWallets.find((w: AbstractWallet) => w.getID() === coldStorageWalletID);
-    const balanceTemp = !walletTemp?.hideBalance && formatBalance(walletTemp?.getBalance(), walletTemp?.getPreferredBalanceUnit(), true);
-    const balanceWithoutSuffixTemp = !walletTemp?.hideBalance && formatBalanceWithoutSuffix(Number(walletTemp?.getBalance()), walletTemp?.getPreferredBalanceUnit(), true);
-    await walletTemp.fetchBalance()
-    setColdStorageWallet(walletTemp);
-    setColdStorageBalanceWithoutSuffix(balanceWithoutSuffixTemp)
-    setColdStorageBalanceVault(balanceTemp)
-    const hasVault = walletTemp.secret ? true : false;
-    setHasColdStorage(hasVault)
-    if (wallets && coldStorageWalletID) {
-      setIsAllDone(!!walletTemp);
-    } else {
-      setIsAllDone(false)
-    }
-  }
-
   useEffect(() => {
     async function handleToken() {
       if (isAuth && token) {
@@ -157,10 +135,9 @@ export default function HomeScreen({ route }: Props) {
     //   }
     // }
     // getWithdrawal();
-    getWallet();
-    coldStorageWalletID && getColdStorageWallet();
+    getWallet()
     handleToken();
-  }, [isAuth, token, wallets, walletID, coldStorageWalletID]);
+  }, [isAuth, token, wallets, walletID]);
 
   useEffect(() => {
     if (isAuth && token && !vaultAddress.startsWith('ln') && !vaultAddress.includes('@') && !recommendedFee) {
@@ -201,22 +178,6 @@ export default function HomeScreen({ route }: Props) {
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [wallet, sleep]),
-  );
-
-  useFocusEffect(
-    useCallback(() => {
-      if (coldStorageWallet) {
-        // obtainWalletAddress();
-        (async () => {
-          try {
-            await Promise.race([coldStorageWallet?.fetchUtxo(), sleep(10000)]);
-          } catch (e) {
-            console.log('coincontrol coldStorageWallet.fetchUtxo() failed'); // either sleep expired or fetchUtxo threw an exception
-          }
-        })();
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [coldStorageWallet, sleep]),
   );
 
   const handleUser = async () => {
@@ -329,22 +290,15 @@ export default function HomeScreen({ route }: Props) {
   };
 
   const savingVaultClickHandler = () => {
-    dispatchNavigate('HotStorageVault', { wallet: vaultTab ? coldStorageWallet : wallet, matchedRate });
+    dispatchNavigate('HotStorageVault', { wallet, matchedRate });
   };
 
   const coldStorageClickHandler = () => {
-    setVaultTab(true);
+    dispatchNavigate('ColdStorage');
   };
 
-  const handleCreateColdVault = () => {
-    dispatchNavigate('ConnectColdStorage');
-  }
-
   const hotStorageClickHandler = () => {
-    setVaultTab(false);
-    if(!walletID){
-      dispatchNavigate('SavingVaultIntroNew');      
-    }
+    dispatchNavigate('SavingVaultIntroNew');
   };
 
   const handleCreateVault = () => {
@@ -360,9 +314,6 @@ export default function HomeScreen({ route }: Props) {
     setRefreshing(true);
     if (wallet) {
       await wallet?.fetchBalance();
-    }
-    if(coldStorageWallet){
-      await coldStorageWallet?.fetchBalance();
     }
     handleUser()
   };
@@ -390,7 +341,9 @@ export default function HomeScreen({ route }: Props) {
     }
   };
 
+
   const hasFilledTheBar = calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount)) === 100
+
 
   return (
     <ScreenLayout
@@ -615,7 +568,7 @@ export default function HomeScreen({ route }: Props) {
               </View>
             }
 
-            {(hasSavingVault && walletID && !vaultTab) &&
+            {(hasSavingVault && walletID) &&
               <SavingVault
                 container={StyleSheet.flatten([styles.savingVault, { marginTop: 10 }])}
                 innerContainer={styles.savingVault}
@@ -627,38 +580,7 @@ export default function HomeScreen({ route }: Props) {
                 inDollars={`$${(Number(balanceWithoutSuffix) * Number(matchedRate)).toFixed(2)}`}
                 isColorable
               />
-            }
 
-            {(hasColdStorage && vaultTab) ?
-              <SavingVault
-                container={StyleSheet.flatten([styles.savingVault, { marginTop: 10 }])}
-                innerContainer={styles.savingVault}
-                shadowTopBottom={styles.savingVault}
-                shadowBottomBottom={styles.savingVault}
-                bitcoinText={styles.bitcoinText}
-                title={"Cold Storage"}
-                onPress={savingVaultClickHandler}
-                bitcoinValue={ColdStorageBalanceVault}
-                inDollars={`$${(Number(coldStorageBalanceWithoutSuffix) * Number(matchedRate)).toFixed(2)}`}
-                isColorable
-              />
-              : vaultTab && !coldStorageWalletID &&
-              <View style={[styles.createVaultContainer, {top: 0}]}>
-                <TouchableOpacity
-                  onPress={handleCreateColdVault}
-                >
-                  <LinearGradient
-                    colors={['#1E1E1E', '#6D6D6D']}
-                    start={{ x: 0, y: -0.1 }}
-                    end={{ x: 0, y: 2 }}
-                    locations={[0, 1]}
-                    style={[styles.createVault, {justifyContent: 'center'}]}>
-                    <Text h2 style={styles.createVaultText}>
-                      Create Cold Vault
-                    </Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </View>
             }
             <View style={[styles.container3, { opacity: hasSavingVault ? 1 : 0.5, }]}>
               {(hasSavingVault && walletID) &&
@@ -667,10 +589,7 @@ export default function HomeScreen({ route }: Props) {
                     {!hasSavingVault ?
                       <Text h3 bold style={styles.storageText} onPress={hotStorageClickHandler}>Hot Storage</Text>
                       :
-                      <View style={[styles.bottomBtn, !vaultTab && {        
-                        borderWidth: 2,
-                        borderColor: colors.greenShadow,
-                      }]}>
+                      <View style={styles.bottomBtn}>
                         <LinearGradient
                           start={{ x: 1, y: 0 }}
                           end={{ x: 1, y: 1 }}
@@ -681,11 +600,10 @@ export default function HomeScreen({ route }: Props) {
                         </LinearGradient>
                       </View>
                     }
-                    {isAllDone &&
-                      <View style={[styles.bottomBtn, { marginEnd: 7.5, marginStart: 0 }, vaultTab && {        
-                        borderWidth: 2,
-                        borderColor: colors.greenShadow,
-                      }]}>
+                    {isAllDone || isWithdraw ?
+                      <Text h3 bold style={styles.storageText} onPress={coldStorageClickHandler}>Cold Storage</Text>
+                      :
+                      <View style={[styles.bottomBtn, { marginEnd: 7.5, marginStart: 0 }]}>
                         <LinearGradient
                           start={{ x: 1, y: 0 }}
                           end={{ x: 1, y: 1 }}
@@ -696,7 +614,7 @@ export default function HomeScreen({ route }: Props) {
                               : ['#333333', '#282727']
                           }
                           style={styles.linearGradientbottom}>
-                          <Text h3 bold onPress={coldStorageClickHandler}>Cold Storage</Text>
+                          <Text h3 bold onPress={hotStorageClickHandler}>Cold Storage</Text>
                         </LinearGradient>
                       </View>
                     }
