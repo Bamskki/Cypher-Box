@@ -18,7 +18,10 @@ interface Style {
     btnHeight: ViewStyle;
     linearGradientInside: ViewStyle;
     linearStyle: ViewStyle;
-    insideView: ViewStyle
+    insideView: ViewStyle;
+    deleteButton: ViewStyle;
+    deleteIcon: ImageStyle;
+    inputStyle: ImageStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -113,5 +116,19 @@ export default StyleSheet.create<Style>({
         backgroundColor: colors.gray.dark,
         margin: 1,
         borderRadius: 8,
-    }
+    },
+    inputStyle: {
+        width: '100%',
+        height: 69,
+    },
+    deleteButton: {
+        position: 'absolute',
+        alignSelf: 'flex-end',
+        top: 22,
+        right: 10
+    },
+    deleteIcon: {
+        width: 50,
+        height: 30,
+    },
 })

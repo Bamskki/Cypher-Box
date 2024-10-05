@@ -16,17 +16,19 @@ import { dispatchNavigate } from "@Cypher/helpers";
 import BottomModal from "../../../components/BottomModal";
 import { useTheme } from "../../../components/themes";
 import { OutputModalContent } from "../../../screen/send/coinControl";
+import { createInvoice } from "@Cypher/api/coinOSApis";
 // import { Bitcoin, Transaction, TransactionN } from "@Cypher/assets/svg";
 
-export default function Capsules({ wallet, matchedRate }: any) {
+export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
     const { colors: themeColors } = useTheme();
     const [ids, setIds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [output, setOutput] = useState();
+    const [bitcoinHash, setBitcoinHash] = useState();
     console.log("🚀 ~ Capsules ~ ids:", ids)
     const [btc, setBtc] = useState('0.00');
     const utxo = wallet.getUtxo(true).sort((a, b) => a.height - b.height || a.txid.localeCompare(b.txid) || a.vout - b.vout);
-
+    const primaryColor = vaultTab ? colors.blueText : colors.green
     const [frozen, setFrozen] = useState(
         utxo.filter(out => wallet.getUTXOMetadata(out.txid, out.vout).frozen).map(({ txid, vout }) => `${txid}:${vout}`),
     );
@@ -60,7 +62,36 @@ export default function Capsules({ wallet, matchedRate }: any) {
     // const offset = useRef(new Animated.Value(0)).current;
     // console.log("🚀 ~ Coins ~ offset:", offset);
 
-    const addressClickHandler = () => { }
+    useEffect(() => {
+        (async () => {
+            try {
+                const response = await createInvoice({
+                type: 'bitcoin',
+                });
+                setBitcoinHash(response.hash)
+                console.log('response: ', response)
+            } catch (error) {
+                console.error('Error generating bitcoin address:', error);
+            }
+        })();
+    }, [])
+
+    const addressClickHandler = async () => {
+        let capsulesData: any = [];
+        ids.forEach(id => {
+            const result = utxo?.find(obj => `${obj.txid}:${obj.vout}` === id)?.value;
+            if (result) capsulesData.push({
+                id, value: result
+            });
+        });
+        if (ids.length > 0) {
+            dispatchNavigate('ColdStorage', {wallet, utxo, ids, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to: bitcoinHash});
+        } else {
+            SimpleToast.show("Please select Capsules to Send", SimpleToast.SHORT)
+        }
+    };
+    
+    // const addressClickHandler = () => { }
 
     const { total, inUSD } = useMemo(() => {
         let total = 0;
@@ -91,7 +122,7 @@ export default function Capsules({ wallet, matchedRate }: any) {
     const handleSendBars = () => {
         if (ids.length > 0) {
             const usd = inUSD.toFixed(2);
-            dispatchNavigate('EditAmount', { isEdit: false, wallet, utxo, ids, maxUSD: total, inUSD: inUSD.toFixed(2), total, matchedRate });
+            dispatchNavigate('EditAmount', { isEdit: false, vaultTab, wallet, utxo, ids, maxUSD: total, inUSD: inUSD.toFixed(2), total, matchedRate, to });
         } else {
             SimpleToast.show("Please select Capsules to Send", SimpleToast.SHORT)
         }
@@ -140,7 +171,8 @@ export default function Capsules({ wallet, matchedRate }: any) {
                             <Text white h3 bold>This wallet does not have any coins at the moment.</Text>
                         </View>
                     )}
-                    renderItem={({ item, index }) => <ListView wallet={wallet} item={item} onPress={onPressClickHandler} handleChoose={handleChoose} ids={ids} />}
+                    renderItem={({ item, index }) => <ListView wallet={wallet} item={item} onPress={onPressClickHandler} handleChoose={handleChoose} ids={ids} vaultTab={vaultTab} />}
+                    style={{marginTop: 10}}
                 />
             }
             {/* <ScrollView>
@@ -154,36 +186,49 @@ export default function Capsules({ wallet, matchedRate }: any) {
                         value={`${total} BTC`}
                         keyboardType="number-pad"
                         editable={false}
-                        textInputStyle={StyleSheet.flatten([styles.input, { borderColor: btc?.length > 0 ? colors.green : colors.gray.default }])}
+                        textInputStyle={StyleSheet.flatten([styles.input, { borderColor: btc?.length > 0 ? primaryColor : colors.gray.default }])}
                     />
                     <Text h2 bold numberOfLines={1} style={{ marginStart: 10, width: 100, }}>~$ {inUSD.toFixed(2)}</Text>
                 </View>
                 <Text bold center style={styles.tips}>Tip: Selecting dust coins will increase network fees</Text>
-                <View style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                }}>
+                {vaultTab ?
                     <GradientView
                         onPress={handleSendBars}
                         style={styles.capsuleLinearGradientStyle}
                         linearGradientStyle={styles.capsuleMainShadowStyle}
-                        topShadowStyle={styles.capsuleOuterShadowStyle}
-                        bottomShadowStyle={styles.capsuleInnerShadowStyle}
-                        linearGradientStyleMain={styles.capsuleLinearGradientStyleMain}
+                        topShadowStyle={[styles.capsuleOuterShadowStyle, {width: widths - 30}, vaultTab && { shadowColor: colors.blueText}]}
+                        bottomShadowStyle={[styles.capsuleInnerShadowStyle, {width: widths - 30}, vaultTab && { shadowColor: colors.blueText}]}
+                        linearGradientStyleMain={[styles.capsuleLinearGradientStyleMain, {width: widths - 30}]}
                     >
                         <Text h3 center>Send Capsule</Text>
                     </GradientView>
-                    <GradientView
-                        onPress={addressClickHandler}
-                        topShadowStyle={styles.capsuleOuterShadowStyle}
-                        bottomShadowStyle={styles.capsuleInnerShadowStyle}
-                        style={[styles.capsuleLinearGradientStyle, { marginStart: 25 }]}
-                        linearGradientStyle={styles.capsuleMainShadowStyle}
-                        linearGradientStyleMain={styles.capsuleLinearGradientStyleMain}
-                    >
-                        <Text h3 center>Move to Cold Vault</Text>
-                    </GradientView>
-                </View>
+                :
+                    <View style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                    }}>
+                        <GradientView
+                            onPress={handleSendBars}
+                            style={styles.capsuleLinearGradientStyle}
+                            linearGradientStyle={styles.capsuleMainShadowStyle}
+                            topShadowStyle={[styles.capsuleOuterShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
+                            bottomShadowStyle={[styles.capsuleInnerShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
+                            linearGradientStyleMain={styles.capsuleLinearGradientStyleMain}
+                        >
+                            <Text h3 center>Send Capsule</Text>
+                        </GradientView>
+                        <GradientView
+                            onPress={addressClickHandler}
+                            topShadowStyle={[styles.capsuleOuterShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
+                            bottomShadowStyle={[styles.capsuleInnerShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
+                            style={[styles.capsuleLinearGradientStyle, { marginStart: 25 }]}
+                            linearGradientStyle={styles.capsuleMainShadowStyle}
+                            linearGradientStyleMain={styles.capsuleLinearGradientStyleMain}
+                        >
+                            <Text h3 center>Top-up</Text>
+                        </GradientView>
+                    </View>
+                }
             </View>
             <BottomModal
                 isVisible={Boolean(output)}

@@ -13,7 +13,7 @@ const { height, width } = Dimensions.get('window');
 export class DynamicQRCode extends Component {
   constructor() {
     super();
-    const qrCodeHeight = height > width ? width - 40 : width / 3;
+    const qrCodeHeight = height > width ? width - 90 : width / 3;
     const qrCodeMaxHeight = 370;
     this.state = {
       index: 0,

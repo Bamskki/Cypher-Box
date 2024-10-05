@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Image, ScrollView, StyleSheet, TextInput, View, Clipboard, Platform, PermissionsAndroid } from "react-native";
+import { Image, TouchableOpacity, StyleSheet, TextInput, View, Clipboard, Platform, PermissionsAndroid } from "react-native";
 import SimpleToast from "react-native-simple-toast";
 import { PERMISSIONS, request } from "react-native-permissions";
 import QRCodeScanner from 'react-native-qrcode-scanner';
@@ -278,6 +278,7 @@ export default function SendScreen({ navigation, route }: any) {
                                             style={styles.main}
                                             linearStyle={styles.heigth}
                                             colors_={sender ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}>
+                                            {/* <View style={{ width: '100%', flexDirection: 'row' }}> */}
                                             <Input
                                                 ref={senderRef}
                                                 onChange={setSender}
@@ -289,9 +290,17 @@ export default function SendScreen({ navigation, route }: any) {
                                                 onBlur={() => {
                                                     setAddressFocused(false);
                                                 }}
-
                                             />
+                                            {sender.length > 0 && (
+                                                <TouchableOpacity onPress={() => setSender('')} style={styles.deleteButton}>
+                                                    <Image source={require('../../../img/delete.png')} style={styles.deleteIcon}
+                                                        resizeMode="contain"
+                                                    />
+                                                </TouchableOpacity>
+                                            )}
+                                            {/* </View> */}
                                         </GradientCard>
+
                                         <View style={styles.buttonsContainer}>
                                             <GradientCard
                                                 style={styles.linearGradientInside}

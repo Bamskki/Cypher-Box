@@ -86,12 +86,15 @@ import PaymentCode from './screen/wallets/paymentCode';
 import PaymentCodesList from './screen/wallets/paymentCodesList';
 import loc from './loc';
 import { useTheme } from './components/themes';
-import { AccountStatus, AdjustHotThreshold, CheckAccount, CheckingAccount, ColdStorage, ConfirmTransction, CopyInvoice, CreateCoinOSScreen, CreateInvoice, CreateVault, DownloadBlink, EditAmount, FeeRate, GetAddressScreen, HomeScreen, HotStorageVault, InfoBlink, LoginBlink, LoginBlinkPhone, LoginCoinOSScreen, PurchaseVault, QrScreen, ReceivedMethodScreen, ReviewPayment, SavingVault, SavingVaultCreated, SavingVaultIntro, SavingVaultIntroNew, SendReceiveOnChain, SendReceiveSuccessScreen, SendScreen, SplashScreen, ThresholdAdjust, Transaction, TransactionBroadCast, TransactionBroadCastNew, VerifyPhone, WelcomeScreen, WithdrawThreshold, WithdrawToSavingsVault, ReviewWithdrawal, RecoverSavingVault, GetStartedScreen, TermOfService } from './src/screens';
+import { AccountStatus, AdjustHotThreshold, CheckAccount, CheckingAccount, ColdStorage, ConfirmTransction, CopyInvoice, CreateCoinOSScreen, CreateInvoice, CreateVault, DownloadBlink, EditAmount, FeeRate, GetAddressScreen, HomeScreen, HotStorageVault, InfoBlink, LoginBlink, LoginBlinkPhone, LoginCoinOSScreen, PurchaseVault, QrScreen, ReceivedMethodScreen, ReviewPayment, SavingVault, SavingVaultCreated, SavingVaultIntro, SavingVaultIntroNew, SendReceiveOnChain, SendReceiveSuccessScreen, SendScreen, SplashScreen, ThresholdAdjust, Transaction, TransactionBroadCast, TransactionBroadCastNew, VerifyPhone, WelcomeScreen, WithdrawThreshold, WithdrawToSavingsVault, ReviewWithdrawal, RecoverSavingVault, GetStartedScreen, TermOfService, ConnectColdStorage } from './src/screens';
 import { CardStyleInterpolators, createStackNavigator } from '@react-navigation/stack';
 import Invoice from '@Cypher/screens/Invoice';
 import ChangeUsername from '@Cypher/screens/Account/ChangeUsername';
 import TransactionNew from '@Cypher/screens/TransactionNew';
 import ForgetPassword from '@Cypher/screens/Account/ForgetPassword';
+import HardwareWalletTransaction from '@Cypher/screens/HardwareWalletTransaction';
+import HardwareWalletTransactionContinue from '@Cypher/screens/HardwareWalletTransactionContinue';
+import ConfirmHardwareTransaction from '@Cypher/screens/ConfirmHardwareTransaction';
 
 const WalletsStack = createStackNavigator();
 
@@ -184,9 +187,13 @@ const WalletsRoot = () => {
       <WalletsStack.Screen name="AdjustHotThreshold" component={AdjustHotThreshold} options={{ headerShown: false }} />
       <WalletsStack.Screen name="SendReceiveOnChain" component={SendReceiveOnChain} options={{ headerShown: false }} />
       <WalletsStack.Screen name="ColdStorage" component={ColdStorage} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="ConnectColdStorage" component={ConnectColdStorage} options={{ headerShown: false }} />
       <WalletsStack.Screen name="EditAmount" component={EditAmount} options={{ headerShown: false }} />
       <WalletsStack.Screen name="FeeRate" component={FeeRate} options={{ headerShown: false }} />
       <WalletsStack.Screen name="ConfirmTransction" component={ConfirmTransction} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="HardwareWalletTransaction" component={HardwareWalletTransaction} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="HardwareWalletTransactionContinue" component={HardwareWalletTransactionContinue} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="ConfirmHardwareTransaction" component={ConfirmHardwareTransaction} options={{ headerShown: false }} />
       <WalletsStack.Screen name="TransactionBroadCastNew" component={TransactionBroadCastNew} options={{ headerShown: false }} />
       <WalletsStack.Screen name="PurchaseVault" component={PurchaseVault} options={{ headerShown: false }} />
       <WalletsStack.Screen name="TransactionNew" component={TransactionNew} options={{ headerShown: false }} />

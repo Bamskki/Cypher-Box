@@ -42,5 +42,6 @@ export { default as ReviewWithdrawal } from './ReviewWithdrawal';
 export { default as RecoverSavingVault } from './RecoverSavingVault';
 export { default as GetStartedScreen } from './GetStartedScreen';
 export { default as TermOfService } from './TermOfService';
+export { default as ConnectColdStorage } from './ConnectColdStorage';
 
 

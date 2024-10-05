@@ -12,10 +12,11 @@ import {
 import styles from "./styles";
 import { Text } from "@Cypher/component-library";
 import { Shadow } from "react-native-neomorph-shadows";
-import { ProgressBar5 } from "@Cypher/assets/images";
+import { ProgressBar5, ProgressBarColdStorage } from "@Cypher/assets/images";
 import ProgressBar from "../ProgressBar";
 import { BlueStorageContext } from "../../../blue_modules/storage-context";
 import useAuthStore from "@Cypher/stores/authStore";
+import { colors } from "@Cypher/style-guide";
 
 interface Props extends TouchableOpacityProps {
     container?: ViewStyle;
@@ -35,8 +36,8 @@ interface Props extends TouchableOpacityProps {
 export default function SavingVault({ container, innerContainer, shadowTopBottom, shadowBottomBottom, bitcoinText, onPress, imageStyle, title = 'Savings Vault', titleStyle, bitcoinValue, inDollars, isColorable = false }: Props) {
     const btc = '0.1';
     const { addWallet, saveToDisk, isAdvancedModeEnabled, wallets } = useContext(BlueStorageContext);
-    const { isAuth, walletID, token, user, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
-    const wallet = wallets.find(w => w.getID() === walletID);
+    const { isAuth, walletID, coldStorageWalletID, vaultTab, token, user, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
+    const wallet = vaultTab ? wallets.find(w => w.getID() === coldStorageWalletID) : wallets.find(w => w.getID() === walletID);
     const utxo = wallet?.getUtxo(true).sort((a, b) => a.height - b.height || a.txid.localeCompare(b.txid) || a.vout - b.vout) || [];
     // const inDollar = '6500';
     const emptyUTXO = !utxo ? 5 : utxo.length <= 5 ? 5 - utxo.length : utxo.length > 5 && 0;
@@ -45,7 +46,7 @@ export default function SavingVault({ container, innerContainer, shadowTopBottom
         <TouchableOpacity style={[styles.container, container]} onPress={onPress}>
             <View style={[styles.innerContainer, innerContainer]}>
                 <Shadow
-                    style={StyleSheet.flatten([styles.shadowTopBottom, shadowTopBottom])}
+                    style={StyleSheet.flatten([styles.shadowTopBottom, shadowTopBottom, vaultTab && {shadowColor: colors.blueText}])}
                     inner
                     useArt
                 >
@@ -71,7 +72,7 @@ export default function SavingVault({ container, innerContainer, shadowTopBottom
 
                     <View style={styles.tabs}>
                         {Array(utxo.length > 5 ? 5 : utxo.length).fill(0).map((item, i) => (
-                            <ProgressBar image={ProgressBar5} />
+                            <ProgressBar image={vaultTab ? ProgressBarColdStorage : ProgressBar5} />
                         ))}
                         {Array(emptyUTXO).fill(0).map((item, i) => (
                             <View style={styles.tab} />
@@ -81,7 +82,7 @@ export default function SavingVault({ container, innerContainer, shadowTopBottom
                     <Shadow
                         inner
                         useArt
-                        style={StyleSheet.flatten([styles.shadowBottomBottom, shadowBottomBottom])}
+                        style={StyleSheet.flatten([styles.shadowBottomBottom, shadowBottomBottom, vaultTab && {shadowColor: colors.blueText}])}
                     />
                 </Shadow>
             </View>

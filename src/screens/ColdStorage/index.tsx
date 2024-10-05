@@ -45,7 +45,7 @@ export const shortenAddress = (address: string) => {
 
 
 export default function ColdStorage({ route, navigation }: Props) {
-    const {wallet, utxo, ids, maxUSD, inUSD, total, matchedRate, capsulesData = null, to = null} = route?.params;
+    const {wallet, vaultTab, utxo, ids, maxUSD, inUSD, total, matchedRate, capsulesData = null, to = null} = route?.params;
     const [usd, setUSD] = useState('40');
     const [sats, setSats] = useState('100K sats  ~$' + usd);
     const [address, setAddress] = useState();
@@ -75,7 +75,7 @@ export default function ColdStorage({ route, navigation }: Props) {
 
     const [changeAddress, setChangeAddress] = useState();
     const { wallets, setSelectedWalletID, sleep, txMetadata, saveToDisk, isElectrumDisabled } = useContext(BlueStorageContext);
-    const { walletID } = useAuthStore();
+    const { walletID, coldStorageWalletID } = useAuthStore();
     const { navigate } = useNavigation();
 
 
@@ -87,6 +87,7 @@ export default function ColdStorage({ route, navigation }: Props) {
     const allBalance = formatBalanceWithoutSuffix(balance, BitcoinUnit.BTC, true);
     const balanceWallet = !wallet?.hideBalance && formatBalance(Number(wallet?.getBalance()), wallet?.getPreferredBalanceUnit(), true);
     const balanceWithoutSuffix = !wallet?.hideBalance && formatBalanceWithoutSuffix(Number(wallet?.getBalance()), wallet?.getPreferredBalanceUnit(), true);
+    const primaryColor = vaultTab ? colors?.blueText : colors.green
 
     const formatFee = fee => formatBalance(fee, feeUnit, true);
 
@@ -135,7 +136,7 @@ export default function ColdStorage({ route, navigation }: Props) {
         Alert.alert(loc.errors.error, loc.send.details_wallet_before_tx);
         return;
         }
-        const newWallet = (walletID && wallets.find(w => w.getID() === walletID)) || suitable[0];
+        const newWallet = vaultTab ? ((coldStorageWalletID && wallets.find(w => w.getID() === coldStorageWalletID)) || suitable[0]) : ((walletID && wallets.find(w => w.getID() === walletID)) || suitable[0]);
         setFeeUnit(newWallet.getPreferredBalanceUnit());
         setAmountUnit(newWallet.preferredBalanceUnit); // default for whole screen
 
@@ -167,104 +168,103 @@ export default function ColdStorage({ route, navigation }: Props) {
         });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const getChangeAddressFast = () => {
-        if (changeAddress) return changeAddress; // cache
-    
-        let change;
-        if (WatchOnlyWallet.type === wallet.type && !wallet.isHd()) {
-          // plain watchonly - just get the address
-          change = wallet.getAddress();
-        } else if (WatchOnlyWallet.type === wallet.type || wallet instanceof AbstractHDElectrumWallet) {
-          change = wallet._getInternalAddressByIndex(wallet.getNextFreeChangeAddressIndex());
-        } else {
-          // legacy wallets
-          change = wallet.getAddress();
-        }
-    
-        return change;
-    };
-    
-    useEffect(() => {
-        if (!wallet) return; // wait for it
-        const fees = networkTransactionFees;
-        const change = getChangeAddressFast();
-        const requestedSatPerByte = Number(feeRate);
-        const lutxo = utxo || wallet.getUtxo();
-        let frozen = 0;
-        if (!utxo) {
-          // if utxo is not limited search for frozen outputs and calc it's balance
-          frozen = wallet
-            .getUtxo(true)
-            .filter(o => !lutxo.some(i => i.txid === o.txid && i.vout === o.vout))
-            .reduce((prev, curr) => prev + curr.value, 0);
-        }
-    
-        const options = [
-          { key: 'current', fee: requestedSatPerByte },
-          { key: 'slowFee', fee: fees.slowFee },
-          { key: 'mediumFee', fee: fees.mediumFee },
-          { key: 'fastestFee', fee: fees.fastestFee },
-        ];
-    
-        const newFeePrecalc = { ...feePrecalc };
-    
-        for (const opt of options) {
-          let targets = [];
-          let addresses = [{ address: destinationAddress, key: String(Math.random()), amount: Number(inUSD).toFixed(4), amountSats: parseInt(Number(inUSD) / Number(matchedRate) * 100000000) }]
-          for (const transaction of addresses) {
-            if (transaction.amount === BitcoinUnit.MAX) {
-              // single output with MAX
-              targets = [{ address: transaction.address }];
-              break;
-            }
-            const value = parseInt(transaction.amountSats, 10);
-            if (value > 0) {
-              targets.push({ address: transaction.address, value });
-            } else if (transaction.amount) {
-              if (btcToSatoshi(transaction.amount) > 0) {
-                targets.push({ address: transaction.address, value: btcToSatoshi(transaction.amount) });
-              }
-            }
+  const getChangeAddressFast = () => {
+      if (changeAddress) return changeAddress; // cache
+  
+      let change;
+      if (WatchOnlyWallet.type === wallet.type && !wallet.isHd()) {
+        // plain watchonly - just get the address
+        change = wallet.getAddress();
+      } else if (WatchOnlyWallet.type === wallet.type || wallet instanceof AbstractHDElectrumWallet) {
+        change = wallet._getInternalAddressByIndex(wallet.getNextFreeChangeAddressIndex());
+      } else {
+        // legacy wallets
+        change = wallet.getAddress();
+      }
+  
+      return change;
+  };
+  
+  useEffect(() => {
+      if (!wallet) return; // wait for it
+      const fees = networkTransactionFees;
+      const change = getChangeAddressFast();
+      const requestedSatPerByte = Number(feeRate);
+      const lutxo = utxo || wallet.getUtxo();
+      let frozen = 0;
+      if (!utxo) {
+        // if utxo is not limited search for frozen outputs and calc it's balance
+        frozen = wallet
+          .getUtxo(true)
+          .filter(o => !lutxo.some(i => i.txid === o.txid && i.vout === o.vout))
+          .reduce((prev, curr) => prev + curr.value, 0);
+      }
+  
+      const options = [
+        { key: 'current', fee: requestedSatPerByte },
+        { key: 'slowFee', fee: fees.slowFee },
+        { key: 'mediumFee', fee: fees.mediumFee },
+        { key: 'fastestFee', fee: fees.fastestFee },
+      ];
+  
+      const newFeePrecalc = { ...feePrecalc };
+  
+      for (const opt of options) {
+        let targets = [];
+        let addresses = [{ address: destinationAddress, key: String(Math.random()), amount: Number(inUSD).toFixed(4), amountSats: parseInt(Number(inUSD) / Number(matchedRate) * 100000000) }]
+        for (const transaction of addresses) {
+          if (transaction.amount === BitcoinUnit.MAX) {
+            // single output with MAX
+            targets = [{ address: transaction.address }];
+            break;
           }
-    
-          // if targets is empty, insert dust
-          if (targets.length === 0) {
-            targets.push({ address: '36JxaUrpDzkEerkTf1FzwHNE1Hb7cCjgJV', value: 546 });
-          }
-    
-          // replace wrong addresses with dump
-          targets = targets.map(t => {
-            if (!wallet.isAddressValid(t.address)) {
-              return { ...t, address: '36JxaUrpDzkEerkTf1FzwHNE1Hb7cCjgJV' };
-            } else {
-              return t;
-            }
-          });
-    
-          let flag = false;
-          while (true) {
-            try {
-              const { fee } = wallet.coinselect(lutxo, targets, opt.fee, change);
-    
-              newFeePrecalc[opt.key] = fee;
-              break;
-            } catch (e) {
-              if (e.message.includes('Not enough') && !flag) {
-                flag = true;
-                // if we don't have enough funds, construct maximum possible transaction
-                targets = targets.map((t, index) => (index > 0 ? { ...t, value: 546 } : { address: t.address }));
-                continue;
-              }
-    
-              newFeePrecalc[opt.key] = null;
-              break;
+          const value = parseInt(transaction.amountSats, 10);
+          if (value > 0) {
+            targets.push({ address: transaction.address, value });
+          } else if (transaction.amount) {
+            if (btcToSatoshi(transaction.amount) > 0) {
+              targets.push({ address: transaction.address, value: btcToSatoshi(transaction.amount) });
             }
           }
         }
-    
-        setFeePrecalc(newFeePrecalc);
-      }, [wallet, networkTransactionFees, utxo, destinationAddress, feeRate, dumb]); // eslint-disable-line react-hooks/exhaustive-deps
-    
+  
+        // if targets is empty, insert dust
+        if (targets.length === 0) {
+          targets.push({ address: '36JxaUrpDzkEerkTf1FzwHNE1Hb7cCjgJV', value: 546 });
+        }
+  
+        // replace wrong addresses with dump
+        targets = targets.map(t => {
+          if (!wallet.isAddressValid(t.address)) {
+            return { ...t, address: '36JxaUrpDzkEerkTf1FzwHNE1Hb7cCjgJV' };
+          } else {
+            return t;
+          }
+        });
+  
+        let flag = false;
+        while (true) {
+          try {
+            const { fee } = wallet.coinselect(lutxo, targets, opt.fee, change);
+  
+            newFeePrecalc[opt.key] = fee;
+            break;
+          } catch (e) {
+            if (e.message.includes('Not enough') && !flag) {
+              flag = true;
+              // if we don't have enough funds, construct maximum possible transaction
+              targets = targets.map((t, index) => (index > 0 ? { ...t, value: 546 } : { address: t.address }));
+              continue;
+            }
+  
+            newFeePrecalc[opt.key] = null;
+            break;
+          }
+        }
+      }
+  
+      setFeePrecalc(newFeePrecalc);
+    }, [wallet, networkTransactionFees, utxo, destinationAddress, feeRate, dumb]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const createTransaction = async () => {
         Keyboard.dismiss();
@@ -272,8 +272,8 @@ export default function ColdStorage({ route, navigation }: Props) {
         const requestedSatPerByte = feeRate;
         let addresses = [{ address: destinationAddress, key: String(Math.random()), amount: Number(inUSD).toFixed(4), amountSats: parseInt(Number(inUSD) / Number(matchedRate) * 100000000) }]
         for (const [index, transaction] of addresses.entries()) {
-            console.log('balance: ', balance, ' transaction.amountSats: ', transaction.amountSats, parseInt(Number(inUSD) / Number(matchedRate) * 100000000))
-            let error;
+          console.log('balance: ', balance, ' transaction.amountSats: ', transaction.amountSats, parseInt(Number(inUSD) / Number(matchedRate) * 100000000))
+          let error;
           if (!transaction.amount || transaction.amount < 0 || parseFloat(transaction.amount) === 0) {
             error = loc.send.details_amount_field_is_not_valid;
             console.log('validation error');
@@ -356,7 +356,7 @@ export default function ColdStorage({ route, navigation }: Props) {
         const requestedSatPerByte = Number(feeRate);
         const lutxo = utxo || wallet.getUtxo();
         console.log({ requestedSatPerByte, lutxo: lutxo.length });
-    
+
         const targets = [];
         let addresses = [{ address: destinationAddress, key: String(Math.random()), amount: Number(inUSD).toFixed(4), amountSats: parseInt(Number(inUSD) / Number(matchedRate) * 100000000) }]
         for (const transaction of addresses) {
@@ -378,6 +378,7 @@ export default function ColdStorage({ route, navigation }: Props) {
         console.log('targets: ', targets)
         console.log('requestedSatPerByte: ', requestedSatPerByte)
         console.log('change: ' ,change)
+
         // coinThresholdClickHandler.log('lutxo: ', lutxo)
         const { tx, outputs, psbt, fee } = wallet.createTransaction(
           lutxo,
@@ -396,12 +397,21 @@ export default function ColdStorage({ route, navigation }: Props) {
           // watch-only wallets with enabled HW wallet support have different flow. we have to show PSBT to user as QR code
           // so he can scan it and sign it. then we have to scan it back from user (via camera and QR code), and ask
           // user whether he wants to broadcast it
-        //   navigation.navigate('PsbtWithHardwareWallet', {
-        //     memo: transactionMemo,
-        //     fromWallet: wallet,
-        //     psbt,
-        //     launchedBy: routeParams.launchedBy,
-        //   });
+          const selectedFee = options.find(item => item.active);
+          navigation.navigate('HardwareWalletTransaction', {
+            memo: transactionMemo,
+            fromWallet: wallet,
+            psbt,
+            sats: parseInt(Number(inUSD) / Number(matchedRate) * 100000000),
+            inUSD: Number(inUSD).toFixed(4),
+            sentFrom: address,
+            destinationAddress: destinationAddress,
+            networkFees: isCustomFee ? customFee : selectedFee?.fee,
+            serviceFees: serviceFees,
+            totalFees: totalFees,
+            isCustomFee: isCustomFee,
+            walletID: wallet.getID(),
+          });
           setIsLoading(false);
           return;
         }
@@ -448,6 +458,7 @@ export default function ColdStorage({ route, navigation }: Props) {
             memo: transactionMemo,
             targets: [{ address, value: parseInt(Number(inUSD) / Number(matchedRate) * 100000000) }],
             walletID: wallet.getID(),
+            vaultTab: vaultTab,
             satoshiPerByte: requestedSatPerByte,
             payjoinUrl,
             tx: tx.toHex(),
@@ -541,7 +552,7 @@ export default function ColdStorage({ route, navigation }: Props) {
     }
 
     const editAmountClickHandler = () => {
-        navigation.push('EditAmount', {isEdit: true, wallet, utxo, ids, maxUSD, inUSD, total, matchedRate, capsulesData, to, setSatsEdit: setSats_ });
+        navigation.push('EditAmount', {isEdit: true, vaultTab, wallet, utxo, ids, maxUSD, inUSD, total, matchedRate, capsulesData, to, setSatsEdit: setSats_ });
     }
 
     const editFeesClickHandler = () => {
@@ -730,7 +741,7 @@ export default function ColdStorage({ route, navigation }: Props) {
                     {to ?
                       <View>
                         <Text bold style={styles.coinselected}>Capsules selected: {ids.length}</Text>
-                          {capsulesData.map((item, i) => (
+                          {capsulesData && capsulesData.map((item, i) => (
                             <View style={styles.tabs}>
                               <ProgressBar image={ProgressBar5} />
                               <View style={{ width: '80%', alignItems: 'flex-end' }}>
@@ -746,9 +757,9 @@ export default function ColdStorage({ route, navigation }: Props) {
                     <View style={styles.priceView}>
                         <View>
                             <Text style={styles.recipientTitle}>{to ? "Top-up amount" : "Recipient will get:"}</Text>
-                            <Text bold style={styles.value}>{parseInt(Number(inUSD) / Number(matchedRate) * 100000000) + ' sats ~$' + Number(inUSD).toFixed(2)}</Text>
+                            <Text bold style={[styles.value, vaultTab && {color: colors.blueText}]}>{parseInt(Number(inUSD) / Number(matchedRate) * 100000000) + ' sats ~$' + Number(inUSD).toFixed(2)}</Text>
                         </View>
-                        <TouchableOpacity style={[styles.editAmount, { borderColor: satsEditable ? colors.green : '#B6B6B6' }]} onPress={editAmountClickHandler}>
+                        <TouchableOpacity style={[styles.editAmount, { borderColor: satsEditable ? primaryColor : '#B6B6B6' }]} onPress={editAmountClickHandler}>
                             <Text>Edit amount</Text>
                         </TouchableOpacity>
                     </View>
@@ -770,7 +781,7 @@ export default function ColdStorage({ route, navigation }: Props) {
                         </View>
                     :
                       <View style={styles.pasteview}>
-                          <TouchableOpacity style={[styles.button, { borderColor: destinationAddress?.length > 0 ? colors.green : '#B6B6B6' }]} onPress={pasteClickHandler}>
+                          <TouchableOpacity style={[styles.button, { borderColor: destinationAddress?.length > 0 ? primaryColor : '#B6B6B6' }]} onPress={pasteClickHandler}>
                               {destinationAddress ?
                                   <Text h3 bold>{destinationAddress}</Text>
                                   :
@@ -795,7 +806,7 @@ export default function ColdStorage({ route, navigation }: Props) {
                             {/* <Text bold style={styles.fees}>~ {isCustomFee ? customFee + " sats/vByte" :  getCurrentFee().fee + " sats"}</Text> */}
                         </View>
                         {visibleSelection &&
-                            <View style={styles.feesDropDown}>
+                            <View style={[styles.feesDropDown, vaultTab && {borderColor: colors.blueText}]}>
                                 {options.map((item, index) => {
                                     console.log('item: ', item)
                                     if(item?.fee){
@@ -840,7 +851,7 @@ export default function ColdStorage({ route, navigation }: Props) {
                                 </TouchableOpacity> 
                             </View>
                         }
-                        <TouchableOpacity style={[styles.editAmount, { flexDirection: 'row', borderColor: feesEditable ? colors.green : '#B6B6B6' }]}
+                        <TouchableOpacity style={[styles.editAmount, { flexDirection: 'row', borderColor: feesEditable ? primaryColor : '#B6B6B6' }]}
                             onPress={editFeesClickHandler}>
                             <Text style={{ marginStart: 10, }}>{isCustomFee ? "Customize" : getCurrentFee().label}</Text>
                             <View style={{ marginHorizontal: 10 }}>
@@ -866,10 +877,10 @@ export default function ColdStorage({ route, navigation }: Props) {
                         onChangeText={setTransactionMemo}
                         placeholder="Add note"
                         placeholderTextColor={colors.white}
-                        style={[styles.noteInput, { borderColor: transactionMemo?.length > 0 ? colors.green : '#B6B6B6' }]}
+                        style={[styles.noteInput, { borderColor: transactionMemo?.length > 0 ? primaryColor : '#B6B6B6' }]}
                     />
                 </View>
-                <TouchableOpacity onPress={nextClickHandler} style={styles.nextBtn}>
+                <TouchableOpacity onPress={nextClickHandler} style={[styles.nextBtn, vaultTab && {backgroundColor: colors.blueText}]}>
                     <Text h3>Next</Text>
                 </TouchableOpacity>
             </View>
