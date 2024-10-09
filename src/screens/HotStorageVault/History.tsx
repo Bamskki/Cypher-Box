@@ -12,7 +12,7 @@ import screenHeight from "@Cypher/style-guide/screenHeight";
 import dayjs from "dayjs";
 import { dispatchNavigate } from "@Cypher/helpers";
 
-export default function History({ wallet, matchedRate }: any) {
+export default function History({ wallet, matchedRate, vaultTab }: any) {
 
     const { wallets, saveToDisk, setSelectedWalletID, walletTransactionUpdateStatus, isElectrumDisabled } = useContext(BlueStorageContext);
     const [dataSource, setDataSource] = useState(wallet.getTransactions(5));
@@ -163,7 +163,7 @@ export default function History({ wallet, matchedRate }: any) {
             <SectionList
                 sections={sections}
                 keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => <Items wallet={wallet} matchedRate={matchedRate}  item={item} onPressHandler={() => onPressHandler(item)} />}
+                renderItem={({ item }) => <Items wallet={wallet} matchedRate={matchedRate}  item={item} onPressHandler={() => onPressHandler(item)} vaultTab={vaultTab} />}
                 renderSectionHeader={({ section: { title } }) => <Header title={title} />}
                 onEndReached={async () => {
                     // pagination in works. in this block we will add more txs to FlatList

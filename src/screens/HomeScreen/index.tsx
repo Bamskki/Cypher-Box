@@ -100,9 +100,13 @@ export default function HomeScreen({ route }: Props) {
     }
   };
 
-  useFocusEffect(() => {
-    if (route?.params?.isComplete) setIsAllDone(true);
-  });
+  useFocusEffect(
+    useCallback(() => {
+      if (route?.params?.isComplete) setIsAllDone(true);
+      if (!coldStorageWalletID) setColdStorageWallet(undefined)
+      if (!walletID) setWallet(undefined)
+    }, [wallet, coldStorageWalletID, walletID]),
+  );
 
 
   const getWallet = async () => {

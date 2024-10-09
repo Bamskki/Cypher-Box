@@ -20,6 +20,7 @@ import triggerHapticFeedback, { HapticFeedbackTypes } from "../../../blue_module
 import loc from "../../../loc";
 import Notifications from "../../../blue_modules/notifications";
 import showPrompt from "@Cypher/helpers/prompt";
+import { dispatchReset } from "@Cypher/helpers/navigation";
 
 export default function Settings() {
     // const [right] = useState(new Animated.Value(0));
@@ -28,10 +29,9 @@ export default function Settings() {
     const thirdView = useSharedValue(0);
     const [right] = useState(new RNAnimated.Value(0));
     const [viewType, setViewType] = useState(0);
-    const { walletID } = useAuthStore();
     const { wallets, isAdvancedModeEnabled, saveToDisk, deleteWallet } = useContext(BlueStorageContext);
-    const { setWalletID } = useAuthStore()
-    const wallet = useRef(wallets.find(w => w.getID() === walletID)).current;
+    const { setWalletID, setColdStorageWalletID, vaultTab, walletID, coldStorageWalletID } = useAuthStore()
+    const wallet = vaultTab ? useRef(wallets.find(w => w.getID() === coldStorageWalletID)).current : useRef(wallets.find(w => w.getID() === walletID)).current;
 
     const [hideTransactionsInWalletsList, setHideTransactionsInWalletsList] = useState(!wallet.getHideTransactionsInWalletsList());
     const [isAdvancedModeEnabledRender, setIsAdvancedModeEnabledRender] = useState(false);
@@ -171,9 +171,9 @@ export default function Settings() {
             externalAddresses = wallet.getAllExternalAddresses();
         } catch (_) { }
         Notifications.unsubscribe(externalAddresses, [], []);
-        setWalletID(undefined);
+        vaultTab ? setColdStorageWalletID(undefined) : setWalletID(undefined);
         deleteWallet(wallet);
-        dispatchNavigate('HomeScreen');
+        dispatchReset('HomeScreen');
         saveToDisk(true);
         triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
     };
