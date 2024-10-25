@@ -24,7 +24,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { btc } from "@Cypher/helpers/coinosHelper";
 import { scanQrHelper } from "../../../helpers/scan-qr";
 import DeeplinkSchemaMatch from "../../../class/deeplink-schema-match";
-import { ProgressBar5 } from "@Cypher/assets/images";
+import { ProgressBarColdStorage, ProgressBar5 } from "@Cypher/assets/images";
 
 const prompt = require('../../../helpers/prompt');
 const btcAddressRx = /^[a-zA-Z0-9]{26,35}$/;
@@ -45,7 +45,7 @@ export const shortenAddress = (address: string) => {
 
 
 export default function ColdStorage({ route, navigation }: Props) {
-    const {wallet, vaultTab, utxo, ids, maxUSD, inUSD, total, matchedRate, capsulesData = null, to = null} = route?.params;
+    const {wallet, vaultTab, utxo, ids, maxUSD, inUSD, total, matchedRate, capsulesData = null, to = null, vaultSend} = route?.params;
     const [usd, setUSD] = useState('40');
     const [sats, setSats] = useState('100K sats  ~$' + usd);
     const [address, setAddress] = useState();
@@ -466,6 +466,7 @@ export default function ColdStorage({ route, navigation }: Props) {
             psbt,
             capsulesData,
             to,
+            vaultSend,
             fee: new BigNumber(fee).dividedBy(100000000).toNumber(),          
         }
         console.log('data: ', data)
@@ -552,7 +553,7 @@ export default function ColdStorage({ route, navigation }: Props) {
     }
 
     const editAmountClickHandler = () => {
-        navigation.push('EditAmount', {isEdit: true, vaultTab, wallet, utxo, ids, maxUSD, inUSD, total, matchedRate, capsulesData, to, setSatsEdit: setSats_ });
+        navigation.push('EditAmount', {isEdit: true, vaultTab, wallet, utxo, ids, maxUSD, inUSD, total, matchedRate, capsulesData, to, vaultSend, setSatsEdit: setSats_ });
     }
 
     const editFeesClickHandler = () => {
@@ -743,7 +744,7 @@ export default function ColdStorage({ route, navigation }: Props) {
                         <Text bold style={styles.coinselected}>Capsules selected: {ids.length}</Text>
                           {capsulesData && capsulesData.map((item, i) => (
                             <View style={styles.tabs}>
-                              <ProgressBar image={ProgressBar5} />
+                              <ProgressBar image={vaultTab ? ProgressBarColdStorage : ProgressBar5} />
                               <View style={{ width: '80%', alignItems: 'flex-end' }}>
                               <Text bold style={styles.coinselected}>Total: {formatBalance(item?.value, BitcoinUnit.BTC, true)}</Text>
                               </View>
@@ -775,8 +776,10 @@ export default function ColdStorage({ route, navigation }: Props) {
                         <View style={styles.priceView}>
                           <View>
                               <Text style={styles.recipientTitle}>Sent to:</Text>
-                              <Text style={{...styles.fees, color: colors.pink.main}} italic>My Coinos Checking Account</Text>
-                              <Text style={{...styles.fees, color: colors.pink.main}} italic>Deposit address: {shortenAddress(to)}</Text>
+                              {!vaultSend &&
+                                <Text style={{...styles.fees, color: colors.pink.main}} italic>My Coinos Checking Account</Text>
+                              }
+                              <Text style={{...styles.fees, color: vaultSend ? colors.blueText : colors.pink.main}} italic>{vaultSend ? "Vault Address: " + shortenAddress(to) : "Deposit address: " + shortenAddress(to)}</Text>
                           </View>
                         </View>
                     :

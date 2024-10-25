@@ -399,9 +399,9 @@ export default StyleSheet.create<Style>({
         fontFamily: 'Lato-Bold',
     },
     bottomViewNew: {
-        marginBottom: 40,
+        // marginBottom: 10,
         paddingTop: 10,
-        paddingBottom: 15,
+        // paddingBottom: 15,
         borderTopWidth: 0.5,
         borderTopColor: '#5E5E5E',
     },

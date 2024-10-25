@@ -27,7 +27,7 @@ interface Props {
 
 export default function ConfirmTransction({ route }: Props) {
     const { data } = route?.params;
-    const { recipients = [], walletID, vaultTab, fee, memo, tx, satoshiPerByte, psbt, capsulesData = null, to = null} = data;
+    const { recipients = [], walletID, vaultTab, fee, memo, tx, satoshiPerByte, psbt, capsulesData = null, to = null, vaultSend} = data;
 
     const [usd, setUSD] = useState('40');
     const [sats, setSats] = useState('100K sats  ~$' + usd);
@@ -184,7 +184,7 @@ export default function ConfirmTransction({ route }: Props) {
                     </View>
                     <View style={styles.priceView}>
                         <View>
-                            <Text style={styles.recipientTitle}>{to ? "To Coinos Bitcoin address" : "To:"}</Text>
+                            <Text style={styles.recipientTitle}>{to && !vaultSend ? "To Coinos Bitcoin address" : "To:"}</Text>
                             <Text style={StyleSheet.flatten([styles.fees, { color: vaultTab ? colors.blueText : colors.green }])}>Bitcoin Address: {shortenAddress(data?.destinationAddress)}</Text>
                         </View>
                     </View>
