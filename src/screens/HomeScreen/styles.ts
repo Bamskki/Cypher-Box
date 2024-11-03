@@ -88,11 +88,10 @@ interface Style {
     bitcoinText?: TextStyle;
     linearGradientbottom?: ViewStyle;
     bottomBtn: ViewStyle;
+    createVaultContainer: ViewStyle;
     createVault: ViewStyle;
     createVaultText: TextStyle;
     advancedText: TextStyle;
-    createVaultContainer: ViewStyle;
-
 }
 
 export default StyleSheet.create<Style>({
