@@ -1,4 +1,4 @@
-package io.bluewallet.bluewallet;
+package io.cypherbox.app;
 
 import android.app.Application;
 import android.content.Context;
