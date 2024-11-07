@@ -62,7 +62,7 @@ class AppStorage {
           await AsyncStorage.setItem(key, value);
           await RNSecureKeyStore.remove(key);
         }
-      } catch (_) {}
+      } catch (_) { }
     }
   }
 
@@ -828,7 +828,7 @@ class AppStorage {
   isAdvancedModeEnabled = async () => {
     try {
       return !!(await AsyncStorage.getItem(AppStorage.ADVANCED_MODE_ENABLED));
-    } catch (_) {}
+    } catch (_) { }
     return false;
   };
 
@@ -839,7 +839,7 @@ class AppStorage {
   isHandoffEnabled = async () => {
     try {
       return !!(await AsyncStorage.getItem(AppStorage.HANDOFF_STORAGE_KEY));
-    } catch (_) {}
+    } catch (_) { }
     return false;
   };
 
@@ -850,13 +850,13 @@ class AppStorage {
   isDoNotTrackEnabled = async () => {
     try {
       return !!(await AsyncStorage.getItem(AppStorage.DO_NOT_TRACK));
-    } catch (_) {}
+    } catch (_) { }
     return false;
   };
 
   setDoNotTrack = async value => {
     await AsyncStorage.setItem(AppStorage.DO_NOT_TRACK, value ? '1' : '');
-    await DefaultPreference.setName('group.io.bluewallet.bluewallet');
+    await DefaultPreference.setName('group.io.cypherbox.app');
     await DefaultPreference.set(AppStorage.DO_NOT_TRACK, value);
   };
 

@@ -73,9 +73,9 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "io.bluewallet.bluewallet"
+    namespace "io.cypherbox.app"
     defaultConfig {
-        applicationId "io.bluewallet.bluewallet"
+        applicationId "io.cypherbox.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

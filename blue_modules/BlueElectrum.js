@@ -100,7 +100,7 @@ async function connectMain() {
     usingPeer = savedPeer;
   }
 
-  await DefaultPreference.setName('group.io.bluewallet.bluewallet');
+  await DefaultPreference.setName('group.io.cypherbox.app');
   try {
     if (usingPeer.host.endsWith('onion')) {
       const randomPeer = await getCurrentPeer();
@@ -224,7 +224,7 @@ async function presentNetworkErrorAlert(usingPeer) {
               {
                 text: loc._.cancel,
                 style: 'cancel',
-                onPress: () => {},
+                onPress: () => { },
               },
               {
                 text: loc._.ok,
@@ -234,7 +234,7 @@ async function presentNetworkErrorAlert(usingPeer) {
                   await AsyncStorage.setItem(ELECTRUM_TCP_PORT, '');
                   await AsyncStorage.setItem(ELECTRUM_SSL_PORT, '');
                   try {
-                    await DefaultPreference.setName('group.io.bluewallet.bluewallet');
+                    await DefaultPreference.setName('group.io.cypherbox.app');
                     await DefaultPreference.clear(ELECTRUM_HOST);
                     await DefaultPreference.clear(ELECTRUM_SSL_PORT);
                     await DefaultPreference.clear(ELECTRUM_TCP_PORT);
@@ -936,7 +936,7 @@ module.exports.calculateBlockTime = function (height) {
 module.exports.testConnection = async function (host, tcpPort, sslPort) {
   const client = new ElectrumClient(global.net, global.tls, sslPort || tcpPort, host, sslPort ? 'tls' : 'tcp');
 
-  client.onError = () => {}; // mute
+  client.onError = () => { }; // mute
   let timeoutId = false;
   try {
     const rez = await Promise.race([
