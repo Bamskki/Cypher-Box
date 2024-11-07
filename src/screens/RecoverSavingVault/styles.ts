@@ -1,4 +1,4 @@
-import { colors, widths, heights, shadow } from "@Cypher/style-guide";
+import { colors, widths, shadow, heights } from "@Cypher/style-guide";
 import { StyleProp, ImageStyle, StyleSheet, TextStyle, ViewStyle } from "react-native";
 
 interface Style {
@@ -20,10 +20,7 @@ interface Style {
     login: TextStyle;
     alreadyView: ViewStyle;
     inputsContainer: ViewStyle;
-    inputColumn: ViewStyle;
-    inputContainer: ViewStyle;
     inputStyle: ViewStyle;
-    leftContainer: ViewStyle;
     column: ViewStyle;
     labelText: TextStyle;
     textInputStyle: ViewStyle;

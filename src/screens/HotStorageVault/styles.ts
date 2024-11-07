@@ -417,9 +417,7 @@ export default StyleSheet.create<Style>({
         borderRadius: 25,
         width: (widths / 2) - 30,
         height: 47,
-        // flex: 1,
         justifyContent: 'center',
-        // backgroundColor: 'blue'
     },
     capsuleInnerShadowStyle: {
         shadowOffset: { width: -2, height: -2 },

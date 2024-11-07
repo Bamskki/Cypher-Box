@@ -17,7 +17,7 @@ export function startsWithLn(str: string) {
     return str.startsWith("ln");
 }
 
-export const isValidEmail = (email) => {
+export const isValidEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
 };
