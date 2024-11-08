@@ -21,7 +21,7 @@ jobs:
 
           # run tests!
           # - run:
-          command: npm run tslint && npm run lint
+          #command: npm run tslint && npm run lint
 
   unit:
     docker:
