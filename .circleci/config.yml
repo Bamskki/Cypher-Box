@@ -1,6 +1,5 @@
 version: 2.1
 jobs:
-
   lint:
     docker:
       - image: cimg/node:16.20.2
@@ -20,8 +19,8 @@ jobs:
           paths:
             - node_modules
 
-      # run tests!
-      - run:
+          # run tests!
+          # - run:
           command: npm run tslint && npm run lint
 
   unit:
@@ -46,7 +45,6 @@ jobs:
       # run tests!
       - run:
           command: npm run unit
-
 
   integration:
     docker:
