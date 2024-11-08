@@ -34,9 +34,8 @@ interface Props extends TouchableOpacityProps {
 }
 
 export default function SavingVault({ container, innerContainer, shadowTopBottom, shadowBottomBottom, bitcoinText, onPress, imageStyle, title = 'Savings Vault', titleStyle, bitcoinValue, inDollars, isColorable = false }: Props) {
-    const btc = '0.1';
-    const { addWallet, saveToDisk, isAdvancedModeEnabled, wallets } = useContext(BlueStorageContext);
-    const { isAuth, walletID, coldStorageWalletID, vaultTab, token, user, withdrawThreshold, reserveAmount, setUser } = useAuthStore();
+    const { wallets } = useContext(BlueStorageContext);
+    const { walletID, coldStorageWalletID, vaultTab } = useAuthStore();
     const wallet = vaultTab ? wallets.find(w => w.getID() === coldStorageWalletID) : wallets.find(w => w.getID() === walletID);
     const utxo = wallet?.getUtxo(true).sort((a, b) => a.height - b.height || a.txid.localeCompare(b.txid) || a.vout - b.vout) || [];
     // const inDollar = '6500';
@@ -46,7 +45,7 @@ export default function SavingVault({ container, innerContainer, shadowTopBottom
         <TouchableOpacity style={[styles.container, container]} onPress={onPress}>
             <View style={[styles.innerContainer, innerContainer]}>
                 <Shadow
-                    style={StyleSheet.flatten([styles.shadowTopBottom, shadowTopBottom, vaultTab && {shadowColor: colors.blueText}])}
+                    style={StyleSheet.flatten([styles.shadowTopBottom, shadowTopBottom, vaultTab && { shadowColor: colors.blueText }])}
                     inner
                     useArt
                 >
@@ -72,17 +71,17 @@ export default function SavingVault({ container, innerContainer, shadowTopBottom
 
                     <View style={styles.tabs}>
                         {Array(utxo.length > 5 ? 5 : utxo.length).fill(0).map((item, i) => (
-                            <ProgressBar image={vaultTab ? ProgressBarColdStorage : ProgressBar5} />
+                            <ProgressBar key={item} image={vaultTab ? ProgressBarColdStorage : ProgressBar5} />
                         ))}
                         {Array(emptyUTXO).fill(0).map((item, i) => (
-                            <View style={styles.tab} />
+                            <View key={item} style={styles.tab} />
                         ))}
                     </View>
 
                     <Shadow
                         inner
                         useArt
-                        style={StyleSheet.flatten([styles.shadowBottomBottom, shadowBottomBottom, vaultTab && {shadowColor: colors.blueText}])}
+                        style={StyleSheet.flatten([styles.shadowBottomBottom, shadowBottomBottom, vaultTab && { shadowColor: colors.blueText }])}
                     />
                 </Shadow>
             </View>
