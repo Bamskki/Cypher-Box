@@ -19,7 +19,7 @@ interface Props {
 }
 
 export default function ConnectColdStorage({ route, navigation }: Props) {
-    const [address, setAddress] = useState<string>()
+    const [address, setAddress] = useState<string>("")
     const [progress, setProgress] = useState();
     const [wallets, setWallets] = useState([]);
     const [password, setPassword] = useState();
