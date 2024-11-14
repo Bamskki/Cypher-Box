@@ -278,7 +278,6 @@ export default function SendScreen({ navigation, route }: any) {
                                             style={styles.main}
                                             linearStyle={styles.heigth}
                                             colors_={sender ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}>
-                                            {/* <View style={{ width: '100%', flexDirection: 'row' }}> */}
                                             <Input
                                                 ref={senderRef}
                                                 onChange={setSender}
@@ -298,9 +297,7 @@ export default function SendScreen({ navigation, route }: any) {
                                                     />
                                                 </TouchableOpacity>
                                             )}
-                                            {/* </View> */}
                                         </GradientCard>
-
                                         <View style={styles.buttonsContainer}>
                                             <GradientCard
                                                 style={styles.linearGradientInside}

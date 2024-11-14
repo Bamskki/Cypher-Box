@@ -92,7 +92,6 @@ export default StyleSheet.create<Style>({
         justifyContent: 'center',
         columnGap: 10,
         marginTop: 20,
-
     },
     btnHeight: {
         height: 84
