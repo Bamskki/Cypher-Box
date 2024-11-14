@@ -7,6 +7,8 @@ import TextView from "./TextView";
 import { btc } from "@Cypher/helpers/coinosHelper";
 import { formatBalance } from "../../../loc";
 import { BlueStorageContext } from "../../../blue_modules/storage-context";
+import { colors } from "@Cypher/style-guide";
+import useAuthStore from "@Cypher/stores/authStore";
 
 interface Props {
     route: any;
@@ -31,6 +33,7 @@ export default function SendReceiveOnChain({ route }: Props) {
     const dollarAmount = satsAmount * matchedRate * currency;
     const BTCAmount = btc(satsAmount) + " BTC";
     const { saveToDisk, txMetadata, wallets, getTransactions } = useContext(BlueStorageContext);
+    const { vaultTab } = useAuthStore();
     const [from, setFrom] = useState();
     const [to, setTo] = useState();
     const [isLoading, setIsLoading] = useState(true);
@@ -114,7 +117,7 @@ export default function SendReceiveOnChain({ route }: Props) {
                         <Text bold h4 style={styles.text}>Accelrate transaction</Text>
                     </TouchableOpacity>
                 } */}
-                <TouchableOpacity style={styles.button} onPress={handleViewBtcNetExplorerClickHandler}>
+                <TouchableOpacity style={[styles.button, vaultTab && { borderColor: colors.blueText}]} onPress={handleViewBtcNetExplorerClickHandler}>
                     <Text bold h4 style={styles.text}>View in Bitcoin Network Explorer</Text>
                 </TouchableOpacity>
             </View>

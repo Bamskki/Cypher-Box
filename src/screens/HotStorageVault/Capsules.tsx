@@ -17,6 +17,8 @@ import BottomModal from "../../../components/BottomModal";
 import { useTheme } from "../../../components/themes";
 import { OutputModalContent } from "../../../screen/send/coinControl";
 import { createInvoice } from "@Cypher/api/coinOSApis";
+import { AbstractWallet } from "../../../class";
+import useAuthStore from "@Cypher/stores/authStore";
 // import { Bitcoin, Transaction, TransactionN } from "@Cypher/assets/svg";
 
 export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
@@ -27,12 +29,14 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
     const [bitcoinHash, setBitcoinHash] = useState();
     console.log("🚀 ~ Capsules ~ ids:", ids)
     const [btc, setBtc] = useState('0.00');
+    const [sendToAddress, setSendToAddress] = useState();
     const utxo = wallet.getUtxo(true).sort((a, b) => a.height - b.height || a.txid.localeCompare(b.txid) || a.vout - b.vout);
     const primaryColor = vaultTab ? colors.blueText : colors.green
     const [frozen, setFrozen] = useState(
         utxo.filter(out => wallet.getUTXOMetadata(out.txid, out.vout).frozen).map(({ txid, vout }) => `${txid}:${vout}`),
     );
-    const { wallets, saveToDisk, sleep } = useContext(BlueStorageContext);
+    const { walletID, coldStorageWalletID } = useAuthStore();
+    const { wallets, saveToDisk, sleep, isElectrumDisabled } = useContext(BlueStorageContext);
 
     const debouncedSaveFronen = useRef(
         debounce(async frzn => {
@@ -50,6 +54,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
     useEffect(() => {
         (async () => {
             try {
+                obtainWalletAddress();
                 await Promise.race([wallet.fetchUtxo(), sleep(10000)]);
             } catch (e) {
                 console.log('coincontrol wallet.fetchUtxo() failed'); // either sleep expired or fetchUtxo threw an exception
@@ -74,7 +79,40 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
                 console.error('Error generating bitcoin address:', error);
             }
         })();
-    }, [])
+    }, []);
+
+    const obtainWalletAddress = async () => {
+        let newAddress;
+        const allWallets = wallets.concat(false);
+        const walletTemp = vaultTab ? allWallets.find((w: AbstractWallet) => w.getID() === walletID) : allWallets.find((w: AbstractWallet) => w.getID() === coldStorageWalletID);    
+        try {
+            if (!isElectrumDisabled) newAddress = await Promise.race([walletTemp.getAddressAsync(), sleep(1000)]);
+        } catch (_) { }
+        if (newAddress === undefined) {
+            // either sleep expired or getAddressAsync threw an exception
+            console.warn('either sleep expired or getAddressAsync threw an exception');
+            newAddress = walletTemp._getExternalAddressByIndex(walletTemp.getNextFreeAddressIndex());
+        } else {
+            saveToDisk(); // caching whatever getAddressAsync() generated internally
+        }
+        console.log('newAddress: ', newAddress)
+        setSendToAddress(newAddress);
+    }
+
+    const moveToVaultClickHandler = async () => {
+        let capsulesData: any = [];
+        ids.forEach(id => {
+            const result = utxo?.find(obj => `${obj.txid}:${obj.vout}` === id)?.value;
+            if (result) capsulesData.push({
+                id, value: result
+            });
+        });
+        if (ids.length > 0) {
+            dispatchNavigate('ColdStorage', {wallet, utxo, ids, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to: sendToAddress, vaultTab, vaultSend: true});
+        } else {
+            SimpleToast.show("Please select Capsules to Send", SimpleToast.SHORT)
+        }
+    }
 
     const addressClickHandler = async () => {
         let capsulesData: any = [];
@@ -229,6 +267,31 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
                         </GradientView>
                     </View>
                 }
+                <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginTop: 10,
+                }}>
+                    <GradientView
+                        style={styles.capsuleLinearGradientStyle}
+                        linearGradientStyle={styles.capsuleMainShadowStyle}
+                        topShadowStyle={[styles.capsuleOuterShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
+                        bottomShadowStyle={[styles.capsuleInnerShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
+                        linearGradientStyleMain={styles.capsuleLinearGradientStyleMain}
+                    >
+                        <Text h3 center>Batch</Text>
+                    </GradientView>
+                    <GradientView
+                        onPress={moveToVaultClickHandler}
+                        topShadowStyle={[styles.capsuleOuterShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
+                        bottomShadowStyle={[styles.capsuleInnerShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
+                        style={[styles.capsuleLinearGradientStyle, { marginStart: 25 }]}
+                        linearGradientStyle={styles.capsuleMainShadowStyle}
+                        linearGradientStyleMain={styles.capsuleLinearGradientStyleMain}
+                    >
+                        <Text h3 center>{vaultTab ? "Move to Hot Vault" : "Move to Cold Vault"}</Text>
+                    </GradientView>
+                </View>
             </View>
             <BottomModal
                 isVisible={Boolean(output)}

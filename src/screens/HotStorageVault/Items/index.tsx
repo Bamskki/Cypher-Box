@@ -10,10 +10,11 @@ interface Props {
     wallet: any;
     item: any;
     matchedRate: any;
+    vaultTab: boolean;
     onPressHandler(item: any): void;
 }
 
-export default function Items({ wallet, item, matchedRate, onPressHandler }: Props) {
+export default function Items({ wallet, item, matchedRate, vaultTab, onPressHandler }: Props) {
     const satsAmount = item.value.toString().replace('-', ''); // Adjusted for negative sign
     const BTCAmount = btc(satsAmount) + " BTC";
     const amountSign = item.value < 0 ? "-" : "+";
