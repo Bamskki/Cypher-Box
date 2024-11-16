@@ -13,7 +13,7 @@ import { isCameraAuthorizationStatusGranted } from '../../helpers/scan-qr';
 import { useTheme } from '../../components/themes';
 import Button from '../../components/Button';
 
-const LocalQRCode = require('@remobile/react-native-qrcode-local-image');
+const LocalQRCode = require('@flyskywhy/react-native-qrcode-local-image');
 const createHash = require('create-hash');
 const fs = require('../../blue_modules/fs');
 const Base43 = require('../../blue_modules/base43');

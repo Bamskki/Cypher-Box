@@ -8,7 +8,7 @@ import { isDesktop } from './environment';
 import alert from '../components/Alert';
 import { readFile } from './react-native-bw-file-access';
 
-const LocalQRCode = require('@remobile/react-native-qrcode-local-image');
+const LocalQRCode = require('@flyskywhy/react-native-qrcode-local-image');
 
 const _shareOpen = async (filePath: string) => {
   return await Share.open({
