@@ -4,7 +4,7 @@
 
 Forked from BlueWallet release (???)
 
-Built with React Native, Electrum, and Coinos.io API (more APIs will be included soon)
+Built with React Native, Electrum, and integrated with Coinos.io API (more APIs will be included soon)
 
 ---
 
@@ -28,7 +28,7 @@ You will now need to either connect an Android device to your computer or run an
 
 1. Download and run Android Studio
 2. Click on "Open an existing Android Studio Project"
-3. Open build.gradle file under BlueWallet/android/ folder
+3. Open build.gradle file under Cypher-Box/android/ folder
 4. Android Studio will take some time to set things up. Once everything is set up, go to Tools -> AVD Manager. This option may take some time to appear in the menu if you're opening the project in a freshly-installed version of Android Studio.
 5. Click on "Create Virtual Device..." and go through the steps to create a virtual device
 6. Launch your newly created virtual device by clicking the Play button under Actions column
@@ -45,7 +45,7 @@ In another terminal window within the BlueWallet folder:
 
 `npx react-native run-ios`
 
-**To debug BlueWallet on the iOS Simulator, you must choose a Rosetta-compatible iOS Simulator. This can be done by navigating to the Product menu in Xcode, selecting Destination Architectures, and then opting for "Show Both." This action will reveal the simulators that support Rosetta.**
+**To debug Cypher-Box on the iOS Simulator, you must choose a Rosetta-compatible iOS Simulator. This can be done by navigating to the Product menu in Xcode, selecting Destination Architectures, and then opting for "Show Both." This action will reveal the simulators that support Rosetta.**
 
 * To run on macOS using Mac Catalyst:
 * `npx pod-install`
@@ -59,7 +59,7 @@ BlueWallet's [repo](https://github.com/BlueWallet/BlueWallet/)
 
 Website: [cypherbox.io](cypherbox.io)
 
-Community: [telegram group](https://t.me/+t01zpIzF5s8wYjlh)
+Community: [telegram group](https://t.me/BitcoinUserSupport)
 
 ---
 
@@ -88,7 +88,7 @@ Cold Vault (watch-only):
 
 ---
 
-MVP roadmap (last update 27th July)
+MVP development roadmap (last update 27th November)
 **Checking account**
 - ✅ Create Account
 - ✅ Login
@@ -101,7 +101,7 @@ MVP roadmap (last update 27th July)
 - ✅ Unit conversion
 - ⏱️ Notifications (postponed)
 - ✅ Transaction history
-- ⭕️ Withdraw to hot vault
+- ✅ Withdraw to hot vault
 - ⭕️ Withdraw to cold vault
 - ✅ Threshold bar
 - ✅ Adjust Threshold
@@ -113,17 +113,17 @@ MVP roadmap (last update 27th July)
 - ✅ Receive to Hot Vault
 - ✅ Coin control
 - ⭕️ Notifications
-- ⭕️ Send from Hot Vault
+- ✅ Send from Hot Vault
 - ✅ Transaction history
-- ⭕️ Transfer to cold vault
-- ⭕️ Top-up from checking account
+- ✅ Transfer to cold vault
+- ✅ Top-up to checking account
 
 **Cold vault**
-- ⭕️ Create Cold Vault
-- ⭕️ Send from Cold Vault
+- ✅ Create Cold Vault
+- ✅ Send from Cold Vault
 - ⭕️ Transfer to hot vault
 - ✅ Withdrawal fee estimations
-- ⭕️ Top-up from checking account
+- ⭕️ Top-up to checking account
 
 ---
 
