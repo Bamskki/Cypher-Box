@@ -1,29 +1,135 @@
-# Cypher Bank - The New Way of Using Bitcoin
+# Cypher Box - A New Way to Play Bitcoin
 
-**APP UNDER CONSTRUCTION. FIGMA DESIGN AND PROTOTYPE CAN BE FOUND [HERE](https://www.figma.com/file/tOPzd8F5sS5vux6o8gquhx/Prototype-1?type=design&node-id=48%3A114&mode=design&t=RM6JJskEqcuRwQpG-1)**
+**APP UNDER CONSTRUCTION**
 
-Derived from BlueWallet & Blink Wallet
+Forked from BlueWallet release (???)
 
-Built with React Native, Electrum, and Blink's API from Galoy. You could think of Blink as bank, and Galoy as a factory that creates banks.
+Built with React Native, Electrum, and Coinos.io API (more APIs will be included soon)
 
-Read BlueWallet's [repo](https://github.com/BlueWallet/BlueWallet/)
+---
 
-Galoy [Read me](https://github.com/GaloyMoney/galoy)
+# BUILD & RUN IT
 
-Blink Developer [Documentation](https://dev.blink.sv/)
+Please refer to the `engines` field in `package.json` file for the minimum required versions of Node and npm. It is preferred that you use an even-numbered version of Node as these are LTS versions.
 
-Website: [cypherbank.io](cypherbank.io)
+To view the version of Node and npm in your environment, run the following in your console:
+
+`node --version && npm --version`
+In your console:
+
+* `https://github.com/Bamskki/Cypher-Box.git`
+* `cd Cypher-Box` 
+* `npm install`
+
+Please make sure that your console is running the most stable versions of npm and node (even-numbered versions).
+
+To run on Android:
+You will now need to either connect an Android device to your computer or run an emulated Android device using AVD Manager which comes shipped with Android Studio. To run an emulator using AVD Manager:
+
+1. Download and run Android Studio
+2. Click on "Open an existing Android Studio Project"
+3. Open build.gradle file under BlueWallet/android/ folder
+4. Android Studio will take some time to set things up. Once everything is set up, go to Tools -> AVD Manager. This option may take some time to appear in the menu if you're opening the project in a freshly-installed version of Android Studio.
+5. Click on "Create Virtual Device..." and go through the steps to create a virtual device
+6. Launch your newly created virtual device by clicking the Play button under Actions column
+Once you connected an Android device or launched an emulator, run this:
+
+`npx react-native run-android`
+The above command will build the app and install it. Once you launch the app it will take some time for all of the dependencies to load. Once everything loads up, you should have the built app running.
+
+To run on iOS:
+* `npx pod-install`
+* `npm start`
+
+In another terminal window within the BlueWallet folder:
+
+`npx react-native run-ios`
+
+**To debug BlueWallet on the iOS Simulator, you must choose a Rosetta-compatible iOS Simulator. This can be done by navigating to the Product menu in Xcode, selecting Destination Architectures, and then opting for "Show Both." This action will reveal the simulators that support Rosetta.**
+
+* To run on macOS using Mac Catalyst:
+* `npx pod-install`
+* `npm start`
+
+Open ios/BlueWallet.xcworkspace. Once the project loads, select the scheme/target BlueWallet-NoLDK. Click Run.
+
+---
+
+BlueWallet's [repo](https://github.com/BlueWallet/BlueWallet/)
+
+Website: [cypherbox.io](cypherbox.io)
 
 Community: [telegram group](https://t.me/+t01zpIzF5s8wYjlh)
 
+---
+
+Checking Account:
+* Create/login to Coinos.io 
+* Send and receive lightning, Liquid, and onchain payments
+* Create lightning address
+* Payment history, Withdrawal Threshold reminder
+* Withdraw to Vault
+* Authentication token(s) for custodian API(s) are only accessable by the user
+
+Hot Vault:
 * Private keys never leave your device
-* Lightning Network supported through Blink's API
-* SegWit-first. Replace-By-Fee support
-* Encryption. Plausible deniability
-* Gamified experience 
-* And many more features...
+* SegWit-first, Bip39, Replace-By-Fee, and Child-Pay-For-Parent support
+* Coin control
+* Top-up Checking Account
+* Send to Cold Vault
 
-Blink Account registration process: Users should register their Blink accounts directly from this [page]( https://consent.blink.sv/login?login_challenge=0b48a0faa424456a9b198ba1b15d7179)
-and then it will redirect to our callback URL upon completion.
+Cold Vault (watch-only):
+* Private keys never leave your device
+* SegWit-first, Bip39, Replace-By-Fee, and Child-Pay-For-Parent support
+* Coin control
+* Top-up Checking Account
+* PSBT
+* Send to Hot Vault
 
-<img src="https://i.imgur.com/bJtx6Cg.png" width="100%">
+---
+
+MVP roadmap (last update 27th July)
+**Checking account**
+- ✅ Create Account
+- ✅ Login
+- ✅ Fetch Balance
+- ✅ Receive lightning
+- ✅ Send lightning
+- ✅ Receive onchain
+- ✅ Send onchain
+- ✅ Update Balance
+- ✅ Unit conversion
+- ⏱️ Notifications (postponed)
+- ✅ Transaction history
+- ⭕️ Withdraw to hot vault
+- ⭕️ Withdraw to cold vault
+- ✅ Threshold bar
+- ✅ Adjust Threshold
+- ✅ Adjust Reserve Amount
+
+**Hot vault**
+- ✅ Create Hot Vault
+- ✅ Withdrawal fee estimation
+- ✅ Receive to Hot Vault
+- ✅ Coin control
+- ⭕️ Notifications
+- ⭕️ Send from Hot Vault
+- ✅ Transaction history
+- ⭕️ Transfer to cold vault
+- ⭕️ Top-up from checking account
+
+**Cold vault**
+- ⭕️ Create Cold Vault
+- ⭕️ Send from Cold Vault
+- ⭕️ Transfer to hot vault
+- ✅ Withdrawal fee estimations
+- ⭕️ Top-up from checking account
+
+---
+
+# RESPONSIBLE DISCLOSURE
+Found critical bugs/vulnerabilities? Please email them info@cypherbox.io Thanks!
+
+<img src="https://i.imgur.com/GLXuiOX.png" width="100%">
+
+
