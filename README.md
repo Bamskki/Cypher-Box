@@ -1,5 +1,8 @@
 # Cypher Box - A New Way to Play Bitcoin
 
+## License
+This software is available for auditing, learning, and development purposes only. Redistribution, selling, or commercial use is prohibited. See the [LICENSE](./LICENSE) file for details.
+
 **APP UNDER CONSTRUCTION**
 
 Forked from BlueWallet release (???)
