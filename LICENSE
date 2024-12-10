@@ -51,5 +51,6 @@ Modifications made by Cypher Box include, but are not limited to:
 - UTXO shapes also known as 'Capsules': graphical shapes displayed on Vault(s) card(s) and other screens that represent the value of bitcoin UTXOs.
 - Intuitive onchain send flow that allow users to do coin control as a default option before specifying amount.
 
+Redistribution, commercialization, or sublicensing of these modifications is prohibited without prior written consent.
 For any questions or permissions, please contact info@cypherbox.io
 
