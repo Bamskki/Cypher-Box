@@ -46,11 +46,13 @@ Modifications made by Cypher Box include, but are not limited to:
 - Rebalancing  (between custodian accounts): Establishing API connections between custodian accounts to enable seamless swapping of funds between custodians and exchanges for counterparty risk management and offchain balance control 
 - Withdrawal/Top-Up: Provides functionality to connect users' custodian accounts to their on-chain wallets (referred to as "Vaults"), enabling users to withdraw and deposit funds between their custodian accounts and Vaults.
 - Move to Cold or Hot Vault: Facilitates seamless transfers of funds between on-chain Vaults, allowing users to switch between storage options based on their preferences.
+- Onchain percentage fee: Calculates an on-chain transaction's fee as a percentage of the total amount being sent.
 2. Enhanced Frontend Functionality:
-Withdrawal Thresholds: Introduces a threshold bar display to visualize users' balances and the counterparty risks associated with storing funds in custodian accounts.
-Reserve Amount Threshold: Specifies a threshold value representing the remaining balance in custodian accounts after an on-chain withdrawal order is processed.
-UTXO Shapes (Capsules): Graphical shapes displayed on Vault cards and other screens to visually represent the value of Bitcoin UTXOs, enhancing user comprehension.
-Intuitive On-Chain Send Flow: Provides a user-friendly interface for conducting coin control as a default option before specifying the transaction amount, improving UTXO privacy and control.
+- Splitting homepage screen into third-party custodian Checking Account(s) and self-custodial onchain Vault(s)
+- Withdrawal Thresholds: Introduces a threshold bar display to visualize users' balances and the counterparty risks associated with storing funds in custodian accounts.
+- Reserve Amount Threshold: Specifies a threshold value representing the remaining balance in custodian accounts after an on-chain withdrawal order is processed.
+- UTXO Shapes (Capsules): Graphical shapes displayed on Vault cards and other screens to visually represent the value of Bitcoin UTXOs, enhancing user comprehension.
+- Intuitive On-Chain Send Flow: Provides a user-friendly interface for conducting coin control as a default option before specifying the transaction amount, improving UTXO privacy and control.
 
 Redistribution, commercialization, or sublicensing of these modifications is prohibited without prior written consent.
 For any questions or permissions, please contact info@cypherbox.io
