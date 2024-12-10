@@ -41,15 +41,16 @@ The modifications, enhancements, and additional code contributed to this project
 
 Modifications made by Cypher Box include, but are not limited to:
 
-1. Custom backend features: 
-- Integration of third party custodians and exchanges through API connections.
-- Withdrawal/Top-up buttons connecting users' custodian account(s) to their onchain wallets (also known as 'Vaults') where users can withdraw and deposit funds to and from addresses that belong to their Vaults.
-- Move to Cold or Hot Vault buttons: buttons that allow users to seamlessly transfer funds between their onchain Vaults 
-2. Enhanced frontend functionality: 
-- Withdrawal Thresholds: a threshold bar display to visulalise the user's balance and counterparty risk of storing funds on their custodian accounts
-- Reserve Amount Threshold: a threshold value that specifies the remaining custodian account balance after an onchain withdrawal order.
-- UTXO shapes also known as 'Capsules': graphical shapes displayed on Vault(s) card(s) and other screens that represent the value of bitcoin UTXOs.
-- Intuitive onchain send flow that allow users to do coin control as a default option before specifying amount.
+1. Custom Backend Features:
+- Integration of Third-Party Custodians and Exchanges: Establishes API connections for seamless buying, selling, receiving, sending bitcoin in custodial manner.
+- Rebalancing  (between custodian accounts): Establishing API connections between custodian accounts to enable seamless swapping of funds between custodians and exchanges for counterparty risk management and offchain balance control 
+- Withdrawal/Top-Up: Provides functionality to connect users' custodian accounts to their on-chain wallets (referred to as "Vaults"), enabling users to withdraw and deposit funds between their custodian accounts and Vaults.
+- Move to Cold or Hot Vault: Facilitates seamless transfers of funds between on-chain Vaults, allowing users to switch between storage options based on their preferences.
+2. Enhanced Frontend Functionality:
+Withdrawal Thresholds: Introduces a threshold bar display to visualize users' balances and the counterparty risks associated with storing funds in custodian accounts.
+Reserve Amount Threshold: Specifies a threshold value representing the remaining balance in custodian accounts after an on-chain withdrawal order is processed.
+UTXO Shapes (Capsules): Graphical shapes displayed on Vault cards and other screens to visually represent the value of Bitcoin UTXOs, enhancing user comprehension.
+Intuitive On-Chain Send Flow: Provides a user-friendly interface for conducting coin control as a default option before specifying the transaction amount, improving UTXO privacy and control.
 
 Redistribution, commercialization, or sublicensing of these modifications is prohibited without prior written consent.
 For any questions or permissions, please contact info@cypherbox.io
