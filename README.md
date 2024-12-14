@@ -1,6 +1,9 @@
 # Cypher Box - A New Way to Play Bitcoin
 
-**APP UNDER CONSTRUCTION**
+## License
+This software is available for personal, internal, and non-commercial use. Redistribution, selling, or offering the software as a service is prohibited without prior written consent. See the [LICENSE](./LICENSE) file for details.
+
+**APP UNDER CONSTRUCTION - PLEASE USE IT CAUTIOUSLY**
 
 Forked from BlueWallet release (???)
 
