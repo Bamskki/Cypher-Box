@@ -8,6 +8,7 @@ interface Style {
     button: ViewStyle;
     text: TextStyle;
     forgot: TextStyle;
+    rememberMe: TextStyle;
     textInput: TextStyle;
     extra: ViewStyle;
     space: ViewStyle;
@@ -51,6 +52,10 @@ export default StyleSheet.create<Style>({
         fontSize: 18,
         color: colors.pink.default,
         marginStart: 5,
+    },
+    rememberMe: {
+        fontSize: 16,
+        color: colors.white,
     },
     textInput: {
         // width: '90%',

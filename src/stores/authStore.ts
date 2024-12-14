@@ -11,6 +11,8 @@ export type AuthStateType = {
     reserveAmount: number;
     coldStorageWalletID: string | undefined;
     vaultTab: boolean;
+    userCreds: {email: string, password: string, isRememberMe: boolean} | undefined;
+    setUserCreds: (state: {email: string, password: string, isRememberMe: boolean} | undefined) => void;
     setVaultTab: (state: boolean) => void;
     setReserveAmount: (state: number) => void;
     setAuth: (state: boolean | undefined) => void;
@@ -33,9 +35,11 @@ const createAuthStore = (
     isAuth: undefined,
     walletID: undefined,
     vaultTab: false,
+    userCreds: undefined,
     coldStorageWalletID: undefined,
     setAuth: (state: boolean | undefined) => set({ isAuth: state }),
     setVaultTab: (state: boolean) => set({ vaultTab: state }),
+    setUserCreds: (state: {email: string, password: string, isRememberMe: boolean} | undefined) => set( { userCreds: state }),
     setToken: (token: string) => set({ token: token }),
     setUser: (state: any) => set({ user: state }),
     setWalletID: (state: string | undefined) => set({walletID: state}),

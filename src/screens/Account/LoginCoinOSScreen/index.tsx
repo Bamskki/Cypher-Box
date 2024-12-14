@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TouchableOpacity, View, Image } from "react-native";
 import SimpleToast from "react-native-simple-toast";
 import styles from "./styles";
@@ -10,13 +10,28 @@ import { dispatchReset } from "@Cypher/helpers/navigation";
 import { loginUser } from "@Cypher/api/coinOSApis";
 import useAuthStore from "@Cypher/stores/authStore";
 import { CoinOS } from "@Cypher/assets/images";
+import CheckBox from '@react-native-community/checkbox';
 
 export default function LoginCoinOSScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const { setToken, setAuth, setUser } = useAuthStore();
+    const [isRememberMe, setIsRememberMe] = useState(false);
+    const {
+        userCreds,
+        setToken, 
+        setAuth, 
+        setUser, 
+        setUserCreds 
+    } = useAuthStore();
 
+    useEffect(() => {
+        if(userCreds){
+            setEmail(userCreds.email);
+            setPassword(userCreds.password)
+            setIsRememberMe(userCreds.isRememberMe)
+        }
+    }, [userCreds])
 
     const nextClickHandler = async () => {
         setIsLoading(true);
@@ -38,6 +53,11 @@ export default function LoginCoinOSScreen() {
                 setToken(response?.token);
                 setUser(response?.user);
                 dispatchReset("HomeScreen");
+                if(isRememberMe){
+                    setUserCreds({email, password, isRememberMe});
+                } else {
+                    setUserCreds(undefined);
+                }
             } else {
                 SimpleToast.show("Invalid usernmae or password", SimpleToast.SHORT);
             }
@@ -55,7 +75,10 @@ export default function LoginCoinOSScreen() {
         dispatchNavigate('ForgotCoinOSScreen')
     }
 
-    console.log('password: ', password.length)
+    const toggleIsRememberMe = (value: boolean | ((prevState: boolean) => boolean)) => {
+        setIsRememberMe(value)
+    }
+
     return (
         <ScreenLayout disableScroll showToolbar>
             <View style={styles.container}>
@@ -80,6 +103,25 @@ export default function LoginCoinOSScreen() {
                             label="Password"
                         />
                     </GradientCard>
+                    <View 
+                        style={{ 
+                            marginTop: 15,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            alignSelf: 'flex-start'
+                        }} 
+                    >
+                        <CheckBox
+                            boxType="square"
+                            disabled={false}
+                            tintColors={{ true: colors.pink.default, false: colors.pink.default }}
+                            value={isRememberMe}
+                            onValueChange={(newValue) => toggleIsRememberMe(newValue)}
+                        />
+                        <Text bold style={styles.rememberMe}>
+                            Remember Me
+                        </Text>
+                    </View>
                     <TouchableOpacity style={{ marginTop: 18, alignSelf: 'flex-end' }} onPress={forgotClickHandler}>
                         <Text bold style={styles.forgot}>
                             Forgot Password?

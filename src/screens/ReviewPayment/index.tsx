@@ -31,10 +31,19 @@ type Fees = {
     economyFee: number;
 };
 
+export const shortenAddress = (address: string) => {
+    // Take the first 6 characters
+    const start = address.substring(0, 6);
+    // Take the last 6 characters
+    const end = address.substring(address.length - 6);
+    // Combine with three dots in the middle
+    return `${start}...${end}`;
+};
+
 export default function ReviewPayment({ route }: Props) {
-    const { value, converted, isSats, to, type, recommendedFee, isWithdrawal = false, wallet = null } = route?.params;
+    const { value, converted, isSats, to, type, recommendedFee, isWithdrawal = false, wallet = null, description } = route?.params;
     const { withdrawThreshold, reserveAmount } = useAuthStore();
-    const [note, setNote] = useState('');
+    const [note, setNote] = useState(description || '');
     const [balance, setBalance] = useState(0);
     const [currency, setCurrency] = useState('$');
     const [convertedRate, setConvertedRate] = useState(0);
@@ -450,7 +459,7 @@ export default function ReviewPayment({ route }: Props) {
                         </TouchableOpacity>
                     }
                     <TextViewV2 keytext="Sent from: " text="Coinos Checking Account" />
-                    <TextViewV2 keytext="To: " text={to} />
+                    <TextViewV2 keytext="To: " text={!to.includes('@') && to.length > 20 ? shortenAddress(to) : to} />
                     {isWithdrawal &&
                         <TouchableOpacity onPress={addressHandler}>
                             <Text style={{ marginLeft: 10, fontSize: 18, marginBottom: 20, textDecorationLine: 'underline' }}>Add Address</Text>

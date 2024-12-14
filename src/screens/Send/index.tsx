@@ -10,24 +10,26 @@ import { Input, ScreenLayout, Text } from "@Cypher/component-library";
 import { CustomKeyboard, GradientCard, GradientInput, GradientInputNew } from "@Cypher/components";
 import { colors, } from "@Cypher/style-guide";
 import { dispatchNavigate } from "@Cypher/helpers";
-import { bitcoinRecommendedFee } from "../../api/coinOSApis";
+import { bitcoinRecommendedFee, getInvoiceByLightening } from "../../api/coinOSApis";
+import { shortenAddress } from "../ColdStorage";
+import { emailRegex } from "@Cypher/helpers/regex";
+import { btc } from "@Cypher/helpers/coinosHelper";
 
 
 export function startsWithLn(str: string) {
     return str.startsWith("ln");
 }
 
-export const isValidEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const validateEmail = (email: string) => {
     return emailRegex.test(email);
-};
+}
 
 export default function SendScreen({ navigation, route }: any) {
     const info = route.params;
     const [isSats, setIsSats] = useState(true);
     const [sats, setSats] = useState('');
     const [usd, setUSD] = useState('');
-    const [sender, setSender] = useState(info?.to || '');
+    const [sender, setSender] = useState(info?.to || info?.destination || '');
     const senderRef = useRef<TextInput>(null);
 
     const [convertedRate, setConvertedRate] = useState(0.00);
@@ -36,6 +38,8 @@ export default function SendScreen({ navigation, route }: any) {
     const [selectedFee, setSelectedFee] = useState<number | null>(null);
     const [isScannerActive, setIsScannerActive] = useState(false);
     const [addressFocused, setAddressFocused] = useState(false);
+    const [isPaste, setIsPaste] = useState(info?.destination && info?.destination?.startsWith('ln') ? true : false)
+
     useEffect(() => {
         if (info?.isWithdrawal) {
             setSats(String(info?.value))
@@ -51,8 +55,13 @@ export default function SendScreen({ navigation, route }: any) {
                 console.log('recommendedFee: ', res)
             }
             init();
+        } else if (sender.startsWith('ln') && isPaste){
+            if(info.destination){
+                setTimeout(() => handleLighteningInvoice(), 500)
+            }
+            handleLighteningInvoice()
         }
-    }, [sender])
+    }, [sender, isPaste, info?.destination])
 
     async function requestCameraPermission() {
         if (Platform.OS === 'android') {
@@ -80,12 +89,43 @@ export default function SendScreen({ navigation, route }: any) {
     const handlePaste = async () => {
         const clipboardContent = await Clipboard.getString();
         setSender(clipboardContent);
+        setIsPaste(true)
         SimpleToast.show('Pasted from clipboard', SimpleToast.SHORT);
     };
 
     // useEffect(() => {
     //     requestCameraPermission();
     // }, []);
+
+    const handleLighteningInvoice = async () => {
+        setIsLoading(true);
+        try {
+            const response = await getInvoiceByLightening(sender);
+            console.log('response getInvoiceByLightening: ', response)
+                const dollarAmount = (response.amount_msat / 1000) * info?.matchedRate * btc(1);
+                console.log('dollarAmount: ', dollarAmount)
+                if(dollarAmount){
+                    dispatchNavigate('ReviewPayment', {
+                        ...info,
+                        value: response.amount_msat / 1000,
+                        converted: dollarAmount,
+                        isSats: isSats,
+                        to: info?.isWithdrawal ? info?.to : sender,
+                        fees: 0,
+                        type: 'lightening',
+                        description: response?.description,
+                        matchedRate: info?.matchedRate,
+                        currency: info?.curreny,
+                        recommendedFee: recommendedFee || 0
+                    });    
+                }
+        } catch (error) {
+            console.error('Error Send Lightening:', error);
+            SimpleToast.show('Failed to generate lightening. Please try again.', SimpleToast.SHORT);
+        } finally {
+            setIsLoading(false);
+        }
+    }
 
     const handleSendNext = async () => {
         setIsLoading(true);
@@ -234,9 +274,11 @@ export default function SendScreen({ navigation, route }: any) {
 
     const handleScan = (e: any) => {
         setSender(e.data);
+        setIsPaste(true);
         setIsScannerActive(false); // Close scanner after successful scan
     };
 
+    console.log('sender: ', sender, info)
     return (
         <>
             {isScannerActive ? (
@@ -280,8 +322,11 @@ export default function SendScreen({ navigation, route }: any) {
                                             colors_={sender ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}>
                                             <Input
                                                 ref={senderRef}
-                                                onChange={setSender}
-                                                value={!isValidEmail(sender) && sender.length > 15 ? sender.slice(0, 5) + '...' + sender.slice(-7) : sender}
+                                                onChange={newValue => {
+                                                    console.log('newValue: ', newValue)
+                                                    setSender(newValue);
+                                                }}
+                                                value={!sender.includes('@') && sender.length > 20 ? shortenAddress(sender) : sender}
                                                 textInputStyle={styles.senderText}
                                                 onFocus={() => {
                                                     setAddressFocused(true);

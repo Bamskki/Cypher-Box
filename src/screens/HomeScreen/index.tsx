@@ -1,5 +1,6 @@
 import React, { useCallback, useContext, useEffect, useReducer, useRef, useState } from "react";
 import { ActivityIndicator, Image, Linking, RefreshControl, StyleSheet, TouchableOpacity, View } from "react-native";
+import SimpleToast from "react-native-simple-toast";
 import styles from "./styles";
 import {
   useFocusEffect,
@@ -28,13 +29,14 @@ import RBSheet from 'react-native-raw-bottom-sheet';
 import LinearGradient from "react-native-linear-gradient";
 import ReceivedList from "./ReceivedList";
 import useAuthStore from "@Cypher/stores/authStore";
-import { bitcoinRecommendedFee, createInvoice, getCurrencyRates, getMe, getTransactionHistory } from "@Cypher/api/coinOSApis";
+import { bitcoinRecommendedFee, createInvoice, getCurrencyRates, getInvoiceByLightening, getMe, getTransactionHistory } from "@Cypher/api/coinOSApis";
 import { btc, formatNumber, matchKeyAndValue } from "@Cypher/helpers/coinosHelper";
 import { AbstractWallet, HDSegwitBech32Wallet, HDSegwitP2SHWallet } from "../../../class";
 import loc, { formatBalance, formatBalanceWithoutSuffix } from '../../../loc';
 import { initialState, walletReducer } from "../../../screen/wallets/add";
 import { BlueStorageContext } from '../../../blue_modules/storage-context';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { startsWithLn } from "../Send";
 
 interface Props {
   route: any;
@@ -89,6 +91,7 @@ export default function HomeScreen({ route }: Props) {
   const [vaultAddress, setVaultAddress] = useState('')
   const [hasSavingVault, setHasSavingVault] = useState<boolean | null>()
   const [hasColdStorage, setHasColdStorage] = useState<boolean>(false);
+  const [sendAddress, setSendAddress] = useState<any>()
   const refRBSheet = useRef<any>(null);
 
   const getWalletID = async () => {
@@ -176,6 +179,43 @@ export default function HomeScreen({ route }: Props) {
     }
   }, [vaultAddress])
 
+  useEffect(() => {
+    if(sendAddress && isAuth && token){
+      if(startsWithLn(sendAddress)){
+        handleLighteningInvoice()
+      } else {
+        dispatchNavigate('SendScreen', { currency, matchedRate, destination: sendAddress.toLowerCase() });
+      }
+    }
+  }, [sendAddress, isAuth, token])
+
+  const handleLighteningInvoice = async () => {
+    try {
+      const response = await getInvoiceByLightening(sendAddress);
+      console.log('response getInvoiceByLightening: ', response)
+      const dollarAmount = (response.amount_msat / 1000) * matchedRate * btc(1);
+      console.log('dollarAmount: ', dollarAmount)
+      if(dollarAmount){
+        dispatchNavigate('ReviewPayment', {
+          value: response.amount_msat / 1000,
+          converted: dollarAmount,
+          isSats: true,
+          to: sendAddress,
+          fees: 0,
+          type: 'lightening',
+          description: response?.description,
+          matchedRate: matchedRate,
+          currency: currency,
+          recommendedFee: recommendedFee || 0
+        });
+      } else {
+        dispatchNavigate('SendScreen', { currency, matchedRate, destination: sendAddress.toLowerCase() });
+      }
+    } catch (error) {
+        console.error('Error Send Lightening:', error);
+        SimpleToast.show('Failed to generate lightening. Please try again.', SimpleToast.SHORT);
+    }
+}
   const obtainWalletAddress = async () => {
     let newAddress;
     try {
@@ -193,6 +233,7 @@ export default function HomeScreen({ route }: Props) {
 
   useFocusEffect(
     useCallback(() => {
+      setSendAddress(null)
       if (wallet) {
         obtainWalletAddress();
         (async () => {
@@ -267,13 +308,15 @@ export default function HomeScreen({ route }: Props) {
 
   const onBarScanned = (value: any) => {
     if (!value) return;
-    DeeplinkSchemaMatch.navigationRouteFor(
-      { url: value },
-      (completionValue) => {
-        triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
-        navigate(...completionValue);
-      }
-    );
+    console.log('value: ', value)
+    setSendAddress(value);
+    // DeeplinkSchemaMatch.navigationRouteFor(
+    //   { url: value },
+    //   (completionValue) => {
+    //     triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
+    //     navigate(...completionValue);
+    //   }
+    // );
   };
 
   const createChekingAccountClickHandler = () => {

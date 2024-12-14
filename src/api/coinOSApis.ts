@@ -125,6 +125,21 @@ export const createInvoice = async (invoiceData: any) => {
   }
 };
 
+export const getInvoiceByLightening = async (hash: string) => {
+  try {
+    const response = await fetch(`${BASE_URL}/decode/${hash}`, await withAuthToken({
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }));
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching invoice by lightening:', error);
+    throw error;
+  }
+};
+
 export const getInvoiceByHash = async (hash: string) => {
   try {
     const response = await fetch(`${BASE_URL}/invoice/${hash}`, await withAuthToken({
@@ -165,11 +180,9 @@ export const sendCoinsViaUsername = async (address: string, amount: number, memo
     let [name, domain] = address.split("@");
     const user = useAuthStore.getState().user;
 
-    console.log('user: ', user)
-
-    if(user === name){
+    if(user?.toLowerCase() === name?.toLowerCase()){
       SimpleToast.show("Cannot send to self", SimpleToast.SHORT);
-      return;
+      throw new Error("Cannot send to self");
     }
 
     let url = `https://${domain}/.well-known/lnurlp/${name}`;
@@ -214,7 +227,7 @@ export const sendCoinsViaUsername = async (address: string, amount: number, memo
         }
       } else {
         SimpleToast.show(paymentResult.reason, SimpleToast.SHORT);
-        return;
+        throw paymentResult?.reason;
       }
     } else {
       SimpleToast.show("Invalid LNURL-Pay response", SimpleToast.SHORT)
