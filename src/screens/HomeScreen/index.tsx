@@ -89,6 +89,7 @@ export default function HomeScreen({ route }: Props) {
   const [coldStorageBalanceWithoutSuffix, setColdStorageBalanceWithoutSuffix] = useState()
   const [recommendedFee, setRecommendedFee] = useState<any>();
   const [vaultAddress, setVaultAddress] = useState('')
+  const [coldStorageAddress, setColdStorageAddress] = useState('')
   const [hasSavingVault, setHasSavingVault] = useState<boolean | null>()
   const [hasColdStorage, setHasColdStorage] = useState<boolean>(false);
   const [sendAddress, setSendAddress] = useState<any>()
@@ -108,6 +109,12 @@ export default function HomeScreen({ route }: Props) {
       if (route?.params?.isComplete) setIsAllDone(true);
       if (!coldStorageWalletID) setColdStorageWallet(undefined)
       if (!walletID) setWallet(undefined)
+
+      if(!walletID && coldStorageWalletID) {
+        setVaultTab(true);
+      } else if(walletID && !coldStorageWalletID) {
+        setVaultTab(false);
+      }
     }, [wallet, coldStorageWalletID, walletID]),
   );
 
@@ -170,14 +177,14 @@ export default function HomeScreen({ route }: Props) {
   }, [isAuth, token, wallets, walletID, coldStorageWalletID]);
 
   useEffect(() => {
-    if (isAuth && token && !vaultAddress.startsWith('ln') && !vaultAddress.includes('@') && !recommendedFee) {
+    if (isAuth && token && ((!vaultAddress.startsWith('ln') && !vaultAddress.includes('@')) || (!coldStorageAddress.startsWith('ln') && !coldStorageAddress.includes('@'))) && !recommendedFee) {
       const init = async () => {
         const res = await bitcoinRecommendedFee();
         setRecommendedFee(res);
       }
       init();
     }
-  }, [vaultAddress])
+  }, [vaultAddress, coldStorageAddress])
 
   useEffect(() => {
     if(sendAddress && isAuth && token){
@@ -231,6 +238,21 @@ export default function HomeScreen({ route }: Props) {
     setVaultAddress(newAddress);
   }
 
+  const obtainColdWalletAddress = async () => {
+    let newAddress;
+    try {
+      if (!isElectrumDisabled && coldStorageWallet) newAddress = await Promise.race([coldStorageWallet?.getAddressAsync(), sleep(1000)]);
+    } catch (_) { }
+    if (newAddress === undefined && coldStorageWallet) {
+      // either sleep expired or getAddressAsync threw an exception
+      console.warn('either sleep expired or getAddressAsync threw an exception');
+      newAddress = coldStorageWallet._getExternalAddressByIndex(coldStorageWallet.getNextFreeAddressIndex());
+    } else {
+      saveToDisk(); // caching whatever getAddressAsync() generated internally
+    }
+    setColdStorageAddress(newAddress);
+  }
+
   useFocusEffect(
     useCallback(() => {
       setSendAddress(null)
@@ -251,7 +273,7 @@ export default function HomeScreen({ route }: Props) {
   useFocusEffect(
     useCallback(() => {
       if (coldStorageWallet) {
-        // obtainWalletAddress();
+        obtainColdWalletAddress();
         (async () => {
           try {
             await Promise.race([coldStorageWallet?.fetchUtxo(), sleep(10000)]);
@@ -337,20 +359,21 @@ export default function HomeScreen({ route }: Props) {
   }
 
   const withdrawClickHandler = () => {
-    if (wallet) {
+    console.log('recommendedFee: ', recommendedFee)
+    if (wallet || coldStorageWallet) {
       const amount = withdrawThreshold > balance ? balance : withdrawThreshold;
       dispatchNavigate('ReviewPayment', {
         value: amount,
         converted: ((Number(matchedRate) || 0) * btc(1) * Number(amount)).toFixed(2),
         isSats: true,
-        to: vaultAddress,
+        to: vaultTab ? coldStorageAddress : vaultAddress,
         fees: 0,
         matchedRate: matchedRate,
         currency: currency,
         type: 'bitcoin',
         feeForBamskki: 0,
         recommendedFee,
-        wallet,
+        wallet: vaultTab ? coldStorageWallet : wallet,
         isWithdrawal: true
       });
     } else {
@@ -366,7 +389,7 @@ export default function HomeScreen({ route }: Props) {
       const response = await createInvoice({
         type: 'bitcoin',
       });
-      dispatchNavigate('HotStorageVault', { wallet, matchedRate, to: response.hash });
+      dispatchNavigate('HotStorageVault', { wallet: vaultTab ? coldStorageWallet : wallet, matchedRate, to: response.hash });
       console.log('response: ', response)
     } catch (error) {
       console.error('Error generating bitcoin address:', error);
@@ -439,6 +462,7 @@ export default function HomeScreen({ route }: Props) {
 
   const hasFilledTheBar = calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount)) === 100
 
+  console.log('ColdStorageBalanceVault: ', Number(ColdStorageBalanceVault?.split(' ')[0]), Number(balanceVault?.split(' ')[0]))
   return (
     <ScreenLayout
       RefreshControl={
@@ -491,10 +515,11 @@ export default function HomeScreen({ route }: Props) {
                     useArt
                   >
                     <Text subHeader bold style={styles.price}>
-                      {btc(1) * (balance || 0)} BTC
-                    </Text>
+                      {/* {(btc(1) * (Number(balance) || 0)) + (Number(ColdStorageBalanceVault?.split(' ')[0]) || 0) + (Number(balanceVault?.split(' ')[0]) || 0)} BTC */}
+                      {((btc(1) * (Number(balance) || 0)) + (Number(ColdStorageBalanceVault?.split(' ')[0]) || 0) + (Number(balanceVault?.split(' ')[0]) || 0)).toFixed(8)} BTC
+                      </Text>
                     <Text bold style={styles.priceusd} >
-                      {"$" + convertedRate.toFixed(2)}
+                      {"$" + (Number(convertedRate) + ((Number(coldStorageBalanceWithoutSuffix) * Number(matchedRate)) + (Number(balanceWithoutSuffix) * Number(matchedRate)))).toFixed(2)}
                     </Text>
                     <Shadow
                       inner
@@ -629,7 +654,7 @@ export default function HomeScreen({ route }: Props) {
                 {(hasSavingVault && walletID) &&
                   <GradientView
                     onPress={topupClickHandler}
-                    topShadowStyle={styles.outerShadowStyle}
+                    topShadowStyle={[styles.outerShadowStyle, vaultTab && {shadowColor: colors.blueText}]}
                     bottomShadowStyle={styles.innerShadowStyle}
                     style={styles.linearGradientStyle}
                     linearGradientStyle={styles.mainShadowStyle}
@@ -645,7 +670,7 @@ export default function HomeScreen({ route }: Props) {
                 {(hasSavingVault && walletID) &&
                   <GradientView
                     onPress={withdrawClickHandler}
-                    topShadowStyle={styles.outerShadowStyle}
+                    topShadowStyle={[styles.outerShadowStyle, vaultTab && {shadowColor: colors.blueText}]}
                     bottomShadowStyle={styles.innerShadowStyle}
                     style={styles.linearGradientStyle}
                     linearGradientStyle={styles.mainShadowStyle}
@@ -715,8 +740,9 @@ export default function HomeScreen({ route }: Props) {
                       <Text h3 bold style={styles.storageText} onPress={hotStorageClickHandler}>Hot Storage</Text>
                       :
                       <View style={[styles.bottomBtn, !vaultTab && {        
-                        borderWidth: 2,
-                        borderColor: colors.greenShadow,
+                        borderWidth: !vaultTab ? 2 : 0,
+                        borderColor: !vaultTab ? colors.greenShadow : 'transparent',
+                        borderRadius: 25,
                       }]}>
                         <LinearGradient
                           start={{ x: 1, y: 0 }}
@@ -730,8 +756,8 @@ export default function HomeScreen({ route }: Props) {
                     }
                     {isAllDone &&
                       <View style={[styles.bottomBtn, { marginEnd: 7.5, marginStart: 0 }, vaultTab && {        
-                        borderWidth: 2,
-                        borderColor: colors.greenShadow,
+                        borderWidth: vaultTab ? 2 : 0,
+                        borderColor: vaultTab ? colors.blueText : 'transparent',
                       }]}>
                         <LinearGradient
                           start={{ x: 1, y: 0 }}
@@ -743,7 +769,7 @@ export default function HomeScreen({ route }: Props) {
                               : ['#333333', '#282727']
                           }
                           style={styles.linearGradientbottom}>
-                          <Text h3 bold onPress={coldStorageClickHandler}>Cold Storage</Text>
+                          <Text h3 bold onPress={coldStorageClickHandler} style={{color: colors.blueText}}>Cold Storage</Text>
                         </LinearGradient>
                       </View>
                     }

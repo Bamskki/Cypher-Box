@@ -230,16 +230,31 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
                 </View>
                 <Text bold center style={styles.tips}>Tip: Selecting dust coins will increase network fees</Text>
                 {vaultTab ?
-                    <GradientView
-                        onPress={handleSendBars}
-                        style={styles.capsuleLinearGradientStyle}
-                        linearGradientStyle={styles.capsuleMainShadowStyle}
-                        topShadowStyle={[styles.capsuleOuterShadowStyle, {width: widths - 30}, vaultTab && { shadowColor: colors.blueText}]}
-                        bottomShadowStyle={[styles.capsuleInnerShadowStyle, {width: widths - 30}, vaultTab && { shadowColor: colors.blueText}]}
-                        linearGradientStyleMain={[styles.capsuleLinearGradientStyleMain, {width: widths - 30}]}
-                    >
-                        <Text h3 center>Send Capsule</Text>
-                    </GradientView>
+                    <View style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                    }}>
+                        <GradientView
+                            onPress={handleSendBars}
+                            style={styles.capsuleLinearGradientStyle}
+                            linearGradientStyle={styles.capsuleMainShadowStyle}
+                            topShadowStyle={[styles.capsuleOuterShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
+                            bottomShadowStyle={[styles.capsuleInnerShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
+                            linearGradientStyleMain={styles.capsuleLinearGradientStyleMain}
+                        >
+                            <Text h3 center>Send Capsule</Text>
+                        </GradientView>
+                        <GradientView
+                            onPress={addressClickHandler}
+                            topShadowStyle={[styles.capsuleOuterShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
+                            bottomShadowStyle={[styles.capsuleInnerShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
+                            style={[styles.capsuleLinearGradientStyle, { marginStart: 25 }]}
+                            linearGradientStyle={styles.capsuleMainShadowStyle}
+                            linearGradientStyleMain={styles.capsuleLinearGradientStyleMain}
+                        >
+                            <Text h3 center>Top-up</Text>
+                        </GradientView>
+                    </View>
                 :
                     <View style={{
                         flexDirection: 'row',
