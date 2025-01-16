@@ -91,7 +91,7 @@ Cold Vault (watch-only):
 
 ---
 
-MVP development roadmap (last update 27th November)
+MVP development roadmap (last update 17th January '25)
 **Checking account**
 - ✅ Create Account
 - ✅ Login
@@ -105,7 +105,7 @@ MVP development roadmap (last update 27th November)
 - ⏱️ Notifications (postponed)
 - ✅ Transaction history
 - ✅ Withdraw to hot vault
-- ⭕️ Withdraw to cold vault
+- ✅ Withdraw to cold vault
 - ✅ Threshold bar
 - ✅ Adjust Threshold
 - ✅ Adjust Reserve Amount
@@ -115,7 +115,7 @@ MVP development roadmap (last update 27th November)
 - ✅ Withdrawal fee estimation
 - ✅ Receive to Hot Vault
 - ✅ Coin control
-- ⭕️ Notifications
+- ⏱️ Notifications (postponed)
 - ✅ Send from Hot Vault
 - ✅ Transaction history
 - ✅ Transfer to cold vault
@@ -124,9 +124,9 @@ MVP development roadmap (last update 27th November)
 **Cold vault**
 - ✅ Create Cold Vault
 - ✅ Send from Cold Vault
-- ⭕️ Transfer to hot vault
+- ✅ Transfer to hot vault
 - ✅ Withdrawal fee estimations
-- ⭕️ Top-up to checking account
+- ✅ Top-up to checking account
 
 ---
 
