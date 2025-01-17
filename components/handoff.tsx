@@ -25,9 +25,9 @@ const HandoffComponent: HandoffComponentWithActivityTypes = props => {
 };
 
 const activityTypes = {
-  ReceiveOnchain: 'io.cypherbox.app.receiveonchain',
-  Xpub: 'io.cypherbox.app.xpub',
-  ViewInBlockExplorer: 'io.cypherbox.app.blockexplorer',
+  ReceiveOnchain: 'io.cypherbox.btc.receiveonchain',
+  Xpub: 'io.cypherbox.btc.xpub',
+  ViewInBlockExplorer: 'io.cypherbox.btc.blockexplorer',
 };
 
 HandoffComponent.activityTypes = activityTypes;

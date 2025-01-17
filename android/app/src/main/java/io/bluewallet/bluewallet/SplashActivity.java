@@ -1,4 +1,4 @@
-package io.cypherbox.app; // Replace with your package name
+package io.cypherbox.btc; // Replace with your package name
 
 import android.content.Intent;
 import android.os.Bundle;

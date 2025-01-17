@@ -252,7 +252,7 @@
 		B461B851299599F800E431AA /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = BlueWallet/AppDelegate.mm; sourceTree = "<group>"; };
 		B47B21E92B2128B8001F6690 /* BlueWalletUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BlueWalletUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B47B21EB2B2128B8001F6690 /* BlueWalletUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlueWalletUITests.swift; sourceTree = "<group>"; };
-		B4A29A452B55C990002A67DF /* Cypher Bank.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Cypher Bank.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B4A29A452B55C990002A67DF /* Cypher Box.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Cypher Box.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B4A29A462B55C990002A67DF /* BlueWallet-NoLDK.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "BlueWallet-NoLDK.plist"; sourceTree = "<absolute>"; };
 		B4AB21062B61D8CA0080440C /* SplashScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashScreen.swift; sourceTree = "<group>"; };
 		B4AB21082B61DC3F0080440C /* SplashScreen.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SplashScreen.m; sourceTree = "<group>"; };
@@ -531,7 +531,7 @@
 			children = (
 				13B07F961A680F5B00A75B9A /* BlueWallet.app */,
 				B47B21E92B2128B8001F6690 /* BlueWalletUITests.xctest */,
-				B4A29A452B55C990002A67DF /* Cypher Bank.app */,
+				B4A29A452B55C990002A67DF /* Cypher Box.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -712,7 +712,7 @@
 			);
 			name = "BlueWallet-NoLDK";
 			productName = "Hello World";
-			productReference = B4A29A452B55C990002A67DF /* Cypher Bank.app */;
+			productReference = B4A29A452B55C990002A67DF /* Cypher Box.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -1192,7 +1192,7 @@
 					"-lc++",
 				);
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = io.cypherbox.app;
+				PRODUCT_BUNDLE_IDENTIFIER = io.cypherbox.btc;
 				PRODUCT_NAME = BlueWallet;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = Sadiq2;
@@ -1247,7 +1247,7 @@
 					"-lc++",
 				);
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = io.cypherbox.app;
+				PRODUCT_BUNDLE_IDENTIFIER = io.cypherbox.btc;
 				PRODUCT_NAME = BlueWallet;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = Sadiq2;
@@ -1418,7 +1418,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = io.cypherbox.app.BlueWalletUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = io.cypherbox.btc.BlueWalletUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1463,7 +1463,7 @@
 				MARKETING_VERSION = 1.0;
 				MTL_FAST_MATH = YES;
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = io.cypherbox.app.BlueWalletUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = io.cypherbox.btc.BlueWalletUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1500,7 +1500,7 @@
 				);
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "BlueWallet-NoLDK.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Cypher Bank";
+				INFOPLIST_KEY_CFBundleDisplayName = "Cypher Box";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1519,8 +1519,8 @@
 					"-lc++",
 				);
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = io.cypherbox.app;
-				PRODUCT_NAME = "Cypher Bank";
+				PRODUCT_BUNDLE_IDENTIFIER = io.cypherbox.btc;
+				PRODUCT_NAME = "Cypher Box";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = Sadiq2;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1553,7 +1553,7 @@
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = "BlueWallet-NoLDK.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Cypher Bank";
+				INFOPLIST_KEY_CFBundleDisplayName = "Cypher Box";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1572,8 +1572,8 @@
 					"-lc++",
 				);
 				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = io.cypherbox.app;
-				PRODUCT_NAME = "Cypher Bank";
+				PRODUCT_BUNDLE_IDENTIFIER = io.cypherbox.btc;
+				PRODUCT_NAME = "Cypher Box";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = Sadiq2;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

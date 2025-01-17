@@ -360,6 +360,11 @@ export default function HomeScreen({ route }: Props) {
 
   const withdrawClickHandler = () => {
     console.log('recommendedFee: ', recommendedFee)
+    if(vaultTab && !coldStorageWallet){
+      SimpleToast.show('You need to have a cold storage wallet to withdraw', SimpleToast.SHORT);
+      return
+    }
+
     if (wallet || coldStorageWallet) {
       const amount = withdrawThreshold > balance ? balance : withdrawThreshold;
       dispatchNavigate('ReviewPayment', {
@@ -385,6 +390,10 @@ export default function HomeScreen({ route }: Props) {
     // dispatchNavigate('PurchaseVault', {
     //   data: {}
     // });
+    if(vaultTab && !coldStorageWallet){
+      SimpleToast.show('You need to have a cold storage wallet to top up', SimpleToast.SHORT);
+      return
+    }
     try {
       const response = await createInvoice({
         type: 'bitcoin',
@@ -519,7 +528,7 @@ export default function HomeScreen({ route }: Props) {
                       {((btc(1) * (Number(balance) || 0)) + (Number(ColdStorageBalanceVault?.split(' ')[0]) || 0) + (Number(balanceVault?.split(' ')[0]) || 0)).toFixed(8)} BTC
                       </Text>
                     <Text bold style={styles.priceusd} >
-                      {"$" + (Number(convertedRate) + ((Number(coldStorageBalanceWithoutSuffix) * Number(matchedRate)) + (Number(balanceWithoutSuffix) * Number(matchedRate)))).toFixed(2)}
+                      {"$" + (Number(convertedRate || 0) + ((Number(coldStorageBalanceWithoutSuffix || 0) * Number(matchedRate || 0)) + (Number(balanceWithoutSuffix || 0) * Number(matchedRate || 0)))).toFixed(2)}
                     </Text>
                     <Shadow
                       inner

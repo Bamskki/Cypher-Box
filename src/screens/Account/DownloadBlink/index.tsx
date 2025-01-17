@@ -27,7 +27,7 @@ export default function DownloadBlink() {
             <View style={styles.container}>
                 <View style={styles.innerView}>
                     <GradientText>Download Blink</GradientText>
-                    <Text h4 style={styles.descption}>To use Cypher Bank, you should download Blink wallet from the app store and register your account by providing them with your phone number.</Text>
+                    <Text h4 style={styles.descption}>To use Cypher Box, you should download Blink wallet from the app store and register your account by providing them with your phone number.</Text>
                     <Button onPress={appleStoreClickHandler} text="Download Blink wallet" leftIcon="logo-apple" textStyle={{color:colors.black.default}}/>
                 </View>
                 <Text style={styles.info}>If you’ve manged to create a account, or already have an existing account on Blink, you can login now!</Text>

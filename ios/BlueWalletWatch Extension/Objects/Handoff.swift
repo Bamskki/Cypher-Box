@@ -9,9 +9,9 @@
 import Foundation
 
 enum HandoffIdentifier: String {
-  case ReceiveOnchain = "io.cypherbox.app.receiveonchain"
-  case Xpub = "io.cypherbox.app.xpub"
-  case ViewInBlockExplorer = "io.cypherbox.app.blockexplorer"
+  case ReceiveOnchain = "io.cypherbox.btc.receiveonchain"
+  case Xpub = "io.cypherbox.btc.xpub"
+  case ViewInBlockExplorer = "io.cypherbox.btc.blockexplorer"
 }
 
 enum HandOffUserInfoKey: String {

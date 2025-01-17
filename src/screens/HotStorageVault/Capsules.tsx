@@ -286,8 +286,9 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
                     flexDirection: 'row',
                     alignItems: 'center',
                     marginTop: 10,
+                    // width: '100%'
                 }}>
-                    <GradientView
+                    {/* <GradientView
                         style={styles.capsuleLinearGradientStyle}
                         linearGradientStyle={styles.capsuleMainShadowStyle}
                         topShadowStyle={[styles.capsuleOuterShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
@@ -295,14 +296,14 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
                         linearGradientStyleMain={styles.capsuleLinearGradientStyleMain}
                     >
                         <Text h3 center>Batch</Text>
-                    </GradientView>
+                    </GradientView> */}
                     <GradientView
                         onPress={moveToVaultClickHandler}
-                        topShadowStyle={[styles.capsuleOuterShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
-                        bottomShadowStyle={[styles.capsuleInnerShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
+                        topShadowStyle={[styles.capsuleOuterShadowStyle, {width: widths - 52}, vaultTab && { shadowColor: colors.blueText}]}
+                        bottomShadowStyle={[styles.capsuleInnerShadowStyle, {width: widths - 52}, vaultTab && { shadowColor: colors.blueText}]}
                         style={[styles.capsuleLinearGradientStyle, { marginStart: 25 }]}
                         linearGradientStyle={styles.capsuleMainShadowStyle}
-                        linearGradientStyleMain={styles.capsuleLinearGradientStyleMain}
+                        linearGradientStyleMain={[styles.capsuleLinearGradientStyleMain, {width: widths - 52}]}
                     >
                         <Text h3 center>{vaultTab ? "Move to Hot Vault" : "Move to Cold Vault"}</Text>
                     </GradientView>

@@ -75,7 +75,7 @@ export default function GetAddressScreen() {
                     </GradientCardWithShadow>
                     <Button style={StyleSheet.flatten([styles.button, shadow.shadow25])} textStyle={styles.buttonText} text="Show QR" onPress={() => showQRClickHandler(true)} />
                 </View>
-                <Text h3 style={styles.bottomText}>Tip: it’s much faster and cheaper for the sender to send funds to lightning addresses and invoices instead of using the main Bitcoin Network, so tell them download Cypher Bank!</Text>
+                <Text h3 style={styles.bottomText}>Tip: it’s much faster and cheaper for the sender to send funds to lightning addresses and invoices instead of using the main Bitcoin Network, so tell them download Cypher Box!</Text>
             </View>
         </ScreenLayout>
     )

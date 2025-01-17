@@ -22,7 +22,7 @@ export default function LoginBlink() {
                 <View style={styles.innerView}>
                     <GradientText>Login to Blink</GradientText>
                     <Text h2 bold style={styles.title}>Were you able to register at Blink?</Text>
-                    <Text h4 style={styles.title}>If you did, you should login with you phone number or email. If not, Try again. Currently you cannot use Cypher Bank without Blink, but in the future we will offer more options. Stay tuned!</Text>
+                    <Text h4 style={styles.title}>If you did, you should login with you phone number or email. If not, Try again. Currently you cannot use Cypher Box without Blink, but in the future we will offer more options. Stay tuned!</Text>
                     <InputEmailPhone label={`Phone \nNumber`} setText={setPhone} text={phone} type="phone-pad" />
                     <View style={styles.view}>
                         <View style={styles.line} />
