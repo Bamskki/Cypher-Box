@@ -357,6 +357,7 @@ export default function HomeScreen({ route }: Props) {
   const checkingAccountClickHandler = () => {
     dispatchNavigate('CheckingAccount', { matchedRate });
   }
+  
 
   const withdrawClickHandler = () => {
     console.log('recommendedFee: ', recommendedFee)
