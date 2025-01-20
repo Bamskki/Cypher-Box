@@ -133,6 +133,6 @@ MVP development roadmap (last update 17th January '25)
 # RESPONSIBLE DISCLOSURE
 Found critical bugs/vulnerabilities? Please email them info@cypherbox.io Thanks!
 
-<img src="https://i.imgur.com/GLXuiOX.png" width="100%">
+
 
 
