@@ -184,7 +184,8 @@ export default StyleSheet.create<Style>({
         marginTop: 20,
     },
     price: {
-        color: colors.pink.dark,
+        color: colors.white,
+        fontWeight: 'bold'
     },
     modal: {
         height: 200,

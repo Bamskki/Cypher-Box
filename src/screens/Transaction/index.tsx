@@ -33,13 +33,13 @@ export default function Transaction({navigation, route}: any) {
         const intervalId = setInterval(() => {
             setProgress((prevProgress) => {
                 if (prevProgress < 1) {
-                    return prevProgress + 0.001;
+                    return prevProgress + 0.1;
                 } else {
                     clearInterval(intervalId);
                     return 1;
                 }
             });
-        }, 10);
+        }, 5);
         return () => clearInterval(intervalId);
     }, []);
 
@@ -82,7 +82,7 @@ export default function Transaction({navigation, route}: any) {
 
     console.log(type, amountUSD)
     return (
-        <ScreenLayout disableScroll showToolbar title={!response ? "Finding route..." : ""} isBackButton={false}>
+        <ScreenLayout disableScroll showToolbar title={""} isBackButton={false}>
             <View style={styles.main}>
                 <View style={styles.container}>
                     {response &&
@@ -95,27 +95,27 @@ export default function Transaction({navigation, route}: any) {
                         </Animated.View>
                     }
                 </View>
-                <View style={styles.ringEffect}>
-                    {!response ?
+                {response &&
+                    <View style={styles.ringEffect}>
                         <>
                             <Ring delay={0} />
                             <Ring delay={1000} />
                             <Ring delay={2000} />
                             <Ring delay={3000} />
                         </>
-                        : null}
-                    <GradientCard style={styles.gradient} linearStyle={styles.gradient}
-                        colors_={!response ? [colors.white, colors.white] : [colors.pink.extralight, colors.pink.default]}>
-                        <View style={styles.inner}>
-                            <GradientCard style={styles.gradientInner} linearStyle={styles.gradientInner}
-                                colors_={!response ? [colors.white, colors.white] : [colors.pink.extralight, colors.pink.default]}>
-                                <View style={styles.inside}>
-                                    <Image source={Electrik} style={styles.image} resizeMode="contain" />
-                                </View>
-                            </GradientCard>
-                        </View>
-                    </GradientCard>
-                </View>
+                        <GradientCard style={styles.gradient} linearStyle={styles.gradient}
+                            colors_={!response ? [colors.white, colors.white] : [colors.pink.extralight, colors.pink.default]}>
+                            <View style={styles.inner}>
+                                <GradientCard style={styles.gradientInner} linearStyle={styles.gradientInner}
+                                    colors_={!response ? [colors.white, colors.white] : [colors.pink.extralight, colors.pink.default]}>
+                                    <View style={styles.inside}>
+                                        <Image source={Electrik} style={styles.image} resizeMode="contain" />
+                                    </View>
+                                </GradientCard>
+                            </View>
+                        </GradientCard>
+                    </View>
+                }
                 {/* {!response ?
                     <View style={styles.ringEffect}>
                         <Ring delay={0} />
@@ -153,26 +153,29 @@ export default function Transaction({navigation, route}: any) {
                     </Animated.View>
                 } */}
                 <View style={styles.extra} />
-                <Text semibold center style={styles.text}>Lightning Network</Text>
-                {response ?
+                {response &&
+                    <Text semibold center style={styles.text}>Lightning Network</Text>
+                }
+                {response &&
                     <GradientButton style={styles.invoiceButton} textStyle={{ fontFamily: 'Lato-Medium', }}
                         title='Payment Details'
                         disabled={!response}
                         onPress={onPressClickHandler} />
-                    :
-                    <View style={styles.invoiceButton}>
-                        <Progress.Bar
-                            height={30}
-                            progress={progress}
-                            color={colors.white}
-                            borderColor="#303030"
-                            width={widths - 60}
-                            style={{
-                                backgroundColor: '#303030',
-                                height: 30,
-                                borderRadius: 20,
-                            }} />
-                    </View>
+                    // :
+                    //     <View style={{height: 50}} />
+                    // <View style={styles.invoiceButton}>
+                    //     <Progress.Bar
+                    //         height={30}
+                    //         progress={progress}
+                    //         color={colors.white}
+                    //         borderColor="#303030"
+                    //         width={widths - 60}
+                    //         style={{
+                    //             backgroundColor: '#303030',
+                    //             height: 30,
+                    //             borderRadius: 20,
+                    //         }} />
+                    // </View>
                 }
             </View>
         </ScreenLayout>
