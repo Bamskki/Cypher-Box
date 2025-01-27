@@ -92,8 +92,9 @@ Cold Vault (watch-only):
 ---
 
 MVP development roadmap (last update 17th January '25)
+
 **Checking account**
-- ✅ Create Account
+- ✅ Account Creation (removed, as required by Apple & Google) 
 - ✅ Login
 - ✅ Fetch Balance
 - ✅ Receive lightning
