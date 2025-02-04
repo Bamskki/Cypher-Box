@@ -16,7 +16,7 @@ import Animated, {
     useAnimatedStyle,
 } from "react-native-reanimated";
 
-export default function TransactionBroadCastNew({navigation, route}) {
+export default function TransactionBroadCastNew({navigation, route}: any) {
     const [response, setResponse] = useState(false);
     const [progress, setProgress] = useState(0);
     // const [sats, setSats] = useState('100K sats');
@@ -30,13 +30,13 @@ export default function TransactionBroadCastNew({navigation, route}) {
         const intervalId = setInterval(() => {
             setProgress((prevProgress) => {
                 if (prevProgress < 1) {
-                    return prevProgress + 0.002;
+                    return prevProgress + 0.1;
                 } else {
                     clearInterval(intervalId);
                     return 1;
                 }
             });
-        }, 10);
+        }, 5);
 
         return () => clearInterval(intervalId);
     }, []);
@@ -54,7 +54,7 @@ export default function TransactionBroadCastNew({navigation, route}) {
 
     const fadeIn = () => {
         fadeInOpacity.value = withTiming(1, {
-            duration: 2500,
+            duration: 1500,
             easing: Easing.linear,
         });
     };
@@ -70,7 +70,7 @@ export default function TransactionBroadCastNew({navigation, route}) {
         <ScreenLayout disableScroll showToolbar isBackButton={false}>
             <View style={styles.main}>
                 <View style={styles.container}>
-                    {response ?
+                    {response &&
                         <>
                             <Text h1 bold center style={styles.title}>Transaction Broadcasted...</Text>
                             <Animated.View style={animatedStyle}>
@@ -82,40 +82,42 @@ export default function TransactionBroadCastNew({navigation, route}) {
                                 {/* <GradientText style={styles.gradientText}>Estimated time: ~2hr</GradientText> */}
                             </Animated.View>
                         </>
-                        :
-                        <Text h1 bold center style={styles.title}>Broadcasting Transaction...</Text>
+                        // :
+                        // <Text h1 bold center style={styles.title}>Broadcasting Transaction...</Text>
                     }
                 </View>
-                <View
-                    style={styles.ringEffect}
-                >
-                    <Ring delay={0} />
-                    <Ring delay={1000} />
-                    <Ring delay={2000} />
-                    <Ring delay={3000} />
-                    <ImageBackground source={BitcoinTower} style={styles.image} resizeMode="contain">
-                        <Image source={Bitcoin} style={styles.bitcoin} resizeMode="contain" />
-                    </ImageBackground>
-                    <Text semibold center style={styles.text}>Bitcoin Network</Text>
-                </View>
-                {response ?
+                {response &&
+                    <View
+                        style={styles.ringEffect}
+                    >
+                        <Ring delay={0} isWhite />
+                        <Ring delay={1000} isWhite />
+                        <Ring delay={2000} isWhite />
+                        <Ring delay={3000} isWhite />
+                        <ImageBackground source={BitcoinTower} style={styles.image} resizeMode="contain">
+                            <Image source={Bitcoin} style={styles.bitcoin} resizeMode="contain" />
+                        </ImageBackground>
+                        <Text semibold center style={styles.text}>Bitcoin Network</Text>
+                    </View>
+                }
+                {response &&
                     <TouchableOpacity onPress={onPressClickHandler} style={styles.nextBtn}>
                         <Text h3>Home</Text>
                     </TouchableOpacity>
-                    :
-                    <View style={styles.invoiceButton}>
-                        <Progress.Bar
-                            height={30}
-                            progress={progress}
-                            color={colors.white}
-                            borderColor="#303030"
-                            width={widths - 60}
-                            style={{
-                                backgroundColor: '#303030',
-                                height: 30,
-                                borderRadius: 20,
-                            }} />
-                    </View>
+                    // :
+                    // <View style={styles.invoiceButton}>
+                    //     <Progress.Bar
+                    //         height={30}
+                    //         progress={progress}
+                    //         color={colors.white}
+                    //         borderColor="#303030"
+                    //         width={widths - 60}
+                    //         style={{
+                    //             backgroundColor: '#303030',
+                    //             height: 30,
+                    //             borderRadius: 20,
+                    //         }} />
+                    // </View>
                 }
             </View>
         </ScreenLayout>

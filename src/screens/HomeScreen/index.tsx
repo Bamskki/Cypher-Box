@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useReducer, useRef, useState } from "react";
-import { ActivityIndicator, Image, Linking, RefreshControl, StyleSheet, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, Linking, RefreshControl, StyleSheet, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import SimpleToast from "react-native-simple-toast";
 import styles from "./styles";
 import {
@@ -7,6 +7,7 @@ import {
   useNavigation,
   useRoute,
 } from "@react-navigation/native";
+import { TabView, SceneMap } from 'react-native-tab-view';
 import { scanQrHelper } from "../../../helpers/scan-qr";
 import DeeplinkSchemaMatch from "../../../class/deeplink-schema-match";
 import triggerHapticFeedback, {
@@ -22,9 +23,9 @@ import {
   SavingVault,
 } from "@Cypher/components";
 import { ScreenLayout, Text } from "@Cypher/component-library";
-import { dispatchNavigate } from "@Cypher/helpers";
+import { dispatchNavigate, isIOS } from "@Cypher/helpers";
 import { Shadow } from "react-native-neomorph-shadows";
-import { colors, heights } from "@Cypher/style-guide";
+import { colors, heights, shadow } from "@Cypher/style-guide";
 import RBSheet from 'react-native-raw-bottom-sheet';
 import LinearGradient from "react-native-linear-gradient";
 import ReceivedList from "./ReceivedList";
@@ -37,6 +38,10 @@ import { initialState, walletReducer } from "../../../screen/wallets/add";
 import { BlueStorageContext } from '../../../blue_modules/storage-context';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { startsWithLn } from "../Send";
+import screenHeight from "@Cypher/style-guide/screenHeight";
+import Carousel from "react-native-snap-carousel";
+import screenWidth from "@Cypher/style-guide/screenWidth";
+import { mostRecentFetchedRate } from "../../../blue_modules/currency";
 
 interface Props {
   route: any;
@@ -93,7 +98,10 @@ export default function HomeScreen({ route }: Props) {
   const [hasSavingVault, setHasSavingVault] = useState<boolean | null>()
   const [hasColdStorage, setHasColdStorage] = useState<boolean>(false);
   const [sendAddress, setSendAddress] = useState<any>()
+  const [isWalletLoaded, setIsWalletLoaded] = useState(true);
+  const [isColdWalletLoaded, setIsColdWalletLoaded] = useState(true);
   const refRBSheet = useRef<any>(null);
+  const carouselRef = useRef<Carousel<any>>(null);
 
   const getWalletID = async () => {
     try {
@@ -110,48 +118,60 @@ export default function HomeScreen({ route }: Props) {
       if (!coldStorageWalletID) setColdStorageWallet(undefined)
       if (!walletID) setWallet(undefined)
 
-      if(!walletID && coldStorageWalletID) {
-        setVaultTab(true);
-      } else if(walletID && !coldStorageWalletID) {
-        setVaultTab(false);
-      }
+      // if(!walletID && coldStorageWalletID) {
+      //   setVaultTab(true);
+      // } else if(walletID && !coldStorageWalletID) {
+      //   setVaultTab(false);
+      // }
     }, [wallet, coldStorageWalletID, walletID]),
   );
 
 
   const getWallet = async () => {
-    const allWallets = wallets.concat(false);
-    const walletTemp = allWallets.find((w: AbstractWallet) => w.getID() === walletID);
-    const balanceTemp = !walletTemp?.hideBalance && formatBalance(walletTemp?.getBalance(), walletTemp?.getPreferredBalanceUnit(), true);
-    const balanceWithoutSuffixTemp = !walletTemp?.hideBalance && formatBalanceWithoutSuffix(Number(walletTemp?.getBalance()), walletTemp?.getPreferredBalanceUnit(), true);
-    await walletTemp.fetchBalance()
-    setWallet(walletTemp);
-    setBalanceWithoutSuffix(balanceWithoutSuffixTemp)
-    setBalanceVault(balanceTemp)
-    const hasVault = walletTemp.secret ? true : false;
-    setHasSavingVault(hasVault)
-    if (wallets && walletID) {
-      setIsAllDone(!!walletTemp);
-    } else {
-      setIsAllDone(false)
+    try {
+      const allWallets = wallets.concat(false);
+      const walletTemp = allWallets.find((w: AbstractWallet) => w.getID() === walletID);
+      const balanceTemp = !walletTemp?.hideBalance && formatBalance(walletTemp?.getBalance(), walletTemp?.getPreferredBalanceUnit(), true);
+      const balanceWithoutSuffixTemp = !walletTemp?.hideBalance && formatBalanceWithoutSuffix(Number(walletTemp?.getBalance()), walletTemp?.getPreferredBalanceUnit(), true);
+      await walletTemp.fetchBalance()
+      setWallet(walletTemp);
+      setBalanceWithoutSuffix(balanceWithoutSuffixTemp)
+      setBalanceVault(balanceTemp)
+      const hasVault = walletTemp.secret ? true : false;
+      setHasSavingVault(hasVault)
+      if (wallets && walletID) {
+        setIsAllDone(!!walletTemp);
+      } else {
+        setIsAllDone(false)
+      }  
+    } catch (error) {
+      console.error('Error getting wallet:', error);
+    } finally {
+      setIsWalletLoaded(false);
     }
   }
 
   const getColdStorageWallet = async () => {
-    const allWallets = wallets.concat(false);
-    const walletTemp = allWallets.find((w: AbstractWallet) => w.getID() === coldStorageWalletID);
-    const balanceTemp = !walletTemp?.hideBalance && formatBalance(walletTemp?.getBalance(), walletTemp?.getPreferredBalanceUnit(), true);
-    const balanceWithoutSuffixTemp = !walletTemp?.hideBalance && formatBalanceWithoutSuffix(Number(walletTemp?.getBalance()), walletTemp?.getPreferredBalanceUnit(), true);
-    await walletTemp.fetchBalance()
-    setColdStorageWallet(walletTemp);
-    setColdStorageBalanceWithoutSuffix(balanceWithoutSuffixTemp)
-    setColdStorageBalanceVault(balanceTemp)
-    const hasVault = walletTemp.secret ? true : false;
-    setHasColdStorage(hasVault)
-    if (wallets && coldStorageWalletID) {
-      setIsAllDone(!!walletTemp);
-    } else {
-      setIsAllDone(false)
+    try {
+      const allWallets = wallets.concat(false);
+      const walletTemp = allWallets.find((w: AbstractWallet) => w.getID() === coldStorageWalletID);
+      const balanceTemp = !walletTemp?.hideBalance && formatBalance(walletTemp?.getBalance(), walletTemp?.getPreferredBalanceUnit(), true);
+      const balanceWithoutSuffixTemp = !walletTemp?.hideBalance && formatBalanceWithoutSuffix(Number(walletTemp?.getBalance()), walletTemp?.getPreferredBalanceUnit(), true);
+      await walletTemp.fetchBalance()
+      setColdStorageWallet(walletTemp);
+      setColdStorageBalanceWithoutSuffix(balanceWithoutSuffixTemp)
+      setColdStorageBalanceVault(balanceTemp)
+      const hasVault = walletTemp.secret ? true : false;
+      setHasColdStorage(hasVault)
+      if (wallets && coldStorageWalletID) {
+        setIsAllDone(!!walletTemp);
+      } else {
+        setIsAllDone(false)
+      }  
+    } catch (error) {
+      console.error('Error getting wallet:', error);
+    } finally {
+      setIsColdWalletLoaded(false);
     }
   }
 
@@ -161,6 +181,12 @@ export default function HomeScreen({ route }: Props) {
         handleUser();
         loadPayments();
       } else {
+        const rates = await exchangeRate();
+        console.log('rates: ', rates)
+        if (rates && rates?.Rate) {
+          const numericAmount = Number(rates.Rate.replace(/[^0-9\.]/g, ''));
+          setMatchedRate(numericAmount);
+        }
         setIsLoading(false)
       }
     }
@@ -171,8 +197,14 @@ export default function HomeScreen({ route }: Props) {
     //   }
     // }
     // getWithdrawal();
+    // if(!walletID){
+    //   setIsWalletLoaded(false)
+    // }
+    // if(!coldStorageWalletID){
+    //   setIsColdWalletLoaded(false)
+    // }
     getWallet();
-    coldStorageWalletID && getColdStorageWallet();
+    coldStorageWalletID ? getColdStorageWallet() : setIsColdWalletLoaded(false);
     handleToken();
   }, [isAuth, token, wallets, walletID, coldStorageWalletID]);
 
@@ -300,7 +332,7 @@ export default function HomeScreen({ route }: Props) {
       }
       setUser(response?.username);
     } catch (error) {
-      console.log('error: ', error);
+      console.error('error: ', error);
     } finally {
       setIsLoading(false)
       setRefreshing(false);
@@ -357,10 +389,13 @@ export default function HomeScreen({ route }: Props) {
   const checkingAccountClickHandler = () => {
     dispatchNavigate('CheckingAccount', { matchedRate });
   }
-  
 
   const withdrawClickHandler = () => {
     console.log('recommendedFee: ', recommendedFee)
+    if(!isAuth){
+      SimpleToast.show('You need to be logged in to Coinos.io to withdraw', SimpleToast.SHORT);
+      return
+    }
     if(vaultTab && !coldStorageWallet){
       SimpleToast.show('You need to have a cold storage wallet to withdraw', SimpleToast.SHORT);
       return
@@ -391,6 +426,10 @@ export default function HomeScreen({ route }: Props) {
     // dispatchNavigate('PurchaseVault', {
     //   data: {}
     // });
+    if(!isAuth){
+      SimpleToast.show('You need to be logged in to Coinos.io to top up', SimpleToast.SHORT);
+      return
+    }
     if(vaultTab && !coldStorageWallet){
       SimpleToast.show('You need to have a cold storage wallet to top up', SimpleToast.SHORT);
       return
@@ -414,6 +453,8 @@ export default function HomeScreen({ route }: Props) {
 
   const coldStorageClickHandler = () => {
     setVaultTab(true);
+    // setIndex(1)
+    carouselRef.current?.snapToItem(1, true);
   };
 
   const handleCreateColdVault = () => {
@@ -422,9 +463,11 @@ export default function HomeScreen({ route }: Props) {
 
   const hotStorageClickHandler = () => {
     setVaultTab(false);
-    if(!walletID){
-      dispatchNavigate('SavingVaultIntroNew');      
-    }
+    // setIndex(0);
+    carouselRef.current?.snapToItem(0, true);
+    // if(!walletID){
+    //   dispatchNavigate('SavingVaultIntroNew');      
+    // }
   };
 
   const handleCreateVault = () => {
@@ -470,9 +513,231 @@ export default function HomeScreen({ route }: Props) {
     }
   };
 
-  const hasFilledTheBar = calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount)) === 100
+  const [index, setIndex] = useState(vaultTab ? 1 : 0); // Used for the tab index
+  const [routes] = useState([
+    { key: 'hot', title: 'Hot Storage' },
+    { key: 'cold', title: 'Cold Storage' }
+  ]);
 
-  console.log('ColdStorageBalanceVault: ', Number(ColdStorageBalanceVault?.split(' ')[0]), Number(balanceVault?.split(' ')[0]))
+  const TopUpWithdrawView = ({isVault}: any) => (
+    <View style={styles.bottominner}>
+        <GradientView
+          onPress={topupClickHandler}
+          topShadowStyle={[styles.outerShadowStyle, isVault && { shadowColor: colors.blueText }]}
+          bottomShadowStyle={styles.innerShadowStyle}
+          style={styles.linearGradientStyle}
+          linearGradientStyle={styles.mainShadowStyle}
+        >
+          <Image
+            style={styles.arrowLeft}
+            resizeMode="contain"
+            source={require("../../../img/arrow-right.png")}
+          />
+          <Text bold h3 center style={{ marginStart: 20 }}>Top-up</Text>
+        </GradientView>
+       <GradientView
+          onPress={withdrawClickHandler}
+          topShadowStyle={[styles.outerShadowStyle, isVault && { shadowColor: colors.blueText }]}
+          bottomShadowStyle={styles.innerShadowStyle}
+          style={styles.linearGradientStyle}
+          linearGradientStyle={styles.mainShadowStyle}
+        >
+          <Text bold h3 center style={{ marginEnd: 20 }}>Withdraw</Text>
+          <Image
+            style={styles.arrowRight}
+            resizeMode="contain"
+            source={require("../../../img/arrow-right.png")}
+          />
+        </GradientView>
+    </View>
+  );
+
+  const exchangeRate = async () => {
+    const rates = await mostRecentFetchedRate();
+    return rates
+  }
+
+  console.log('matchedRate: ', matchedRate)
+  const HotStorageTab = () => (
+    <View style={{flex: 1}}>
+      {hasSavingVault && wallet ?
+        <TopUpWithdrawView isVault={false} />
+      :
+        <View style={{height: 40}} />
+      }
+      {(hasSavingVault && wallet) ? (
+        <SavingVault
+          container={StyleSheet.flatten([styles.savingVault, { marginTop: 10 }])}
+          innerContainer={styles.savingVault}
+          shadowTopBottom={styles.savingVault}
+          shadowBottomBottom={styles.savingVault}
+          bitcoinText={styles.bitcoinText}
+          isVault={false}
+          onPress={savingVaultClickHandler}
+          bitcoinValue={balanceVault}
+          inDollars={`$${(Number(balanceWithoutSuffix) * Number(matchedRate)).toFixed(2)}`}
+          isColorable
+        />
+      )
+      :
+      (
+        <View style={[styles.createVaultContainer, { top: '-20%' }]}>
+        {/* <View style={styles.createVaultContainer}> */}
+          <View style={styles.alreadyView}>
+            <Text bold style={styles.text}>
+              Already have a vault?
+            </Text>
+            <TouchableOpacity onPress={handleRecoverSavingVault}>
+              <Text bold style={[styles.login, { color: colors.green }]}>
+                Recover
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            onPress={handleCreateVault}
+          >
+            <LinearGradient
+              colors={['#32D38E', '#24C47F']}
+              // start={{ x: 0, y: -0.3 }}
+              // end={{ x: 0, y: 2 }}
+              start = {{ x: 0, y: 1} }
+              end = {{ x: 1, y: 1 }}
+                        // locations={[0, 1]}
+              style={styles.createVault}>
+              {/* <Text h3 style={styles.advancedText}>⚠  Advanced</Text> */}
+              <Text h2 style={[styles.createVaultText, shadow.text25]}>
+                Create Hot Vault
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  );
+
+  const ColdStorageTab = () => (
+    <View style={{flex: 1}}>
+      {coldStorageWallet ?
+        <TopUpWithdrawView isVault={true} />
+      :
+        <View style={{height: 40}} />
+      }
+      {(hasColdStorage) ? (
+        <SavingVault
+          container={StyleSheet.flatten([styles.savingVault, { marginTop: 10 }])}
+          innerContainer={styles.savingVault}
+          shadowTopBottom={styles.savingVault}
+          shadowBottomBottom={styles.savingVault}
+          bitcoinText={styles.bitcoinText}
+          title={"Cold Storage"}
+          isVault={true}
+          onPress={savingVaultClickHandler}
+          bitcoinValue={ColdStorageBalanceVault}
+          inDollars={`$${(Number(coldStorageBalanceWithoutSuffix) * Number(matchedRate)).toFixed(2)}`}
+          isColorable
+        />
+      ) : (
+        !coldStorageWalletID && (
+          <View style={[styles.createVaultContainer, { top: -10 }]}>
+            <TouchableOpacity onPress={handleCreateColdVault}>
+              <LinearGradient
+                colors={['#1693EDFA', '#15A7A7']}
+                // start={{ x: 0, y: -0.3 }}
+                // end={{ x: 0, y: 2 }}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                // locations={[0, 1]}
+                style={[styles.createVault, { justifyContent: 'center' }]}
+              >
+                <Text h2 style={[styles.createVaultText, shadow.text25]}>
+                  Create Cold Vault
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        )
+      )}
+    </View>
+  );
+
+  // const renderScene = ({ route }: { route: any }) => {
+  //   switch (route.key) {
+  //     case "hot":
+  //       return <HotStorageTab />;
+  //     case "cold":
+  //       return <ColdStorageTab />;
+  //     default:
+  //       return null;
+  //   }
+  // };
+  // const renderScene = SceneMap({
+  //   hot: HotStorageTab,
+  //   cold: ColdStorageTab,
+  // });
+
+  const tabs = [
+    { key: "hot", title: "Hot Storage", component: () => <HotStorageTab /> },
+    { key: "cold", title: "Cold Storage", component: () => <ColdStorageTab /> },
+  ];
+  
+  
+  const RenderTabBar = (props: any) => {
+    return (
+        <View style={[styles.container3, { opacity: 1 }]}>
+          {/* {hasSavingVault && walletID && ( */}
+            <GradientCard colors_={['#464D6854', '#FFF']} style={styles.container2} linearStyle={styles.main} disabled={true}>
+              <View style={styles.container4}>
+                {/* {!hasSavingVault ? (
+                  <Text h3 bold style={styles.storageText} onPress={hotStorageClickHandler}>Hot Storage</Text>
+                ) : ( */}
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={hotStorageClickHandler}
+                    style={[styles.bottomBtn, !vaultTab && { borderWidth: !vaultTab ? 2 : 0, borderColor: !vaultTab ? colors.greenShadow : 'transparent', borderRadius: 25 }]}>
+                    <LinearGradient
+                      start={{ x: 1, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      locations={[0.25, 1]}
+                      colors={!vaultTab ? ['#333333', '#282727'] : ['transparent', 'transparent']}
+                      style={styles.linearGradientbottom}>
+                      <Text h3 bold style={{ color: '#FD7A68' }}>Hot Storage</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                {/* )} */}
+                {/* {isAllDone && ( */}
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    onPress={coldStorageClickHandler}
+                    style={[styles.bottomBtn, { marginEnd: 7.5, marginStart: 0 }, vaultTab && { borderWidth: vaultTab ? 2 : 0, borderColor: vaultTab ? colors.blueText : 'transparent' }]}>
+                    <LinearGradient
+                      start={{ x: 1, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      locations={[0.25, 1]}
+                      colors={ vaultTab ? ['#333333', '#282727'] : ['transparent', 'transparent']}
+                      style={styles.linearGradientbottom}>
+                      <Text h3 bold style={{ color: colors.blueText }}>Cold Storage</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                {/* )} */}
+              </View>
+            </GradientCard>
+          {/* )} */}
+        </View>
+    );
+  };
+
+  const renderItem = ({ item }: any) => {
+    return(
+      <View style={{ flex: 1 }}>
+        {item.component()}
+      </View>
+    )
+  };
+
+  const hasFilledTheBar = calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount)) === 100
+  const layout = useWindowDimensions();
+
+  console.log('matchedRate: ', matchedRate)
   return (
     <ScreenLayout
       RefreshControl={
@@ -617,9 +882,10 @@ export default function HomeScreen({ route }: Props) {
                     <Text h4 style={styles.alert}>
                       Congrats! You've completed the bar, It's time to create your Hot Storage Savings Vault and take full self-custody of your bitcoi. Click 'Withdraw' to know more.
                     </Text>
-                    :
+                  :
                     <Text h4 style={styles.alertGrey}>
-                      New security upgrades will be revealed once you meet fill up the bar displayed on your Checking Account.
+                      {/* New security upgrades will be revealed once you meet fill up the bar displayed on your Checking Account. */}
+                      {'\n'}
                     </Text>
                 )
               }
@@ -628,7 +894,6 @@ export default function HomeScreen({ route }: Props) {
 
           {/* {isAuth ? (
             <> */}
-
           {!isAuth &&
             <View style={{ height: '42%' }}>
               <GradientCardWithShadow
@@ -641,7 +906,7 @@ export default function HomeScreen({ route }: Props) {
                     resizeMode="contain"
                     source={require("../../../img/arrow-right.png")}
                   />
-                  <Text h2 style={styles.shadow}>
+                  <Text h2 style={styles.shadow} center>
                     Login to Your Checking Account
                   </Text>
                 </View>
@@ -658,199 +923,42 @@ export default function HomeScreen({ route }: Props) {
               </View>
             </View>
           }
-          <View style={styles.bottom}>
-            {isAuth &&
-              <View style={styles.bottominner}>
-                {(hasSavingVault && walletID) &&
-                  <GradientView
-                    onPress={topupClickHandler}
-                    topShadowStyle={[styles.outerShadowStyle, vaultTab && {shadowColor: colors.blueText}]}
-                    bottomShadowStyle={styles.innerShadowStyle}
-                    style={styles.linearGradientStyle}
-                    linearGradientStyle={styles.mainShadowStyle}
-                  >
-                    <Image
-                      style={styles.arrowLeft}
-                      resizeMode="contain"
-                      source={require("../../../img/arrow-right.png")}
-                    />
-                    <Text bold h3 center style={{ marginStart: 20 }}>Top-up</Text>
-                  </GradientView>
-                }
-                {(hasSavingVault && walletID) &&
-                  <GradientView
-                    onPress={withdrawClickHandler}
-                    topShadowStyle={[styles.outerShadowStyle, vaultTab && {shadowColor: colors.blueText}]}
-                    bottomShadowStyle={styles.innerShadowStyle}
-                    style={styles.linearGradientStyle}
-                    linearGradientStyle={styles.mainShadowStyle}
-                  >
-                    <Text bold h3 center style={{ marginEnd: 20 }}>Withdraw</Text>
-                    <Image
-                      style={styles.arrowRight}
-                      resizeMode="contain"
-                      source={require("../../../img/arrow-right.png")}
-                    />
-                  </GradientView>
-
-                }
-              </View>
-            }
-
-            {(hasSavingVault && walletID && !vaultTab) &&
-              <SavingVault
-                container={StyleSheet.flatten([styles.savingVault, { marginTop: 10 }])}
-                innerContainer={styles.savingVault}
-                shadowTopBottom={styles.savingVault}
-                shadowBottomBottom={styles.savingVault}
-                bitcoinText={styles.bitcoinText}
-                onPress={savingVaultClickHandler}
-                bitcoinValue={balanceVault}
-                inDollars={`$${(Number(balanceWithoutSuffix) * Number(matchedRate)).toFixed(2)}`}
-                isColorable
+          {!isLoading && !isWalletLoaded && !isColdWalletLoaded &&
+            <View style={[{height: isIOS && !isAuth ? '36.2%' : isAuth ? '37%' : '35%' }, isIOS && {bottom: 20}, isAuth && styles.bottom]}>
+              <Carousel
+                data={tabs}
+                ref={carouselRef}
+                renderItem={renderItem}
+                firstItem={index}
+                vertical={false}
+                sliderWidth={screenWidth * 0.92}
+                itemWidth={screenWidth * 0.92}
+                onSnapToItem={(index) => {
+                  setIndex(index)
+                  setVaultTab(index === 1);
+                }} // Update pagination index
               />
-            }
-
-            {(hasColdStorage && vaultTab) ?
-              <SavingVault
-                container={StyleSheet.flatten([styles.savingVault, { marginTop: 10 }])}
-                innerContainer={styles.savingVault}
-                shadowTopBottom={styles.savingVault}
-                shadowBottomBottom={styles.savingVault}
-                bitcoinText={styles.bitcoinText}
-                title={"Cold Storage"}
-                onPress={savingVaultClickHandler}
-                bitcoinValue={ColdStorageBalanceVault}
-                inDollars={`$${(Number(coldStorageBalanceWithoutSuffix) * Number(matchedRate)).toFixed(2)}`}
-                isColorable
-              />
-              : vaultTab && !coldStorageWalletID &&
-              <View style={[styles.createVaultContainer, {top: 0}]}>
-                <TouchableOpacity
-                  onPress={handleCreateColdVault}
-                >
-                  <LinearGradient
-                    colors={['#1E1E1E', '#6D6D6D']}
-                    start={{ x: 0, y: -0.1 }}
-                    end={{ x: 0, y: 2 }}
-                    locations={[0, 1]}
-                    style={[styles.createVault, {justifyContent: 'center'}]}>
-                    <Text h2 style={styles.createVaultText}>
-                      Create Cold Vault
-                    </Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </View>
-            }
-            <View style={[styles.container3, { opacity: hasSavingVault ? 1 : 0.5, }]}>
-              {(hasSavingVault && walletID) &&
-                <GradientCard colors_={['#464D6854', '#FFF']} style={styles.container2} linearStyle={styles.main}>
-                  <View style={styles.container4}>
-                    {!hasSavingVault ?
-                      <Text h3 bold style={styles.storageText} onPress={hotStorageClickHandler}>Hot Storage</Text>
-                      :
-                      <View style={[styles.bottomBtn, !vaultTab && {        
-                        borderWidth: !vaultTab ? 2 : 0,
-                        borderColor: !vaultTab ? colors.greenShadow : 'transparent',
-                        borderRadius: 25,
-                      }]}>
-                        <LinearGradient
-                          start={{ x: 1, y: 0 }}
-                          end={{ x: 1, y: 1 }}
-                          locations={[0.25, 1]}
-                          colors={['#333333', '#282727']}
-                          style={styles.linearGradientbottom}>
-                          <Text h3 bold style={{ color: '#FD7A68' }} onPress={hotStorageClickHandler}>Hot Storage</Text>
-                        </LinearGradient>
-                      </View>
-                    }
-                    {isAllDone &&
-                      <View style={[styles.bottomBtn, { marginEnd: 7.5, marginStart: 0 }, vaultTab && {        
-                        borderWidth: vaultTab ? 2 : 0,
-                        borderColor: vaultTab ? colors.blueText : 'transparent',
-                      }]}>
-                        <LinearGradient
-                          start={{ x: 1, y: 0 }}
-                          end={{ x: 1, y: 1 }}
-                          locations={[0.25, 1]}
-                          colors={
-                            !isAllDone
-                              ? [colors.gray.light, colors.gray.light]
-                              : ['#333333', '#282727']
-                          }
-                          style={styles.linearGradientbottom}>
-                          <Text h3 bold onPress={coldStorageClickHandler} style={{color: colors.blueText}}>Cold Storage</Text>
-                        </LinearGradient>
-                      </View>
-                    }
-                  </View>
-                </GradientCard>
-              }
-              {isAllDone &&
-                <View style={styles.circle}>
-                  <Image
-                    style={styles.arrow2}
-                    resizeMode="contain"
-                    source={require("../../../img/arrow-right.png")}
-                  />
-                  <Image
-                    style={styles.arrow3}
-                    resizeMode="contain"
-                    source={require("../../../img/arrow-right.png")}
-                  />
-                </View>
-              }
+              <RenderTabBar />
             </View>
-          </View>
-
-          {/* </>
-          ) : (
-            <>
-              <GradientCardWithShadow
-                style={styles.createView}
-                onPress={createChekingAccountClickHandler}
-              >
-                <View style={styles.middle}>
-                  <Image
-                    style={styles.arrow}
-                    resizeMode="contain"
-                    source={require("../../../img/arrow-right.png")}
-                  />
-                  <Text h2 style={styles.shadow}>
-                    Create Your Checking Account
-                  </Text>
-                </View>
-              </GradientCardWithShadow>
-              <View style={styles.alreadyView}>
-                <Text bold style={styles.text}>
-                  Already have an account?
-                </Text>
-                <TouchableOpacity onPress={loginClickHandler}>
-                  <Text bold style={styles.login}>
-                    Login
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          )} */}
+          }
         </View>
       </View>
-      <>
-
-
+      {/* <>
         {!walletID &&
           <View style={styles.createVaultContainer}>
             <TouchableOpacity
               onPress={handleCreateVault}
             >
               <LinearGradient
-                colors={['#1E1E1E', '#6D6D6D']}
-                start={{ x: 0, y: -0.1 }}
-                end={{ x: 0, y: 2 }}
-                locations={[0, 1]}
+                colors={['#32D38E', '#24C47F']}
+                // start={{ x: 0, y: -0.3 }}
+                // end={{ x: 0, y: 2 }}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                // locations={[0, 1]}
                 style={styles.createVault}>
                 <Text h3 style={styles.advancedText}>⚠  Advanced</Text>
-                <Text h2 style={styles.createVaultText}>
+                <Text h2 style={[styles.createVaultText, shadow.text25]}>
                   Create Vault
                 </Text>
               </LinearGradient>
@@ -867,7 +975,7 @@ export default function HomeScreen({ route }: Props) {
             </View>
           </View>
         }
-      </>
+      </> */}
       <RBSheet
         ref={refRBSheet}
         customStyles={{

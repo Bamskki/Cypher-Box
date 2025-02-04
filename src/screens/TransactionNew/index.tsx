@@ -29,13 +29,13 @@ export default function Transaction() {
         const intervalId = setInterval(() => {
             setProgress((prevProgress) => {
                 if (prevProgress < 1) {
-                    return prevProgress + 0.001;
+                    return prevProgress + 0.1;
                 } else {
                     clearInterval(intervalId);
                     return 1;
                 }
             });
-        }, 10);
+        }, 5);
         return () => clearInterval(intervalId);
     }, []);
 
@@ -69,7 +69,7 @@ export default function Transaction() {
         <ScreenLayout disableScroll showToolbar isBackButton={false}>
             <View style={styles.main}>
                 <View style={styles.container}>
-                    {!response && <Text h1 semibold center style={{ lineHeight: 45 }}>Purchasing vault</Text>}
+                    {/* {!response && <Text h1 semibold center style={{ lineHeight: 45 }}>Purchasing vault</Text>} */}
                     {response &&
                         <Animated.View style={animatedStyle}>
                             <Text semibold center style={{ fontSize: 32, lineHeight: 45 }}>Purchase completed</Text>
@@ -80,46 +80,46 @@ export default function Transaction() {
                         </Animated.View>
                     }
                 </View>
-                <View style={styles.ringEffect}>
-                    {!response ?
-                        <>
-                            <Ring delay={0} />
-                            <Ring delay={1000} />
-                            <Ring delay={2000} />
-                            <Ring delay={3000} />
-                        </>
-                        : null}
-                    <GradientCard style={styles.gradient} linearStyle={styles.gradient}
-                        colors_={!response ? [colors.white, colors.white] : [colors.pink.extralight, colors.pink.default]}>
-                        <View style={styles.inner}>
-                            <GradientCard style={styles.gradientInner} linearStyle={styles.gradientInner}
-                                colors_={!response ? [colors.white, colors.white] : [colors.pink.extralight, colors.pink.default]}>
-                                <View style={styles.inside}>
-                                    <Image source={Electrik} style={styles.image} resizeMode="contain" />
-                                </View>
-                            </GradientCard>
-                        </View>
-                    </GradientCard>
-                </View>
+                {response &&
+                    <View style={styles.ringEffect}>
+                            <>
+                                <Ring delay={0} />
+                                <Ring delay={1000} />
+                                <Ring delay={2000} />
+                                <Ring delay={3000} />
+                            </>
+                        <GradientCard style={styles.gradient} linearStyle={styles.gradient}
+                            colors_={!response ? [colors.white, colors.white] : [colors.pink.extralight, colors.pink.default]}>
+                            <View style={styles.inner}>
+                                <GradientCard style={styles.gradientInner} linearStyle={styles.gradientInner}
+                                    colors_={!response ? [colors.white, colors.white] : [colors.pink.extralight, colors.pink.default]}>
+                                    <View style={styles.inside}>
+                                        <Image source={Electrik} style={styles.image} resizeMode="contain" />
+                                    </View>
+                                </GradientCard>
+                            </View>
+                        </GradientCard>
+                    </View>
+                }
                 <View style={styles.extra} />
-                {response ?
+                {response &&
                     <TouchableOpacity style={styles.button} onPress={generateKeyClickHandler}>
                         <Text bold h3 style={styles.nextBtn}>Generate Keys</Text>
                     </TouchableOpacity>
-                    :
-                    <View style={styles.invoiceButton}>
-                        <Progress.Bar
-                            height={30}
-                            progress={progress}
-                            color={colors.white}
-                            borderColor="#303030"
-                            width={widths - 60}
-                            style={{
-                                backgroundColor: '#303030',
-                                height: 30,
-                                borderRadius: 20,
-                            }} />
-                    </View>
+                    // :
+                    // <View style={styles.invoiceButton}>
+                    //     <Progress.Bar
+                    //         height={30}
+                    //         progress={progress}
+                    //         color={colors.white}
+                    //         borderColor="#303030"
+                    //         width={widths - 60}
+                    //         style={{
+                    //             backgroundColor: '#303030',
+                    //             height: 30,
+                    //             borderRadius: 20,
+                    //         }} />
+                    // </View>
                 }
             </View>
         </ScreenLayout>

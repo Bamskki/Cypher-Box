@@ -9,7 +9,7 @@ interface Props {
     disabled?: boolean;
     start?: { x: number, y: number };
     end?: { x: number, y: number };
-    style?: ViewStyle;
+    style?: ViewStyle | ViewStyle[];
     onPress?(): void;
     colors_?: string[];
     linearStyle?: ViewStyle;

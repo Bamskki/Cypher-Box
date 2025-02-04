@@ -78,8 +78,8 @@ android {
         applicationId "io.cypherbox.btc"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "0.0.1"
+        versionCode 2
+        versionName "0.0.2"
         testBuildType System.getProperty('testBuildType', 'debug')
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         missingDimensionStrategy 'react-native-camera', 'general' //add this line
@@ -110,6 +110,7 @@ dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
     implementation files("../../node_modules/rn-ldk/android/libs/LDK-release.aar")
+    implementation 'com.facebook.fresco:animated-gif:2.5.0' // Enables GIF support
     // implementation 'com.github.uccmawei:FingerprintIdentify:1.2.6'
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

@@ -35,7 +35,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
     const [frozen, setFrozen] = useState(
         utxo.filter(out => wallet.getUTXOMetadata(out.txid, out.vout).frozen).map(({ txid, vout }) => `${txid}:${vout}`),
     );
-    const { walletID, coldStorageWalletID } = useAuthStore();
+    const { walletID, coldStorageWalletID, isAuth } = useAuthStore();
     const { wallets, saveToDisk, sleep, isElectrumDisabled } = useContext(BlueStorageContext);
 
     const debouncedSaveFronen = useRef(
@@ -107,14 +107,23 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
                 id, value: result
             });
         });
-        if (ids.length > 0) {
-            dispatchNavigate('ColdStorage', {wallet, utxo, ids, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to: sendToAddress, vaultTab, vaultSend: true});
+        if(vaultTab && !walletID){
+            SimpleToast.show("Before creating a transaction, you must first add a Hot Vault wallet", SimpleToast.SHORT)
+        } else if(!vaultTab && !coldStorageWalletID){
+            SimpleToast.show("Before creating a transaction, you must first add a Cold Vault wallet", SimpleToast.SHORT)
+        }
+        else if (ids.length > 0) {
+            dispatchNavigate('ColdStorage', {wallet, utxo, ids, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to: sendToAddress, vaultTab, vaultSend: true, title: !vaultTab ? "Transfer To Cold Vault" : undefined});
         } else {
             SimpleToast.show("Please select Capsules to Send", SimpleToast.SHORT)
         }
     }
 
     const addressClickHandler = async () => {
+        if(!isAuth){
+            SimpleToast.show('You need to be logged in to Coinos.io to top up', SimpleToast.SHORT);
+            return;
+        }
         let capsulesData: any = [];
         ids.forEach(id => {
             const result = utxo?.find(obj => `${obj.txid}:${obj.vout}` === id)?.value;
@@ -123,7 +132,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
             });
         });
         if (ids.length > 0) {
-            dispatchNavigate('ColdStorage', {wallet, utxo, ids, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to: bitcoinHash});
+            dispatchNavigate('ColdStorage', {wallet, utxo, ids, vaultTab, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to: bitcoinHash, type: "TOPUP"});
         } else {
             SimpleToast.show("Please select Capsules to Send", SimpleToast.SHORT)
         }
@@ -217,7 +226,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
                 {data.map((data_, index) => <ListView item={data_} onPress={onPressClickHandler} ids={ids} />)}
             </ScrollView> */}
             <View style={styles.bottomViewNew}>
-                <Text h2 center>Size of selected bars and coins:</Text>
+                <Text h2 center>Size of selected capsules:</Text>
                 <View style={styles.priceView}>
                     <Input
                         onChange={setBtc}

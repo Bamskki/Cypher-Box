@@ -12,6 +12,8 @@ import { dispatchNavigate } from "@Cypher/helpers";
 import startImport from "../../../class/wallet-import";
 import { BlueStorageContext } from "../../../blue_modules/storage-context";
 import triggerHapticFeedback, { HapticFeedbackTypes } from "../../../blue_modules/hapticFeedback";
+import { GradientCard } from "@Cypher/components";
+import { shortenAddress } from "../ColdStorage";
 
 interface Props {
     route: any;
@@ -34,6 +36,12 @@ export default function ConnectColdStorage({ route, navigation }: Props) {
         if (value && value.data) value = value.data + ''; // no objects here, only strings
         setAddress(value);
     };
+
+    useEffect(() => {
+        if(address && address.trim().length > 0) {
+            importButtonPressed();
+        }
+    }, [address])
     
     const importScan = () => {
         requestCameraAuthorization().then(() =>
@@ -86,7 +94,7 @@ export default function ConnectColdStorage({ route, navigation }: Props) {
             let subtitle: any;
             try {
                 subtitle = wallet.getDerivationPath?.();
-                dispatchNavigate('HomeScreen');
+                dispatchNavigate('SavingVaultCreated');
             } catch (e) { }
             setWallets(w => [...w, { wallet, subtitle, id }]);
         };
@@ -140,28 +148,79 @@ export default function ConnectColdStorage({ route, navigation }: Props) {
     }
 
     return (
-        <ScreenLayout disableScroll showToolbar isBackButton title={"Connect Hardware Device"}>
-            <ScrollView style={styles.container}>
-            <View style={styles.pasteview}>
-                <TouchableOpacity style={[styles.button, { borderColor: colors.blueText }]} onPress={pasteClickHandler}>
-                    {address ?
-                        <Text bold>{address}</Text>
-                        :
-                        <Text bold>Paste</Text>
-                    }
-                </TouchableOpacity>
-                <TouchableOpacity onPress={importScan}>
-                    <Image source={require("../../../img/scan-new.png")} style={styles.qrcode} resizeMode="contain" />
-                </TouchableOpacity>
-            </View>
-            <TouchableOpacity onPress={importButtonPressed} style={styles.importBtn} disabled={loading}>
-                {loading ?
-                    <ActivityIndicator color={colors.white} />
+        <ScreenLayout disableScroll showToolbar progress={1} color={[colors.blueText, colors.blueText]}>
+        {/* <ScreenLayout disableScroll showToolbar isBackButton title={"Connect Hardware Device"}> */}
+            <View style={styles.container}>
+                <View style={styles.innerView}>
+                    <Text style={styles.title}>Connect Hardware Device</Text>
+                    {loading ?
+                        <ActivityIndicator style={{marginTop: 30}} color={colors.white} />
                     :
-                    <Text h3>Import</Text>
-                }
-            </TouchableOpacity>
-            </ScrollView>
+                        <>
+                            <Text h4 style={styles.descption}>Authorize your hardware device to display its Public Key (xpub, ypub, or zpub) then Scan, Paste, OR Import it from your files. Some devices don’t  give you that so you need to take it from their companion app’s settings.</Text>
+                            <View style={styles.pasteview}>
+                                <GradientCard
+                                    colors_={["#1693EDFA", "#15A7A7"]}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 0, y: 1 }}            
+                                    style={styles.linearGradientInside}
+                                    linearStyle={styles.linearStyle}
+                                    onPress={importScan}>
+                                    <View style={styles.insideView}>
+                                        <Image source={require("../../../img/scan-new.png")} style={styles.qrimage} resizeMode="contain" />
+                                        <Text h2>Scan</Text>
+                                    </View>
+                                </GradientCard>
+                                <GradientCard
+                                    colors_={["#1693EDFA", "#15A7A7"]}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 0, y: 1 }}            
+                                    style={styles.linearGradientInside}
+                                    linearStyle={styles.linearStyle}
+                                    onPress={pasteClickHandler}>
+                                    <View style={styles.insideView}>
+                                        <Image source={require('../../../img/paste-icon.png')} style={styles.qrimage} resizeMode="contain" />
+                                        {address ?
+                                            <Text style={{fontSize: 14}}>{shortenAddress(address)}</Text>
+                                        :
+                                            <Text h2>Paste</Text>
+                                        }
+                                    </View>
+                                </GradientCard>
+                                {/* <GradientCard
+                                    colors_={["#1693EDFA", "#15A7A7"]}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 0, y: 1 }}            
+                                    style={styles.linearGradientInside}
+                                    linearStyle={styles.linearStyle}
+                                    onPress={importScan}>
+                                    <View style={styles.insideView}>
+                                        <Image source={require('../../../img/import.png')} style={styles.qrimage} resizeMode="contain" />
+                                        <Text h2>Import</Text>
+                                    </View>
+                                </GradientCard> */}
+                            </View>
+                        </>
+                    }
+                        {/* <TouchableOpacity style={[styles.button, { borderColor: colors.blueText }]} onPress={pasteClickHandler}>
+                            {address ?
+                                <Text bold>{address}</Text>
+                                :
+                                <Text bold>Paste</Text>
+                            }
+                        </TouchableOpacity> */}
+                        {/* <TouchableOpacity onPress={importScan}>
+                            <Image source={require("../../../img/scan-new.png")} style={styles.qrcode} resizeMode="contain" />
+                        </TouchableOpacity> */}
+                    </View>
+                    {/* <TouchableOpacity onPress={importButtonPressed} style={styles.importBtn} disabled={loading}>
+                        {loading ?
+                            <ActivityIndicator color={colors.white} />
+                            :
+                            <Text h3>Import</Text>
+                        }
+                    </TouchableOpacity> */}
+            </View>
         </ScreenLayout>
     )
 }

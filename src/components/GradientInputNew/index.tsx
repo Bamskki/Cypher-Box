@@ -47,7 +47,7 @@ const GradientInputNew = ({
                     <Text
                         style={isSats ? styles.dollar : styles.btc}
                     >
-                        {isSats ? 'BTC' : '$'}
+                        {isSats ? title ? 'BTC' : 'sats' : '$'}
                     </Text>
                 )}
             </View>
@@ -62,7 +62,7 @@ const GradientInputNew = ({
                     <Text bold style={styles.tips}>Tip: The more bars and coins you select, the higher the network fees</Text> */}
                 </View>
             ) : (
-                <Text style={styles.inDollar}>{isSats ? `$${usd}` : `${usd} BTC`}</Text>
+                <Text style={styles.inDollar}>{isSats ? `$${usd}` : title ? `${usd} BTC` : `${usd} sats`}</Text>
             )}
         </View>
     );

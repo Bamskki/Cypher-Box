@@ -32,11 +32,31 @@ interface Style {
     sats: ViewStyle;
     middle: ViewStyle;
     price: TextStyle;
+    checkView: ViewStyle;
+    checkImage: ImageStyle;
+    editImage: ImageStyle;
 }
 
 export default StyleSheet.create<Style>({
     topView: {
         flex: 1,
+    },
+    checkView: {
+        borderWidth: 1,
+        borderColor: colors.blueText,
+        width: 27,
+        height: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 3,
+    },
+    checkImage: {
+        width: 16,
+        height: 15
+    },
+    editImage: {
+        width: 22,
+        height: 22
     },
     text: {
         alignSelf: 'flex-end',
@@ -184,7 +204,8 @@ export default StyleSheet.create<Style>({
         marginTop: 20,
     },
     price: {
-        color: colors.pink.dark,
+        color: colors.white,
+        fontWeight: 'bold'
     },
     modal: {
         height: 200,

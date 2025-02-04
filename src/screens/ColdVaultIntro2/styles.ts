@@ -4,8 +4,9 @@ import { View } from "react-native-reanimated/lib/typescript/Animated";
 
 interface Style {
     container: ViewStyle;
-    inner: ViewStyle;
+    innerView: ViewStyle;
     descption: TextStyle;
+    guideText: TextStyle;
     title: TextStyle;
     button: ViewStyle;
     btnText: ViewStyle;
@@ -14,34 +15,39 @@ interface Style {
 export default StyleSheet.create<Style>({
     container: {
         flex: 1,
-        paddingHorizontal: 20,
+        paddingBottom: 65,
     },
-    inner: {
+    innerView: {
         flex: 1,
-        marginTop: 40,
+        paddingBottom: 40,
+        paddingTop: 10,
+        paddingHorizontal: 25,
+        alignItems: 'center',
     },
     descption: {
         fontFamily: 'Archivo-Regular',
-        marginTop: 60,
-        marginHorizontal: 30,
+        marginVertical: 30,
+        color: colors.white,
         lineHeight: 24,
     },
+    guideText: {
+        fontFamily: 'Archivo-Regular',
+        fontSize: 14,
+        color: colors.white,
+    },
     title: {
-        color: colors.green,
+        color: colors.blueText,
         fontFamily: 'Archivo-SemiBold',
         fontSize: 18,
     },
     button: {
-        backgroundColor: colors.green,
-        position: 'absolute',
+        backgroundColor: colors.blueText,
         borderWidth: 0,
-        width: '85%',
-        alignSelf: 'center',
-        bottom: 40,
+        marginHorizontal: 20,
     },
     btnText: {
         fontFamily: 'Archivo-Bold',
         color: colors.white,
         fontSize: 16,
-    }
+    },
 })

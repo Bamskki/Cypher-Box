@@ -95,6 +95,8 @@ import ForgetPassword from '@Cypher/screens/Account/ForgetPassword';
 import HardwareWalletTransaction from '@Cypher/screens/HardwareWalletTransaction';
 import HardwareWalletTransactionContinue from '@Cypher/screens/HardwareWalletTransactionContinue';
 import ConfirmHardwareTransaction from '@Cypher/screens/ConfirmHardwareTransaction';
+import ColdVaultIntro from '@Cypher/screens/ColdVaultIntro';
+import ColdVaultIntro2 from '@Cypher/screens/ColdVaultIntro2';
 
 const WalletsStack = createStackNavigator();
 
@@ -179,6 +181,8 @@ const WalletsRoot = () => {
       <WalletsStack.Screen name="GetAddressScreen" component={GetAddressScreen} options={{ headerShown: false }} />
       <WalletsStack.Screen name="SendScreen" component={SendScreen} options={{ headerShown: false }} />
       <WalletsStack.Screen name="SavingVaultIntro" component={SavingVaultIntro} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="ColdVaultIntro" component={ColdVaultIntro} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="ColdVaultIntro2" component={ColdVaultIntro2} options={{ headerShown: false }} />
       <WalletsStack.Screen name="SavingVaultIntroNew" component={SavingVaultIntroNew} options={{ headerShown: false }} />
       <WalletsStack.Screen name="SavingVault" component={SavingVault} options={{ headerShown: false }} />
       <WalletsStack.Screen name="SavingVaultCreated" component={SavingVaultCreated} options={{ headerShown: false }} />

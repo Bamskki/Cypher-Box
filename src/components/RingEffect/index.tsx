@@ -7,13 +7,18 @@ import Animated, {
     withTiming,
     interpolate,
 } from "react-native-reanimated";
+
+import { colors } from "@Cypher/style-guide";
 import styles from "./styles";
+import { ViewStyle } from "react-native";
 
 interface Props {
     delay: number;
+    isWhite?: boolean;
+    ringContainer?: ViewStyle
 }
 
-export default function Ring({ delay }: Props) {
+export default function Ring({ delay, ringContainer, isWhite }: Props) {
     const ring = useSharedValue(0);
 
     const ringStyle = useAnimatedStyle(() => {
@@ -31,12 +36,12 @@ export default function Ring({ delay }: Props) {
             delay,
             withRepeat(
                 withTiming(1, {
-                    duration: 6000,
+                    duration: 5000,
                 }),
                 -1,
                 false
             )
         );
     }, []);
-    return <Animated.View style={[styles.ring, ringStyle]} />;
+    return <Animated.View style={[styles.ring, ringContainer, isWhite && {borderColor: colors.white}, ringStyle]} />;
 };

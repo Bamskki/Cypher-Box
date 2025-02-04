@@ -53,9 +53,9 @@ export default function PrivateKeyGenerater({ callNext }: Props) {
             setIsView(true);
             setTimeout(() => {
                 callNext();
-                setTimeout(() => {
-                    setIsView(false);
-                }, 2000);
+                // setTimeout(() => {
+                //     setIsView(false);
+                // }, 2000);
             }, 3000);
         }, 1500);
     }
@@ -88,18 +88,23 @@ export default function PrivateKeyGenerater({ callNext }: Props) {
                 <BlurView
                     style={styles.hideView}
                     blurType="dark"
-                    blurAmount={8}
+                    blurAmount={9}
                     reducedTransparencyFallbackColor="white"
                 >
-                    <View style={styles.centerView}>
-                        <Text style={styles.title} center>Tap to reveal your seed phrase</Text>
-                        <Text style={styles.detail} center>Make sure no one is watching your screen.</Text>
-                    </View>
-                    <TouchableOpacity style={styles.viewStyle} onPress={viewClickHandler}>
-                        <Image source={EyeVisible} />
-                        <Text h3 style={styles.viewBtn}>View</Text>
-                    </TouchableOpacity>
-                    {loading && <ActivityIndicator style={{ position: 'absolute', top: 100, bottom: 0, left: 0, right: 0 }} />}
+                    {loading ?
+                        <ActivityIndicator style={{ position: 'absolute', top: 100, bottom: 0, left: 0, right: 0 }} />
+                    :
+                        <View style={styles.centerView}>
+                            <View>
+                                <Text style={styles.title} center>Tap to reveal your seed phrase</Text>
+                                <Text style={styles.detail} center>Make sure no one is watching your screen.</Text>
+                            </View>
+                            <TouchableOpacity style={styles.viewStyle} onPress={viewClickHandler}>
+                                <Image source={EyeVisible} />
+                                <Text h3 style={styles.viewBtn}>View</Text>
+                            </TouchableOpacity>
+                        </View>
+                    }
                 </BlurView>
             }
         </View>

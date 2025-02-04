@@ -5,6 +5,7 @@ interface Style {
     main: ViewStyle;
     container: ViewStyle;
     image: ImageStyle;
+    gifImage: ImageStyle;
     card: ViewStyle;
     notification: ViewStyle;
     text: TextStyle;
@@ -18,6 +19,7 @@ interface Style {
     extra: ViewStyle;
     ringEffect: ImageStyle;
     imageContainer: ImageStyle;
+    ringStyle: ViewStyle
 }
 
 export default StyleSheet.create<Style>({
@@ -40,6 +42,19 @@ export default StyleSheet.create<Style>({
         // justifyContent: 'center',
         // position: 'absolute',
         // right: 0,
+    },
+    gifImage: {
+        width: 220,
+        height: 220,
+        borderRadius: 110,
+        position:'absolute',
+        alignSelf: 'center',
+        backgroundColor: colors.primary,
+    },
+    ringStyle: {
+        width: 220,
+        height: 220,
+        borderRadius: 110,
     },
     card: {
         width: 300,

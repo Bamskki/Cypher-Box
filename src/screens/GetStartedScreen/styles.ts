@@ -66,7 +66,7 @@ export default StyleSheet.create<Style>({
     },
 
     container4: {
-        backgroundColor: colors.gray.dark,
+        backgroundColor: '#171717',
         flex: 1,
         borderRadius: 10,
         justifyContent: 'center',

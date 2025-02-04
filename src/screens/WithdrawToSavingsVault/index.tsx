@@ -12,6 +12,7 @@ import { getCurrencyRates, getMe, getTransactionHistory } from '@Cypher/api/coin
 import { matchKeyAndValue } from '@Cypher/helpers/coinosHelper';
 import Svg, { SvgProps, Path } from 'react-native-svg';
 import { ProgressBar } from '@Cypher/components';
+import { mostRecentFetchedRate } from '../../../blue_modules/currency';
 
 const { width } = Dimensions.get('screen');
 
@@ -51,6 +52,12 @@ export default function WithdrawToSavingsVault({ route }: Props) {
                 handleUser();
                 loadPayments();
             } else {
+                const rates = await exchangeRate();
+                console.log('rates: ', rates)
+                if (rates && rates?.Rate) {
+                  const numericAmount = Number(rates.Rate.replace(/[^0-9\.]/g, ''));
+                  setMatchedRate(numericAmount);
+                }
                 setIsLoading(false);
             }
         }
@@ -58,6 +65,11 @@ export default function WithdrawToSavingsVault({ route }: Props) {
         handleToken();
     }, [isAuth, token]);
 
+    const exchangeRate = async () => {
+        const rates = await mostRecentFetchedRate();
+        return rates
+    }
+    
     const handleUser = async () => {
         try {
             const response = await getMe();
@@ -72,7 +84,6 @@ export default function WithdrawToSavingsVault({ route }: Props) {
             console.error('error: ', error);
         } finally {
             setIsLoading(false);
-            setRefreshing(false);
         }
     };
 

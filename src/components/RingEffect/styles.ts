@@ -12,7 +12,7 @@ export default StyleSheet.create({
         width: 180,
         height: 180,
         borderRadius: 90,
-        borderColor: colors.white,
+        borderColor: colors.pink.default,
         borderWidth: 10,
     },
 });

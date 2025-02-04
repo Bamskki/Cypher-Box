@@ -32,13 +32,13 @@ export default function TransactionBroadCast({navigation, route}: any) {
         const intervalId = setInterval(() => {
             setProgress((prevProgress) => {
                 if (prevProgress < 1) {
-                    return prevProgress + 0.002;
+                    return prevProgress + 0.1;
                 } else {
                     clearInterval(intervalId);
                     return 1;
                 }
             });
-        }, 10);
+        }, 5);
 
         return () => clearInterval(intervalId);
     }, []);
@@ -60,7 +60,7 @@ export default function TransactionBroadCast({navigation, route}: any) {
 
     const fadeIn = () => {
         fadeInOpacity.value = withTiming(1, {
-            duration: 2500,
+            duration: 1500,
             easing: Easing.linear,
         });
     };
@@ -75,7 +75,7 @@ export default function TransactionBroadCast({navigation, route}: any) {
         <ScreenLayout disableScroll showToolbar isBackButton={false}>
             <View style={styles.main}>
                 <View style={styles.container}>
-                    {response ?
+                    {response &&
                         <>
                             <Text h1 bold center style={styles.title}>Transaction Broadcasted...</Text>
                             <Animated.View style={animatedStyle}>
@@ -87,22 +87,24 @@ export default function TransactionBroadCast({navigation, route}: any) {
                                 <GradientText style={styles.gradientText}>Estimated time: ~2hr</GradientText>
                             </Animated.View>
                         </>
-                        :
-                        <Text h1 bold center style={styles.title}>Broadcasting Transaction...</Text>
+                        // :
+                        // <Text h1 bold center style={styles.title}>Broadcasting Transaction...</Text>
                     }
                 </View>
-                <View
-                    style={styles.ringEffect}
-                >
-                    <Ring delay={0} />
-                    <Ring delay={1000} />
-                    <Ring delay={2000} />
-                    <Ring delay={3000} />
-                    <ImageBackground source={BitcoinTower} style={styles.image} resizeMode="contain">
-                        <Image source={Bitcoin} style={styles.bitcoin} resizeMode="contain" />
-                    </ImageBackground>
-                    <Text semibold center style={styles.text}>Bitcoin Network</Text>
-                </View>
+                {response &&
+                    <View
+                        style={styles.ringEffect}
+                    >
+                        <Ring delay={0} isWhite />
+                        <Ring delay={1000} isWhite />
+                        <Ring delay={2000} isWhite />
+                        <Ring delay={3000} isWhite />
+                        <ImageBackground source={BitcoinTower} style={styles.image} resizeMode="contain">
+                            <Image source={Bitcoin} style={styles.bitcoin} resizeMode="contain" />
+                        </ImageBackground>
+                        <Text semibold center style={styles.text}>Bitcoin Network</Text>
+                    </View>
+                }
                 {/* <View
                     style={styles.ringEffect}
                 >
@@ -170,25 +172,25 @@ export default function TransactionBroadCast({navigation, route}: any) {
                     </ImageBackground>
                 } */}
                 {/* <View style={styles.extra} /> */}
-                {response ?
+                {response &&
                     <GradientButton style={styles.invoiceButton} textStyle={{ fontFamily: 'Lato-Medium', }}
                         title='Transaction Details'
                         disabled={!response}
                         onPress={onPressClickHandler} />
-                    :
-                    <View style={styles.invoiceButton}>
-                        <Progress.Bar
-                            height={30}
-                            progress={progress}
-                            color={colors.white}
-                            borderColor="#303030"
-                            width={widths - 60}
-                            style={{
-                                backgroundColor: '#303030',
-                                height: 30,
-                                borderRadius: 20,
-                            }} />
-                    </View>
+                    // :
+                    // <View style={styles.invoiceButton}>
+                    //     <Progress.Bar
+                    //         height={30}
+                    //         progress={progress}
+                    //         color={colors.white}
+                    //         borderColor="#303030"
+                    //         width={widths - 60}
+                    //         style={{
+                    //             backgroundColor: '#303030',
+                    //             height: 30,
+                    //             borderRadius: 20,
+                    //         }} />
+                    // </View>
                 }
             </View>
         </ScreenLayout>

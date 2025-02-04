@@ -16,15 +16,17 @@ interface Style {
 }
 export default StyleSheet.create<Style>({
     container: {
-        flex: 1,
+        height: 85,
         flexDirection: 'row',
-        margin: 20,
+        marginHorizontal: 20,
         alignItems: 'center',
+        justifyContent: 'center',
     },
     main: {
         width: widths,
         height: 100,
         marginStart: 5,
+        marginVertical: 5
     },
     value: {
         fontSize: 18,
@@ -78,12 +80,12 @@ export default StyleSheet.create<Style>({
         justifyContent: 'center',
     },
     borderview: {
-        borderWidth: 1,
+        borderWidth: 1.6,
         borderColor: colors.green,
         borderRadius: 25,
         width: '95%',
         height: '95%',
-        top: 5,
+        top: -5,
         start: 5,
         position: 'absolute',
     },
