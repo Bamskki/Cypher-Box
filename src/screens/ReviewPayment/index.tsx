@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Image, ScrollView, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import SimpleToast from "react-native-simple-toast";
 import { Icon } from "react-native-elements";
 import ReactNativeModal from "react-native-modal";
 import styles from "./styles";
 import { Input, LoadingSpinner, ScreenLayout, Text } from "@Cypher/component-library";
-import { CoinOSSmall } from "@Cypher/assets/images";
+import { Check, CoinOSSmall, Edit } from "@Cypher/assets/images";
 import { GradientButton, GradientCard, GradientCardWithShadow, GradientText, ImageText, SwipeButton } from "@Cypher/components";
 import { colors } from "@Cypher/style-guide";
-import { dispatchNavigate } from "@Cypher/helpers";
+import { dispatchNavigate, isIOS } from "@Cypher/helpers";
 import LinearGradient from "react-native-linear-gradient";
 import TextView from "./TextView";
 import TextViewV2 from "../Invoice/TextView"
@@ -42,7 +42,7 @@ export const shortenAddress = (address: string) => {
 
 export default function ReviewPayment({ route }: Props) {
     const { value, converted, isSats, to, type, recommendedFee, isWithdrawal = false, wallet = null, description } = route?.params;
-    const { withdrawThreshold, reserveAmount } = useAuthStore();
+    const { withdrawThreshold, reserveAmount, vaultTab } = useAuthStore();
     const [note, setNote] = useState(description || '');
     const [balance, setBalance] = useState(0);
     const [currency, setCurrency] = useState('$');
@@ -57,7 +57,9 @@ export default function ReviewPayment({ route }: Props) {
     const [feeLoading, setFeeLoading] = useState<boolean>(false);
     const [isSendLoading, setIsSendLoading] = useState<boolean>(false);
     const [isModalVisible, setModalVisible] = useState(false);
-    const [isEditAmount, setIsEditAmount] = useState(false)
+    const [isEditAmount, setIsEditAmount] = useState(false);
+    const [isCheck, setIsCheck] = useState(false);
+
     const swipeButtonRef = useRef(null);
     const feeNames: Record<Fee, string> = {
         fastestFee: "Fastest",
@@ -226,6 +228,11 @@ export default function ReviewPayment({ route }: Props) {
                 setIsSendLoading(false);
                 return;
             }
+            if(!isCheck && isWithdrawal && vaultTab){
+                SimpleToast.show("Please verify the destination address", SimpleToast.SHORT)
+                setIsSendLoading(false);
+                return;
+            }
             if (selectedFee == null) {
                 SimpleToast.show('Please select fee rate', SimpleToast.SHORT);
                 setIsSendLoading(false);
@@ -275,7 +282,7 @@ export default function ReviewPayment({ route }: Props) {
             }
             try {
                 const response = await sendCoinsViaUsername(to, Number(amount), note);
-                console.log('response username: ', response, typeof response)
+                console.log('response username: ', response, typeof response, amount, to, note)
                 if (typeof response == 'object' && response?.hash) {
                     dispatchNavigate('Transaction', { matchedRate, type, value, converted, isSats, to, item: response });
                 } else if (response?.startsWith('{')) {
@@ -398,9 +405,14 @@ export default function ReviewPayment({ route }: Props) {
         });
     }
 
+    const handleWithdrawalFee = (fee: number) => {
+        const temp = ((Number(fee || 0) / Number(value || 0)) || 0) * 100
+        return temp;
+    }
+
     console.log('isEditAmount: ', isEditAmount)
     return (
-        <ScreenLayout showToolbar isBackButton title="Review Payment">
+        <ScreenLayout showToolbar isBackButton title="Review Paymenttt">
             <View style={styles.topView}>
                 {/* {isStartLoading ?
                     <ActivityIndicator style={{ marginTop: 10, marginBottom: 20 }} color={colors.white} />
@@ -441,19 +453,70 @@ export default function ReviewPayment({ route }: Props) {
                     {balance < withdrawThreshold && isWithdrawal &&
                         <Text style={{ color: colors.yellow2, marginLeft: 15, marginBottom: 25 }}>You haven't reached your withdrawal threshold yet.</Text>
                     }
-                    <TextViewV2 keytext="Recipient will get: " text={isSats ? `${value} sats ~ $${converted}` : `$${value} ~ $${converted} sats`} textStyle={styles.price} />
-                    {isWithdrawal &&
-                        <TouchableOpacity onPress={editAmountClickHandler}>
-                            <Text style={{ marginLeft: 10, fontSize: 18, marginBottom: 20, textDecorationLine: 'underline', color: isEditAmount ? colors.green : colors.white }}>Edit Amount</Text>
-                        </TouchableOpacity>
-                    }
+                    <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginRight: 15 }}>
+                        <TextViewV2 keytext="Recipient will get: " text={isSats ? `${value} sats ~ $${converted}` : `$${value} ~ $${converted} sats`} textStyle={styles.price} />
+                        {isWithdrawal &&
+                            <TouchableOpacity activeOpacity={0.7} onPress={editAmountClickHandler} style={{
+                                borderWidth: 3,
+                                borderColor: colors.white,
+                                borderRadius: 17,
+                                paddingVertical: 8,
+                                paddingHorizontal: 10,
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                <Text style={{ fontSize: 14, color: isEditAmount ? colors.green : colors.white }}>Edit Amount</Text>
+                            </TouchableOpacity>
+                        }
+                    </View>
                     <TextViewV2 keytext="Sent from: " text="Coinos Checking Account" />
-                    <TextViewV2 keytext="To: " text={!to.includes('@') && to.length > 20 ? shortenAddress(to) : to} />
-                    {isWithdrawal &&
+                    {isWithdrawal ?
+                        <View style={{
+                            marginBottom:30,
+                            marginStart:15,
+                            marginEnd: 10,
+                        }}>
+                            <Text bold style={{fontSize: 18}}>{"To: "}</Text>
+                            <TouchableOpacity activeOpacity={0.7} onPress={addressHandler} style={{
+                                flexDirection: 'row', 
+                                alignItems: 'center', 
+                                marginTop: 10, 
+                                paddingVertical: 8, 
+                                paddingHorizontal: 25, 
+                                borderWidth: 2, 
+                                borderColor: vaultTab ? colors.blueText : colors.greenShadow, 
+                                borderRadius: 15,
+                                width: '90%'
+                            }}>
+                                <Text italic style={StyleSheet.flatten({
+                                    flex: 1,
+                                    fontSize: 16,
+                                    marginTop: 3,
+                                    color: vaultTab ? colors.blueText : colors.greenShadow
+                                })}>{"Vault Address: "}{!to.includes('@') && to.length > 20 ? shortenAddress(to) : to}</Text>
+                                <Image source={Edit} style={styles.editImage} resizeMode='contain' />
+                            </TouchableOpacity>
+                        </View>
+                    :
+                        <TextViewV2 keytext="To: " text={!to.includes('@') && to.length > 20 ? shortenAddress(to) : to} />
+                    }
+                    {/* {isWithdrawal &&
                         <TouchableOpacity onPress={addressHandler}>
                             <Text style={{ marginLeft: 10, fontSize: 18, marginBottom: 20, textDecorationLine: 'underline' }}>Add Address</Text>
                         </TouchableOpacity>
+                    } */}
+                    {vaultTab && isWithdrawal &&
+                        <>
+                            <Text style={[{marginHorizontal: 12, fontSize: 14, width: isIOS ? '90%' : '80%', marginTop: -10}]}>⚠️ DO NOT transfer to any of these addresses without verifying their authenticity from your hardware device! </Text>
+                            <TouchableOpacity activeOpacity={0.7} onPress={() => setIsCheck(!isCheck)} style={{flexDirection: 'row', alignItems: 'center', marginTop: 20, marginBottom: 25, marginHorizontal: 12 , alignSelf: 'flex-start' }}>
+                                <View style={styles.checkView}>
+                                    {isCheck && <Image source={Check} style={styles.checkImage} resizeMode='contain' /> }
+                                </View>
+                                <Text style={{color: colors.white, marginLeft: 10, fontSize: 16}} italic>I verified this address</Text>
+                            </TouchableOpacity>
+                        </>
                     }
+
                     {to && value && (type === 'bitcoin' || type === 'liquid') && recommendedFee ?
                         <>
                             <View style={styles.feesView}>
@@ -478,7 +541,7 @@ export default function ReviewPayment({ route }: Props) {
                             </View>
                             {/* <TextViewV2 keytext="Coinos Fee + Service Fee:  " text={` ~   ${(networkFee || 0) + (bamskiiFee || 0)} sats`} /> */}
                             <TextViewV2 keytext="Coinos Fee:  " text={` ~   ${(networkFee || 0)} sats`} />
-                            <TextViewV2 keytext="Total Fee:  " text={` ~   ${(networkFee || 0) + (estimatedFee || 0)} sats (~0.2%)`} />
+                            <TextViewV2 keytext="Total Fee:  " text={isWithdrawal ? ` ~   ${(networkFee || 0) + (estimatedFee || 0)} sats (~${handleWithdrawalFee((networkFee || 0) + (estimatedFee || 0)).toFixed(0)}%)` : ` ~   ${(networkFee || 0) + (estimatedFee || 0)} sats (~0.2%)`} />
                         </>
                         :
                         <TextView keytext="Fees:  " text={` ~   ${estimatedFee} sats`} />

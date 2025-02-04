@@ -24,7 +24,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { btc } from "@Cypher/helpers/coinosHelper";
 import { scanQrHelper } from "../../../helpers/scan-qr";
 import DeeplinkSchemaMatch from "../../../class/deeplink-schema-match";
-import { ProgressBarColdStorage, ProgressBar5 } from "@Cypher/assets/images";
+import { ProgressBarColdStorage, ProgressBar5, Check } from "@Cypher/assets/images";
 
 const prompt = require('../../../helpers/prompt');
 const btcAddressRx = /^[a-zA-Z0-9]{26,35}$/;
@@ -45,7 +45,7 @@ export const shortenAddress = (address: string) => {
 
 
 export default function ColdStorage({ route, navigation }: Props) {
-    const {wallet, vaultTab, utxo, ids, maxUSD, inUSD, total, matchedRate, capsulesData = null, to = null, vaultSend} = route?.params;
+    const {wallet, vaultTab, utxo, ids, maxUSD, inUSD, total, matchedRate, capsulesData = null, to = null, vaultSend, title, type} = route?.params;
     const [usd, setUSD] = useState('40');
     const [sats, setSats] = useState('100K sats  ~$' + usd);
     const [address, setAddress] = useState();
@@ -72,6 +72,7 @@ export default function ColdStorage({ route, navigation }: Props) {
     const [transactionMemo, setTransactionMemo] = useState('');
     const [payjoinUrl, setPayjoinUrl] = useState(null);
     const [dumb, setDumb] = useState(false);
+    const [isCheck, setIsCheck] = useState(false);
 
     const [changeAddress, setChangeAddress] = useState();
     const { wallets, setSelectedWalletID, sleep, txMetadata, saveToDisk, isElectrumDisabled } = useContext(BlueStorageContext);
@@ -132,10 +133,11 @@ export default function ColdStorage({ route, navigation }: Props) {
     useEffect(() => {
         // check if we have a suitable wallet
         const suitable = wallets.filter(w => w.chain === Chain.ONCHAIN && w.allowSend());
-        if (suitable.length === 0) {
+        if (suitable.length === 0 && type !== "TOPUP") {
         Alert.alert(loc.errors.error, loc.send.details_wallet_before_tx);
         return;
         }
+        console.log('vaultTabvaultTabvaultTab: ', vaultTab)
         const newWallet = vaultTab ? ((coldStorageWalletID && wallets.find(w => w.getID() === coldStorageWalletID)) || suitable[0]) : ((walletID && wallets.find(w => w.getID() === walletID)) || suitable[0]);
         setFeeUnit(newWallet.getPreferredBalanceUnit());
         setAmountUnit(newWallet.preferredBalanceUnit); // default for whole screen
@@ -166,7 +168,7 @@ export default function ColdStorage({ route, navigation }: Props) {
             LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
             setNetworkTransactionFeesIsLoading(false);
         });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [vaultTab, coldStorageWalletID, walletID, type]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const getChangeAddressFast = () => {
       if (changeAddress) return changeAddress; // cache
@@ -270,9 +272,9 @@ export default function ColdStorage({ route, navigation }: Props) {
         Keyboard.dismiss();
         setIsLoading(true);
         const requestedSatPerByte = feeRate;
-        let addresses = [{ address: destinationAddress, key: String(Math.random()), amount: Number(inUSD).toFixed(4), amountSats: parseInt(Number(inUSD) / Number(matchedRate) * 100000000) }]
+        let addresses = [{ address: destinationAddress, key: String(Math.random()), amount: inUSD == 0 ? 0 : Number(inUSD || 0).toFixed(4), amountSats: parseInt(Number(inUSD || 0) / Number(matchedRate || 0) * 100000000) }]
         for (const [index, transaction] of addresses.entries()) {
-          console.log('balance: ', balance, ' transaction.amountSats: ', transaction.amountSats, parseInt(Number(inUSD) / Number(matchedRate) * 100000000))
+          console.log('balance: ', balance, ', inUSD: ', inUSD, ', transaction.amountSats: ', transaction.amountSats, parseInt(Number(inUSD) / Number(matchedRate) * 100000000))
           let error;
           if (!transaction.amount || transaction.amount < 0 || parseFloat(transaction.amount) === 0) {
             error = loc.send.details_amount_field_is_not_valid;
@@ -491,6 +493,10 @@ export default function ColdStorage({ route, navigation }: Props) {
             SimpleToast.show("Please Enter Destination Address", SimpleToast.SHORT)
             return
         }
+        if(!isCheck && title){
+            SimpleToast.show("Please verify the destination address", SimpleToast.SHORT)
+            return;
+        }
         if (btcAddressRx.test(destinationAddress) || destinationAddress.startsWith('bc1') || destinationAddress.startsWith('BC1')) {
             createTransaction()
             // const selectedFee = options.find(item => item.active);
@@ -589,7 +595,6 @@ export default function ColdStorage({ route, navigation }: Props) {
 
     const getCurrentFee = () => {
         const selectedFee = options.find(item => item.active);
-        console.log('selectedFee: ', selectedFee)
         if(selectedFee && !isCustomFee){
             return {fee: selectedFee.fee, label:  selectedFee?.label}
         } else {
@@ -723,7 +728,7 @@ export default function ColdStorage({ route, navigation }: Props) {
     return (
         <ScreenLayout showToolbar disableScroll>
             <View style={styles.container}>
-                <Text style={styles.title} center>{to ? "Top-up Transaction" : "Construct transaction"}</Text>
+                <Text style={styles.title} center>{title ? title : to ? "Top-up Transaction" : "Construct transaction"}</Text>
                 {/* <SavingVault
                     container={styles.savingVault}
                     innerContainer={styles.savingVault}
@@ -757,8 +762,8 @@ export default function ColdStorage({ route, navigation }: Props) {
                     {/* </TouchableOpacity> */}
                     <View style={styles.priceView}>
                         <View>
-                            <Text style={styles.recipientTitle}>{to ? "Top-up amount" : "Recipient will get:"}</Text>
-                            <Text bold style={[styles.value, vaultTab && {color: colors.blueText}]}>{parseInt(Number(inUSD) / Number(matchedRate) * 100000000) + ' sats ~$' + Number(inUSD).toFixed(2)}</Text>
+                            <Text style={styles.recipientTitle}>{title == "Transfer To Cold Vault" ? "Transfer amount" : to ? "Top-up amount" : "Recipient will get:"}</Text>
+                            <Text bold style={[styles.value, vaultTab && {color: colors.blueText}]}>{((Number(inUSD || 0) / Number(matchedRate || 0) || 0) * 100000000).toFixed(2) + ' sats ~$' + Number(inUSD).toFixed(2)}</Text>
                         </View>
                         <TouchableOpacity style={[styles.editAmount, { borderColor: satsEditable ? primaryColor : '#B6B6B6' }]} onPress={editAmountClickHandler}>
                             <Text>Edit amount</Text>
@@ -800,6 +805,17 @@ export default function ColdStorage({ route, navigation }: Props) {
                               <Image source={require("../../../img/scan-new.png")} style={styles.qrcode} resizeMode="contain" />
                           </TouchableOpacity>
                       </View>
+                    }
+                    {title &&
+                      <>
+                        <Text style={[{marginTop: 20, fontSize: 14}]}>⚠️ DO NOT transfer to any of these addresses without verifying their authenticity from your hardware device! </Text>
+                        <TouchableOpacity activeOpacity={0.7} onPress={() => setIsCheck(!isCheck)} style={{flexDirection: 'row', alignItems: 'center', marginTop: 20, marginBottom: 1, alignSelf: 'flex-start' }}>
+                          <View style={styles.checkView}>
+                            {isCheck && <Image source={Check} style={styles.checkImage} resizeMode='contain' /> }
+                          </View>
+                          <Text style={{...styles.fees, color: colors.white, marginLeft: 10}} italic>I verified this address</Text>
+                        </TouchableOpacity>
+                      </>
                     }
                     <View style={styles.priceView}>
                         <View>

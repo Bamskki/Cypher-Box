@@ -171,8 +171,8 @@ export default function Settings() {
             externalAddresses = wallet.getAllExternalAddresses();
         } catch (_) { }
         Notifications.unsubscribe(externalAddresses, [], []);
-        vaultTab ? setColdStorageWalletID(undefined) : setWalletID(undefined);
         deleteWallet(wallet);
+        vaultTab ? setColdStorageWalletID(undefined) : setWalletID(undefined);
         dispatchReset('HomeScreen');
         saveToDisk(true);
         triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
@@ -240,10 +240,14 @@ export default function Settings() {
                         <View style={styles.blankspace} />
                     </View> */}
                     {/* <View style={styles.line} /> */}
-                    <TouchableOpacity onPress={backupSeedPhraseClickHandler}>
-                        <Text bold style={styles.text}>Backup Seed Phrase</Text>
-                    </TouchableOpacity>
-                    <View style={styles.line} />
+                    {!vaultTab &&
+                        <>
+                            <TouchableOpacity onPress={backupSeedPhraseClickHandler}>
+                                <Text bold style={styles.text}>Backup Seed Phrase</Text>
+                            </TouchableOpacity>
+                            <View style={styles.line} />                        
+                        </>
+                    }
                     {wallet instanceof AbstractHDElectrumWallet && (
                         <>
                             <TouchableOpacity onPress={navigateToAddresses}>

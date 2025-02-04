@@ -528,7 +528,7 @@ export default StyleSheet.create<Style>({
     bottom: {
         // opacity: 0.5,
         marginTop: 15,
-        top: heights * 0.04
+        top: heights * 0.06
     },
     line: {
         height: 2,
@@ -635,20 +635,21 @@ export default StyleSheet.create<Style>({
         flex: 1,
         height: 40,
         alignSelf: 'center',
-        borderWidth: 2,
+        // borderWidth: 2,
         // borderColor: colors.greenShadow,
         marginStart: 7.5,
         borderRadius: 25,
     },
     createVaultContainer: {
-        top: '-10%',
-        paddingHorizontal: 20,
+        // top: '-10%',
+        paddingHorizontal: 5,
     },
     createVault: {
         borderRadius: 25,
         marginTop: 20,
         height: 132,
-        justifyContent: 'flex-start',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     createVaultText: {
         textAlign: 'center'

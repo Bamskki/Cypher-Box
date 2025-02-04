@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Dimensions, TouchableOpacity, View, Image, Animated, StyleSheet } from "react-native";
+import { Dimensions, TouchableOpacity, View, Image, Animated, StyleSheet, Platform } from "react-native";
 import styles from "./styles";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 import Svg, { Path, Defs, Pattern, Use, Image as RnSvgImage } from "react-native-svg"
@@ -168,9 +168,11 @@ export default function GetStartedScreen({ route }: Props) {
                         boxType="square"
                         disabled={false}
                         tintColor={colors.pink.default}
+                        tintColors={{ true: colors.pink.default, false: colors.white }}
                         onTintColor={colors.pink.default}
                         onFillColor={colors.primary}
                         onCheckColor={colors.white}
+                        style={{ transform: [{ scaleX: Platform.OS == 'ios' ? 0.8 : 1.2 }, { scaleY: Platform.OS == 'ios' ? 0.8 : 1.2 }] }}
                         value={hasAcceptedTermsOfService}
                         onValueChange={(newValue) => toggleHasAcceptedTermsOfService(newValue)}
                     />
@@ -185,10 +187,11 @@ export default function GetStartedScreen({ route }: Props) {
 
                     </View>
                 </View>
-                <GradientCard colors_={hasAcceptedTermsOfService ? ['#464D6854', '#FFF'] : ['#B6B6B6', '#FFFFFF']}
+                <GradientCard 
+                    colors_={hasAcceptedTermsOfService ? ['#464D6854', '#FFF'] : ['#B6B6B6', '#FFFFFF']}
                     onPress={initialise}
                     disabled={!hasAcceptedTermsOfService}
-                    style={[styles.gradient, { opacity: hasAcceptedTermsOfService ? 1 : 0.5 }]}>
+                    style={[styles.gradient, { opacity: hasAcceptedTermsOfService ? 1 : 0.5 }, !hasAcceptedTermsOfService ? { backgroundColor: 'transparent' } : {}]}>
                     <View style={styles.container4}>
                         {hasAcceptedTermsOfService ?
                             <Image source={Start}

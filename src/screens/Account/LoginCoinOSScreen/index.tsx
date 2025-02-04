@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TouchableOpacity, View, Image } from "react-native";
+import { TouchableOpacity, View, Image, Platform } from "react-native";
 import SimpleToast from "react-native-simple-toast";
 import styles from "./styles";
 import { GradientButton, GradientCard, GradientText } from "@Cypher/components";
@@ -114,7 +114,13 @@ export default function LoginCoinOSScreen() {
                         <CheckBox
                             boxType="square"
                             disabled={false}
-                            tintColors={{ true: colors.pink.default, false: colors.pink.default }}
+                            // tintColors={{ true: colors.pink.default, false: colors.pink.default }}
+                            tintColor={colors.pink.default}
+                            tintColors={{ true: colors.pink.default, false: colors.white }}
+                            onTintColor={colors.pink.default}
+                            onFillColor={colors.primary}
+                            onCheckColor={colors.white}
+                            style={{ transform: [{ scaleX: Platform.OS == 'ios' ? 0.8 : 1 }, { scaleY: Platform.OS == 'ios' ? 0.8 : 1 }] }}
                             value={isRememberMe}
                             onValueChange={(newValue) => toggleIsRememberMe(newValue)}
                         />

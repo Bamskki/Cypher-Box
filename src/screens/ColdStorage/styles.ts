@@ -28,6 +28,8 @@ interface Style {
     border: ViewStyle;
     pasteview: ViewStyle;
     tabs: ViewStyle;
+    checkView: ViewStyle;
+    checkImage: ImageStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -116,6 +118,19 @@ export default StyleSheet.create<Style>({
         color: '#FFFFFF',
         textAlign: 'center',
         marginTop: 10,
+    },
+    checkView: {
+        borderWidth: 1,
+        borderColor: colors.blueText,
+        width: 27,
+        height: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 3,
+    },
+    checkImage: {
+        width: 16,
+        height: 15
     },
     button: {
         backgroundColor: colors.gray.dark,

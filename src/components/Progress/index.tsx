@@ -25,7 +25,7 @@ export default function Progress({ current = 0, color }: Props) {
                         {index !== 2 &&
                             <View style={{
                                 width: 80, height: 1,
-                                backgroundColor: (current - 1) >= index ? color ? colors.green : colors.pink.default : colors.black.light,
+                                backgroundColor: (current - 1) >= index ? color ? (color[0] || colors.green) : colors.pink.default : colors.black.light,
                                 // left: -2
                             }} />
                         }

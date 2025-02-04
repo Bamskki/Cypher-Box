@@ -123,7 +123,7 @@ export default function Vault({ wallet, matchedRate, setSelectedTab }: { wallet:
                 bitcoinText={styles.bitcoinText}
                 imageStyle={styles.bitcoinImage}
                 titleStyle={styles.title}
-                title="Hot Savings"
+                title={vaultTab ? "Cold Savings" : "Hot Savings"}
                 bitcoinValue={balance}
                 inDollars={`$${(Number(balanceWithoutSuffix) * Number(matchedRate)).toFixed(2)}`}
             />
@@ -149,14 +149,22 @@ export default function Vault({ wallet, matchedRate, setSelectedTab }: { wallet:
                     <Text h3 center>Send Coins</Text>
                 </GradientView> */}
             </View>
-            <View style={[styles.base, { marginHorizontal: 20 }]}>
-                <Image style={styles.info} source={InformationNew} />
-                <Text style={styles.textInfo} italic>What is a Savings Vault?</Text>
-            </View>
+            {!vaultTab ?
+                <View style={[styles.base, { marginHorizontal: 20 }]}>
+                    <Image style={styles.info} source={InformationNew} />
+                    <Text style={styles.textInfo} italic>What is a Savings Vault?</Text>
+                </View>
+            :
+                <View style={[{ flex: 1, marginTop: 20, width: '80%', justifyContent: 'center', alignItems: 'center', alignSelf: 'center' }]}>
+                    <Text style={[{fontSize: 14}]}>⚠️ DO NOT use these addresses to receive funds without verifying their authenticity from your hardware device! </Text>
+                </View>
+            }
             {address ?
                 <>
-                    <Text h4 style={styles.infoText}>You can use this vault address to receive coins from another vault on the Bitcoin Network</Text>
-                    <View style={[styles.qrcode, vaultTab && { borderColor: colors.blueText }]}>
+                    {!vaultTab &&
+                        <Text h4 style={styles.infoText}>You can use this vault address to receive coins from another vault on the Bitcoin Network</Text>
+                    }
+                    <View style={[styles.qrcode, vaultTab && { borderColor: colors.blueText, height: "40%", width: "60%" }]}>
                         <View style={{ width: "80%", height: "80%", margin: 25, padding: 20, backgroundColor: 'white', borderRadius: 30 }}>
                             <QRCode
                                 getRef={c => {

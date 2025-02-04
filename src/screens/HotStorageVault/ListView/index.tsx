@@ -31,7 +31,7 @@ const ListView = ({ wallet, item, onPress, handleChoose, ids, vaultTab }: Props)
         <ImageBackground source={vaultTab ? TransactionBlue : Transaction} style={styles.main}>
             {ids.includes(`${item.txid}:${item.vout}`) && (<View style={[styles.borderview, vaultTab && { borderColor: colors.blueText }]} />)
             }
-            <View style={styles.container}>
+            <TouchableOpacity activeOpacity={0.7} style={styles.container} onPress={() => onPress(`${item.txid}:${item.vout}`)}>
                 <View style={styles.coin}>
                     <View style={styles.tab}>
                         <Image source={vaultTab ? ProgressBarColdStorage : ProgressBar5} style={styles.progressbar} />
@@ -47,14 +47,14 @@ const ListView = ({ wallet, item, onPress, handleChoose, ids, vaultTab }: Props)
                 <TouchableOpacity style={styles.label} onPress={() => handleChoose(item)}>
                     <Image source={Tag} style={{}} />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.select} onPress={() => onPress(`${item.txid}:${item.vout}`)}>
+                <View style={styles.select}>
                     <View style={styles.checkbox}>
                         {ids.includes(`${item.txid}:${item.vout}`) &&
                             <Image source={Yes} />
                         }
                     </View>
-                </TouchableOpacity>
-            </View>
+                </View>
+            </TouchableOpacity>
         </ImageBackground>
     );
 };

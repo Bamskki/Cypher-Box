@@ -48,7 +48,7 @@ const HotStorageVault = ({ _, route }: any) => {
     return (
         <ScreenLayout
             showToolbar
-            title={'Hot Storage Vault'}
+            title={vaultTab ? 'Cold Storage Vault' : 'Hot Storage Vault'}
             disableScroll
             style={{ paddingBottom: 20 }}
         >

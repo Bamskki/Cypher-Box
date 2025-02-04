@@ -109,7 +109,7 @@ export default function SendReceiveOnChain({ route }: Props) {
                 }
                 
                 <TextView keytext="Date:  " text={dayjs(tx?.received).format('HH:mm:ss MM/DD/YYYY')} />
-                {!isSent && <TextView keytext="At bitcoin exchange rate: " text={'$'+matchedRate} />}
+                {/* {!isSent && <TextView keytext="At bitcoin exchange rate: " text={'$'+matchedRate} />} */}
                 <TextView keytext="Txid:  " text={transaction?.txid} />
 
                 {/* {isSent &&

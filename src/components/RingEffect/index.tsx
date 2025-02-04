@@ -10,13 +10,15 @@ import Animated, {
 
 import { colors } from "@Cypher/style-guide";
 import styles from "./styles";
+import { ViewStyle } from "react-native";
 
 interface Props {
     delay: number;
     isWhite?: boolean;
+    ringContainer?: ViewStyle
 }
 
-export default function Ring({ delay, isWhite }: Props) {
+export default function Ring({ delay, ringContainer, isWhite }: Props) {
     const ring = useSharedValue(0);
 
     const ringStyle = useAnimatedStyle(() => {
@@ -41,5 +43,5 @@ export default function Ring({ delay, isWhite }: Props) {
             )
         );
     }, []);
-    return <Animated.View style={[styles.ring, isWhite && {borderColor: colors.white}, ringStyle]} />;
+    return <Animated.View style={[styles.ring, ringContainer, isWhite && {borderColor: colors.white}, ringStyle]} />;
 };

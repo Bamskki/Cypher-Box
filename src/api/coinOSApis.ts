@@ -157,12 +157,13 @@ export const getInvoiceByHash = async (hash: string) => {
 
 export const sendLightningPayment = async (payreq: string, memo: string, amount?: any) => {
   try {
+    console.log('sendLightningPayment payload: ', amount, amount && amount !== '' && amount !== 0 ? { payreq: payreq, memo: memo, amount } : { payreq: payreq, memo: memo })
     const response = await fetch(`${BASE_URL}/payments`, await withAuthToken({
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(amount && amount !== '' && amount !==0 ? { payreq: payreq, memo: memo, amount } : { payreq: payreq, memo: memo }),
+      body: JSON.stringify(amount && amount !== '' && amount !== 0 ? { payreq: payreq, memo: memo, amount } : { payreq: payreq, memo: memo }),
     }));
 
     console.log('response: ', response)
@@ -219,7 +220,7 @@ export const sendCoinsViaUsername = async (address: string, amount: number, memo
           console.log('responseJSON: ', responseJSON)
           return responseJSON;
         } else {
-          const sendToUser = await sendLightningPayment(paymentResult.pr, memo)
+          const sendToUser = await sendLightningPayment(paymentResult.pr, memo, amount)
 
           console.log('sendToUser: ' ,sendToUser)
           return sendToUser;  

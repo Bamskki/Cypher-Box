@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Image, ImageBackground, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { Image, ImageBackground, ScrollView, StyleSheet, TextInput, Vibration, View } from "react-native";
 import styles from "./styles";
 import { Input, ScreenLayout, Text } from "@Cypher/component-library";
 import { Blink, CustomKeyboard, GradientButton, GradientCard, GradientInput } from "@Cypher/components";
@@ -16,7 +16,8 @@ import Animated, {
     Easing,
     useAnimatedStyle,
 } from "react-native-reanimated";
-import { resetAndNavigate } from "@Cypher/helpers/navigation";
+import { dispatchReset, resetAndNavigate } from "@Cypher/helpers/navigation";
+import { startsWithLn } from "../Send";
 
 export default function Transaction({navigation, route}: any) {
     const {matchedRate, type, value, converted, isSats, to, item} = route?.params;
@@ -40,6 +41,9 @@ export default function Transaction({navigation, route}: any) {
                 }
             });
         }, 5);
+        setTimeout(() => {
+            Vibration.vibrate(50);
+        }, 500)
         return () => clearInterval(intervalId);
     }, []);
 
@@ -51,10 +55,14 @@ export default function Transaction({navigation, route}: any) {
     }, [progress]);
 
     const onPressClickHandler = () => {
-        resetAndNavigate('HomeScreen', 'Invoice', {
-            item: item,
-            matchedRate
-        })
+        if(startsWithLn(to) || to.includes("@")){
+            dispatchReset("HomeScreen")
+        } else {
+            resetAndNavigate('HomeScreen', 'Invoice', {
+                item: item,
+                matchedRate
+            })
+        }
         // dispatchNavigate('CheckingAccount', {matchedRate});
     }
 
@@ -98,22 +106,26 @@ export default function Transaction({navigation, route}: any) {
                 {response &&
                     <View style={styles.ringEffect}>
                         <>
-                            <Ring delay={0} />
-                            <Ring delay={1000} />
-                            <Ring delay={2000} />
-                            <Ring delay={3000} />
+                            <Ring delay={0} isWhite={startsWithLn(to) || to.includes("@")} />
+                            <Ring delay={1000} isWhite={startsWithLn(to) || to.includes("@")} />
+                            <Ring delay={2000} isWhite={startsWithLn(to) || to.includes("@")} />
+                            <Ring delay={3000} isWhite={startsWithLn(to) || to.includes("@")} />
                         </>
-                        <GradientCard style={styles.gradient} linearStyle={styles.gradient}
-                            colors_={!response ? [colors.white, colors.white] : [colors.pink.extralight, colors.pink.default]}>
-                            <View style={styles.inner}>
-                                <GradientCard style={styles.gradientInner} linearStyle={styles.gradientInner}
-                                    colors_={!response ? [colors.white, colors.white] : [colors.pink.extralight, colors.pink.default]}>
-                                    <View style={styles.inside}>
-                                        <Image source={Electrik} style={styles.image} resizeMode="contain" />
-                                    </View>
-                                </GradientCard>
-                            </View>
-                        </GradientCard>
+                        {startsWithLn(to) || to.includes("@") ?
+                            <Image source={require('../../../img/success0.gif')} style={styles.gifImage} resizeMode="contain" />
+                        :
+                            <GradientCard style={styles.gradient} linearStyle={styles.gradient}
+                                colors_={!response ? [colors.white, colors.white] : [colors.pink.extralight, colors.pink.default]}>
+                                <View style={styles.inner}>
+                                    <GradientCard style={styles.gradientInner} linearStyle={styles.gradientInner}
+                                        colors_={!response ? [colors.white, colors.white] : [colors.pink.extralight, colors.pink.default]}>
+                                        <View style={styles.inside}>
+                                            <Image source={Electrik} style={styles.image} resizeMode="contain" />
+                                        </View>
+                                    </GradientCard>
+                                </View>
+                            </GradientCard>
+                        }
                     </View>
                 }
                 {/* {!response ?
@@ -158,7 +170,7 @@ export default function Transaction({navigation, route}: any) {
                 }
                 {response &&
                     <GradientButton style={styles.invoiceButton} textStyle={{ fontFamily: 'Lato-Medium', }}
-                        title='Payment Details'
+                        title={startsWithLn(to) || to.includes("@") ? 'Home' : 'Payment Details'}
                         disabled={!response}
                         onPress={onPressClickHandler} />
                     // :

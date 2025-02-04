@@ -87,7 +87,7 @@ export default function Invoice({ route }: Props) {
                     }
 
                     <TextView keytext="Date:  " text={dayjs(historyDetail?.created).format('HH:mm:ss MM/DD/YYYY')} />
-                    <TextView keytext="At bitcoin exchange rate:  " text={formattedCurrency} />
+                    {/* <TextView keytext="At bitcoin exchange rate:  " text={formattedCurrency} /> */}
 
                     {item?.type === 'bitcoin' ?
                         <TouchableOpacity style={styles.button} onPress={handleViewBtcNetExplorerClickHandler}>
