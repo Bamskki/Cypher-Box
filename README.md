@@ -1,4 +1,4 @@
-# Cypher Box - A Fun Way to Play Bitcoin
+# Cypher Box - Onboard Your Friends to Bitcoin
 
 ## License
 This software is available for personal, internal, and non-commercial use. Redistribution, selling, or offering the software as a service is prohibited without prior written consent. See the [LICENSE](./LICENSE) file for details.
