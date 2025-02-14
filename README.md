@@ -1,11 +1,12 @@
 # Cypher Box - A Fun Way to Play Bitcoin
+Https://Cypherbox.io
 
 ## License
 This software is available for personal, internal, and non-commercial use. Redistribution, selling, or offering the software as a service is prohibited without prior written consent. See the [LICENSE](./LICENSE) file for details.
 
 **APP UNDER CONSTRUCTION - PLEASE USE IT CAUTIOUSLY**
 
-Forked from [BlueWallet](https://github.com/BlueWallet/BlueWallet), tailored for newbies
+Forked from [BlueWallet](https://github.com/BlueWallet/BlueWallet) Release 6.5.1, tailored for onbaording newbies to advanced self-custody
 
 Built with React Native, Electrum, and powered by Coinos.io API
 
@@ -90,45 +91,27 @@ Cold Vault (watch-only):
 * Send to Hot Vault
 
 ---
-
-MVP development roadmap (last update 17th January '25)
+Medium-term Development Milestones (last update 12th Feb '25)
 **Checking account**
-- ✅ Create Account
-- ✅ Login
-- ✅ Fetch Balance
-- ✅ Receive lightning
-- ✅ Send lightning
-- ✅ Receive onchain
-- ✅ Send onchain
-- ✅ Update Balance
-- ✅ Unit conversion
-- ⏱️ Notifications (postponed)
-- ✅ Transaction history
-- ✅ Withdraw to hot vault
-- ✅ Withdraw to cold vault
-- ✅ Threshold bar
-- ✅ Adjust Threshold
-- ✅ Adjust Reserve Amount
+- ⭕ Send Liquid
+- ⭕ Recieve ecash 
+- ⭕ Mint and redeem ecash
+- ⭕ Bolt 12
+- ⭕ NWC and new integration API integrations
 
 **Hot vault**
-- ✅ Create Hot Vault
-- ✅ Withdrawal fee estimation
-- ✅ Receive to Hot Vault
-- ✅ Coin control
-- ⏱️ Notifications (postponed)
-- ✅ Send from Hot Vault
-- ✅ Transaction history
-- ✅ Transfer to cold vault
-- ✅ Top-up to checking account
+- ⭕ Batching
+- ⭕ Send change to Checking Account
 
 **Cold vault**
-- ✅ Create Cold Vault
-- ✅ Send from Cold Vault
-- ✅ Transfer to hot vault
-- ✅ Withdrawal fee estimations
-- ✅ Top-up to checking account
-
+- ⭕ Batching
+- ⭕ Send change to Hot Vault
 ---
+Technical debt:
+- ⏱️ Notifications
+- ⏱️ UI inconsistencies
+- ⏱️ Recieve popup
+- ⏱️ Checking Account settings 
 
 # RESPONSIBLE DISCLOSURE
 Found critical bugs/vulnerabilities? Please email them info@cypherbox.io Thanks!
