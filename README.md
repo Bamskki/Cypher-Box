@@ -1,14 +1,13 @@
 # Cypher Box - A Fun Way to Play Bitcoin
-Https://Cypherbox.io
+Tailored for onbaording newbies to advanced self-custody.
 
 ## License
 This software is available for personal, internal, and non-commercial use. Redistribution, selling, or offering the software as a service is prohibited without prior written consent. See the [LICENSE](./LICENSE) file for details.
 
 **APP UNDER CONSTRUCTION - PLEASE USE IT CAUTIOUSLY**
 
-Forked from [BlueWallet](https://github.com/BlueWallet/BlueWallet) Release 6.5.1, tailored for onbaording newbies to advanced self-custody
-
-Built with React Native, Electrum, and powered by Coinos.io API
+Forked from [BlueWallet](https://github.com/BlueWallet/BlueWallet) Release 6.5.1
+Built with React Native, Electrum, and powered by Coinos.io API.
 
 ---
 
