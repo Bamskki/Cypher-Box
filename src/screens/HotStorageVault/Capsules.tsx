@@ -30,6 +30,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
     console.log("🚀 ~ Capsules ~ ids:", ids)
     const [btc, setBtc] = useState('0.00');
     const [sendToAddress, setSendToAddress] = useState();
+    const [selfAddress, setSelfAddress] = useState();
     const utxo = wallet.getUtxo(true).sort((a, b) => a.height - b.height || a.txid.localeCompare(b.txid) || a.vout - b.vout);
     const primaryColor = vaultTab ? colors.blueText : colors.green
     const [frozen, setFrozen] = useState(
@@ -55,6 +56,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
         (async () => {
             try {
                 obtainWalletAddress();
+                obtainSelfWalletAddress();
                 await Promise.race([wallet.fetchUtxo(), sleep(10000)]);
             } catch (e) {
                 console.log('coincontrol wallet.fetchUtxo() failed'); // either sleep expired or fetchUtxo threw an exception
@@ -99,13 +101,33 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
         setSendToAddress(newAddress);
     }
 
+    const obtainSelfWalletAddress = async () => {
+        let newAddress;
+        const allWallets = wallets.concat(false);
+        const walletTemp = vaultTab ? allWallets.find((w: AbstractWallet) => w.getID() === coldStorageWalletID) : allWallets.find((w: AbstractWallet) => w.getID() === walletID);    
+        try {
+            if (!isElectrumDisabled) newAddress = await Promise.race([walletTemp.getAddressAsync(), sleep(1000)]);
+        } catch (_) { }
+        if (newAddress === undefined) {
+            // either sleep expired or getAddressAsync threw an exception
+            console.warn('either sleep expired or getAddressAsync threw an exception');
+            newAddress = walletTemp._getExternalAddressByIndex(walletTemp.getNextFreeAddressIndex());
+        } else {
+            saveToDisk(); // caching whatever getAddressAsync() generated internally
+        }
+        console.log('newAddress: ', newAddress)
+        setSelfAddress(newAddress);
+    }
+
     const moveToVaultClickHandler = async () => {
         let capsulesData: any = [];
+        let capsuleTotal: any = 0;
         ids.forEach(id => {
             const result = utxo?.find(obj => `${obj.txid}:${obj.vout}` === id)?.value;
             if (result) capsulesData.push({
                 id, value: result
             });
+            capsuleTotal += Number(result)
         });
         if(vaultTab && !walletID){
             SimpleToast.show("Before creating a transaction, you must first add a Hot Vault wallet", SimpleToast.SHORT)
@@ -113,7 +135,27 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
             SimpleToast.show("Before creating a transaction, you must first add a Cold Vault wallet", SimpleToast.SHORT)
         }
         else if (ids.length > 0) {
-            dispatchNavigate('ColdStorage', {wallet, utxo, ids, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to: sendToAddress, vaultTab, vaultSend: true, title: !vaultTab ? "Transfer To Cold Vault" : undefined});
+            dispatchNavigate('ColdStorage', {wallet, utxo, ids, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to: sendToAddress, vaultTab, vaultSend: true, title: !vaultTab ? "Transfer To Cold Vault" : undefined, capsuleTotal});
+        } else {
+            SimpleToast.show("Please select Capsules to Send", SimpleToast.SHORT)
+        }
+    }
+
+    console.log('selfAddress: ', selfAddress)
+
+    const sendToBatchClickHandler = async () => {
+        let capsulesData: any = [];
+        let capsuleTotal: any = 0;
+        ids.forEach(id => {
+            const result = utxo?.find(obj => `${obj.txid}:${obj.vout}` === id)?.value;
+            if (result) capsulesData.push({
+                id, value: result
+            });
+            capsuleTotal += Number(result)
+        });
+        console.log('capsuleTotal: ', capsuleTotal)
+        if (ids.length > 0) {
+            dispatchNavigate('ColdStorage', {wallet, capsuleTotal, utxo, ids, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to: selfAddress, vaultTab, vaultSend: true, title: vaultTab ? "Batch Capsules" : undefined, isBatch: true});
         } else {
             SimpleToast.show("Please select Capsules to Send", SimpleToast.SHORT)
         }
@@ -125,14 +167,16 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
             return;
         }
         let capsulesData: any = [];
+        let capsuleTotal: any = 0;
         ids.forEach(id => {
             const result = utxo?.find(obj => `${obj.txid}:${obj.vout}` === id)?.value;
             if (result) capsulesData.push({
                 id, value: result
             });
+            capsuleTotal += Number(result)
         });
         if (ids.length > 0) {
-            dispatchNavigate('ColdStorage', {wallet, utxo, ids, vaultTab, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to: bitcoinHash, type: "TOPUP"});
+            dispatchNavigate('ColdStorage', {wallet, capsuleTotal, utxo, ids, vaultTab, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to: bitcoinHash, type: "TOPUP"});
         } else {
             SimpleToast.show("Please select Capsules to Send", SimpleToast.SHORT)
         }
@@ -293,11 +337,13 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
                 }
                 <View style={{
                     flexDirection: 'row',
+                    justifyContent: 'space-between',
                     alignItems: 'center',
                     marginTop: 10,
-                    // width: '100%'
+                    marginRight: 35
                 }}>
-                    {/* <GradientView
+                    <GradientView
+                        onPress={sendToBatchClickHandler}
                         style={styles.capsuleLinearGradientStyle}
                         linearGradientStyle={styles.capsuleMainShadowStyle}
                         topShadowStyle={[styles.capsuleOuterShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
@@ -305,14 +351,14 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
                         linearGradientStyleMain={styles.capsuleLinearGradientStyleMain}
                     >
                         <Text h3 center>Batch</Text>
-                    </GradientView> */}
+                    </GradientView>
                     <GradientView
                         onPress={moveToVaultClickHandler}
-                        topShadowStyle={[styles.capsuleOuterShadowStyle, {width: widths - 52}, vaultTab && { shadowColor: colors.blueText}]}
-                        bottomShadowStyle={[styles.capsuleInnerShadowStyle, {width: widths - 52}, vaultTab && { shadowColor: colors.blueText}]}
-                        style={[styles.capsuleLinearGradientStyle, { marginStart: 25 }]}
+                        topShadowStyle={[styles.capsuleOuterShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
+                        bottomShadowStyle={[styles.capsuleInnerShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
+                        style={[styles.capsuleLinearGradientStyle]}
                         linearGradientStyle={styles.capsuleMainShadowStyle}
-                        linearGradientStyleMain={[styles.capsuleLinearGradientStyleMain, {width: widths - 52}]}
+                        linearGradientStyleMain={[styles.capsuleLinearGradientStyleMain]}
                     >
                         <Text h3 center>{vaultTab ? "Move to Hot Vault" : "Move to Cold Vault"}</Text>
                     </GradientView>

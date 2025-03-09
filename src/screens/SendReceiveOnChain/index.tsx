@@ -84,6 +84,7 @@ export default function SendReceiveOnChain({ route }: Props) {
     }
 
     console.log('transaction?.confirmations: ', transaction)
+    console.log('tx: ', tx)
     return (
         <ScreenLayout showToolbar isBackButton title="Review Transaction">
             <View style={styles.main}>
@@ -95,10 +96,11 @@ export default function SendReceiveOnChain({ route }: Props) {
                 <TextView keytext="Received to: " text={`Bitcoin Address: ${shortenAddress(transaction?.outputs[0].scriptPubKey.addresses[0])}`} />
                 {isSent &&
                     <>
-                        <TextView keytext="Status: " text={transaction.confirmations > 0
-                        ? transaction?.confirmations > 3
-                          ? "Received"
-                          : "Sent"
+                        <TextView keytext="Status: " text={
+                          transaction.confirmations > 0 ? 
+                            transaction?.confirmations > 3 ? 
+                            "Received" : 
+                            "Sent"
                         : "Pending"} />
                         {tx?.fee &&
                             <TextView keytext="Network fee: " text={tx?.fee} />                        
@@ -112,11 +114,11 @@ export default function SendReceiveOnChain({ route }: Props) {
                 {/* {!isSent && <TextView keytext="At bitcoin exchange rate: " text={'$'+matchedRate} />} */}
                 <TextView keytext="Txid:  " text={transaction?.txid} />
 
-                {/* {isSent &&
-                    <TouchableOpacity style={[styles.button, { marginBottom: 20 }]}>
+                {isSent && transaction.confirmations == 0 &&
+                    <TouchableOpacity style={[styles.button, { marginBottom: 20 }, vaultTab && { borderColor: colors.blueText}]}>
                         <Text bold h4 style={styles.text}>Accelrate transaction</Text>
                     </TouchableOpacity>
-                } */}
+                }
                 <TouchableOpacity style={[styles.button, vaultTab && { borderColor: colors.blueText}]} onPress={handleViewBtcNetExplorerClickHandler}>
                     <Text bold h4 style={styles.text}>View in Bitcoin Network Explorer</Text>
                 </TouchableOpacity>

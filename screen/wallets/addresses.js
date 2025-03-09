@@ -71,6 +71,20 @@ const WalletAddresses = () => {
     type, 
     recommendedFee, 
     isWithdrawal, 
+
+
+    vaultTab, 
+    utxo, 
+    ids, 
+    maxUSD, 
+    inUSD, 
+    total, 
+    matchedRate, 
+    capsulesData, 
+    vaultSend, 
+    title, 
+    isBatch,
+    capsuleTotal,
 } = useRoute().params;
 
   const addressList = useRef();
@@ -146,18 +160,38 @@ const WalletAddresses = () => {
   );
 
   const navigateToReceive = (item) => {
-    dispatchNavigate('ReviewPayment', {
-      value: value,
-      converted: converted,
-      isSats: isSats,
-      to: item.address,
-      fees: 0,
-      type: type,
-      feeForBamskki: 0,
-      recommendedFee,
-      wallet,
-      isWithdrawal: isWithdrawal
-    });
+    if(isBatch){
+      dispatchNavigate('ColdStorage', {
+        wallet, 
+        vaultTab, 
+        utxo, 
+        ids, 
+        maxUSD, 
+        inUSD, 
+        total, 
+        matchedRate, 
+        capsulesData, 
+        to: item.address, 
+        vaultSend, 
+        title, 
+        type, 
+        isBatch,
+        capsuleTotal
+      });
+    } else {
+      dispatchNavigate('ReviewPayment', {
+        value: value,
+        converted: converted,
+        isSats: isSats,
+        to: item.address,
+        fees: 0,
+        type: type,
+        feeForBamskki: 0,
+        recommendedFee,
+        wallet,
+        isWithdrawal: isWithdrawal
+      });  
+    }
     // navigate('ReceiveDetailsRoot', {
     //   screen: 'ReceiveDetails',
     //   params: {

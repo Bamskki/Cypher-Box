@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Dimensions, TouchableOpacity, View, Image, Animated, StyleSheet, Platform } from "react-native";
+import { Dimensions, TouchableOpacity, View, Image, Animated, StyleSheet, Platform, ScrollView } from "react-native";
 import styles from "./styles";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 import Svg, { Path, Defs, Pattern, Use, Image as RnSvgImage } from "react-native-svg"
@@ -142,14 +142,15 @@ export default function GetStartedScreen({ route }: Props) {
     };
 
     return (
-        <ScreenLayout >
+        <ScreenLayout disableScroll>
+            <ScrollView style={{flex: 1}} contentContainerStyle={{flexGrow: 1,}}>
             <Animated.View
                 style={[
-                    StyleSheet.absoluteFill,
                     styles.main,
                     {
                         opacity: opacity.current,
-                        transform: [{ translateY: translateY.current }]
+                        transform: [{ translateY: translateY.current }],
+                        paddingBottom: Platform.OS == 'ios' ? 100 : 0
                     },
                 ]}
             >
@@ -206,7 +207,7 @@ export default function GetStartedScreen({ route }: Props) {
 
 
             </Animated.View>
-
+            </ScrollView>
         </ScreenLayout >
     )
 }
