@@ -83,6 +83,8 @@ android {
         testBuildType System.getProperty('testBuildType', 'debug')
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         missingDimensionStrategy 'react-native-camera', 'general' //add this line
+        manifestPlaceholders["appAuthRedirectScheme"] = "cypherbox" // Add this line
+
     }
 
     signingConfigs {
