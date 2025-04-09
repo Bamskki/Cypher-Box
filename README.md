@@ -64,7 +64,7 @@ Community: [telegram group](https://t.me/BitcoinUserSupport)
 
 ---
 
-Checking Account:
+Lightning Account:
 * Create/login to Coinos.io 
 * Send and receive lightning, Liquid, and onchain payments
 * Create lightning address
@@ -76,14 +76,14 @@ Hot Vault:
 * Private keys never leave your device
 * SegWit-first, Bip39, Replace-By-Fee, and Child-Pay-For-Parent support
 * Coin control
-* Top-up Checking Account
+* Top-up Lightning Account
 * Send to Cold Vault
 
 Cold Vault (watch-only):
 * Private keys never leave your device
 * SegWit-first, Bip39, Replace-By-Fee, and Child-Pay-For-Parent support
 * Coin control
-* Top-up Checking Account
+* Top-up Lightning Account
 * PSBT
 * Send to Hot Vault
 

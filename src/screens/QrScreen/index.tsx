@@ -90,7 +90,7 @@ export default function QrScreen({ route }: Props) {
                     </View>       
                 : hash &&    
                     <View style={styles.innerView}>
-                        {/* <Text h3 style={styles.maintitle}>Top-up your Coinos Checking Account{`\n`} using this Bitcoin Network address:</Text> */}
+                        {/* <Text h3 style={styles.maintitle}>Top-up your Coinos Lightning Account{`\n`} using this Bitcoin Network address:</Text> */}
                         <Image source={CoinOS} style={styles.logo} resizeMode="contain" />
 
                         <View style={{ margin: 20, padding: 30, backgroundColor: 'white', borderRadius: 30 }}>

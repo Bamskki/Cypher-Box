@@ -299,9 +299,13 @@ export default function SendScreen({ navigation, route }: any) {
             )
                 :
                 (
-                    <ScreenLayout disableScroll showToolbar isBackButton title={info?.isWithdrawal ? "Edit Amount" : "Send Bitcoin"}>
+                    <ScreenLayout keyboardAware showToolbar isBackButton title={info?.isWithdrawal ? "Edit Amount" : "Send Bitcoin"}>
                         <View style={styles.container}>
-                            <GradientInputNew isSats={isSats} sats={sats} setSats={setSats} usd={usd}
+                            <GradientInputNew 
+                                isSats={isSats} 
+                                sats={sats} 
+                                setSats={setSats} 
+                                usd={usd}
                                 _colors={[colors.pink.extralight, colors.pink.default]}
                                 showTitle={false}
                             />

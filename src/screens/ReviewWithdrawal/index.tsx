@@ -394,7 +394,7 @@ export default function ReviewWithdrawal({ route }: Props) {
                     >
                         <View style={styles.view}>
                             <Text h2 bold style={styles.check}>
-                                Checking Account
+                                Lightning Account
                             </Text>
                             <Image source={CoinOSSmall} style={styles.blink} resizeMode="contain" />
                         </View>
@@ -460,7 +460,7 @@ export default function ReviewWithdrawal({ route }: Props) {
 
                     <TextViewV2
                         keytext="Sent from: "
-                        text="My Coinos Checking Account"
+                        text="My Coinos Lightning Account"
                         style={styles.textContainer}
 
                     />

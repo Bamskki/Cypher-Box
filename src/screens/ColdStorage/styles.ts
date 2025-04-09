@@ -1,4 +1,5 @@
 import { colors, widths } from "@Cypher/style-guide";
+import screenWidth from "@Cypher/style-guide/screenWidth";
 import { ImageStyle, StyleSheet, TextStyle, ViewStyle } from "react-native";
 
 interface Style {
@@ -30,6 +31,7 @@ interface Style {
     tabs: ViewStyle;
     checkView: ViewStyle;
     checkImage: ImageStyle;
+    editImage: ImageStyle
 }
 
 export default StyleSheet.create<Style>({
@@ -44,6 +46,10 @@ export default StyleSheet.create<Style>({
     },
     titleVault: {
         fontSize: 18,
+    },
+    editImage: {
+        width: 22,
+        height: 22
     },
     savingVault: {
         width: widths - 40,
@@ -88,9 +94,11 @@ export default StyleSheet.create<Style>({
     tabs: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        marginTop: 20,
-        marginHorizontal: 12
+        alignSelf: 'flex-start',
+        width: screenWidth * 0.17,
+        // justifyContent: 'space-between',
+        marginRight: 2,
+        marginLeft: 2,
     },
     recipientView: {
         padding: 20,

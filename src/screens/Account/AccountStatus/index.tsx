@@ -19,11 +19,11 @@ export default function AccountStatus() {
         <ScreenLayout disableScroll progress={2}>
             <View style={styles.container}>
                 <View style={styles.innerView}>
-                    <GradientText>Checking Account Created!</GradientText>
+                    <GradientText>Lightning Account Created!</GradientText>
                     <GradientCardWithShadow colors_={[colors.gray.dark, colors.gray.dark]} style={styles.linearGradient} disabled linearStyle={styles.height} shadowStyleTop={styles.top} shadowStyleBottom={styles.bottom}>
                         <View style={styles.view}>
                             <Text h2 bold style={styles.check}>
-                                Checking Account
+                                Lightning Account
                             </Text>
                             <Image
                                 source={CoinOSSmall}
@@ -44,7 +44,7 @@ export default function AccountStatus() {
                             </Shadow> */}
                         </LinearGradient>
                     </GradientCardWithShadow>
-                    <Text h4 style={styles.description}>Your Checking Account has been created. The interactive bar display helps you in visualizing your Checking Account's balance, indicating a threshold above which storing bitcoin in a bank carries increased counter-party risk.{'\n'}{'\n'}
+                    <Text h4 style={styles.description}>Your Lightning Account has been created. The interactive bar display helps you in visualizing your Lightning Account's balance, indicating a threshold above which storing bitcoin in a bank carries increased counter-party risk.{'\n'}{'\n'}
                         You can deposit money beyond the threshold, but remember, you are technically not the owner of it; you are relying on a third-party custodian. Cypher Box will enable you to become the sole owner of your money once you max out the bar slot (set to 2.1 million sats by default but you can adjust it in the settings).</Text>
                 </View>
                 <GradientButton title="Home" onPress={nextClickHandler} />

@@ -27,7 +27,7 @@ interface Props {
 
 export default function ConfirmTransction({ route }: Props) {
     const { data } = route?.params;
-    const { recipients = [], walletID, vaultTab, fee, memo, tx, satoshiPerByte, psbt, capsulesData = null, to = null, vaultSend} = data;
+    const { recipients = [], walletID, vaultTab, fee, memo, tx, satoshiPerByte, psbt, capsulesData = null, to = null, vaultSend, capsuleTotal, isBatch } = data;
 
     const [usd, setUSD] = useState('40');
     const [sats, setSats] = useState('100K sats  ~$' + usd);
@@ -166,10 +166,12 @@ export default function ConfirmTransction({ route }: Props) {
                 // onPress={savingVaultClickHandler}
                 /> */}
                 <View style={styles.recipientView}>
-                    <Text bold style={styles.coinselected}>Coins selected: {data?.coinsSelected} coins</Text>
+                    {!isBatch &&
+                        <Text bold style={styles.coinselected}>Coins selected: {data?.coinsSelected} coins</Text>
+                    }
                     <View style={styles.priceView}>
                         <View>
-                            <Text style={styles.recipientTitle}>{to ? "Top-up amount:" : "Recipient will get:"}</Text>
+                            <Text style={styles.recipientTitle}>{isBatch ? "Amount to be batched:" : to ? "Top-up amount:" : "Recipient will get:"}</Text>
                             <Text bold style={[styles.value, vaultTab && {color: colors.blueText}]}>{data?.sats + ' sats ~$'+ data?.inUSD}</Text>
                         </View>
                         {/* <TouchableOpacity style={styles.editAmount} onPress={editAmountClickHandler}>
@@ -179,13 +181,13 @@ export default function ConfirmTransction({ route }: Props) {
                     <View style={styles.priceView}>
                         <View>
                             <Text style={styles.recipientTitle}>Sent from:</Text>
-                            <Text style={styles.fees}>Vault address: {shortenAddress(data.sentFrom)}</Text>
+                            <Text style={styles.fees}>{isBatch ? "Cold Vault address: " : "Vault address: "}{shortenAddress(data.sentFrom)}</Text>
                         </View>
                     </View>
                     <View style={styles.priceView}>
                         <View>
                             <Text style={styles.recipientTitle}>{to && !vaultSend ? "To Coinos Bitcoin address" : "To:"}</Text>
-                            <Text style={StyleSheet.flatten([styles.fees, { color: vaultTab ? colors.blueText : colors.green }])}>Bitcoin Address: {shortenAddress(data?.destinationAddress)}</Text>
+                            <Text style={StyleSheet.flatten([styles.fees, { color: vaultTab ? colors.blueText : colors.green }])}>{isBatch ? "Cold Vault address: " : "Bitcoin Address: "}{shortenAddress(data?.destinationAddress)}</Text>
                         </View>
                     </View>
                     <View style={styles.priceView}>

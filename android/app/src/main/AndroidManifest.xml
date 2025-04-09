@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:installLocation="auto" 
-    package="io.cypherbox.btc">
+>
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
@@ -34,6 +34,7 @@
         android:roundIcon="@mipmap/logonew"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true">
 
         <meta-data
@@ -106,7 +107,7 @@
 
                 <data android:scheme="bitcoin" />
                 <data android:scheme="lightning" />
-                <data android:scheme="bluewallet" />
+                <data android:scheme="cypherbox" android:host="oauth/callback" />
                 <data android:scheme="lapp" />
                 <data android:scheme="blue" />
                 <data android:scheme="http" />

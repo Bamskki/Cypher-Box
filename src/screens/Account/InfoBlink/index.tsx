@@ -38,7 +38,7 @@ export default function InfoBlink() {
         <ScreenLayout showToolbar progress={0}>
             <View style={styles.container}>
                 <View style={styles.innerView}>
-                    <GradientText>Checking Account</GradientText>
+                    <GradientText>Lightning Account</GradientText>
                     <Text h4 style={styles.descption}>The first bitcoin custodian bank you’re about to use is called Coinos. Here are some useful things you may want to know about it:</Text>
 
 

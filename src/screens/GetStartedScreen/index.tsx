@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Dimensions, TouchableOpacity, View, Image, Animated, StyleSheet, Platform } from "react-native";
+import { Dimensions, TouchableOpacity, View, Image, Animated, StyleSheet, Platform, ScrollView } from "react-native";
 import styles from "./styles";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 import Svg, { Path, Defs, Pattern, Use, Image as RnSvgImage } from "react-native-svg"
@@ -103,6 +103,8 @@ export default function GetStartedScreen({ route }: Props) {
     const [hasAcceptedTermsOfService, setHasAcceptedTermsOfService] = useState(false)
     const opacity = useRef(new Animated.Value(1));
     const translateY = useRef(new Animated.Value(0));
+    const scrollViewRef = useRef<ScrollView>(null);
+
     const handleTermOfServicePress = () => {
         dispatchNavigate('TermOfService')
     };
@@ -110,6 +112,7 @@ export default function GetStartedScreen({ route }: Props) {
 
     const toggleHasAcceptedTermsOfService = (value: boolean | ((prevState: boolean) => boolean)) => {
         setHasAcceptedTermsOfService(value)
+        scrollViewRef.current?.scrollToEnd({ animated: true });
     }
 
     const handleStartClick = () => {
@@ -142,14 +145,15 @@ export default function GetStartedScreen({ route }: Props) {
     };
 
     return (
-        <ScreenLayout >
+        <ScreenLayout disableScroll>
+            <ScrollView ref={scrollViewRef} style={{flex: 1}} contentContainerStyle={{flexGrow: 1}}>
             <Animated.View
                 style={[
-                    StyleSheet.absoluteFill,
                     styles.main,
                     {
                         opacity: opacity.current,
-                        transform: [{ translateY: translateY.current }]
+                        transform: [{ translateY: translateY.current }],
+                        paddingBottom: Platform.OS == 'ios' ? 100 : 0
                     },
                 ]}
             >
@@ -191,7 +195,7 @@ export default function GetStartedScreen({ route }: Props) {
                     colors_={hasAcceptedTermsOfService ? ['#464D6854', '#FFF'] : ['#B6B6B6', '#FFFFFF']}
                     onPress={initialise}
                     disabled={!hasAcceptedTermsOfService}
-                    style={[styles.gradient, { opacity: hasAcceptedTermsOfService ? 1 : 0.5 }, !hasAcceptedTermsOfService ? { backgroundColor: 'transparent' } : {}]}>
+                    style={[styles.gradient, { marginBottom: 100, opacity: hasAcceptedTermsOfService ? 1 : 0.5 }, !hasAcceptedTermsOfService ? { backgroundColor: 'transparent' } : {}]}>
                     <View style={styles.container4}>
                         {hasAcceptedTermsOfService ?
                             <Image source={Start}
@@ -202,11 +206,8 @@ export default function GetStartedScreen({ route }: Props) {
                         }
                     </View>
                 </GradientCard>
-
-
-
             </Animated.View>
-
+            </ScrollView>
         </ScreenLayout >
     )
 }

@@ -20,7 +20,7 @@ import { resetAndNavigate } from "@Cypher/helpers/navigation";
 export default function TransactionBroadCast({navigation, route}: any) {
     const {matchedRate, type, value, converted, isSats, item} = route?.params;
     const amountSat = isSats ? value : converted;
-    const amountUSD = isSats ? value : converted
+    const amountUSD = isSats ? converted : value
     const [response, setResponse] = useState(false);
     const [progress, setProgress] = useState(0);
     const [sats, setSats] = useState('100K sats');

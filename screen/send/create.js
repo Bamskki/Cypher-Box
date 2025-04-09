@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { TextInput, FlatList, Linking, TouchableOpacity, StyleSheet, Text, View, Platform, Alert } from 'react-native';
+import { TextInput, FlatList, Linking, TouchableOpacity, StyleSheet, Text, View, Platform, Alert, PermissionsAndroid } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { Icon } from 'react-native-elements';
 import Share from 'react-native-share';
@@ -20,8 +20,9 @@ import { useTheme } from '../../components/themes';
 import { satoshiToBTC } from '../../blue_modules/currency';
 const bitcoin = require('bitcoinjs-lib');
 
-const SendCreate = () => {
-  const { fee, recipients, memo = '', satoshiPerByte, psbt, showAnimatedQr, tx } = useRoute().params;
+const SendCreate = ({navigation, route}) => {
+  console.log('fee: ', route?.params)
+  const { fee, recipients, memo = '', satoshiPerByte, psbt, showAnimatedQr, tx } = route?.params || {};
   const transaction = bitcoin.Transaction.fromHex(tx);
   const size = transaction.virtualSize();
   const { colors } = useTheme();

@@ -426,7 +426,7 @@ export default function ReviewPayment({ route }: Props) {
                         shadowStyleBottom={styles.bottom}>
                         <View style={styles.view}>
                             <Text h2 bold style={styles.check}>
-                                Checking Account
+                                Lightning Account
                             </Text>
                             <Image
                                 source={CoinOSSmall}
@@ -469,7 +469,7 @@ export default function ReviewPayment({ route }: Props) {
                             </TouchableOpacity>
                         }
                     </View>
-                    <TextViewV2 keytext="Sent from: " text="Coinos Checking Account" />
+                    <TextViewV2 keytext="Sent from: " text="Coinos Lightning Account" />
                     {isWithdrawal ?
                         <View style={{
                             marginBottom:30,

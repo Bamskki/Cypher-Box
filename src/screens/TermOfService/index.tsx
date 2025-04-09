@@ -30,7 +30,7 @@ const TermsOfService = () => {
                     </Text>
                 </View>
                 <View style={styles.section}>
-                    <Text style={styles.subHeader}>1. Third-party Custodian Checking Account(s)</Text>
+                    <Text style={styles.subHeader}>1. Third-party Custodian Lightning Account(s)</Text>
                     <Text style={styles.paragraph}>
                         Cypher Box lets you connect through API(s) (create account and/or
                         login) to one or more Bitcoin custodians that (if benevolent) allow
@@ -39,7 +39,7 @@ const TermsOfService = () => {
                         custodian is an entity that allow you to transact and accumulate
                         bitcoin (up to a certain subjective threshold) quickly and cheaply
                         depending on your jurisdiction. The funds stored on your custodian
-                        'Checking Account(s)' are technically under the full control of the
+                        'Lightning Account(s)' are technically under the full control of the
                         custodian, NOT OURS, NOT YOURS. The balance shown on your Checking
                         Account(s) may or may not be real Bitcoin. Despite our efforts in
                         choosing the most trusted and regulated Bitcoin custodians, we can
@@ -54,17 +54,17 @@ const TermsOfService = () => {
                         Custodians might face liquidity issues or other technical problems
                         that can only be solved on their side, NOT OURS. A Bitcoin custodian,
                         just like a regular bank or exchange, can seize, freeze, or steal the
-                        balance displayed in your Checking Account. Custodians can even
+                        balance displayed in your Lightning Account. Custodians can even
                         sometimes get hacked. Cypher Box LLC is not liable for any funds
                         stolen by the custodian(s) we integrate with. If you face any problems
-                        in Checking Account(s) you should first login to your Custodian’s
+                        in Lightning Account(s) you should first login to your Custodian’s
                         website or mobile application and validate your balance and
                         transaction history from their side. Cypher Box is not liable for any
                         error that occurs within the custodian(s)’s ledger(s) or in the
                         transfer of requests and callbacks through their API. Due to all the
                         uncertainties mentioned above; we highly recommend that you read and
                         follow the instructions and only store a measured amount of bitcoin
-                        inside your Checking Account, use multiple custodian Checking Accounts
+                        inside your Lightning Account, use multiple custodian Checking Accounts
                         to spread the counter-party risk, periodically monitor your Checking
                         Accounts’ balances and activities from the custodian(s) website or
                         application, and once you’re knowledgeable enough to understand
@@ -97,7 +97,7 @@ const TermsOfService = () => {
                     <Text style={styles.paragraph}>
                         Cypher Box enables you to create single, hierarchical deterministic
                         (HD), non-custodial wallet(s) (referred to as 'Vault(s)') for Bitcoin.
-                        You can use these vaults to withdraw from your Checking Account(s),
+                        You can use these vaults to withdraw from your Lightning Account(s),
                         store, send, and receive the digital asset Bitcoin only (BTC). In order
                         to use the hot or cold storage Vault(s) you are expected to be fully
                         aware of the dangers associated with securing your 12-word backup
@@ -133,7 +133,7 @@ const TermsOfService = () => {
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.subHeader}>5. Responsibility for Checking Account(s) Credentials, Vault(s) Backup
+                    <Text style={styles.subHeader}>5. Responsibility for Lightning Account(s) Credentials, Vault(s) Backup
                         Seedphrases, Passwords and Other Authentication Means</Text>
                     <Text style={styles.paragraph}>
                         Our Services provide a number of ways for you to secure your funds and
@@ -187,7 +187,7 @@ const TermsOfService = () => {
                         whatever reason, we will endeavor to provide advance notice to you.
                         However, we will have no obligation to do so. If our Services are
                         terminated abruptly without notice, for whatever reason, you should
-                        still be able to login to your Checking Account(s) from your
+                        still be able to login to your Lightning Account(s) from your
                         custodian(s) from their website(s) or mobile application(s) if they’re
                         available, and you should be able to recover the funds stored in your
                         hot and cold Vaults’ addresses using your backup seedphrase(s). Cypher
@@ -232,7 +232,7 @@ const TermsOfService = () => {
                         <Text style={styles.listItem}>• Financial loss due to custodian(s) being "bankrupt".</Text>
                         <Text style={styles.listItem}>• Financial loss due to custodian(s) being "unavailable".</Text>
                         <Text style={styles.listItem}>• Financial loss due to custodian(s) seizing or freezing your account.</Text>
-                        <Text style={styles.listItem}>• Financial loss due to loss of access to your Checking Account(s) credentials.</Text>
+                        <Text style={styles.listItem}>• Financial loss due to loss of access to your Lightning Account(s) credentials.</Text>
                         <Text style={styles.listItem}>• Financial loss due to custodian(s) censoring your transactions.</Text>
                         <Text style={styles.listItem}>• Financial loss due to Vault(s) access being "Brute-forced".</Text>
                         <Text style={styles.listItem}>• Financial loss due to server failure or data loss. (We don’t have a server)</Text>
@@ -251,7 +251,7 @@ const TermsOfService = () => {
                         You will hold harmless and indemnify Cypher Box LLC, its directors,
                         officers, employees, suppliers, agents or affiliates from and against
                         any claim, suit or action arising from or related to your use of the
-                        Services, including Checking Account(s) and Vault(s), or violation of
+                        Services, including Lightning Account(s) and Vault(s), or violation of
                         this Agreement, including any liability arising from claims, losses,
                         damages, suits, judgments, litigation costs and attorneys’ fees.
                     </Text>
@@ -261,10 +261,10 @@ const TermsOfService = () => {
                     <Text style={styles.paragraph}>
                         We do not issue or put into circulation a digital currency or redeem
                         or withdraw from circulation digital currency. We do not have access
-                        to neither your Checking Account(s) nor your Vaults) or any Digital
+                        to neither your Lightning Account(s) nor your Vaults) or any Digital
                         Assets stored in it. Any Digital Assets stored using the Services are
                         not in our control. As explained above, we do not store or have any
-                        means of recovering your Checking Account(s), private keys,
+                        means of recovering your Lightning Account(s), private keys,
                         seedphrases, passwords. Cypher Box is not a bank, custodian, exchange,
                         financial intermediary or regulated financial institution. Cypher Box
                         does not have control over or take any responsibility for any
@@ -312,7 +312,7 @@ const TermsOfService = () => {
                         Cypher Box LLC does not collect or share your personal or financial
                         data through this app. However, the third-party custodians in our app
                         may collect or share your personal or financial data and activity
-                        happening in your Checking Account. Due to the transparent nature of
+                        happening in your Lightning Account. Due to the transparent nature of
                         the Bitcoin Network, they may also have access to your vault addresses
                         and the balances they contain if you provide it to them through the
                         ‘Withdraw’ and ‘Top-up’ functions. Neither Cypher Box nor its
@@ -337,7 +337,7 @@ const TermsOfService = () => {
                         Services, including any Vault(s). You may not assign this Agreement.
                         Cypher Box LLC may assign this Agreement. This Agreement controls the
                         relationship between Cypher Box LLC and you. Your use of the Services,
-                        any Checking Account(s) or Vault(s) is subject to international export
+                        any Lightning Account(s) or Vault(s) is subject to international export
                         controls and economic sanctions requirements. You agree that you will
                         comply with those requirements. You are not permitted to use any of
                         the Services if: (1) you are in, under the control of, or a national
@@ -347,7 +347,7 @@ const TermsOfService = () => {
                         Department's Specially Designated Nationals List or the U.S. Commerce
                         Department's Denied Persons List, Unverified List or Entity List, (a
                         "Sanctioned Person"); or (2) you intend to supply any Digital Assets
-                        in Checking Account(s) or Vault(s) to a Sanctioned Country (or a
+                        in Lightning Account(s) or Vault(s) to a Sanctioned Country (or a
                         national or resident of a Sanctioned Country) or Sanctioned Person.
                         All provisions of this Agreement which by their nature extend beyond
                         the expiration or termination of this Agreement, will continue to be

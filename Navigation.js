@@ -4,6 +4,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { Platform, useWindowDimensions, Dimensions, I18nManager } from 'react-native';
 
 import Settings from './screen/settings/settings';
+import Security from './screen/settings/security';
 import About from './screen/settings/about';
 import ReleaseNotes from './screen/settings/releasenotes';
 import Licensing from './screen/settings/licensing';
@@ -213,6 +214,7 @@ const WalletsRoot = () => {
       <WalletsStack.Screen name="RBFBumpFee" component={RBFBumpFee} options={RBFBumpFee.navigationOptions(theme)} />
       <WalletsStack.Screen name="RBFCancel" component={RBFCancel} options={RBFCancel.navigationOptions(theme)} />
       <WalletsStack.Screen name="Settings" component={Settings} options={Settings.navigationOptions(theme)} />
+      <WalletsStack.Screen name="Security" component={Security} options={Security.navigationOptions(theme)} />
       <WalletsStack.Screen name="SelectWallet" component={SelectWallet} options={SelectWallet.navigationOptions(theme)} />
       <WalletsStack.Screen name="Currency" component={Currency} options={Currency.navigationOptions(theme)} />
       <WalletsStack.Screen name="About" component={About} options={About.navigationOptions(theme)} />

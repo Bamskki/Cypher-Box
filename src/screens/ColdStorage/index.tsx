@@ -24,7 +24,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { btc } from "@Cypher/helpers/coinosHelper";
 import { scanQrHelper } from "../../../helpers/scan-qr";
 import DeeplinkSchemaMatch from "../../../class/deeplink-schema-match";
-import { ProgressBarColdStorage, ProgressBar5, Check } from "@Cypher/assets/images";
+import { ProgressBarColdStorage, ProgressBar5, Check, Edit } from "@Cypher/assets/images";
 
 const prompt = require('../../../helpers/prompt');
 const btcAddressRx = /^[a-zA-Z0-9]{26,35}$/;
@@ -45,7 +45,7 @@ export const shortenAddress = (address: string) => {
 
 
 export default function ColdStorage({ route, navigation }: Props) {
-    const {wallet, vaultTab, utxo, ids, maxUSD, inUSD, total, matchedRate, capsulesData = null, to = null, vaultSend, title, type} = route?.params;
+    const {wallet, vaultTab, utxo, ids, maxUSD, inUSD, total, matchedRate, capsulesData = null, to = null, vaultSend, title, type, isBatch, capsuleTotal} = route?.params;
     const [usd, setUSD] = useState('40');
     const [sats, setSats] = useState('100K sats  ~$' + usd);
     const [address, setAddress] = useState();
@@ -106,6 +106,12 @@ export default function ColdStorage({ route, navigation }: Props) {
         return initialFee;
     }, [customFee, feePrecalc, networkTransactionFees]);
     
+    useEffect(() => {
+      if(isBatch){
+        setTransactionMemo('Batching Transaction')
+      }
+    }, [isBatch])
+
     useEffect(() => {
       if(to){
         setDestinationAddress(to)
@@ -469,6 +475,8 @@ export default function ColdStorage({ route, navigation }: Props) {
             capsulesData,
             to,
             vaultSend,
+            capsuleTotal,
+            isBatch,
             fee: new BigNumber(fee).dividedBy(100000000).toNumber(),          
         }
         console.log('data: ', data)
@@ -559,7 +567,7 @@ export default function ColdStorage({ route, navigation }: Props) {
     }
 
     const editAmountClickHandler = () => {
-        navigation.push('EditAmount', {isEdit: true, vaultTab, wallet, utxo, ids, maxUSD, inUSD, total, matchedRate, capsulesData, to, vaultSend, setSatsEdit: setSats_ });
+        navigation.push('EditAmount', {isEdit: true, vaultTab, wallet, utxo, ids, maxUSD, inUSD, total, matchedRate, capsulesData, to, vaultSend, setSatsEdit: setSats_, title, capsuleTotal, isBatch });
     }
 
     const editFeesClickHandler = () => {
@@ -725,10 +733,34 @@ export default function ColdStorage({ route, navigation }: Props) {
         },
     ];
 
+    const addressHandler = () => {
+      console.log('to: ', to)
+        dispatchNavigate('WalletAddresses', {
+          walletID: wallet.getID(),
+          isTouchable: true,
+          wallet, 
+          vaultTab, 
+          utxo, 
+          ids, 
+          maxUSD, 
+          inUSD, 
+          total, 
+          matchedRate, 
+          capsulesData, 
+          to, 
+          vaultSend, 
+          title, 
+          type, 
+          isBatch,
+          capsuleTotal
+        });
+    }
+
+    console.log('to: ', to)
     return (
         <ScreenLayout showToolbar disableScroll>
             <View style={styles.container}>
-                <Text style={styles.title} center>{title ? title : to ? "Top-up Transaction" : "Construct transaction"}</Text>
+                <Text style={styles.title} center>{title ? title : isBatch ? "Batch Capsules" : to ? "Top-up Transaction" : "Construct transaction"}</Text>
                 {/* <SavingVault
                     container={styles.savingVault}
                     innerContainer={styles.savingVault}
@@ -746,30 +778,77 @@ export default function ColdStorage({ route, navigation }: Props) {
                     {/* <TouchableOpacity onPress={coinThresholdClickHandler}> */}
                     {to ?
                       <View>
-                        <Text bold style={styles.coinselected}>Capsules selected: {ids.length}</Text>
-                          {capsulesData && capsulesData.map((item, i) => (
-                            <View style={styles.tabs}>
-                              <ProgressBar image={vaultTab ? ProgressBarColdStorage : ProgressBar5} />
-                              <View style={{ width: '80%', alignItems: 'flex-end' }}>
-                              <Text bold style={styles.coinselected}>Total: {formatBalance(item?.value, BitcoinUnit.BTC, true)}</Text>
+                        <Text bold style={styles.coinselected}>Capsules selected:</Text>
+                        <View style={{flexDirection: 'row', alignItems: 'center', marginLeft: 2, marginTop: 18 }}>
+                          <View style={{flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', maxWidth: '72%'}}>
+                            {capsulesData && capsulesData.map((item, i) => (
+                              <View style={styles.tabs}>
+                                <ProgressBar image={vaultTab ? ProgressBarColdStorage : ProgressBar5} />
                               </View>
-                            </View>
-                          ))}
+                            ))}
+                          </View>
+                          <View style={{ alignSelf: 'flex-start' }}>
+                            <Text bold style={[styles.coinselected, {fontSize: 12}]}>Total: {formatBalance(capsuleTotal, BitcoinUnit.BTC, true)}</Text>
+                          </View>
+                        </View>
                       </View>
                     :
                       <Text bold style={styles.coinselected}>Coins selected: {ids.length} coins</Text>
                     }
                     {/* </TouchableOpacity> */}
-                    <View style={styles.priceView}>
-                        <View>
-                            <Text style={styles.recipientTitle}>{title == "Transfer To Cold Vault" ? "Transfer amount" : to ? "Top-up amount" : "Recipient will get:"}</Text>
-                            <Text bold style={[styles.value, vaultTab && {color: colors.blueText}]}>{((Number(inUSD || 0) / Number(matchedRate || 0) || 0) * 100000000).toFixed(2) + ' sats ~$' + Number(inUSD).toFixed(2)}</Text>
+                    {isBatch ?
+                      <View style={{
+                        marginTop: 20,
+                        marginBottom: 5,
+                        // marginBottom:30,
+                        // marginStart:15,
+                        // marginEnd: 10,
+                      }}>
+                        <Text bold style={{fontSize: 18}}>{"Batched capsule size: "}</Text>
+                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                          <TouchableOpacity activeOpacity={0.7} onPress={editAmountClickHandler} style={{
+                            flexDirection: 'row', 
+                            alignItems: 'center', 
+                            alignSelf: 'flex-start',
+                            marginTop: 10, 
+                            paddingVertical: 8, 
+                            paddingHorizontal: 25, 
+                            borderWidth: 2, 
+                            borderColor: vaultTab ? colors.blueText : colors.greenShadow, 
+                            borderRadius: 15,
+                            // width: '96%'
+                          }}>
+                            <Text style={StyleSheet.flatten({
+                              // flex: 1,
+                              // width: '95%',
+                              fontSize: 16,
+                              marginTop: 3,
+                              marginRight: 15,
+                              color: colors.white
+                            })}>{((Number(inUSD || 0) / Number(matchedRate || 0) || 0).toFixed(8)) + ' BTC'}</Text>
+                            <Image source={Edit} style={styles.editImage} resizeMode='contain' />
+                          </TouchableOpacity>
+                          <Text style={{
+                              fontSize: 16,
+                              marginTop: 10, 
+                              marginLeft: 15,
+                          }}>
+                            {'~$' + Number(inUSD).toFixed(2)}
+                          </Text>
                         </View>
-                        <TouchableOpacity style={[styles.editAmount, { borderColor: satsEditable ? primaryColor : '#B6B6B6' }]} onPress={editAmountClickHandler}>
-                            <Text>Edit amount</Text>
-                        </TouchableOpacity>
-                    </View>
-                    {address &&
+                      </View>
+                    :
+                      <View style={styles.priceView}>
+                          <View>
+                              <Text style={styles.recipientTitle}>{title == "Transfer To Cold Vault" ? "Transfer amount" : to ? "Top-up amount" : "Recipient will get:"}</Text>
+                              <Text bold style={[styles.value, vaultTab && {color: colors.blueText}]}>{((Number(inUSD || 0) / Number(matchedRate || 0) || 0) * 100000000).toFixed(2) + ' sats ~$' + Number(inUSD).toFixed(2)}</Text>
+                          </View>
+                          <TouchableOpacity style={[styles.editAmount, { borderColor: satsEditable ? primaryColor : '#B6B6B6' }]} onPress={editAmountClickHandler}>
+                              <Text>Edit amount</Text>
+                          </TouchableOpacity>
+                      </View>                    
+                    }
+                    {address && !isBatch &&
                         <View style={styles.priceView}>
                             <View>
                                 <Text style={styles.recipientTitle}>Sent from:</Text>
@@ -780,11 +859,43 @@ export default function ColdStorage({ route, navigation }: Props) {
                     {to ?
                         <View style={styles.priceView}>
                           <View>
-                              <Text style={styles.recipientTitle}>Sent to:</Text>
-                              {!vaultSend &&
-                                <Text style={{...styles.fees, color: colors.pink.main}} italic>My Coinos Checking Account</Text>
+                              {!isBatch &&
+                                <Text style={styles.recipientTitle}>Sent to:</Text>
                               }
-                              <Text style={{...styles.fees, color: vaultSend ? colors.blueText : colors.pink.main}} italic>{vaultSend ? "Vault Address: " + shortenAddress(to) : "Deposit address: " + shortenAddress(to)}</Text>
+                              {!vaultSend &&
+                                <Text style={{...styles.fees, color: colors.pink.main}} italic>My Coinos Lightning Account</Text>
+                              }
+                              {isBatch ?
+                                <View style={{
+                                  // marginBottom:30,
+                                  // marginStart:15,
+                                  // marginEnd: 10,
+                                }}>
+                                  <Text bold style={{fontSize: 18}}>{"To: "}</Text>
+                                  <TouchableOpacity activeOpacity={0.7} onPress={addressHandler} style={{
+                                    flexDirection: 'row', 
+                                    alignItems: 'center', 
+                                    marginTop: 10, 
+                                    paddingVertical: 8, 
+                                    paddingHorizontal: 25, 
+                                    borderWidth: 2, 
+                                    borderColor: vaultTab ? colors.blueText : colors.greenShadow, 
+                                    borderRadius: 15,
+                                    width: '96%'
+                                  }}>
+                                    <Text italic style={StyleSheet.flatten({
+                                      // flex: 1,
+                                      width: '95%',
+                                      fontSize: 16,
+                                      marginTop: 3,
+                                      color: vaultTab ? colors.blueText : colors.greenShadow
+                                    })}>{"Vault Address: "+shortenAddress(to)}</Text>
+                                    <Image source={Edit} style={styles.editImage} resizeMode='contain' />
+                                  </TouchableOpacity>
+                                </View>
+                                :
+                                  <Text style={{...styles.fees, color: vaultSend ? colors.blueText : colors.pink.main}} italic>{vaultSend ? "Vault Address: " + shortenAddress(to) : "Deposit address: " + shortenAddress(to)}</Text>
+                              }
                           </View>
                         </View>
                     :
