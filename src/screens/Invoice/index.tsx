@@ -69,9 +69,9 @@ export default function Invoice({ route }: Props) {
                         <Text semibold style={StyleSheet.flatten([styles.sats, { color: amountSign == '+' ? '#4FBF67' : '#FF7A68' }])}>{`${amountSign}${satsAmount} sats`}</Text>
                         <Text bold subHeader>{`$${dollarAmount.toFixed(2)}`}</Text>
                     </View>
-                    <TextView keytext="Sent from: " text={historyDetail?.amount < 0 ? 'My Coinos Checking Account' : historyDetail?.with ? historyDetail?.with?.username : 'Unknown'} />
+                    <TextView keytext="Sent from: " text={historyDetail?.amount < 0 ? 'My Coinos Lightning Account' : historyDetail?.with ? historyDetail?.with?.username : 'Unknown'} />
                     {(historyDetail?.with || historyDetail?.amount > 0) &&
-                        <TextView keytext="To: " text={historyDetail?.amount > 0 ? 'My Coinos Checking Account' : historyDetail?.with?.username} />
+                        <TextView keytext="To: " text={historyDetail?.amount > 0 ? 'My Coinos Lightning Account' : historyDetail?.with?.username} />
                     }
                     {((historyDetail?.type == 'bitcoin' || historyDetail?.type == 'liquid') && historyDetail?.amount < 0) ?
                         <>

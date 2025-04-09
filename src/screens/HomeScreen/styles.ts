@@ -155,6 +155,7 @@ export default StyleSheet.create<Style>({
     },
     createView: {
         marginTop: 20,
+        backgroundColor: 'transparent'
     },
     image: {
         width: 33,
@@ -246,12 +247,13 @@ export default StyleSheet.create<Style>({
         // marginEnd: 15,
     },
     check: {
-        marginStart: 10,
+        // marginStart: 10,
         ...shadow.text25,
     },
     sats: {
         // marginStart: 25,
         ...shadow.text25,
+        fontSize: 18
     },
     alert: {
         color: colors.green,
@@ -300,7 +302,7 @@ export default StyleSheet.create<Style>({
         ...shadow.text25,
     },
     shadowTop: {
-        shadowOffset: { width: 3, height: 3 },
+        shadowOffset: { width: 2, height: 2 },
         shadowOpacity: 1,
         shadowColor: colors.white,
         shadowRadius: 2,
@@ -548,20 +550,20 @@ export default StyleSheet.create<Style>({
         paddingHorizontal: 30,
     },
     arrowLeft: {
-        width: 40,
-        height: 40,
+        width: 30,
+        height: 30,
         position: 'absolute',
         left: 10,
-        bottom: -2.5,
+        // bottom: -2.5,
         transform: [{
             rotate: '270deg',
         }],
     },
     arrowRight: {
-        width: 40,
-        height: 40,
+        width: 30,
+        height: 30,
         position: 'absolute',
-        top: -2.5,
+        // top: -2.5,
         right: 10,
         transform: [{
             rotate: '90deg',

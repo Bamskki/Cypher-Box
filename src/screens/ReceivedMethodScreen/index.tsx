@@ -41,7 +41,7 @@ export default function ReceivedMethodScreen() {
                             <View style={styles.view}>
                                 <View style={styles.container2}>
                                     <Text subHeader bold style={styles.title}>Bitcoin Network Address</Text>
-                                    <Text h4 bold style={styles.desc}>Deposit sizable amounts of bitcoin into your Checking Account </Text>
+                                    <Text h4 bold style={styles.desc}>Deposit sizable amounts of bitcoin into your Lightning Account </Text>
                                 </View>
                                 <Image source={LeftArrow} style={styles.image} resizeMode="contain" />
                             </View>

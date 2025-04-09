@@ -8,7 +8,6 @@ import loc from '../../loc';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
 import ListItem from '../../components/ListItem';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import useAuthStore from '@Cypher/stores/authStore';
 import { dispatchNavigate } from '@Cypher/helpers';
 import triggerHapticFeedback from '../../blue_modules/hapticFeedback';
 const prompt = require('../../helpers/prompt');
@@ -19,15 +18,13 @@ const styles = StyleSheet.create({
   },
 });
 
-const Settings = ({ navigation }) => {
+const Security = ({ navigation }) => {
   const { navigate, popToTop } = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
   const [storageIsEncryptedSwitchEnabled, setStorageIsEncryptedSwitchEnabled] = useState(false);
   const { isStorageEncrypted, encryptStorage, decryptStorage, saveToDisk } = useContext(BlueStorageContext);
   // By simply having it here, it'll re-render the UI if language is changed
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { language } = useContext(BlueStorageContext);
-  const { isAuth, clearAuth } = useAuthStore();
 
   const initialState = useCallback(async () => {
     const isStorageEncryptedSwitchEnabled = await isStorageEncrypted();
@@ -40,14 +37,6 @@ const Settings = ({ navigation }) => {
     initialState();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const handleLogout = async () => {
-    clearAuth();
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'HomeScreen' }],
-    });
-  };
 
   const onEncryptStorageSwitch = async value => {
     setIsLoading(true);
@@ -116,38 +105,33 @@ const Settings = ({ navigation }) => {
     <SafeAreaView style={styles.root}>
       <ScrollView style={styles.root} contentInsetAdjustmentBehavior="automatic" automaticallyAdjustContentInsets>
         <View style={{ height: 45 }} />
-        {Platform.OS === 'android' ? <BlueHeaderDefaultSub leftText={loc.settings.header} /> : <></>}
+        {Platform.OS === 'android' ? <BlueHeaderDefaultSub leftText={'Security'} /> : <></>}
         {/* <ListItem title={loc.settings.general} onPress={() => navigate('GeneralSettings')} testID="GeneralSettings" chevron /> */}
         {/* <ListItem title={loc.settings.currency} onPress={() => navigate('Currency')} testID="Currency" chevron /> */}
         {/* <ListItem title={loc.settings.language} onPress={() => navigate('Language')} testID="Language" chevron /> */}
-        {/* <ListItem title={loc.settings.encrypt_title} onPress={() => navigate('EncryptStorage')} testID="SecurityButton" chevron /> */}
-        <ListItem 
-          chevron 
-          title={"Security"} 
-          onPress={() => {
-            dispatchNavigate('Security');
-          }} 
-        />
-        <ListItem title={loc.settings.network} onPress={() => navigate('NetworkSettings')} testID="NetworkSettings" chevron />
-        {isAuth && <ListItem title={"Set Recover Email (Coinos.io)"} onPress={() => navigate('ChangeUsername', { goBack: true })} testID="ChangeUsername" chevron /> }
-        {/* <ListItem title={loc.settings.tools} onPress={() => navigate('Tools')} testID="Tools" chevron /> */}
-        {/* <ListItem title={loc.settings.about} onPress={() => navigate('About')} testID="AboutButton" chevron /> */}
-        <ListItem title={"Term of service & Privacy Policy"} onPress={() => navigate('TermOfService')} testID="TermOfServiceButton" chevron />
-        {/* <ListItem
+        <ListItem
           testID="EncyptedAndPasswordProtected"
           hideChevron
           title={loc.settings.encrypt_enc_and_pass}
           Component={TouchableWithoutFeedback}
           switch={{ onValueChange: onEncryptStorageSwitch, value: storageIsEncryptedSwitchEnabled }}
-        /> */}
-        {isAuth && <ListItem title={"Logout from Coinos.io"} onPress={handleLogout} testID="LogoutButton" chevron />}
+        />
+        {storageIsEncryptedSwitchEnabled &&
+          <ListItem 
+            chevron 
+            title={"Plausible Deniability"} 
+            onPress={() => {
+              dispatchNavigate('PlausibleDeniability');
+            }} 
+          />
+        }
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-export default Settings;
-Settings.navigationOptions = navigationStyle({
+export default Security;
+Security.navigationOptions = navigationStyle({
   headerTransparent: true,
   headerTitle: Platform.select({ ios: loc.settings.header, default: '' }),
   headerLargeTitle: true,

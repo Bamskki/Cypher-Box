@@ -23,7 +23,7 @@ export default function SavingVault() {
                 <Text h4 style={styles.descption} center>Write  this backup copy on a piece of paper</Text>
                 <PrivateKeyGenerater callNext={nextClickInitiate} />
                 <Tips />
-                <Button text="Ok, I write it down!"
+                <Button text="Ok, I wrote it down!"
                     onPress={nextClickHandler}
                     style={styles.button}
                     textStyle={styles.btnText}

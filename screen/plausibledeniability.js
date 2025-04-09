@@ -12,7 +12,7 @@ import triggerHapticFeedback, { HapticFeedbackTypes } from '../blue_modules/hapt
 import SafeArea from '../components/SafeArea';
 const prompt = require('../helpers/prompt');
 
-const PlausibleDeniability = () => {
+const PlausibleDeniability = ({navigation}) => {
   const { cachedPassword, isPasswordInUse, createFakeStorage, resetWallets } = useContext(BlueStorageContext);
   const [isLoading, setIsLoading] = useState(false);
   const { popToTop } = useNavigation();
@@ -38,12 +38,22 @@ const PlausibleDeniability = () => {
         return alert(loc.plausibledeniability.passwords_do_not_match);
       }
 
+      console.log("1: ", p1, p2)
       await createFakeStorage(p1);
+      console.log("2: ", p1, p2)
       await resetWallets();
+      console.log("3: ", p1, p2)
       triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
+      console.log("4: ", p1, p2)
       alert(loc.plausibledeniability.success);
-      popToTop();
-    } catch {
+      console.log("5: ", p1, p2)
+      // navigation.goBack();
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'HomeScreen' }],
+      });
+    } catch (e) {
+      console.log('e: ', e)
       setIsLoading(false);
     }
   };

@@ -863,7 +863,7 @@ export default function ColdStorage({ route, navigation }: Props) {
                                 <Text style={styles.recipientTitle}>Sent to:</Text>
                               }
                               {!vaultSend &&
-                                <Text style={{...styles.fees, color: colors.pink.main}} italic>My Coinos Checking Account</Text>
+                                <Text style={{...styles.fees, color: colors.pink.main}} italic>My Coinos Lightning Account</Text>
                               }
                               {isBatch ?
                                 <View style={{

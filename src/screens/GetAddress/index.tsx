@@ -68,7 +68,7 @@ export default function GetAddressScreen() {
                         source={require("../../../img/bitcoin.png")}
                     />
                     <Text bold h2 style={styles.desc}>Bitcoin address</Text>
-                    <Text h3 style={styles.topup}>Top-up your Checking Account {'\n'}from the Bitcoin Network</Text>
+                    <Text h3 style={styles.topup}>Top-up your Lightning Account {'\n'}from the Bitcoin Network</Text>
                     <GradientCardWithShadow style={styles.height} disabled linearStyle={styles.height} shadowStyleTop={styles.height} shadowStyleBottom={styles.height}>
                         <Text semibold center style={styles.new}>bc1qt3...wmsn6u</Text>
                         <Image source={Copy} resizeMode="contain" style={styles.img} />

@@ -122,7 +122,7 @@ export default function PurchaseVault({ route }: Props) {
                 />
                 <View style={styles.recipientView}>
                     <Text bold style={styles.text}>One-time purchase: <Text bold style={{ color: colors.green }}>30,000 sats  ~$5</Text></Text>
-                    <Text style={styles.text2}>(Deducted from your Checking Account)</Text>
+                    <Text style={styles.text2}>(Deducted from your Lightning Account)</Text>
                     <Text style={styles.header}>Features:</Text>
                     <View style={styles.flexView}>
                         <View style={styles.dot} />

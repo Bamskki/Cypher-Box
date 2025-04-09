@@ -24,7 +24,7 @@ export default function TransactionBroadCastNew({navigation, route}: any) {
     const [to, setTo] = useState('Awaiting Network Confirmation');
     const fadeInOpacity = useSharedValue(0);
     console.log('route: ', route?.params)
-    const { sats, inUSD } =  route?.params
+    const { sats, inUSD } =  route?.params || {};
 
     useEffect(() => {
         const intervalId = setInterval(() => {
@@ -73,14 +73,16 @@ export default function TransactionBroadCastNew({navigation, route}: any) {
                     {response &&
                         <>
                             <Text h1 bold center style={styles.title}>Transaction Broadcasted...</Text>
-                            <Animated.View style={animatedStyle}>
-                                <Text semibold center style={styles.sats}>{sats} sats</Text>
-                                <View style={styles.extra} />
-                                <Text subHeader bold center>${inUSD}</Text>
-                                <View style={styles.extra} />
-                                <Text h2 bold center>{to}</Text>
-                                {/* <GradientText style={styles.gradientText}>Estimated time: ~2hr</GradientText> */}
-                            </Animated.View>
+                            {sats &&
+                                <Animated.View style={animatedStyle}>
+                                    <Text semibold center style={styles.sats}>{sats} sats</Text>
+                                    <View style={styles.extra} />
+                                    <Text subHeader bold center>${inUSD}</Text>
+                                    <View style={styles.extra} />
+                                    <Text h2 bold center>{to}</Text>
+                                    {/* <GradientText style={styles.gradientText}>Estimated time: ~2hr</GradientText> */}
+                                </Animated.View>
+                            }
                         </>
                         // :
                         // <Text h1 bold center style={styles.title}>Broadcasting Transaction...</Text>

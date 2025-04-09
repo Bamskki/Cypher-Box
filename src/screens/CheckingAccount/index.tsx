@@ -319,7 +319,7 @@ export default function CheckAccount({ navigation, route }: any) {
         <ScreenLayout disableScroll showToolbar isBackButton>
             <View style={styles.container}>
                 <View style={[styles.innerView, { borderBottomColor: isTab ? '#333333' : colors.primary }]}>
-                    <Text subHeader bold>Checking Account</Text>
+                    <Text subHeader bold>Lightning Account</Text>
                     <GradientTab isTextAfter firstTabImg={Time} secondTabImg={
                         <View style={[styles.lineView, !isTab && { borderColor: colors.white }]}>
                             <Image source={Line} style={[styles.line, !isTab && { tintColor: colors.white }]} resizeMode="contain" />
@@ -372,11 +372,13 @@ export default function CheckAccount({ navigation, route }: any) {
                     <View style={styles.main}>
                         <Text h2 semibold>Withdraw Threshold</Text>
                         <Text>
-                            You can adjust the threshold at which a message will be displayed to remind you to withdraw and materialize the money accumulated on your Checking Account and move it into self-custody.
+                            You can adjust the threshold at which a message will be displayed to remind you to withdraw and materialize the money accumulated on your Lightning Account and move it into self-custody.
                         </Text>
                         <Text>
-                            Be aware that adjusting this threshold involves balancing Bitcoin network fees against counter-party risk.<Text>fsds</Text></Text>
-                        <GradientText style={{ fontSize: 14 }}>Learn more</GradientText>
+                            Be aware that adjusting this threshold involves balancing Bitcoin network fees against counter-party risk.
+                            {/* <Text>fsds</Text> */}
+                        </Text>
+                        {/* <GradientText style={{ fontSize: 14 }}>Learn more</GradientText> */}
                         <View style={styles.priceView}>
                             <GradientCard disabled
                                 colors_={isError ? [colors.yellow2, colors.yellow2] : ['#FFFFFF', '#B6B6B6']}
@@ -420,10 +422,10 @@ export default function CheckAccount({ navigation, route }: any) {
                         <TouchableOpacity onPress={() => customizeClickHandler(0)}>
                             <GradientText style={styles.gradientText}>Customize</GradientText>
                         </TouchableOpacity>
-                        <Text h3 center>Estimated withdraw fee: 0.2%</Text>
+                        {/* <Text h3 center>Estimated withdraw fee: 0.2%</Text> */}
                         <View style={styles.reserve}>
                             <Text h2 semibold>Reserve Amount</Text>
-                            <Image source={Information} style={styles.image} />
+                            {/* <Image source={Information} style={styles.image} /> */}
                         </View>
                         <View style={styles.priceView}>
                             <GradientCard disabled

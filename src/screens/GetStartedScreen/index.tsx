@@ -103,6 +103,8 @@ export default function GetStartedScreen({ route }: Props) {
     const [hasAcceptedTermsOfService, setHasAcceptedTermsOfService] = useState(false)
     const opacity = useRef(new Animated.Value(1));
     const translateY = useRef(new Animated.Value(0));
+    const scrollViewRef = useRef<ScrollView>(null);
+
     const handleTermOfServicePress = () => {
         dispatchNavigate('TermOfService')
     };
@@ -110,6 +112,7 @@ export default function GetStartedScreen({ route }: Props) {
 
     const toggleHasAcceptedTermsOfService = (value: boolean | ((prevState: boolean) => boolean)) => {
         setHasAcceptedTermsOfService(value)
+        scrollViewRef.current?.scrollToEnd({ animated: true });
     }
 
     const handleStartClick = () => {
@@ -143,7 +146,7 @@ export default function GetStartedScreen({ route }: Props) {
 
     return (
         <ScreenLayout disableScroll>
-            <ScrollView style={{flex: 1}} contentContainerStyle={{flexGrow: 1,}}>
+            <ScrollView ref={scrollViewRef} style={{flex: 1}} contentContainerStyle={{flexGrow: 1}}>
             <Animated.View
                 style={[
                     styles.main,
@@ -192,7 +195,7 @@ export default function GetStartedScreen({ route }: Props) {
                     colors_={hasAcceptedTermsOfService ? ['#464D6854', '#FFF'] : ['#B6B6B6', '#FFFFFF']}
                     onPress={initialise}
                     disabled={!hasAcceptedTermsOfService}
-                    style={[styles.gradient, { opacity: hasAcceptedTermsOfService ? 1 : 0.5 }, !hasAcceptedTermsOfService ? { backgroundColor: 'transparent' } : {}]}>
+                    style={[styles.gradient, { marginBottom: 100, opacity: hasAcceptedTermsOfService ? 1 : 0.5 }, !hasAcceptedTermsOfService ? { backgroundColor: 'transparent' } : {}]}>
                     <View style={styles.container4}>
                         {hasAcceptedTermsOfService ?
                             <Image source={Start}
@@ -203,9 +206,6 @@ export default function GetStartedScreen({ route }: Props) {
                         }
                     </View>
                 </GradientCard>
-
-
-
             </Animated.View>
             </ScrollView>
         </ScreenLayout >

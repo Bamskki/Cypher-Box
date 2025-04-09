@@ -22,7 +22,7 @@ const config = {
     clientId: "cypherbox",
     clientSecret: "SbYmuewpZGS8XDktirso8ficpChSGu7dEaYuMrLx+3k=", // If needed (but avoid hardcoding secrets in client-side code)
     redirectUrl: "cypherbox://oauth/callback", // Must match the redirect URI in your Strike app settings
-    scopes: ["offline_access", "partner.account.profile.read", "profile", "openid", "partner.invoice.read", "partner.invoice.create", "partner.invoice.quote.generate", "partner.invoice.quote.read", "partner.rates.ticker"], // Specify necessary scopes
+    scopes: ["offline_access", "partner.balances.read", "partner.currency-exchange-quote.read", "partner.account.profile.read", "profile", "openid", "partner.invoice.read", "partner.invoice.create", "partner.invoice.quote.generate", "partner.invoice.quote.read", "partner.rates.ticker"], // Specify necessary scopes
     //clientAuthMethod: "post",
     //wellKnown: `https://auth.strike.me/.well-known/openid-configuration`,
     // authorization: {
@@ -118,14 +118,16 @@ export default function LoginCoinOSScreen() {
         setIsRememberMe(value)
     }
 
+    console.log('accessToken: ', accessToken)
     return (
-        <ScreenLayout disableScroll showToolbar>
+        <ScreenLayout keyboardAware showToolbar>
             <View style={styles.container}>
                 <View style={styles.innerView}>
                     <GradientText>Login to Coinos</GradientText>
                     <View style={styles.space} />
                     <GradientCard style={{ width: '100%' }} colors_={email ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}>
-                        <Input onChange={setEmail}
+                        <Input 
+                            onChange={setEmail}
                             value={email}
                             style={styles.textInput}
                             // keyboardType="email-address"
@@ -142,8 +144,8 @@ export default function LoginCoinOSScreen() {
                             label="Password"
                         />
                     </GradientCard>
-                    <Button title="Login with Strike" onPress={handleLogin} />
-                    {accessToken && <Text>Access Token: {accessToken}</Text>}
+                    {/* <Button title="Login with Strike" onPress={handleLogin} />
+                    {accessToken && <Text>Access Token: {accessToken}</Text>} */}
                     <View 
                         style={{ 
                             marginTop: 15,

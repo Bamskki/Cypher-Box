@@ -39,7 +39,7 @@ const HotStorageVault = ({ _, route }: any) => {
             case 2:
                 return <History wallet={wallet} matchedRate={matchedRate} vaultTab={vaultTab} />;
             case 3:
-                return <Settings />;
+                return <Settings wallet={wallet} vaultTab={vaultTab} to={to} />;
             default:
                 return <Vault wallet={wallet} matchedRate={matchedRate} setSelectedTab={setSelectedTab} />;
         }

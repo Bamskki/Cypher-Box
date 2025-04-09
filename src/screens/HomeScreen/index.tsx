@@ -72,7 +72,7 @@ export default function HomeScreen({ route }: Props) {
   const routeName = useRoute().name;
   const [state, dispatch] = useReducer(walletReducer, initialState);
   const label = state.label;
-  const { addWallet, saveToDisk, isAdvancedModeEnabled, wallets, sleep, isElectrumDisabled } = useContext(BlueStorageContext);
+  const { addWallet, saveToDisk, isAdvancedModeEnabled, wallets, sleep, isElectrumDisabled, startAndDecrypt, setWalletsInitialized } = useContext(BlueStorageContext);
   const { isAuth, walletID, coldStorageWalletID, token, user, withdrawThreshold, reserveAmount, vaultTab, setUser, setVaultTab } = useAuthStore();
   const A = require('../../../blue_modules/analytics');
   // const [storage, setStorage] = useState<number>(-1);
@@ -175,6 +175,10 @@ export default function HomeScreen({ route }: Props) {
     }
   }
 
+  // useEffect(() => {
+  //   successfullyAuthenticated();
+  // }, [])
+
   useEffect(() => {
     async function handleToken() {
       if (isAuth && token) {
@@ -190,6 +194,7 @@ export default function HomeScreen({ route }: Props) {
         setIsLoading(false)
       }
     }
+
     // async function getWithdrawal() {
     //   const wt = await AsyncStorage.getItem('withdrawThreshold');
     //   if(wt){
@@ -228,6 +233,24 @@ export default function HomeScreen({ route }: Props) {
     }
   }, [sendAddress, isAuth, token])
 
+  const successfullyAuthenticated = async () => {
+    // const hasAcceptedTerms = await AsyncStorage.getItem('hasAcceptedTermsOfService')
+    await startAndDecrypt()
+    setWalletsInitialized(true);
+
+    // if (await startAndDecrypt()) {
+    //     setWalletsInitialized(true);
+    //     if (hasAcceptedTerms === 'true') {
+    //         dispatch(StackActions.replace(isHandset ? 'Navigation' : 'DrawerRoot'));
+    //     } else {
+    //         dispatch(StackActions.replace('GetStartedScreen'));
+    //     }
+    // }
+    // else {
+    //     dispatchNavigate('WelcomeScreen')
+    // }
+    // setIsLoading(false);
+  };
   const handleLighteningInvoice = async () => {
     try {
       const response = await getInvoiceByLightening(sendAddress);
@@ -353,6 +376,7 @@ export default function HomeScreen({ route }: Props) {
   };
 
   const onScanButtonPressed = () => {
+    console.log('routeName: ', routeName)
     scanQrHelper(navigate, routeName).then(onBarScanned);
   };
 
@@ -533,7 +557,7 @@ export default function HomeScreen({ route }: Props) {
             resizeMode="contain"
             source={require("../../../img/arrow-right.png")}
           />
-          <Text bold h3 center style={{ marginStart: 20 }}>Top-up</Text>
+          <Text bold h3 center style={{ textAlign: 'center' }}>Top-up</Text>
         </GradientView>
        <GradientView
           onPress={withdrawClickHandler}
@@ -542,7 +566,7 @@ export default function HomeScreen({ route }: Props) {
           style={styles.linearGradientStyle}
           linearGradientStyle={styles.mainShadowStyle}
         >
-          <Text bold h3 center style={{ marginEnd: 20 }}>Withdraw</Text>
+          <Text bold h3 center style={{ textAlign: 'center' }}>Withdraw</Text>
           <Image
             style={styles.arrowRight}
             resizeMode="contain"
@@ -557,7 +581,7 @@ export default function HomeScreen({ route }: Props) {
     return rates
   }
 
-  console.log('matchedRate: ', matchedRate)
+  console.log('hasSavingVault: ', matchedRate)
   const HotStorageTab = () => (
     <View style={{flex: 1}}>
       {hasSavingVault && wallet ?
@@ -573,9 +597,10 @@ export default function HomeScreen({ route }: Props) {
           shadowBottomBottom={styles.savingVault}
           bitcoinText={styles.bitcoinText}
           isVault={false}
+          title={"Hot Vault"}
           onPress={savingVaultClickHandler}
           bitcoinValue={balanceVault}
-          inDollars={`$${(Number(balanceWithoutSuffix) * Number(matchedRate)).toFixed(2)}`}
+          inDollars={`$${(Number(balanceWithoutSuffix || 0) * Number(matchedRate || 0)).toFixed(2)}`}
           isColorable
         />
       )
@@ -615,6 +640,7 @@ export default function HomeScreen({ route }: Props) {
     </View>
   );
 
+  console.log('coldStorageWallet: ', coldStorageWallet, hasColdStorage, coldStorageWalletID)
   const ColdStorageTab = () => (
     <View style={{flex: 1}}>
       {coldStorageWallet ?
@@ -622,7 +648,7 @@ export default function HomeScreen({ route }: Props) {
       :
         <View style={{height: 40}} />
       }
-      {(hasColdStorage) ? (
+      {(hasColdStorage && coldStorageWallet) ? (
         <SavingVault
           container={StyleSheet.flatten([styles.savingVault, { marginTop: 10 }])}
           innerContainer={styles.savingVault}
@@ -637,7 +663,7 @@ export default function HomeScreen({ route }: Props) {
           isColorable
         />
       ) : (
-        !coldStorageWalletID && (
+        // (
           <View style={[styles.createVaultContainer, { top: -10 }]}>
             <TouchableOpacity onPress={handleCreateColdVault}>
               <LinearGradient
@@ -655,7 +681,7 @@ export default function HomeScreen({ route }: Props) {
               </LinearGradient>
             </TouchableOpacity>
           </View>
-        )
+        // )
       )}
     </View>
   );
@@ -816,7 +842,7 @@ export default function HomeScreen({ route }: Props) {
                 >
                   <View style={styles.view}>
                     <Text h2 bold style={styles.check}>
-                      Checking Account
+                      Lightning Account
                     </Text>
                     <Image
                       source={CoinOSSmall}
@@ -826,7 +852,7 @@ export default function HomeScreen({ route }: Props) {
                   </View>
                   <View style={styles.view}>
                     <Text h2 bold style={styles.sats}>
-                      {balance}   sats ~ {"$" + convertedRate.toFixed(2)}
+                      {balance} sats ~ {"$" + convertedRate.toFixed(2)}
                     </Text>
                     <Text bold style={styles.totalsats}>
                       {formatNumber(Number(withdrawThreshold) + Number(reserveAmount))} sats
@@ -875,8 +901,8 @@ export default function HomeScreen({ route }: Props) {
               {!isLoading &&
                 (hasFilledTheBar ?
                   <Text h4 style={styles.alert}>
-                    Your sats have materialized! You can create a Hot Storage Savings Vault and take full self-custody of your money by withdrawing a large chunk of a bitcoin from your custodian Checking Account. Click the Withdraw button to know more
-                    {/* You can receive, send, and accumulate bitcoin using your Checking Account. New security features will be revealed once you meet the withdrawal threshold at 2 million sats */}
+                    Your sats have materialized! You can create a Hot Storage Savings Vault and take full self-custody of your money by withdrawing a large chunk of a bitcoin from your custodian Lightning Account. Click the Withdraw button to know more
+                    {/* You can receive, send, and accumulate bitcoin using your Lightning Account. New security features will be revealed once you meet the withdrawal threshold at 2 million sats */}
                   </Text>
                   : (Number(balance) === Number(withdrawThreshold + reserveAmount)) ?
                     <Text h4 style={styles.alert}>
@@ -884,7 +910,7 @@ export default function HomeScreen({ route }: Props) {
                     </Text>
                   :
                     <Text h4 style={styles.alertGrey}>
-                      {/* New security upgrades will be revealed once you meet fill up the bar displayed on your Checking Account. */}
+                      {/* New security upgrades will be revealed once you meet fill up the bar displayed on your Lightning Account. */}
                       {'\n'}
                     </Text>
                 )
@@ -907,7 +933,7 @@ export default function HomeScreen({ route }: Props) {
                     source={require("../../../img/arrow-right.png")}
                   />
                   <Text h2 style={styles.shadow} center>
-                    Login to Your Checking Account
+                    Login to Your Lightning Account
                   </Text>
                 </View>
               </GradientCardWithShadow>
@@ -931,8 +957,8 @@ export default function HomeScreen({ route }: Props) {
                 renderItem={renderItem}
                 firstItem={index}
                 vertical={false}
-                sliderWidth={screenWidth * 0.92}
-                itemWidth={screenWidth * 0.92}
+                sliderWidth={screenWidth * 0.905}
+                itemWidth={screenWidth * 0.905}
                 onSnapToItem={(index) => {
                   setIndex(index)
                   setVaultTab(index === 1);

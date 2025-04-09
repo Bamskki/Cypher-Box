@@ -122,7 +122,7 @@ export default function WithdrawToSavingsVault({ route }: Props) {
                     <Shadow style={StyleSheet.flatten([styles.shadowTop, { shadowColor: colors.pink.shadowTop, padding: 0 }])} inner useArt>
                         <View style={styles.view}>
                             <Text h2 bold style={styles.check}>
-                                Checking Account
+                                Lightning Account
                             </Text>
                             <Image source={CoinOSSmall} style={styles.blink} resizeMode="contain" />
                         </View>
@@ -187,7 +187,7 @@ export default function WithdrawToSavingsVault({ route }: Props) {
 
                 <View style={styles.textContainer}>
                     <Text>
-                        The full pink bar represents the funds accumulated inside the Checking Account. By clicking ‘Withdraw’ it will convert most of
+                        The full pink bar represents the funds accumulated inside the Lightning Account. By clicking ‘Withdraw’ it will convert most of
                         the funds into a real verifiable bitcoin ‘capsule’ (also known as a UTXO) filling one of the five slots in your Hot Vault, and
                         leaving a small amount as pocket money for quick spending (Reserve Amount).
                     </Text>

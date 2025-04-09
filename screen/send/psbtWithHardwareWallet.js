@@ -136,7 +136,7 @@ const PsbtWithHardwareWallet = () => {
         if (memo) {
           txMetadata[txid] = { memo };
         }
-        navigation.navigate('Success', { amount: undefined });
+        navigation.navigate('WalletsRoot', { screen: "TransactionBroadCastNew", params: { sats: undefined, inUSD: undefined } });
         await new Promise(resolve => setTimeout(resolve, 3000)); // sleep to make sure network propagates
         fetchAndSaveWalletTransactions(fromWallet.getID());
       } else {
