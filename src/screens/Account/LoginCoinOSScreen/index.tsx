@@ -144,8 +144,8 @@ export default function LoginCoinOSScreen() {
                             label="Password"
                         />
                     </GradientCard>
-                    {/* <Button title="Login with Strike" onPress={handleLogin} />
-                    {accessToken && <Text>Access Token: {accessToken}</Text>} */}
+                    {/* <Button title="Login with Strike" onPress={handleLogin} /> */}
+                    {/* {accessToken && <Text>Access Token: {accessToken}</Text>} */}
                     <View 
                         style={{ 
                             marginTop: 15,

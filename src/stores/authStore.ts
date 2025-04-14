@@ -22,6 +22,19 @@ export type AuthStateType = {
     setUser: (state: any) => void;
     setWithdrawThreshold: (state: any) => void;
     clearAuth: () => void;
+    clearStrikeAuth: () => void;
+
+    //strike
+    walletTab: boolean;
+    isStrikeAuth: boolean;
+    strikeToken: string | null;
+    reserveStrikeAmount: number;
+    withdrawStrikeThreshold: any | null;
+    setWalletTab: (state: boolean) => void;
+    setStrikeToken: (token: string) => void;
+    setReserveStrikeAmount: (state: number) => void;
+    setWithdrawStrikeThreshold: (state: any) => void;
+    setStrikeAuth: (state: boolean | undefined) => void;
 };
 
 const createAuthStore = (
@@ -54,7 +67,26 @@ const createAuthStore = (
             token: null,
             withdrawThreshold: 2000000,
             reserveAmount: 100000,
-        })
+        }),
+    //strike
+    walletTab: false,
+    strikeToken: null,
+    isStrikeAuth: false,
+    reserveStrikeAmount: 100000,
+    withdrawStrikeThreshold: 2000000,
+    setWalletTab: (state: boolean) => set({ walletTab: state }),
+    setStrikeToken: (token: string) => set({ strikeToken: token }),
+    setStrikeAuth: (state: boolean | undefined) => set({ isStrikeAuth: state }),
+    setReserveStrikeAmount: (state: number) => set({ reserveStrikeAmount: state }),
+    setWithdrawStrikeThreshold: (state: any) => set({ withdrawStrikeThreshold: state }),
+    clearStrikeAuth: () =>
+        set({
+            walletTab: false,
+            strikeToken: null,
+            isStrikeAuth: undefined,
+            reserveStrikeAmount: 100000,
+            withdrawStrikeThreshold: 2000000,
+        }),
 });
 
 const useAuthStore = create<AuthStateType>()(
