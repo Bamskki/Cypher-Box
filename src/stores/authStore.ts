@@ -27,9 +27,13 @@ export type AuthStateType = {
     //strike
     walletTab: boolean;
     isStrikeAuth: boolean;
+    strikeUser: any | null;
+    allBTCWallets: string[];
     strikeToken: string | null;
     reserveStrikeAmount: number;
     withdrawStrikeThreshold: any | null;
+    setStrikeUser: (state: any) => void;
+    setAllBTCWallets: (state: string[]) => void;
     setWalletTab: (state: boolean) => void;
     setStrikeToken: (token: string) => void;
     setReserveStrikeAmount: (state: number) => void;
@@ -43,6 +47,7 @@ const createAuthStore = (
 ): AuthStateType => ({
     user: null,
     token: null,
+    allBTCWallets: [],
     withdrawThreshold: 2000000,
     reserveAmount: 100000,
     isAuth: undefined,
@@ -50,6 +55,7 @@ const createAuthStore = (
     vaultTab: false,
     userCreds: undefined,
     coldStorageWalletID: undefined,
+    setAllBTCWallets: (state: string[]) => set({ allBTCWallets: state }),
     setAuth: (state: boolean | undefined) => set({ isAuth: state }),
     setVaultTab: (state: boolean) => set({ vaultTab: state }),
     setUserCreds: (state: {email: string, password: string, isRememberMe: boolean} | undefined) => set( { userCreds: state }),
@@ -69,11 +75,13 @@ const createAuthStore = (
             reserveAmount: 100000,
         }),
     //strike
+    strikeUser: null,
     walletTab: false,
     strikeToken: null,
     isStrikeAuth: false,
     reserveStrikeAmount: 100000,
     withdrawStrikeThreshold: 2000000,
+    setStrikeUser: (state: any) => set({ strikeUser: state }),
     setWalletTab: (state: boolean) => set({ walletTab: state }),
     setStrikeToken: (token: string) => set({ strikeToken: token }),
     setStrikeAuth: (state: boolean | undefined) => set({ isStrikeAuth: state }),
@@ -83,6 +91,7 @@ const createAuthStore = (
         set({
             walletTab: false,
             strikeToken: null,
+            allBTCWallets: get().allBTCWallets.filter(wallet => wallet !== 'STRIKE'),
             isStrikeAuth: undefined,
             reserveStrikeAmount: 100000,
             withdrawStrikeThreshold: 2000000,

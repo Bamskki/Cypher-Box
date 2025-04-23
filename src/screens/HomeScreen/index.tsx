@@ -31,7 +31,7 @@ import LinearGradient from "react-native-linear-gradient";
 import ReceivedList from "./ReceivedList";
 import useAuthStore from "@Cypher/stores/authStore";
 import { bitcoinRecommendedFee, createInvoice, getCurrencyRates, getInvoiceByLightening, getMe, getTransactionHistory } from "@Cypher/api/coinOSApis";
-import { btc, formatNumber, matchKeyAndValue } from "@Cypher/helpers/coinosHelper";
+import { btc, formatNumber, matchKeyAndValue, SATS } from "@Cypher/helpers/coinosHelper";
 import { AbstractWallet, HDSegwitBech32Wallet, HDSegwitP2SHWallet } from "../../../class";
 import loc, { formatBalance, formatBalanceWithoutSuffix } from '../../../loc';
 import { initialState, walletReducer } from "../../../screen/wallets/add";
@@ -101,7 +101,7 @@ export default function HomeScreen({ route }: Props) {
   const [state, dispatch] = useReducer(walletReducer, initialState);
   const label = state.label;
   const { addWallet, saveToDisk, isAdvancedModeEnabled, wallets, sleep, isElectrumDisabled, startAndDecrypt, setWalletsInitialized } = useContext(BlueStorageContext);
-  const { isAuth, isStrikeAuth, strikeToken, walletTab, withdrawStrikeThreshold, reserveStrikeAmount, setWalletTab, setStrikeToken, setStrikeAuth, clearStrikeAuth, walletID, coldStorageWalletID, token, user, withdrawThreshold, reserveAmount, vaultTab, setUser, setVaultTab } = useAuthStore();
+  const { isAuth, isStrikeAuth, strikeToken, walletTab, allBTCWallets, setAllBTCWallets, withdrawStrikeThreshold, reserveStrikeAmount, strikeUser, setWalletTab, setStrikeUser, setStrikeToken, setStrikeAuth, clearStrikeAuth, walletID, coldStorageWalletID, token, user, withdrawThreshold, reserveAmount, vaultTab, setUser, setVaultTab } = useAuthStore();
   const A = require('../../../blue_modules/analytics');
   // const [storage, setStorage] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -284,11 +284,12 @@ export default function HomeScreen({ route }: Props) {
     const getInit = async () => {
       if(strikeToken){
         const balances = await getBalances();
-        console.log('balances: ', balances.data?.status)
+        console.log('balances: ', balances)
         if(balances.data?.status === 401){
           SimpleToast.show("Authorization expired. Please login again to strike account", SimpleToast.SHORT)
           clearStrikeAuth();
         } else if (balances) {
+          setStrikeUser(balances);
           // setStrikeBalance(balances);
         }
       }
@@ -445,7 +446,8 @@ export default function HomeScreen({ route }: Props) {
   };
 
   const loginClickHandler = () => {
-    dispatchNavigate('LoginCoinOSScreen');
+    // dispatchNavigate('LoginCoinOSScreen');
+    dispatchNavigate('CheckingAccountIntro');
   };
 
   const onBarScanned = (value: any) => {
@@ -606,7 +608,8 @@ export default function HomeScreen({ route }: Props) {
     }
   };
 
-  const [indexStrike, setIndexStrike] = useState(vaultTab ? 1 : 0); // Used for the tab index
+  console.log('walletTab: ', walletTab)
+  const [indexStrike, setIndexStrike] = useState(0); // Used for the tab index
   const [index, setIndex] = useState(vaultTab ? 1 : 0); // Used for the tab index
   const [routes] = useState([
     { key: 'hot', title: 'Hot Storage' },
@@ -781,6 +784,32 @@ export default function HomeScreen({ route }: Props) {
     { key: "strike", component: () => <StrikeWalletTab /> },
   ];
 
+  const walletTabsMap = {
+    COINOS: { key: 'coinos', component: () => <CoinosWalletTab /> },
+    STRIKE: { key: 'strike', component: () => <StrikeWalletTab /> },
+  };
+  
+  const [wTabs, setWTabs] = useState([])
+  useEffect(() => {
+    const tabs: any = [...wTabs];
+
+    console.log('allBTCWallets: ', allBTCWallets)
+    if(allBTCWallets){
+      allBTCWallets.map(wallet => {
+        console.log('walletTabsMap[wallet]: ', walletTabsMap[wallet])
+        if (walletTabsMap[wallet]) {
+          tabs.push(walletTabsMap[wallet]);
+        }
+      });
+  
+      setWTabs(tabs)
+    }
+  }, [allBTCWallets]);
+
+  const coinOSTab = [
+    { key: "coinos", component: () => <CoinosWalletTab /> },
+  ];
+
   const CoinosWalletTab = () => {
     return (
       <>
@@ -899,10 +928,11 @@ export default function HomeScreen({ route }: Props) {
             </View>
           </View>
         }
-      </>      
+      </>
     )
   }
 
+  console.log('balance strike: ', strikeBalance)
   const StrikeWalletTab = () => {
     return (
       <>
@@ -916,17 +946,18 @@ export default function HomeScreen({ route }: Props) {
               >
                 <View style={styles.view}>
                   <Text h2 bold style={styles.check}>
-                    Strike Account
+                    Lightning Account
                   </Text>
                   <Image
-                    source={CoinOSSmall}
+                    source={require("../../../img/Strike.png")}
                     style={styles.blink}
                     resizeMode="contain"
                   />
                 </View>
                 <View style={styles.view}>
                   <Text h2 bold style={styles.sats}>
-                    {strikeBalance || 0} sats ~ {"$" + convertedRate.toFixed(2)}
+                    {`${Math.round(Number(strikeUser?.[0]?.available || 0) * SATS)} sats ~ $${(Number(strikeUser?.[0]?.available || 0) * matchedRate).toFixed(2)}`}
+                    {/* {strikeUser && strikeUser[0]?.available || 0} sats ~ {"$" + convertedRate.toFixed(2)} */}
                   </Text>
                   <Text bold style={styles.totalsats}>
                     {formatNumber(Number(withdrawStrikeThreshold) + Number(reserveStrikeAmount))} sats
@@ -958,7 +989,7 @@ export default function HomeScreen({ route }: Props) {
                 />
               </Shadow>
             </TouchableOpacity>
-            <View style={styles.btnView}>
+            {/* <View style={styles.btnView}>
               <GradientButtonWithShadow
                 title="Receive"
                 onPress={receiveClickHandler}
@@ -971,7 +1002,7 @@ export default function HomeScreen({ route }: Props) {
                 isShadow
                 isTextShadow
               />
-            </View>
+            </View> */}
             {!isLoading &&
               (hasFilledTheBar ?
                 <Text h4 style={styles.alert}>
@@ -1089,7 +1120,7 @@ export default function HomeScreen({ route }: Props) {
   const hasFilledTheBar = calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount)) === 100
   const layout = useWindowDimensions();
 
-  console.log('matchedRate: ', matchedRate)
+  console.log('wTabs: ', wTabs, wTabs?.length, allBTCWallets.length)
   return (
     <ScreenLayout
       RefreshControl={
@@ -1144,10 +1175,15 @@ export default function HomeScreen({ route }: Props) {
                   <Text subHeader bold style={styles.price}>
                     {/* {(btc(1) * (Number(balance) || 0)) + (Number(ColdStorageBalanceVault?.split(' ')[0]) || 0) + (Number(balanceVault?.split(' ')[0]) || 0)} BTC */}
                     {((btc(1) * (Number(balance) || 0)) + (Number(ColdStorageBalanceVault?.split(' ')[0]) || 0) + (Number(balanceVault?.split(' ')[0]) || 0)).toFixed(8)} BTC
-                    </Text>
+                  </Text>
                   <Text bold style={styles.priceusd} >
                     {"$" + (Number(convertedRate || 0) + ((Number(coldStorageBalanceWithoutSuffix || 0) * Number(matchedRate || 0)) + (Number(balanceWithoutSuffix || 0) * Number(matchedRate || 0)))).toFixed(2)}
                   </Text>
+                  {(allBTCWallets.length > 0 && allBTCWallets.length < 2) &&
+                    <TouchableOpacity onPress={() => dispatchNavigate('CheckingAccountIntro')} style={{zIndex: 100, alignSelf: 'flex-end', borderRadius: 10, borderWidth: 1, borderColor: colors.pink.light}}>
+                      <Text h4 style={styles.descption}>Add Account</Text>
+                    </TouchableOpacity>
+                  }
                   <Shadow
                     inner
                     useArt
@@ -1161,19 +1197,43 @@ export default function HomeScreen({ route }: Props) {
           {/* */}
 
           <View>
-            <Carousel
-              data={walletTabs}
-              // ref={carouselRef}
-              renderItem={renderWalletItem}
-              firstItem={indexStrike}
-              vertical={false}
-              sliderWidth={screenWidth * 0.905}
-              itemWidth={screenWidth * 0.905}
-              onSnapToItem={(index) => {
-                setIndexStrike(index)
-                setWalletTab(index === 1);
-              }} // Update pagination index
-            />
+            {!isAuth && !isLoading && !isStrikeAuth ?
+              <View style={{ height: '42%' }}>
+                <GradientCardWithShadow
+                  style={styles.createView}
+                  onPress={loginClickHandler}
+                >
+                  <View style={styles.middle}>
+                    <Image
+                      style={styles.arrow}
+                      resizeMode="contain"
+                      source={require("../../../img/arrow-right.png")}
+                    />
+                    <View style={{alignItems: 'center', justifyContent: 'center', alignSelf: 'center'}}>
+                      <Text h2 style={styles.shadow} center>
+                        Create Lightning Account
+                      </Text>
+                    </View>
+                  </View>
+                </GradientCardWithShadow>
+              </View>
+            : !isLoading &&
+              <View style={{ height: '42%' }}>
+                <Carousel
+                  data={wTabs}
+                  // ref={carouselRef}
+                  renderItem={renderWalletItem}
+                  firstItem={indexStrike}
+                  vertical={false}
+                  sliderWidth={screenWidth * 0.905}
+                  itemWidth={screenWidth * 0.905}
+                  onSnapToItem={(index) => {
+                    setIndexStrike(index)
+                    setWalletTab(index === 1);
+                  }} // Update pagination index
+                />
+              </View>
+            }
           </View>
           
           {/* */}

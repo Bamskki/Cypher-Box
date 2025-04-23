@@ -98,6 +98,9 @@ import HardwareWalletTransactionContinue from '@Cypher/screens/HardwareWalletTra
 import ConfirmHardwareTransaction from '@Cypher/screens/ConfirmHardwareTransaction';
 import ColdVaultIntro from '@Cypher/screens/ColdVaultIntro';
 import ColdVaultIntro2 from '@Cypher/screens/ColdVaultIntro2';
+import CheckingAccountIntro from '@Cypher/screens/CheckingAccountIntro';
+import CheckingAccountLogin from '@Cypher/screens/CheckingAccountLogin';
+import CheckingAccountCreated from '@Cypher/screens/CheckingAccountCreated';
 
 const WalletsStack = createStackNavigator();
 
@@ -165,6 +168,10 @@ const WalletsRoot = () => {
         //   close: config,
         // },
       }} />
+      
+      <WalletsStack.Screen name="CheckingAccountIntro" component={CheckingAccountIntro} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="CheckingAccountLogin" component={CheckingAccountLogin} options={{ headerShown: false }} />
+      <WalletsStack.Screen name="CheckingAccountCreated" component={CheckingAccountCreated} options={{ headerShown: false }} />
       <WalletsStack.Screen name="CheckingAccount" component={CheckingAccount} options={{ headerShown: false }} />
       <WalletsStack.Screen name="Invoice" component={Invoice} options={{ headerShown: false }} />
       <WalletsStack.Screen name="WithdrawThreshold" component={WithdrawThreshold} options={{ headerShown: false }} />
