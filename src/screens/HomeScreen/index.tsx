@@ -213,7 +213,6 @@ export default function HomeScreen({ route }: Props) {
   const handleStrikeLogin = async () => {
       try {
           const result = await authorize(config);
-          console.log("Access Token:", result);
           setStrikeToken(result.accessToken);
           setStrikeAuth(true);
           // if (balances && balances?.balances) {
@@ -233,7 +232,6 @@ export default function HomeScreen({ route }: Props) {
         loadPayments();
       } else {
         const rates = await exchangeRate();
-        console.log('rates: ', rates)
         if (rates && rates?.Rate) {
           const numericAmount = Number(rates.Rate.replace(/[^0-9\.]/g, ''));
           setMatchedRate(numericAmount);
@@ -284,7 +282,6 @@ export default function HomeScreen({ route }: Props) {
     const getInit = async () => {
       if(strikeToken){
         const balances = await getBalances();
-        console.log('balances: ', balances)
         if(balances.data?.status === 401){
           SimpleToast.show("Authorization expired. Please login again to strike account", SimpleToast.SHORT)
           clearStrikeAuth();
@@ -319,9 +316,7 @@ export default function HomeScreen({ route }: Props) {
   const handleLighteningInvoice = async () => {
     try {
       const response = await getInvoiceByLightening(sendAddress);
-      console.log('response getInvoiceByLightening: ', response)
       const dollarAmount = (response.amount_msat / 1000) * matchedRate * btc(1);
-      console.log('dollarAmount: ', dollarAmount)
       if(dollarAmount){
         dispatchNavigate('ReviewPayment', {
           value: response.amount_msat / 1000,
@@ -441,7 +436,6 @@ export default function HomeScreen({ route }: Props) {
   };
 
   const onScanButtonPressed = () => {
-    console.log('routeName: ', routeName)
     scanQrHelper(navigate, routeName).then(onBarScanned);
   };
 
@@ -452,7 +446,6 @@ export default function HomeScreen({ route }: Props) {
 
   const onBarScanned = (value: any) => {
     if (!value) return;
-    console.log('value: ', value)
     setSendAddress(value);
     // DeeplinkSchemaMatch.navigationRouteFor(
     //   { url: value },
@@ -486,7 +479,6 @@ export default function HomeScreen({ route }: Props) {
   }
 
   const withdrawClickHandler = () => {
-    console.log('recommendedFee: ', recommendedFee)
     if(!isAuth){
       SimpleToast.show('You need to be logged in to Coinos.io to withdraw', SimpleToast.SHORT);
       return
@@ -534,7 +526,6 @@ export default function HomeScreen({ route }: Props) {
         type: 'bitcoin',
       });
       dispatchNavigate('HotStorageVault', { wallet: vaultTab ? coldStorageWallet : wallet, matchedRate, to: response.hash });
-      console.log('response: ', response)
     } catch (error) {
       console.error('Error generating bitcoin address:', error);
     } finally {
@@ -608,7 +599,6 @@ export default function HomeScreen({ route }: Props) {
     }
   };
 
-  console.log('walletTab: ', walletTab)
   const [indexStrike, setIndexStrike] = useState(0); // Used for the tab index
   const [index, setIndex] = useState(vaultTab ? 1 : 0); // Used for the tab index
   const [routes] = useState([
@@ -654,7 +644,6 @@ export default function HomeScreen({ route }: Props) {
     return rates
   }
 
-  console.log('hasSavingVault: ', matchedRate)
   const HotStorageTab = () => (
     <View style={{flex: 1}}>
       {hasSavingVault && wallet ?
@@ -713,7 +702,6 @@ export default function HomeScreen({ route }: Props) {
     </View>
   );
 
-  console.log('coldStorageWallet: ', coldStorageWallet, hasColdStorage, coldStorageWalletID)
   const ColdStorageTab = () => (
     <View style={{flex: 1}}>
       {coldStorageWallet ?
@@ -793,10 +781,8 @@ export default function HomeScreen({ route }: Props) {
   useEffect(() => {
     const tabs: any = [...wTabs];
 
-    console.log('allBTCWallets: ', allBTCWallets)
-    if(allBTCWallets){
+    if(allBTCWallets && !isLoading){
       allBTCWallets.map(wallet => {
-        console.log('walletTabsMap[wallet]: ', walletTabsMap[wallet])
         if (walletTabsMap[wallet]) {
           tabs.push(walletTabsMap[wallet]);
         }
@@ -804,7 +790,7 @@ export default function HomeScreen({ route }: Props) {
   
       setWTabs(tabs)
     }
-  }, [allBTCWallets]);
+  }, [allBTCWallets, isLoading]);
 
   const coinOSTab = [
     { key: "coinos", component: () => <CoinosWalletTab /> },
@@ -932,7 +918,6 @@ export default function HomeScreen({ route }: Props) {
     )
   }
 
-  console.log('balance strike: ', strikeBalance)
   const StrikeWalletTab = () => {
     return (
       <>
@@ -1120,7 +1105,6 @@ export default function HomeScreen({ route }: Props) {
   const hasFilledTheBar = calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount)) === 100
   const layout = useWindowDimensions();
 
-  console.log('wTabs: ', wTabs, wTabs?.length, allBTCWallets.length)
   return (
     <ScreenLayout
       RefreshControl={
