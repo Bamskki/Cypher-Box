@@ -6,6 +6,8 @@ import { dispatchNavigate } from "@Cypher/helpers";
 import useAuthStore from "@Cypher/stores/authStore";
 import { colors } from "@Cypher/style-guide";
 import { authorize } from "react-native-app-auth";
+import { jwtDecode } from 'jwt-decode';
+import { Buffer } from 'buffer';
 
 const config = {
     id: 'strike',
@@ -34,7 +36,7 @@ const config = {
 };
 
 export default function CheckingAccountLogin() {
-    const {isAuth, isStrikeAuth, allBTCWallets, setStrikeAuth, setStrikeToken, setAllBTCWallets} = useAuthStore();
+    const {isAuth, isStrikeAuth, allBTCWallets, setStrikeMe, setStrikeAuth, setStrikeToken, setAllBTCWallets} = useAuthStore();
 
 
     const createChekingAccountClickHandler = () => {
@@ -56,6 +58,14 @@ export default function CheckingAccountLogin() {
             setStrikeToken(result.accessToken);
             setStrikeAuth(true);
             const temp = [...allBTCWallets];
+            const tokenParts = result.accessToken.split('.');
+            const header = Buffer.from(tokenParts[0], 'base64').toString('utf8');
+            const payload = Buffer.from(tokenParts[1], 'base64').toString('utf8');
+            const signature = tokenParts[2];            
+            const decoded = JSON.parse(payload);
+            console.log("decoded", decoded);
+            console.log('signature: ', signature)
+            setStrikeMe(decoded);
             setAllBTCWallets([...temp, 'STRIKE']);
             dispatchNavigate('CheckingAccountCreated');
 

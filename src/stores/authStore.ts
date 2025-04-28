@@ -25,6 +25,7 @@ export type AuthStateType = {
     clearStrikeAuth: () => void;
 
     //strike
+    strikeMe: any | null;
     walletTab: boolean;
     isStrikeAuth: boolean;
     strikeUser: any | null;
@@ -32,6 +33,7 @@ export type AuthStateType = {
     strikeToken: string | null;
     reserveStrikeAmount: number;
     withdrawStrikeThreshold: any | null;
+    setStrikeMe: (state: any) => void;
     setStrikeUser: (state: any) => void;
     setAllBTCWallets: (state: string[]) => void;
     setWalletTab: (state: boolean) => void;
@@ -75,12 +77,14 @@ const createAuthStore = (
             reserveAmount: 100000,
         }),
     //strike
+    strikeMe: null,
     strikeUser: null,
     walletTab: false,
     strikeToken: null,
     isStrikeAuth: false,
     reserveStrikeAmount: 100000,
     withdrawStrikeThreshold: 2000000,
+    setStrikeMe: (state: any) => set({ strikeMe: state }),
     setStrikeUser: (state: any) => set({ strikeUser: state }),
     setWalletTab: (state: boolean) => set({ walletTab: state }),
     setStrikeToken: (token: string) => set({ strikeToken: token }),

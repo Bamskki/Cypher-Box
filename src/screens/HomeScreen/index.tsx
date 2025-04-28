@@ -214,14 +214,12 @@ export default function HomeScreen({ route }: Props) {
       try {
           const result = await authorize(config);
           setStrikeToken(result.accessToken);
+          const decoded = jwtDecode(token);
           setStrikeAuth(true);
-          // if (balances && balances?.balances) {
-          //   const numericAmount = Number(balances.balances[0].amount.replace(/[^0-9\.]/g, ''));
-          //   setMatchedRate(numericAmount);
-          // }
-          setIsLoading(false)
       } catch (error) {
           console.error("OAuth error", error);
+      } finally {
+        setIsLoading(false)
       }
   };
 
@@ -295,6 +293,7 @@ export default function HomeScreen({ route }: Props) {
     getInit();
   }, [strikeToken])
 
+  console.log('strikeToken: ', strikeToken)
   const successfullyAuthenticated = async () => {
     // const hasAcceptedTerms = await AsyncStorage.getItem('hasAcceptedTermsOfService')
     await startAndDecrypt()
@@ -474,8 +473,8 @@ export default function HomeScreen({ route }: Props) {
     dispatchNavigate('SendScreen', { currency, matchedRate });
   };
 
-  const checkingAccountClickHandler = () => {
-    dispatchNavigate('CheckingAccount', { matchedRate });
+  const checkingAccountClickHandler = (walletType: string) => {
+    dispatchNavigate('CheckingAccount', { matchedRate, walletType });
   }
 
   const withdrawClickHandler = () => {
@@ -801,7 +800,7 @@ export default function HomeScreen({ route }: Props) {
       <>
         {isAuth &&
           <>
-            <TouchableOpacity style={styles.shadowView} onPress={checkingAccountClickHandler}>
+            <TouchableOpacity style={styles.shadowView} onPress={() => checkingAccountClickHandler("COINOS")}>
               <Shadow
                 style={StyleSheet.flatten([styles.shadowTop, { shadowColor: colors.pink.shadowTop, padding: 0 }])}
                 inner
@@ -923,7 +922,7 @@ export default function HomeScreen({ route }: Props) {
       <>
         {isStrikeAuth &&
           <>
-            <TouchableOpacity style={styles.shadowView} onPress={checkingAccountClickHandler}>
+            <TouchableOpacity style={styles.shadowView} onPress={() => checkingAccountClickHandler('STRIKE')}>
               <Shadow
                 style={StyleSheet.flatten([styles.shadowTop, { shadowColor: colors.pink.shadowTop, padding: 0 }])}
                 inner
@@ -974,7 +973,7 @@ export default function HomeScreen({ route }: Props) {
                 />
               </Shadow>
             </TouchableOpacity>
-            {/* <View style={styles.btnView}>
+            <View style={styles.btnView}>
               <GradientButtonWithShadow
                 title="Receive"
                 onPress={receiveClickHandler}
@@ -987,7 +986,7 @@ export default function HomeScreen({ route }: Props) {
                 isShadow
                 isTextShadow
               />
-            </View> */}
+            </View>
             {!isLoading &&
               (hasFilledTheBar ?
                 <Text h4 style={styles.alert}>
@@ -1202,7 +1201,7 @@ export default function HomeScreen({ route }: Props) {
                 </GradientCardWithShadow>
               </View>
             : !isLoading &&
-              <View style={{ height: '42%' }}>
+              // <View style={{ height: '42%' }}>
                 <Carousel
                   data={wTabs}
                   // ref={carouselRef}
@@ -1216,7 +1215,7 @@ export default function HomeScreen({ route }: Props) {
                     setWalletTab(index === 1);
                   }} // Update pagination index
                 />
-              </View>
+              // </View>
             }
           </View>
           

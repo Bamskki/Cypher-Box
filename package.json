@@ -142,6 +142,7 @@
     "events": "3.3.0",
     "frisbee": "3.1.0",
     "junderw-crc32c": "1.2.0",
+    "jwt-decode": "^4.0.0",
     "lottie-ios": "^4.4.3",
     "lottie-react-native": "6.6.0",
     "metro-react-native-babel-preset": "0.77.0",

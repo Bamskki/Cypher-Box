@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ScrollView, View } from "react-native";
+import { ScrollView, View, Text as RNText } from "react-native";
 import { Button, ScreenLayout, Text } from "@Cypher/component-library";
 import { colors } from "@Cypher/style-guide";
 import { SavingVault } from "@Cypher/components";
@@ -9,7 +9,7 @@ import styles from "./styles";
 
 export default function CheckingAccountCreated() {
     const [isValidate, setIsValidate] = useState(false);
-    const { vaultTab, strikeToken } = useAuthStore();
+    const { vaultTab, strikeToken, strikeMe } = useAuthStore();
 
     const nextClickHandler = () => {
         console.log('next click');
@@ -26,37 +26,24 @@ export default function CheckingAccountCreated() {
         setIsValidate(true);
     }
 
-    console.log('strikeToken: ', strikeToken)
+    console.log('strikeMe: ', strikeMe)
     return (
-        <ScreenLayout disableScroll showToolbar progress={2} color={vaultTab ? [colors.blueText, colors.blueText] : [colors.green, colors.green]} isBackButton={false} isClose onBackPress={nextClickHandler}>
+        <ScreenLayout disableScroll showToolbar progress={2} color={[colors.pink.light, colors.pink.light]} isBackButton={false} isClose onBackPress={nextClickHandler}>
             <View style={styles.container}>
-                <Text style={[styles.title, vaultTab ? { color: colors.blueText } : { }]} center>{vaultTab ? "Cold Storage Vault Created!" : "Savings Vault Created!"}</Text>
+                <Text style={[styles.title, { color: colors.pink.light }]} center>{"Checking Account Created!"}</Text>
                 <View style={styles.inner}>
-                    <SavingVault title={vaultTab ? "Cold Vault" : "Savings Vault"} />
+                    <SavingVault title={"Checking Account"} />
                     <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-                        {vaultTab ?
-                            <>
-                                <Text h4 style={[styles.descption, { fontSize: 14, marginTop: 30 }]}>Remember to keep your seed phrase safe, it's your responsibility!
-                                    {'\n\n'}
-                                    This is a Watch-only vault, meaning you can only inspect its balance and grab addresses from it for deposits, but in order to send out funds you need to ‘sign’ or authorize  transactions using your hardware device.
-                                    {'\n\n'}
-                                    ⚠️ DO NOT use any of its addresses without verifying their authenticity from your  hardware device!
-                                    {'\n\n'}
-                                    When Bitcoin Network fees become moderately low, you can select the capsules accumulated in your Hot Vault and transfer them to your Cold Storage Vault using the “Move to Cold Vault” button.
-                                </Text>
-                            </>
-                        :
-                            <Text h4 style={styles.descption}>Remember to keep your seed phrase safe, it's your responsibility!
-                                {'\n\n'}
-                                Each slot represents  a materialized coin (UTXO). Advanced security features will be unlocked once you fill these slots with enough coins. You can always store beyond 5 coins and you adjust the number of slots  in the Savings Vault menu. Tap ‘Secure Funds’ to do your first settlement transaction!
-                            </Text>
-                        }
+                        <Text h4 style={[styles.descption, { fontSize: 14, marginTop: 30 }]}>Your Checking Account has been created. You can receive bitcoin using your unique Lightning Address:{'\n\n'}</Text>
+                        <Text style={{ width: '100%', fontSize: 24, paddingTop: 10, fontWeight: 'bold',  textAlign: 'center' }}>{strikeMe && strikeMe?.username+'@strike.me'}</Text>
+                        <Text h4 style={[styles.descption, { fontSize: 14, marginTop: 30 }]}>The interactive bar display helps you visualize your Checking Account's balance, showing a threshold above which storing bitcoin in an exchange carries increased counter-party risk.</Text>
+                        <Text h4 style={[styles.descption, { fontSize: 14, marginTop: 30 }]}>You can deposit money beyond the threshold, but remember, you are relying on a third-party custodian. Withdraw your accumulated funds once you fill the bar slot (set to 2.1 million sats by default but you can adjust it in the settings).</Text>
                     </ScrollView>
                 </View>
             </View>
             <Button text="Home"
                 onPress={nextClickHandler}
-                style={{...styles.button, ...{ backgroundColor: vaultTab ? colors.blueText : colors.green, marginTop: vaultTab ? 30 : 0 } }}
+                style={{...styles.button, ...{ backgroundColor: colors.pink.light, marginTop: vaultTab ? 30 : 0 } }}
                 textStyle={styles.btnText}
             />
         </ScreenLayout>
