@@ -58,6 +58,8 @@ Open ios/BlueWallet.xcworkspace. Once the project loads, select the scheme/targe
 
 BlueWallet's [repo](https://github.com/BlueWallet/BlueWallet/)
 
+Coinos API [documentation](https://coinos.io/docs)
+
 Website: [cypherbox.io](cypherbox.io)
 
 Community: [telegram group](https://t.me/BitcoinUserSupport)
