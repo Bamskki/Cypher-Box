@@ -12,13 +12,14 @@ import { dispatchNavigate } from "@Cypher/helpers";
 import ImageText from "@Cypher/components/ImageText";
 import { GradientCard, ImageTextVertical } from "@Cypher/components";
 import { createInvoice } from "@Cypher/api/coinOSApis";
+import { createInvoice as createInvoiceStrike } from "@Cypher/api/strikeAPIs";
 
 interface Props {
     route: any;
 }
 
 export default function QrScreen({ route }: Props) {
-    const { type } = route.params;
+    const { type, receiveType } = route.params;
 
     const [hash, setHash] = useState('');
     const qrCode = useRef();
@@ -33,11 +34,15 @@ export default function QrScreen({ route }: Props) {
 
     const handleCreateInvoice = async () => {
         try {
-            const response = await createInvoice({
+            const response = receiveType ? await createInvoice({
                 type: type,
+            }) : await createInvoiceStrike({
+                onchain: {
+                },
+                targetCurrency: "USD"
             });
-            setHash(response.hash);
-            console.log('response: ', response)
+            const hash = receiveType ? response.hash : response.onchain?.address
+            setHash(hash);
         } catch (error) {
             console.error('Error generating bitcoin address:', error);
             SimpleToast.show(`Failed to generating ${type == 'bitcoin' ? "bitcoin" : "liquid"} address. Please try again.`, SimpleToast.SHORT);
@@ -91,7 +96,11 @@ export default function QrScreen({ route }: Props) {
                 : hash &&    
                     <View style={styles.innerView}>
                         {/* <Text h3 style={styles.maintitle}>Top-up your Coinos Lightning Account{`\n`} using this Bitcoin Network address:</Text> */}
-                        <Image source={CoinOS} style={styles.logo} resizeMode="contain" />
+                        {receiveType ?
+                            <Image source={CoinOS} style={styles.logo} resizeMode="contain" />
+                        :
+                            <Image source={require('../../../img/Strike.png')} style={styles.logo} resizeMode="contain" />
+                        }
 
                         <View style={{ margin: 20, padding: 30, backgroundColor: 'white', borderRadius: 30 }}>
                             <QRCode
@@ -123,7 +132,7 @@ export default function QrScreen({ route }: Props) {
                                 <Text subHeader bold>bc1qt3......wmsn6u</Text>
                             </View>
                         </GradientCard> */}
-                        <Text h3 style={styles.title}>Bitcoin Network transactions may take hours, or in rare case, days to confirm depending on how much fees the sender paid and how fast your bitcoin banking provider, Coinos, will credit your account.</Text>
+                        <Text h3 style={styles.title}>Bitcoin Network transactions may take hours, or in rare case, days to confirm depending on how much fees the sender paid and how fast your bitcoin banking provider, {receiveType ? 'Coinos' : 'Strike'}, will credit your account.</Text>
                     </View>
                 }
             </View>

@@ -15,6 +15,7 @@ import { getTransactionHistory } from "@Cypher/api/coinOSApis";
 import screenHeight from "@Cypher/style-guide/screenHeight";
 import { btc, formatNumber } from "@Cypher/helpers/coinosHelper";
 import useAuthStore from "@Cypher/stores/authStore";
+import { getInvoices } from "@Cypher/api/strikeAPIs";
 
 interface Transaction {
     date: string;
@@ -124,7 +125,7 @@ export default function CheckAccount({ navigation, route }: any) {
     const [isError, setIsError] = useState(false);
     const [isErrorReserve, setIsErrorReserve] = useState(false);
     const [reserveAmt, setReserveAmt] = useState(Number(reserveAmount));
-    const { matchedRate } = route.params;
+    const { matchedRate, walletType } = route.params;
     const [isLoading, setIsLoading] = useState(false);
     const [payments, setPayments] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -136,7 +137,7 @@ export default function CheckAccount({ navigation, route }: any) {
 
     useEffect(() => {
         loadPayments();
-    }, [offset]);
+    }, [offset, walletType]);
 
     useEffect(() => {
         if (withdrawThreshold < data[0].sats || withdrawThreshold > data[data.length - 1].sats) {
@@ -281,6 +282,17 @@ export default function CheckAccount({ navigation, route }: any) {
             setIsLoading(false);
             setIsFetchingMore(false);
             setIsRefreshing(false);
+        }
+    };
+
+    const loadStrikePayments = async () => {
+        try {
+            const paymentList = await getInvoices();
+            setPayments(paymentList.payments);
+        } catch (error) {
+            console.error('Error loading payments:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 

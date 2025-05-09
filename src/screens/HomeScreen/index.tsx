@@ -31,7 +31,7 @@ import LinearGradient from "react-native-linear-gradient";
 import ReceivedList from "./ReceivedList";
 import useAuthStore from "@Cypher/stores/authStore";
 import { bitcoinRecommendedFee, createInvoice, getCurrencyRates, getInvoiceByLightening, getMe, getTransactionHistory } from "@Cypher/api/coinOSApis";
-import { btc, formatNumber, matchKeyAndValue } from "@Cypher/helpers/coinosHelper";
+import { btc, formatNumber, matchKeyAndValue, SATS } from "@Cypher/helpers/coinosHelper";
 import { AbstractWallet, HDSegwitBech32Wallet, HDSegwitP2SHWallet } from "../../../class";
 import loc, { formatBalance, formatBalanceWithoutSuffix } from '../../../loc';
 import { initialState, walletReducer } from "../../../screen/wallets/add";
@@ -42,10 +42,38 @@ import screenHeight from "@Cypher/style-guide/screenHeight";
 import Carousel from "react-native-snap-carousel";
 import screenWidth from "@Cypher/style-guide/screenWidth";
 import { mostRecentFetchedRate } from "../../../blue_modules/currency";
+import { authorize } from "react-native-app-auth";
+import { getBalances } from "@Cypher/api/strikeAPIs";
 
 interface Props {
   route: any;
 }
+
+const config = {
+  id: 'strike',
+  name: 'Strike',
+  type: 'oauth',
+  issuer: "https://auth.strike.me", // Strike Identity Server URL
+  clientId: "cypherbox",
+  clientSecret: "SbYmuewpZGS8XDktirso8ficpChSGu7dEaYuMrLx+3k=", // If needed (but avoid hardcoding secrets in client-side code)
+  redirectUrl: "cypherbox://oauth/callback", // Must match the redirect URI in your Strike app settings
+  scopes: ["offline_access", "partner.balances.read", "partner.currency-exchange-quote.read", "partner.account.profile.read", "profile", "openid", "partner.invoice.read", "partner.invoice.create", "partner.invoice.quote.generate", "partner.invoice.quote.read", "partner.rates.ticker"], // Specify necessary scopes
+  //clientAuthMethod: "post",
+  //wellKnown: `https://auth.strike.me/.well-known/openid-configuration`,
+  // authorization: {
+  //     params: {
+  //         scope: 'partner.invoice.read offline_access',
+  //         response_type: 'code',
+  //     }
+  // },
+  idToken: false,
+  checks: ['pkce', 'state'],
+  // serviceConfiguration: {
+  //   authorizationEndpoint: "https://auth.strike.me/oauth/authorize",
+  //   tokenEndpoint: "https://auth.strike.me/oauth/token",
+  //   revocationEndpoint: "https://auth.strike.me/oauth/revoke",
+  // },
+};
 
 export const calculatePercentage = (withdrawThreshold: number, reserveAmount: number) => {
   const threshold = Number(withdrawThreshold);
@@ -73,14 +101,17 @@ export default function HomeScreen({ route }: Props) {
   const [state, dispatch] = useReducer(walletReducer, initialState);
   const label = state.label;
   const { addWallet, saveToDisk, isAdvancedModeEnabled, wallets, sleep, isElectrumDisabled, startAndDecrypt, setWalletsInitialized } = useContext(BlueStorageContext);
-  const { isAuth, walletID, coldStorageWalletID, token, user, withdrawThreshold, reserveAmount, vaultTab, setUser, setVaultTab } = useAuthStore();
+  const { isAuth, isStrikeAuth, strikeToken, walletTab, allBTCWallets, setAllBTCWallets, withdrawStrikeThreshold, reserveStrikeAmount, strikeUser, setWalletTab, setStrikeUser, setStrikeToken, setStrikeAuth, clearStrikeAuth, walletID, coldStorageWalletID, token, user, withdrawThreshold, reserveAmount, vaultTab, setUser, setVaultTab } = useAuthStore();
   const A = require('../../../blue_modules/analytics');
   // const [storage, setStorage] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [balance, setBalance] = useState(0);
+  const [strikeBalance, setStrikeBalance] = useState();
   const [currency, setCurrency] = useState('$');
   const [convertedRate, setConvertedRate] = useState(0);
+  const [convertedStrikeRate, setConvertedStrikeRate] = useState(0);
   const [matchedRate, setMatchedRate] = useState(0);
+  const [matchedStrikeRate, setMatchedStrikeRate] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [payment, setPayments] = useState([])
   const [wt, setWt] = useState<number>();
@@ -100,6 +131,7 @@ export default function HomeScreen({ route }: Props) {
   const [sendAddress, setSendAddress] = useState<any>()
   const [isWalletLoaded, setIsWalletLoaded] = useState(true);
   const [isColdWalletLoaded, setIsColdWalletLoaded] = useState(true);
+  const [receiveType, setReceiveType] = useState(false);
   const refRBSheet = useRef<any>(null);
   const carouselRef = useRef<Carousel<any>>(null);
 
@@ -179,6 +211,19 @@ export default function HomeScreen({ route }: Props) {
   //   successfullyAuthenticated();
   // }, [])
 
+  const handleStrikeLogin = async () => {
+      try {
+          const result = await authorize(config);
+          setStrikeToken(result.accessToken);
+          const decoded = jwtDecode(token);
+          setStrikeAuth(true);
+      } catch (error) {
+          console.error("OAuth error", error);
+      } finally {
+        setIsLoading(false)
+      }
+  };
+
   useEffect(() => {
     async function handleToken() {
       if (isAuth && token) {
@@ -186,7 +231,6 @@ export default function HomeScreen({ route }: Props) {
         loadPayments();
       } else {
         const rates = await exchangeRate();
-        console.log('rates: ', rates)
         if (rates && rates?.Rate) {
           const numericAmount = Number(rates.Rate.replace(/[^0-9\.]/g, ''));
           setMatchedRate(numericAmount);
@@ -233,6 +277,24 @@ export default function HomeScreen({ route }: Props) {
     }
   }, [sendAddress, isAuth, token])
 
+  useEffect(()  => {
+    const getInit = async () => {
+      if(strikeToken){
+        const balances = await getBalances();
+        if(balances.data?.status === 401){
+          SimpleToast.show("Authorization expired. Please login again to strike account", SimpleToast.SHORT)
+          clearStrikeAuth();
+        } else if (balances) {
+          setStrikeUser(balances);
+          // setStrikeBalance(balances);
+        }
+      }
+    }
+
+    getInit();
+  }, [strikeToken])
+
+  console.log('strikeToken: ', strikeToken)
   const successfullyAuthenticated = async () => {
     // const hasAcceptedTerms = await AsyncStorage.getItem('hasAcceptedTermsOfService')
     await startAndDecrypt()
@@ -254,9 +316,7 @@ export default function HomeScreen({ route }: Props) {
   const handleLighteningInvoice = async () => {
     try {
       const response = await getInvoiceByLightening(sendAddress);
-      console.log('response getInvoiceByLightening: ', response)
       const dollarAmount = (response.amount_msat / 1000) * matchedRate * btc(1);
-      console.log('dollarAmount: ', dollarAmount)
       if(dollarAmount){
         dispatchNavigate('ReviewPayment', {
           value: response.amount_msat / 1000,
@@ -376,17 +436,16 @@ export default function HomeScreen({ route }: Props) {
   };
 
   const onScanButtonPressed = () => {
-    console.log('routeName: ', routeName)
     scanQrHelper(navigate, routeName).then(onBarScanned);
   };
 
   const loginClickHandler = () => {
-    dispatchNavigate('LoginCoinOSScreen');
+    // dispatchNavigate('LoginCoinOSScreen');
+    dispatchNavigate('CheckingAccountIntro');
   };
 
   const onBarScanned = (value: any) => {
     if (!value) return;
-    console.log('value: ', value)
     setSendAddress(value);
     // DeeplinkSchemaMatch.navigationRouteFor(
     //   { url: value },
@@ -402,7 +461,13 @@ export default function HomeScreen({ route }: Props) {
     // dispatchNavigate("CheckAccount");
   };
 
-  const receiveClickHandler = () => {
+  const createStrikeAccountClickHandler = () => {
+    Linking.openURL('https://dashboard.strike.me/signup')
+    // dispatchNavigate("CheckAccount");
+  };
+
+  const receiveClickHandler = (type: boolean) => {
+    setReceiveType(type);
     refRBSheet.current.open();
   };
 
@@ -410,12 +475,11 @@ export default function HomeScreen({ route }: Props) {
     dispatchNavigate('SendScreen', { currency, matchedRate });
   };
 
-  const checkingAccountClickHandler = () => {
-    dispatchNavigate('CheckingAccount', { matchedRate });
+  const checkingAccountClickHandler = (walletType: string) => {
+    dispatchNavigate('CheckingAccount', { matchedRate, walletType });
   }
 
   const withdrawClickHandler = () => {
-    console.log('recommendedFee: ', recommendedFee)
     if(!isAuth){
       SimpleToast.show('You need to be logged in to Coinos.io to withdraw', SimpleToast.SHORT);
       return
@@ -463,7 +527,6 @@ export default function HomeScreen({ route }: Props) {
         type: 'bitcoin',
       });
       dispatchNavigate('HotStorageVault', { wallet: vaultTab ? coldStorageWallet : wallet, matchedRate, to: response.hash });
-      console.log('response: ', response)
     } catch (error) {
       console.error('Error generating bitcoin address:', error);
     } finally {
@@ -537,6 +600,7 @@ export default function HomeScreen({ route }: Props) {
     }
   };
 
+  const [indexStrike, setIndexStrike] = useState(0); // Used for the tab index
   const [index, setIndex] = useState(vaultTab ? 1 : 0); // Used for the tab index
   const [routes] = useState([
     { key: 'hot', title: 'Hot Storage' },
@@ -581,7 +645,6 @@ export default function HomeScreen({ route }: Props) {
     return rates
   }
 
-  console.log('hasSavingVault: ', matchedRate)
   const HotStorageTab = () => (
     <View style={{flex: 1}}>
       {hasSavingVault && wallet ?
@@ -640,7 +703,6 @@ export default function HomeScreen({ route }: Props) {
     </View>
   );
 
-  console.log('coldStorageWallet: ', coldStorageWallet, hasColdStorage, coldStorageWalletID)
   const ColdStorageTab = () => (
     <View style={{flex: 1}}>
       {coldStorageWallet ?
@@ -705,7 +767,280 @@ export default function HomeScreen({ route }: Props) {
     { key: "hot", title: "Hot Storage", component: () => <HotStorageTab /> },
     { key: "cold", title: "Cold Storage", component: () => <ColdStorageTab /> },
   ];
+
+  const walletTabs = [
+    { key: "coinos", component: () => <CoinosWalletTab /> },
+    { key: "strike", component: () => <StrikeWalletTab /> },
+  ];
+
+  const walletTabsMap = {
+    COINOS: { key: 'coinos', component: () => <CoinosWalletTab /> },
+    STRIKE: { key: 'strike', component: () => <StrikeWalletTab /> },
+  };
   
+  const [wTabs, setWTabs] = useState([])
+  useEffect(() => {
+    const tabs: any = [...wTabs];
+
+    if(allBTCWallets && !isLoading){
+      allBTCWallets.map(wallet => {
+        if (walletTabsMap[wallet]) {
+          tabs.push(walletTabsMap[wallet]);
+        }
+      });
+  
+      setWTabs(tabs)
+    }
+  }, [allBTCWallets, isLoading]);
+
+  const coinOSTab = [
+    { key: "coinos", component: () => <CoinosWalletTab /> },
+  ];
+
+  const CoinosWalletTab = () => {
+    return (
+      <>
+        {isAuth &&
+          <>
+            <TouchableOpacity style={styles.shadowView} onPress={() => checkingAccountClickHandler("COINOS")}>
+              <Shadow
+                style={StyleSheet.flatten([styles.shadowTop, { shadowColor: colors.pink.shadowTop, padding: 0 }])}
+                inner
+                useArt
+              >
+                <View style={styles.view}>
+                  <Text h2 bold style={styles.check}>
+                    Lightning Account
+                  </Text>
+                  <Image
+                    source={CoinOSSmall}
+                    style={styles.blink}
+                    resizeMode="contain"
+                  />
+                </View>
+                <View style={styles.view}>
+                  <Text h2 bold style={styles.sats}>
+                    {balance} sats ~ {"$" + convertedRate.toFixed(2)}
+                  </Text>
+                  <Text bold style={styles.totalsats}>
+                    {formatNumber(Number(withdrawThreshold) + Number(reserveAmount))} sats
+                  </Text>
+                </View>
+                <View>
+                  <View style={styles.showLine} />
+                  <View style={[styles.box, { left: `${calculatePercentage(Number(withdrawThreshold), (Number(reserveAmount)))}%` }]} />
+                  <LinearGradient
+                    start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
+                    colors={[colors.white, colors.pink.dark]}
+                    style={[styles.linearGradient2, { width: `${calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount))}%` }]}>
+                    {/* <View style={[styles.box, {marginLeft: `${Math.min((withdrawThreshold / (Number(withdrawThreshold + reserveAmount) || 0)) * 100, 100)}%`}]} /> */}
+                    {/* <Shadow
+                        inner // <- enable inner shadow
+                        useArt // <- set this prop to use non-native shadow on ios
+                        style={styles.top2} >
+                    </Shadow> */}
+                  </LinearGradient>
+
+                  {/* <View style={styles.showLine} /> */}
+                  {/* <View style={[styles.box, {marginLeft: `${Math.min((balance / (Number(withdrawThreshold) || 0)) * 100, 100)}%`}]} />
+                  </View> */}
+                </View>
+                <Shadow
+                  inner
+                  useArt
+                  style={StyleSheet.flatten([styles.shadowBottom, { shadowColor: colors.pink.shadowBottom }])}
+                />
+              </Shadow>
+            </TouchableOpacity>
+            <View style={styles.btnView}>
+              <GradientButtonWithShadow
+                title="Receive"
+                onPress={() => receiveClickHandler(true)}
+                isShadow
+                isTextShadow
+              />
+              <GradientButtonWithShadow
+                title="Send"
+                onPress={sendClickHandler}
+                isShadow
+                isTextShadow
+              />
+            </View>
+            {!isLoading &&
+              (hasFilledTheBar ?
+                <Text h4 style={styles.alert}>
+                  Your sats have materialized! You can create a Hot Storage Savings Vault and take full self-custody of your money by withdrawing a large chunk of a bitcoin from your custodian Lightning Account. Click the Withdraw button to know more
+                  {/* You can receive, send, and accumulate bitcoin using your Lightning Account. New security features will be revealed once you meet the withdrawal threshold at 2 million sats */}
+                </Text>
+                : (Number(balance) === Number(withdrawThreshold + reserveAmount)) ?
+                  <Text h4 style={styles.alert}>
+                    Congrats! You've completed the bar, It's time to create your Hot Storage Savings Vault and take full self-custody of your bitcoi. Click 'Withdraw' to know more.
+                  </Text>
+                :
+                  <Text h4 style={styles.alertGrey}>
+                    {/* New security upgrades will be revealed once you meet fill up the bar displayed on your Lightning Account. */}
+                    {'\n'}
+                  </Text>
+              )
+            }
+          </>
+        }
+
+        {!isAuth &&
+          <View style={{ height: '42%' }}>
+            <GradientCardWithShadow
+              style={styles.createView}
+              onPress={loginClickHandler}
+            >
+              <View style={styles.middle}>
+                <Image
+                  style={styles.arrow}
+                  resizeMode="contain"
+                  source={require("../../../img/arrow-right.png")}
+                />
+                <Text h2 style={styles.shadow} center>
+                  Login to Your Lightning Account
+                </Text>
+              </View>
+            </GradientCardWithShadow>
+            <View style={styles.createAccount}>
+              <Text bold style={styles.text}>
+                Don’t have an account?
+              </Text>
+              <TouchableOpacity onPress={createChekingAccountClickHandler}>
+                <Text bold style={styles.login}>
+                  Create on Coinos.io
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        }
+      </>
+    )
+  }
+
+  const StrikeWalletTab = () => {
+    return (
+      <>
+        {isStrikeAuth &&
+          <View style={{ height: '42%' }}>
+            <TouchableOpacity style={styles.shadowView} onPress={() => checkingAccountClickHandler('STRIKE')}>
+              <Shadow
+                style={StyleSheet.flatten([styles.shadowTop, { shadowColor: colors.pink.shadowTop, padding: 0 }])}
+                inner
+                useArt
+              >
+                <View style={styles.view}>
+                  <Text h2 bold style={styles.check}>
+                    Lightning Account
+                  </Text>
+                  <Image
+                    source={require("../../../img/Strike.png")}
+                    style={styles.blink}
+                    resizeMode="contain"
+                  />
+                </View>
+                <View style={styles.view}>
+                  <Text h2 bold style={styles.sats}>
+                    {`${Math.round(Number(strikeUser?.[0]?.available || 0) * SATS)} sats ~ $${(Number(strikeUser?.[0]?.available || 0) * matchedRate).toFixed(2)}`}
+                    {/* {strikeUser && strikeUser[0]?.available || 0} sats ~ {"$" + convertedRate.toFixed(2)} */}
+                  </Text>
+                  <Text bold style={styles.totalsats}>
+                    {formatNumber(Number(withdrawStrikeThreshold) + Number(reserveStrikeAmount))} sats
+                  </Text>
+                </View>
+                <View>
+                  <View style={styles.showLine} />
+                  <View style={[styles.box, { left: `${calculatePercentage(Number(withdrawStrikeThreshold), (Number(reserveStrikeAmount)))}%` }]} />
+                  <LinearGradient
+                    start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
+                    colors={[colors.white, colors.pink.dark]}
+                    style={[styles.linearGradient2, { width: `${calculateBalancePercentage(Number(strikeBalance), Number(withdrawStrikeThreshold), Number(reserveStrikeAmount))}%` }]}>
+                    {/* <View style={[styles.box, {marginLeft: `${Math.min((withdrawThreshold / (Number(withdrawThreshold + reserveAmount) || 0)) * 100, 100)}%`}]} /> */}
+                    {/* <Shadow
+                        inner // <- enable inner shadow
+                        useArt // <- set this prop to use non-native shadow on ios
+                        style={styles.top2} >
+                    </Shadow> */}
+                  </LinearGradient>
+
+                  {/* <View style={styles.showLine} /> */}
+                  {/* <View style={[styles.box, {marginLeft: `${Math.min((balance / (Number(withdrawThreshold) || 0)) * 100, 100)}%`}]} />
+                  </View> */}
+                </View>
+                <Shadow
+                  inner
+                  useArt
+                  style={StyleSheet.flatten([styles.shadowBottom, { shadowColor: colors.pink.shadowBottom }])}
+                />
+              </Shadow>
+            </TouchableOpacity>
+            <View style={styles.btnView}>
+              <GradientButtonWithShadow
+                title="Receive"
+                onPress={() => receiveClickHandler(false)}
+                isShadow
+                isTextShadow
+              />
+              <GradientButtonWithShadow
+                title="Send"
+                onPress={sendClickHandler}
+                isShadow
+                isTextShadow
+              />
+            </View>
+            {!isLoading &&
+              (hasFilledTheBar ?
+                <Text h4 style={styles.alert}>
+                  Your sats have materialized! You can create a Hot Storage Savings Vault and take full self-custody of your money by withdrawing a large chunk of a bitcoin from your custodian Lightning Account. Click the Withdraw button to know more
+                  {/* You can receive, send, and accumulate bitcoin using your Lightning Account. New security features will be revealed once you meet the withdrawal threshold at 2 million sats */}
+                </Text>
+                : (Number(strikeBalance) === Number(withdrawStrikeThreshold + reserveStrikeAmount)) ?
+                  <Text h4 style={styles.alert}>
+                    Congrats! You've completed the bar, It's time to create your Hot Storage Savings Vault and take full self-custody of your bitcoi. Click 'Withdraw' to know more.
+                  </Text>
+                :
+                  <Text h4 style={styles.alertGrey}>
+                    {/* New security upgrades will be revealed once you meet fill up the bar displayed on your Lightning Account. */}
+                    {'\n'}
+                  </Text>
+              )
+            }
+          </View>
+        }
+
+        {!isStrikeAuth &&
+          <View style={{ height: '42%' }}>
+            <GradientCardWithShadow
+              style={styles.createView}
+              onPress={handleStrikeLogin}
+            >
+              <View style={styles.middle}>
+                <Image
+                  style={styles.arrow}
+                  resizeMode="contain"
+                  source={require("../../../img/arrow-right.png")}
+                />
+                <Text h2 style={styles.shadow} center>
+                  Login to Your Strike Account
+                </Text>
+              </View>
+            </GradientCardWithShadow>
+            <View style={styles.createAccount}>
+              <Text bold style={styles.text}>
+                Don’t have an account?
+              </Text>
+              <TouchableOpacity onPress={createStrikeAccountClickHandler}>
+                <Text bold style={styles.login}>
+                  Create on Strike
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        }
+      </>      
+    )
+  }
   
   const RenderTabBar = (props: any) => {
     return (
@@ -760,10 +1095,18 @@ export default function HomeScreen({ route }: Props) {
     )
   };
 
+  const renderWalletItem = ({ item }: any) => {
+    return(
+      <View>
+        {item.component()}
+      </View>
+    )
+  };
+
   const hasFilledTheBar = calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount)) === 100
   const layout = useWindowDimensions();
 
-  console.log('matchedRate: ', matchedRate)
+  console.log('allBTCWallets: ', allBTCWallets)
   return (
     <ScreenLayout
       RefreshControl={
@@ -779,176 +1122,108 @@ export default function HomeScreen({ route }: Props) {
           {isLoading ? (
             <ActivityIndicator size="large" color="#ffffff" />
           )
-            :
-            (
-              <>
-                <View style={styles.title}>
-                  <Text subHeader bold>
-                    Total Balance
-                  </Text>
-                  <View style={styles.row}>
-                    <TouchableOpacity
-                      style={styles.imageView}
-                      onPress={navigateToSettings}
-                    >
-                      <Image
-                        style={styles.image}
-                        resizeMode="contain"
-                        source={require("../../../img/settings.png")}
-                      />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.imageViews}
-                      onPress={onScanButtonPressed}
-                    >
-                      <Image
-                        style={styles.scan}
-                        resizeMode="contain"
-                        source={require("../../../img/scan-new.png")}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-                <View style={styles.shadowView}>
-                  <Shadow
-                    style={styles.shadowTop}
-                    inner
-                    useArt
-                  >
-                    <Text subHeader bold style={styles.price}>
-                      {/* {(btc(1) * (Number(balance) || 0)) + (Number(ColdStorageBalanceVault?.split(' ')[0]) || 0) + (Number(balanceVault?.split(' ')[0]) || 0)} BTC */}
-                      {((btc(1) * (Number(balance) || 0)) + (Number(ColdStorageBalanceVault?.split(' ')[0]) || 0) + (Number(balanceVault?.split(' ')[0]) || 0)).toFixed(8)} BTC
-                      </Text>
-                    <Text bold style={styles.priceusd} >
-                      {"$" + (Number(convertedRate || 0) + ((Number(coldStorageBalanceWithoutSuffix || 0) * Number(matchedRate || 0)) + (Number(balanceWithoutSuffix || 0) * Number(matchedRate || 0)))).toFixed(2)}
-                    </Text>
-                    <Shadow
-                      inner
-                      useArt
-                      style={styles.shadowBottom}
-                    />
-                  </Shadow>
-                </View>
-              </>
-            )}
-
-          {isAuth &&
+          :
+          (
             <>
-              <TouchableOpacity style={styles.shadowView} onPress={checkingAccountClickHandler}>
+              <View style={styles.title}>
+                <Text subHeader bold>
+                  Total Balance
+                </Text>
+                <View style={styles.row}>
+                  <TouchableOpacity
+                    style={styles.imageView}
+                    onPress={navigateToSettings}
+                  >
+                    <Image
+                      style={styles.image}
+                      resizeMode="contain"
+                      source={require("../../../img/settings.png")}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.imageViews}
+                    onPress={onScanButtonPressed}
+                  >
+                    <Image
+                      style={styles.scan}
+                      resizeMode="contain"
+                      source={require("../../../img/scan-new.png")}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={styles.shadowView}>
                 <Shadow
-                  style={StyleSheet.flatten([styles.shadowTop, { shadowColor: colors.pink.shadowTop, padding: 0 }])}
+                  style={styles.shadowTop}
                   inner
                   useArt
                 >
-                  <View style={styles.view}>
-                    <Text h2 bold style={styles.check}>
-                      Lightning Account
-                    </Text>
-                    <Image
-                      source={CoinOSSmall}
-                      style={styles.blink}
-                      resizeMode="contain"
-                    />
-                  </View>
-                  <View style={styles.view}>
-                    <Text h2 bold style={styles.sats}>
-                      {balance} sats ~ {"$" + convertedRate.toFixed(2)}
-                    </Text>
-                    <Text bold style={styles.totalsats}>
-                      {formatNumber(Number(withdrawThreshold) + Number(reserveAmount))} sats
-                    </Text>
-                  </View>
-                  <View>
-                    <View style={styles.showLine} />
-                    <View style={[styles.box, { left: `${calculatePercentage(Number(withdrawThreshold), (Number(reserveAmount)))}%` }]} />
-                    <LinearGradient
-                      start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
-                      colors={[colors.white, colors.pink.dark]}
-                      style={[styles.linearGradient2, { width: `${calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount))}%` }]}>
-                      {/* <View style={[styles.box, {marginLeft: `${Math.min((withdrawThreshold / (Number(withdrawThreshold + reserveAmount) || 0)) * 100, 100)}%`}]} /> */}
-                      {/* <Shadow
-                          inner // <- enable inner shadow
-                          useArt // <- set this prop to use non-native shadow on ios
-                          style={styles.top2} >
-                      </Shadow> */}
-                    </LinearGradient>
-
-                    {/* <View style={styles.showLine} /> */}
-                    {/* <View style={[styles.box, {marginLeft: `${Math.min((balance / (Number(withdrawThreshold) || 0)) * 100, 100)}%`}]} />
-                    </View> */}
-                  </View>
+                  <Text subHeader bold style={styles.price}>
+                    {/* {(btc(1) * (Number(balance) || 0)) + (Number(ColdStorageBalanceVault?.split(' ')[0]) || 0) + (Number(balanceVault?.split(' ')[0]) || 0)} BTC */}
+                    {((btc(1) * (Number(balance) || 0)) + (Number(ColdStorageBalanceVault?.split(' ')[0]) || 0) + (Number(balanceVault?.split(' ')[0]) || 0)).toFixed(8)} BTC
+                  </Text>
+                  <Text bold style={styles.priceusd} >
+                    {"$" + (Number(convertedRate || 0) + ((Number(coldStorageBalanceWithoutSuffix || 0) * Number(matchedRate || 0)) + (Number(balanceWithoutSuffix || 0) * Number(matchedRate || 0)))).toFixed(2)}
+                  </Text>
+                  {(allBTCWallets.length > 0 && allBTCWallets.length < 2) &&
+                    <TouchableOpacity onPress={() => dispatchNavigate('CheckingAccountIntro')} style={{zIndex: 100, alignSelf: 'flex-end', borderRadius: 10, borderWidth: 1, borderColor: colors.pink.light}}>
+                      <Text h4 style={styles.descption}>Add Account</Text>
+                    </TouchableOpacity>
+                  }
                   <Shadow
                     inner
                     useArt
-                    style={StyleSheet.flatten([styles.shadowBottom, { shadowColor: colors.pink.shadowBottom }])}
+                    style={styles.shadowBottom}
                   />
                 </Shadow>
-              </TouchableOpacity>
-              <View style={styles.btnView}>
-                <GradientButtonWithShadow
-                  title="Receive"
-                  onPress={receiveClickHandler}
-                  isShadow
-                  isTextShadow
-                />
-                <GradientButtonWithShadow
-                  title="Send"
-                  onPress={sendClickHandler}
-                  isShadow
-                  isTextShadow
-                />
               </View>
-              {!isLoading &&
-                (hasFilledTheBar ?
-                  <Text h4 style={styles.alert}>
-                    Your sats have materialized! You can create a Hot Storage Savings Vault and take full self-custody of your money by withdrawing a large chunk of a bitcoin from your custodian Lightning Account. Click the Withdraw button to know more
-                    {/* You can receive, send, and accumulate bitcoin using your Lightning Account. New security features will be revealed once you meet the withdrawal threshold at 2 million sats */}
-                  </Text>
-                  : (Number(balance) === Number(withdrawThreshold + reserveAmount)) ?
-                    <Text h4 style={styles.alert}>
-                      Congrats! You've completed the bar, It's time to create your Hot Storage Savings Vault and take full self-custody of your bitcoi. Click 'Withdraw' to know more.
-                    </Text>
-                  :
-                    <Text h4 style={styles.alertGrey}>
-                      {/* New security upgrades will be revealed once you meet fill up the bar displayed on your Lightning Account. */}
-                      {'\n'}
-                    </Text>
-                )
-              }
             </>
-          }
+          )}
 
-          {/* {isAuth ? (
-            <> */}
-          {!isAuth &&
-            <View style={{ height: '42%' }}>
-              <GradientCardWithShadow
-                style={styles.createView}
-                onPress={loginClickHandler}
-              >
-                <View style={styles.middle}>
-                  <Image
-                    style={styles.arrow}
-                    resizeMode="contain"
-                    source={require("../../../img/arrow-right.png")}
-                  />
-                  <Text h2 style={styles.shadow} center>
-                    Login to Your Lightning Account
-                  </Text>
-                </View>
-              </GradientCardWithShadow>
-              <View style={styles.createAccount}>
-                <Text bold style={styles.text}>
-                  Don’t have an account?
-                </Text>
-                <TouchableOpacity onPress={createChekingAccountClickHandler}>
-                  <Text bold style={styles.login}>
-                    Create on Coinos.io
-                  </Text>
-                </TouchableOpacity>
+          {/* */}
+
+          <View>
+            {!isAuth && !isLoading && !isStrikeAuth ?
+              <View style={{ height: '42%' }}>
+                <GradientCardWithShadow
+                  style={styles.createView}
+                  onPress={loginClickHandler}
+                >
+                  <View style={styles.middle}>
+                    <Image
+                      style={styles.arrow}
+                      resizeMode="contain"
+                      source={require("../../../img/arrow-right.png")}
+                    />
+                    <View style={{alignItems: 'center', justifyContent: 'center', alignSelf: 'center'}}>
+                      <Text h2 style={styles.shadow} center>
+                        Create Lightning Account
+                      </Text>
+                    </View>
+                  </View>
+                </GradientCardWithShadow>
               </View>
-            </View>
-          }
+            : !isLoading &&
+              // <View style={{ height: '42%' }}>
+                <Carousel
+                  data={wTabs}
+                  // ref={carouselRef}
+                  renderItem={renderWalletItem}
+                  firstItem={indexStrike}
+                  vertical={false}
+                  sliderWidth={screenWidth * 0.905}
+                  itemWidth={screenWidth * 0.905}
+                  onSnapToItem={(index) => {
+                    setIndexStrike(index)
+                    setWalletTab(index === 1);
+                  }} // Update pagination index
+                />
+              // </View>
+            }
+          </View>
+          
+          {/* */}
+
           {!isLoading && !isWalletLoaded && !isColdWalletLoaded &&
             <View style={[{height: isIOS && !isAuth ? '36.2%' : isAuth ? '37%' : '35%' }, isIOS && {bottom: 20}, isAuth && styles.bottom]}>
               <Carousel
@@ -1023,7 +1298,7 @@ export default function HomeScreen({ route }: Props) {
           enabled: false,
         }}
       >
-        <ReceivedList refRBSheet={refRBSheet} matchedRate={matchedRate} currency={currency} />
+        <ReceivedList refRBSheet={refRBSheet} receiveType={receiveType} matchedRate={matchedRate} currency={currency} />
       </RBSheet>
     </ScreenLayout>
   );

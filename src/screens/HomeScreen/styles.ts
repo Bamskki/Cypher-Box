@@ -71,7 +71,7 @@ interface Style {
     closeView: ViewStyle;
     bottom: ViewStyle;
     line: ViewStyle;
-
+    descption: TextStyle;
     price: TextStyle;
     priceusd: TextStyle;
     totalsats: TextStyle;
@@ -123,6 +123,12 @@ export default StyleSheet.create<Style>({
         flexDirection: 'column',
         marginTop: 10,
         alignSelf: 'center'
+    },
+    descption: {
+        fontFamily: 'Archivo-SemiBold',
+        color: colors.white,
+        margin: 8,
+        fontSize: 18,
     },
     alreadyView: {
         flexDirection: 'row',
