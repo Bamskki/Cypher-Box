@@ -33,6 +33,23 @@ export const getBalances = async () => {
     }
 };
 
+export const createInvoice = async (invoiceData: any) => {
+  try {
+    console.log('invoiceData: ', invoiceData)
+    const response = await fetch(`${BASE_URL}/receive-requests`, await withAuthToken({
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(invoiceData),
+    }));
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating invoice:', error);
+    throw error;
+  }
+};
+
 export const getInvoices = async () => {
     try {
         const response = await fetch(`${BASE_URL}/invoices/`, await withAuthToken({

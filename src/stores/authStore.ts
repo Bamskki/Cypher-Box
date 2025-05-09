@@ -73,6 +73,7 @@ const createAuthStore = (
             isAuth: undefined,
             user: null,
             token: null,
+            allBTCWallets: get().allBTCWallets.filter(wallet => wallet !== 'COINOS'),
             withdrawThreshold: 2000000,
             reserveAmount: 100000,
         }),

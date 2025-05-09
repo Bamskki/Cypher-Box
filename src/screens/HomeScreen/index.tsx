@@ -131,6 +131,7 @@ export default function HomeScreen({ route }: Props) {
   const [sendAddress, setSendAddress] = useState<any>()
   const [isWalletLoaded, setIsWalletLoaded] = useState(true);
   const [isColdWalletLoaded, setIsColdWalletLoaded] = useState(true);
+  const [receiveType, setReceiveType] = useState(false);
   const refRBSheet = useRef<any>(null);
   const carouselRef = useRef<Carousel<any>>(null);
 
@@ -465,7 +466,8 @@ export default function HomeScreen({ route }: Props) {
     // dispatchNavigate("CheckAccount");
   };
 
-  const receiveClickHandler = () => {
+  const receiveClickHandler = (type: boolean) => {
+    setReceiveType(type);
     refRBSheet.current.open();
   };
 
@@ -853,7 +855,7 @@ export default function HomeScreen({ route }: Props) {
             <View style={styles.btnView}>
               <GradientButtonWithShadow
                 title="Receive"
-                onPress={receiveClickHandler}
+                onPress={() => receiveClickHandler(true)}
                 isShadow
                 isTextShadow
               />
@@ -921,7 +923,7 @@ export default function HomeScreen({ route }: Props) {
     return (
       <>
         {isStrikeAuth &&
-          <>
+          <View style={{ height: '42%' }}>
             <TouchableOpacity style={styles.shadowView} onPress={() => checkingAccountClickHandler('STRIKE')}>
               <Shadow
                 style={StyleSheet.flatten([styles.shadowTop, { shadowColor: colors.pink.shadowTop, padding: 0 }])}
@@ -976,7 +978,7 @@ export default function HomeScreen({ route }: Props) {
             <View style={styles.btnView}>
               <GradientButtonWithShadow
                 title="Receive"
-                onPress={receiveClickHandler}
+                onPress={() => receiveClickHandler(false)}
                 isShadow
                 isTextShadow
               />
@@ -1004,7 +1006,7 @@ export default function HomeScreen({ route }: Props) {
                   </Text>
               )
             }
-          </>
+          </View>
         }
 
         {!isStrikeAuth &&
@@ -1104,6 +1106,7 @@ export default function HomeScreen({ route }: Props) {
   const hasFilledTheBar = calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount)) === 100
   const layout = useWindowDimensions();
 
+  console.log('allBTCWallets: ', allBTCWallets)
   return (
     <ScreenLayout
       RefreshControl={
@@ -1295,7 +1298,7 @@ export default function HomeScreen({ route }: Props) {
           enabled: false,
         }}
       >
-        <ReceivedList refRBSheet={refRBSheet} matchedRate={matchedRate} currency={currency} />
+        <ReceivedList refRBSheet={refRBSheet} receiveType={receiveType} matchedRate={matchedRate} currency={currency} />
       </RBSheet>
     </ScreenLayout>
   );

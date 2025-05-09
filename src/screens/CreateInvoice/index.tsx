@@ -7,9 +7,10 @@ import { ScreenLayout } from "@Cypher/component-library";
 import { CustomKeyboard, GradientInput } from "@Cypher/components";
 import { dispatchNavigate } from "@Cypher/helpers";
 import { createInvoice } from "@Cypher/api/coinOSApis";
+import { createInvoice as createInvoiceStrike } from "@Cypher/api/strikeAPIs";
 
 export default function CreateInvoice({navigation, route}: any) {
-    const {matchedRate, currency} = route.params
+    const {matchedRate, currency, receiveType} = route.params
     const [isSats, setIsSats] = useState(true);
     const [sats, setSats] = useState('');
     const [usd, setUSD] = useState('');
@@ -33,14 +34,27 @@ export default function CreateInvoice({navigation, route}: any) {
             return;
         }
         try {
-            const response = await createInvoice({
+            console.log('receiveType: ', receiveType)
+            const response = receiveType ? await createInvoice({
                 amount: isSats ? Number(sats) : Number(usd),
                 type: 'lightning',
-            });
+            }) : await createInvoiceStrike({
+                bolt11: {
+                    amount: {
+                        amount: isSats ? Number(usd) : Number(sats),
+                        currency: "USD"
+                    },
+                    expiryInSeconds: 60
+                },
+                targetCurrency: "USD"
+              });
+            const hash = receiveType ? response.hash : response.bolt11?.invoice
+            console.log('hash: ', hash)
             dispatchNavigate('CopyInvoice', {
                 value: isSats ? `Receive ${sats} sats` : `Receive ${sats} USD`,
                 converted: isSats ? `$ ${usd}` : `${usd} sats`,
-                hash: response?.hash
+                hash: hash,
+                receiveType
             });
 
             // navigation.navigate('CreatedInvoice', {invoice: response})

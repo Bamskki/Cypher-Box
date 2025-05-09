@@ -9,6 +9,7 @@ import { authorize } from "react-native-app-auth";
 import { jwtDecode } from 'jwt-decode';
 import { Buffer } from 'buffer';
 
+
 const config = {
     id: 'strike',
     name: 'Strike',
@@ -17,7 +18,7 @@ const config = {
     clientId: "cypherbox",
     clientSecret: "SbYmuewpZGS8XDktirso8ficpChSGu7dEaYuMrLx+3k=", // If needed (but avoid hardcoding secrets in client-side code)
     redirectUrl: "cypherbox://oauth/callback", // Must match the redirect URI in your Strike app settings
-    scopes: ["offline_access", "partner.balances.read", "partner.currency-exchange-quote.read", "partner.account.profile.read", "profile", "openid", "partner.invoice.read", "partner.invoice.create", "partner.invoice.quote.generate", "partner.invoice.quote.read", "partner.rates.ticker"], // Specify necessary scopes
+    scopes: ["offline_access", 'partner.receive-request.read', 'partner.payment-quote.onchain.create', 'partner.payment-quote.lightning.create' , 'partner.receive-request.create', "partner.balances.read", "partner.currency-exchange-quote.read", "partner.account.profile.read", "profile", "openid", "partner.invoice.read", "partner.invoice.create", "partner.invoice.quote.generate", "partner.invoice.quote.read", "partner.rates.ticker"], // Specify necessary scopes
     //clientAuthMethod: "post",
     //wellKnown: `https://auth.strike.me/.well-known/openid-configuration`,
     // authorization: {
