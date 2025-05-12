@@ -20,12 +20,18 @@ export default StyleSheet.create({
   },
   footer: {
     alignItems: 'center',
-    paddingBottom: 60,
+    paddingBottom: 20,
   },
   lightningIcon: {
     width: 81,
     height: 94,
     tintColor: colors.white,
+  },
+  line: {
+    height: 2,
+    width: '100%',
+    marginBottom: 20,
+    marginTop: 10,
   },
 });
 

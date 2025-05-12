@@ -13,6 +13,7 @@ import {
   RegisterPrompt,
   HeaderWithLine,
 } from "@Cypher/components";
+import LinearGradient from "react-native-linear-gradient";
 
 const config = {
   id: "strike",
@@ -119,7 +120,7 @@ export default function CheckingAccountLogin() {
               />
               <RegisterPrompt
                 text="Don't have a Strike account?"
-                actionText="Create on Strike"
+                actionText="Download and register"
                 onPress={createStrikeAccountClickHandler}
               />
             </>
@@ -132,13 +133,17 @@ export default function CheckingAccountLogin() {
               />
               <RegisterPrompt
                 text="Don't have a Coinos account?"
-                actionText="Register on Coinos.io"
+                actionText="Register"
                 onPress={createCheckingAccountClickHandler}
               />
             </>
           )}
         </View>
         <View style={styles.footer}>
+          <LinearGradient
+            colors={["#333333", "rgba(48, 48, 51, 0.6)"]}
+            style={styles.line}
+          />
           <Image
             source={require("@Cypher/assets/images/electricity.png")}
             style={styles.lightningIcon}
