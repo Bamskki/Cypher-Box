@@ -10,7 +10,9 @@ import { Input, ScreenLayout, Text } from "@Cypher/component-library";
 import { CustomKeyboard, GradientCard, GradientInput, GradientInputNew } from "@Cypher/components";
 import { colors, } from "@Cypher/style-guide";
 import { dispatchNavigate } from "@Cypher/helpers";
-import { bitcoinRecommendedFee } from "../../api/coinOSApis";
+import { bitcoinRecommendedFee, getNPubData } from "../../api/coinOSApis";
+import { fetchNostrMetadata } from "@Cypher/helpers/fetchNostrMetadata";
+import ConfirmNostrPublicID from "./components/ConfirmNostrPublicID";
 
 
 export function startsWithLn(str: string) {
@@ -28,6 +30,8 @@ export default function SendScreen({ navigation, route }: any) {
     const [sats, setSats] = useState('');
     const [usd, setUSD] = useState('');
     const [sender, setSender] = useState(info?.to || '');
+    const [showNostrConfirm, setShowNostrConfirm] = useState(false);
+
     const senderRef = useRef<TextInput>(null);
 
     const [convertedRate, setConvertedRate] = useState(0.00);
@@ -36,6 +40,28 @@ export default function SendScreen({ navigation, route }: any) {
     const [selectedFee, setSelectedFee] = useState<number | null>(null);
     const [isScannerActive, setIsScannerActive] = useState(false);
     const [addressFocused, setAddressFocused] = useState(false);
+
+    const [nostrProfile, setNostrProfile] = useState<any>(null);
+
+    useEffect(() => {
+        const maybeFetchMetadata = async () => {
+            if (sender.startsWith('npub')) {
+                try {
+                    const metadata = await getNPubData(sender);
+                    setNostrProfile(metadata);
+                    setShowNostrConfirm(true);
+                    setNostrProfile(metadata); // save it to display in UI
+                } catch (err) {
+                    console.log(err, 'err')
+                    setNostrProfile(null);
+                }
+            }
+        };
+
+        maybeFetchMetadata();
+    }, [sender]);
+
+
     useEffect(() => {
         if (info?.isWithdrawal) {
             setSats(String(info?.value))
@@ -239,6 +265,13 @@ export default function SendScreen({ navigation, route }: any) {
 
     return (
         <>
+            <ConfirmNostrPublicID
+                isVisible={showNostrConfirm}
+                onClose={() => setShowNostrConfirm(false)}
+                userProfile={nostrProfile?.profilePic}
+                userName={nostrProfile?.userName || ''}
+                onConfirm={handleSendNext}
+            />
             {isScannerActive ? (
                 <ScreenLayout disableScroll showToolbar isBackButton onBackPress={() => setIsScannerActive(false)} title="Scan QR Code">
                     <View style={styles.scannerContainer}>

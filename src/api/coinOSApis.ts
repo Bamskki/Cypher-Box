@@ -30,10 +30,10 @@ const withAuthToken = async (requestConfig: any) => {
 export const registerUser = async (username: string, password: string) => {
   try {
     const payload = {
-        user: {
-            username: username,
-            password: password,
-        }
+      user: {
+        username: username,
+        password: password,
+      }
     }
     console.log('payload:', payload)
     const response = await fetch(`${BASE_URL}/register`, {
@@ -55,8 +55,8 @@ export const registerUser = async (username: string, password: string) => {
 export const loginUser = async (username: string, password: string) => {
   try {
     const payload = {
-        username,
-        password
+      username,
+      password
     }
     console.log('payload: ', payload)
     const response = await fetch(`${BASE_URL}/login`, {
@@ -83,7 +83,7 @@ export const forgetPassword = async (email: string) => {
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
-      body: JSON.stringify({email}),
+      body: JSON.stringify({ email }),
     });
 
     return await response.text();
@@ -147,7 +147,7 @@ export const sendLightningPayment = async (payreq: string, memo: string, amount?
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(amount && amount !== '' && amount !==0 ? { payreq: payreq, memo: memo, amount } : { payreq: payreq, memo: memo }),
+      body: JSON.stringify(amount && amount !== '' && amount !== 0 ? { payreq: payreq, memo: memo, amount } : { payreq: payreq, memo: memo }),
     }));
 
     console.log('response: ', response)
@@ -167,20 +167,20 @@ export const sendCoinsViaUsername = async (address: string, amount: number, memo
 
     console.log('user: ', user)
 
-    if(user === name){
+    if (user === name) {
       SimpleToast.show("Cannot send to self", SimpleToast.SHORT);
       return;
     }
 
     let url = `https://${domain}/.well-known/lnurlp/${name}`;
-    
+
     const response = await fetch(url);
     console.log('sendCoinsViaLNURL response: ', response)
     const lnurlPayData = await response.json();
     console.log('sendCoinsViaLNURL lnurlPayData: ', lnurlPayData)
 
     if (lnurlPayData.tag === "payRequest") {
-      const paymentResponse = await fetch(lnurlPayData.callback+'?amount='+(amount * 1000), {
+      const paymentResponse = await fetch(lnurlPayData.callback + '?amount=' + (amount * 1000), {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -190,9 +190,9 @@ export const sendCoinsViaUsername = async (address: string, amount: number, memo
 
       const paymentResult = await paymentResponse.json();
       console.log('sendCoinsViaLNURL paymentResult: ', paymentResult)
-      if(paymentResult.pr){
+      if (paymentResult.pr) {
         console.log('domain: ', domain)
-        if(domain == 'coinos.io'){
+        if (domain == 'coinos.io') {
           const response = await fetch(`${BASE_URL}/payments`, await withAuthToken({
             method: 'POST',
             headers: {
@@ -200,7 +200,7 @@ export const sendCoinsViaUsername = async (address: string, amount: number, memo
             },
             body: JSON.stringify({ amount: amount, hash: paymentResult.pr }),
           }));
-      
+
           console.log('response: ', response)
           const responseJSON = await response.json();
           console.log('responseJSON: ', responseJSON)
@@ -208,9 +208,9 @@ export const sendCoinsViaUsername = async (address: string, amount: number, memo
         } else {
           const sendToUser = await sendLightningPayment(paymentResult.pr, memo)
 
-          console.log('sendToUser: ' ,sendToUser)
-          return sendToUser;  
-  
+          console.log('sendToUser: ', sendToUser)
+          return sendToUser;
+
         }
       } else {
         SimpleToast.show(paymentResult.reason, SimpleToast.SHORT);
@@ -264,9 +264,9 @@ export const bitcoinSendFee = async (amount: number, address: string, feeRate: n
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ amount, address, feeRate}),
+      body: JSON.stringify({ amount, address, feeRate }),
     }));
-    
+
     return await response.text();
   } catch (error) {
     console.error('Error sending bitcoin payment:', error);
@@ -299,7 +299,7 @@ export const getMe = async () => {
       },
     }));
     console.log('response: ', response?.status)
-    if(response?.status === 401){
+    if (response?.status === 401) {
       SimpleToast.show("Authorization expired. Please login again to continue", SimpleToast.SHORT)
       useAuthStore.getState().clearAuth();
     }
@@ -353,6 +353,45 @@ export const getTransactionDetail = async (id: number) => {
     return await response.json();
   } catch (error) {
     console.error('Error fetching invoice by hash:', error);
+    throw error;
+  }
+};
+
+export const getNPubData = async (npubAddress: string) => {
+  // const npubAddress = "npub1fuga6qv0mjyu4ru0r4cet7dnw0w4wz8r7k3myf72araypn0tnu7q7hpfdu";
+  try {
+    const url = `https://coinos.io/${npubAddress}/__data.json?x-sveltekit-invalidated=11111`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Cookie': `username=${npubAddress}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch user data');
+    }
+
+
+    const text = await response.text();
+    const lines = text.split('\n').filter(l => l.trim());
+    console.log(lines, 'lines')
+    const userNode = lines.find(line => {
+      const parsed = JSON.parse(line);
+      return parsed.type === "data" && parsed.nodes?.[1]?.data;
+    });
+
+    if (!userNode) throw new Error('User data not found in response');
+    const data = JSON.parse(userNode);
+    const userData = data.nodes[1].data;
+
+    return {
+      userName: userData[12],
+      profilePic: userData[9]
+    };
+
+  } catch (error) {
+    console.error('Error fetching user data:', error);
     throw error;
   }
 };

@@ -212,6 +212,7 @@
     "stream-browserify": "3.0.0",
     "url": "0.11.3",
     "wif": "2.0.6",
+    "ws": "^8.18.2",
     "zustand": "^4.5.2"
   },
   "react-native": {

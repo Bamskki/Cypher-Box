@@ -47,3 +47,5 @@ export { default as TransactionBlue } from './transaction-blue.png';
 export { default as Small } from './small.png';
 export { default as Yes } from './yes.png';
 export { default as StartNotActive } from './startNotActive.png';
+export { default as Confirm } from './confirm.png';
+
