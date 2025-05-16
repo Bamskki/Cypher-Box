@@ -471,12 +471,12 @@ export default function HomeScreen({ route }: Props) {
     refRBSheet.current.open();
   };
 
-  const sendClickHandler = () => {
-    dispatchNavigate('SendScreen', { currency, matchedRate });
+  const sendClickHandler = (walletType: boolean) => {
+    dispatchNavigate('SendScreen', { currency, matchedRate, receiveType: walletType });
   };
 
-  const checkingAccountClickHandler = (walletType: string) => {
-    dispatchNavigate('CheckingAccount', { matchedRate, walletType });
+  const checkingAccountClickHandler = (walletType: boolean) => {
+    dispatchNavigate('CheckingAccount', { matchedRate, receiveType: walletType });
   }
 
   const withdrawClickHandler = () => {
@@ -802,7 +802,7 @@ export default function HomeScreen({ route }: Props) {
       <>
         {isAuth &&
           <>
-            <TouchableOpacity style={styles.shadowView} onPress={() => checkingAccountClickHandler("COINOS")}>
+            <TouchableOpacity style={styles.shadowView} onPress={() => checkingAccountClickHandler(true)}>
               <Shadow
                 style={StyleSheet.flatten([styles.shadowTop, { shadowColor: colors.pink.shadowTop, padding: 0 }])}
                 inner
@@ -861,7 +861,7 @@ export default function HomeScreen({ route }: Props) {
               />
               <GradientButtonWithShadow
                 title="Send"
-                onPress={sendClickHandler}
+                onPress={() => sendClickHandler(true)}
                 isShadow
                 isTextShadow
               />
@@ -924,7 +924,7 @@ export default function HomeScreen({ route }: Props) {
       <>
         {isStrikeAuth &&
           <View style={{ height: '42%' }}>
-            <TouchableOpacity style={styles.shadowView} onPress={() => checkingAccountClickHandler('STRIKE')}>
+            <TouchableOpacity style={styles.shadowView} onPress={() => checkingAccountClickHandler(false)}>
               <Shadow
                 style={StyleSheet.flatten([styles.shadowTop, { shadowColor: colors.pink.shadowTop, padding: 0 }])}
                 inner
@@ -984,7 +984,7 @@ export default function HomeScreen({ route }: Props) {
               />
               <GradientButtonWithShadow
                 title="Send"
-                onPress={sendClickHandler}
+                onPress={() => sendClickHandler(false)}
                 isShadow
                 isTextShadow
               />

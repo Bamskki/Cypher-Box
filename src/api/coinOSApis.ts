@@ -258,12 +258,12 @@ export const sendInternalPayment = async (amount: number, hash: string) => {
 
 export const bitcoinRecommendedFee = async () => {
   try {
-    const response = await fetch(`https://mempool.space/api/v1/fees/recommended`, await withAuthToken({
+    const response = await fetch(`https://mempool.space/api/v1/fees/recommended`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
-    }));
+    });
     return await response.json();
   } catch (error) {
     console.error('Error getting Fee:', error);
