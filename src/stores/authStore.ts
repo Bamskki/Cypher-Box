@@ -94,6 +94,8 @@ const createAuthStore = (
     setWithdrawStrikeThreshold: (state: any) => set({ withdrawStrikeThreshold: state }),
     clearStrikeAuth: () =>
         set({
+            strikeMe: null,
+            strikeUser: null,
             walletTab: false,
             strikeToken: null,
             allBTCWallets: get().allBTCWallets.filter(wallet => wallet !== 'STRIKE'),
