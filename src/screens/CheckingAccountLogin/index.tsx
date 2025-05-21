@@ -1,14 +1,19 @@
 import React from "react";
-import { Linking, TouchableOpacity, View } from "react-native";
+import { Linking, TouchableOpacity, View, Image } from "react-native";
 import styles from "./styles";
 import { Button, ScreenLayout, Text } from "@Cypher/component-library";
 import { dispatchNavigate } from "@Cypher/helpers";
 import useAuthStore from "@Cypher/stores/authStore";
 import { colors } from "@Cypher/style-guide";
 import { authorize } from "react-native-app-auth";
-import { jwtDecode } from 'jwt-decode';
-import { Buffer } from 'buffer';
-
+import { jwtDecode } from "jwt-decode";
+import { Buffer } from "buffer";
+import {
+  LoginOption,
+  RegisterPrompt,
+  HeaderWithLine,
+} from "@Cypher/components";
+import LinearGradient from "react-native-linear-gradient";
 
 const config = {
     id: 'strike',
@@ -37,89 +42,99 @@ const config = {
 };
 
 export default function CheckingAccountLogin() {
-    const {isAuth, isStrikeAuth, allBTCWallets, setStrikeMe, setStrikeAuth, setStrikeToken, setAllBTCWallets} = useAuthStore();
+  const {
+    isAuth,
+    isStrikeAuth,
+    allBTCWallets,
+    setStrikeMe,
+    setStrikeAuth,
+    setStrikeToken,
+    setAllBTCWallets,
+  } = useAuthStore();
 
+  const createCheckingAccountClickHandler = () => {
+    Linking.openURL("https://coinos.io/register");
+  };
 
-    const createChekingAccountClickHandler = () => {
-        Linking.openURL('https://coinos.io/register')
-    };
-  
-    const createStrikeAccountClickHandler = () => {
-        Linking.openURL('https://dashboard.strike.me/signup')
-    };
+  const createStrikeAccountClickHandler = () => {
+    Linking.openURL("https://dashboard.strike.me/signup");
+  };
 
-    const handleCoinosLogin = () => {
-        dispatchNavigate('LoginCoinOSScreen');
+  const handleCoinosLogin = () => {
+    dispatchNavigate("LoginCoinOSScreen");
+  };
+
+  const handleStrikeLogin = async () => {
+    try {
+      const result = await authorize(config);
+      console.log("Access Token:", result);
+      setStrikeToken(result.accessToken);
+      setStrikeAuth(true);
+      const temp = [...allBTCWallets];
+      const tokenParts = result.accessToken.split(".");
+      const header = Buffer.from(tokenParts[0], "base64").toString("utf8");
+      const payload = Buffer.from(tokenParts[1], "base64").toString("utf8");
+      const signature = tokenParts[2];
+      const decoded = JSON.parse(payload);
+      console.log("decoded", decoded);
+      console.log("signature: ", signature);
+      setStrikeMe(decoded);
+      setAllBTCWallets([...temp, "STRIKE"]);
+      dispatchNavigate("CheckingAccountCreated");
+
+      // if (balances && balances?.balances) {
+      //   const numericAmount = Number(balances.balances[0].amount.replace(/[^0-9\.]/g, ''));
+      //   setMatchedRate(numericAmount);
+      // }
+    } catch (error) {
+      console.error("OAuth error", error);
     }
+  };
 
-    const handleStrikeLogin = async () => {
-        try {
-            const result = await authorize(config);
-            console.log("Access Token:", result);
-            setStrikeToken(result.accessToken);
-            setStrikeAuth(true);
-            const temp = [...allBTCWallets];
-            const tokenParts = result.accessToken.split('.');
-            const header = Buffer.from(tokenParts[0], 'base64').toString('utf8');
-            const payload = Buffer.from(tokenParts[1], 'base64').toString('utf8');
-            const signature = tokenParts[2];            
-            const decoded = JSON.parse(payload);
-            console.log("decoded", decoded);
-            console.log('signature: ', signature)
-            setStrikeMe(decoded);
-            setAllBTCWallets([...temp, 'STRIKE']);
-            dispatchNavigate('CheckingAccountCreated');
-
-            // if (balances && balances?.balances) {
-            //   const numericAmount = Number(balances.balances[0].amount.replace(/[^0-9\.]/g, ''));
-            //   setMatchedRate(numericAmount);
-            // }
-        } catch (error) {
-            console.error("OAuth error", error);
-        }
-    };
-
-    return (
-        <ScreenLayout showToolbar>
-            <View style={styles.container}>
-                <View style={styles.innerView}>
-                    {!isStrikeAuth &&
-                        <>
-                            <Text style={styles.title}>Login to Checking Account</Text>
-                            <TouchableOpacity onPress={handleStrikeLogin} style={{borderRadius: 10, marginTop: 60, marginBottom: 15, borderWidth: 1, borderColor: colors.pink.light}}>
-                                <Text h4 style={styles.descption}>Login to Strike</Text>
-                            </TouchableOpacity>
-                            <View style={styles.createAccount}>
-                                <Text bold style={styles.text}>
-                                    Don’t have an account?
-                                </Text>
-                                <TouchableOpacity onPress={createStrikeAccountClickHandler}>
-                                    <Text bold style={styles.login}>
-                                        Create on Strike
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                        </>
-                    }
-                    {!isAuth &&
-                        <>
-                            <TouchableOpacity onPress={handleCoinosLogin} style={{borderRadius: 10, marginTop: 60, marginBottom: 15, borderWidth: 1, borderColor: colors.pink.light}}>
-                                <Text h4 style={styles.descption}>Login to Coinos</Text>
-                            </TouchableOpacity>
-                            <View style={styles.createAccount}>
-                                <Text bold style={styles.text}>
-                                    Don’t have an account?
-                                </Text>
-                                <TouchableOpacity onPress={createChekingAccountClickHandler}>
-                                    <Text bold style={styles.login}>
-                                        Create on Coinos.io
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>    
-                        </>
-                    }
-                </View>
-            </View>
-        </ScreenLayout>
-    )
+  return (
+    <ScreenLayout showToolbar>
+      <View style={styles.container}>
+        <HeaderWithLine title="Login to Checking Account" />
+        <View style={styles.content}>
+          {!isStrikeAuth && (
+            <>
+              <LoginOption
+                logo={require("@Cypher/assets/images/strike.png")}
+                onPress={handleStrikeLogin}
+              />
+              <RegisterPrompt
+                text="Don't have a Strike account?"
+                actionText="Download and register"
+                onPress={createStrikeAccountClickHandler}
+              />
+            </>
+          )}
+          {!isAuth && (
+            <>
+              <LoginOption
+                logo={require("@Cypher/assets/images/coinos.png")}
+                onPress={handleCoinosLogin}
+              />
+              <RegisterPrompt
+                text="Don't have a Coinos account?"
+                actionText="Register"
+                onPress={createCheckingAccountClickHandler}
+              />
+            </>
+          )}
+        </View>
+        <View style={styles.footer}>
+          <LinearGradient
+            colors={["#333333", "rgba(48, 48, 51, 0.6)"]}
+            style={styles.line}
+          />
+          <Image
+            source={require("@Cypher/assets/images/electricity.png")}
+            style={styles.lightningIcon}
+            resizeMode="contain"
+          />
+        </View>
+      </View>
+    </ScreenLayout>
+  );
 }
