@@ -92,7 +92,11 @@ interface Style {
     createVaultText: TextStyle;
     advancedText: TextStyle;
     createVaultContainer: ViewStyle;
-
+    addView: ViewStyle;
+    subView: ViewStyle;
+    add: TextStyle;
+    sub: TextStyle;
+    addSats: TextStyle;
 }
 
 export default StyleSheet.create<Style>({
@@ -105,6 +109,44 @@ export default StyleSheet.create<Style>({
     },
     container2: {
         flex: 1,
+    },
+    addView: {
+        height: 40,
+        width: 40,
+        marginTop: 10,
+        marginBottom: 16,
+        borderRadius: 10,
+        borderWidth: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderColor: colors.pink.default
+    },
+    subView: {
+        height: 40,
+        width: 40,
+        marginTop: 10,
+        marginLeft: 10,
+        marginBottom: 16,
+        borderRadius: 10,
+        borderWidth: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderColor: colors.pink.default
+    },
+    sub: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#ffffff'
+    },
+    add: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#ffffff'
+    },
+    addSats: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#ffffff'
     },
     container3: {
         height: 62,

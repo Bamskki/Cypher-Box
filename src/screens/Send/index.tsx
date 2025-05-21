@@ -40,13 +40,20 @@ export default function SendScreen({ navigation, route }: any) {
     const [addressFocused, setAddressFocused] = useState(false);
     const [isPaste, setIsPaste] = useState(info?.destination && info?.destination?.startsWith('ln') ? true : false)
 
-    console.log('info: ', info)
     useEffect(() => {
         if (info?.isWithdrawal) {
             setSats(String(info?.value))
             setUSD(info?.converted)
         }
     }, [info?.isWithdrawal])
+
+    useEffect(() => {
+        if(info?.fiatAmount){
+            let sats = Number(info?.fiatAmount / info?.matchedRate  * 100000000)
+            setUSD(String(info?.fiatAmount))
+            setSats(String(sats))
+        }
+    }, [info])
 
     useEffect(() => {
         if (!sender.startsWith('ln') && !sender.includes('@') && !recommendedFee) {
