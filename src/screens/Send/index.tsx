@@ -48,6 +48,14 @@ export default function SendScreen({ navigation, route }: any) {
     }, [info?.isWithdrawal])
 
     useEffect(() => {
+        if(info?.fiatAmount){
+            let sats = Number(info?.fiatAmount / info?.matchedRate  * 100000000)
+            setUSD(String(info?.fiatAmount))
+            setSats(String(sats))
+        }
+    }, [info])
+
+    useEffect(() => {
         if (!sender.startsWith('ln') && !sender.includes('@') && !recommendedFee) {
             const init = async () => {
                 const res = await bitcoinRecommendedFee();
@@ -59,7 +67,7 @@ export default function SendScreen({ navigation, route }: any) {
             if(info.destination){
                 setTimeout(() => handleLighteningInvoice(), 500)
             }
-            handleLighteningInvoice()
+            // handleLighteningInvoice()
         }
     }, [sender, isPaste, info?.destination])
 
@@ -102,23 +110,23 @@ export default function SendScreen({ navigation, route }: any) {
         try {
             const response = await getInvoiceByLightening(sender);
             console.log('response getInvoiceByLightening: ', response)
-                const dollarAmount = (response.amount_msat / 1000) * info?.matchedRate * btc(1);
-                console.log('dollarAmount: ', dollarAmount)
-                if(dollarAmount){
-                    dispatchNavigate('ReviewPayment', {
-                        ...info,
-                        value: response.amount_msat / 1000,
-                        converted: dollarAmount,
-                        isSats: isSats,
-                        to: info?.isWithdrawal ? info?.to : sender,
-                        fees: 0,
-                        type: 'lightening',
-                        description: response?.description,
-                        matchedRate: info?.matchedRate,
-                        currency: info?.curreny,
-                        recommendedFee: recommendedFee || 0
-                    });    
-                }
+            const dollarAmount = (response.amount_msat / 1000) * info?.matchedRate * btc(1);
+            console.log('dollarAmount: ', dollarAmount)
+            if(dollarAmount){
+                dispatchNavigate('ReviewPayment', {
+                    ...info,
+                    value: response.amount_msat / 1000,
+                    converted: dollarAmount,
+                    isSats: isSats,
+                    to: info?.isWithdrawal ? info?.to : sender,
+                    fees: 0,
+                    type: 'lightening',
+                    description: response?.description,
+                    matchedRate: info?.matchedRate,
+                    currency: info?.curreny,
+                    recommendedFee: recommendedFee || 0
+                });    
+            }
         } catch (error) {
             console.error('Error Send Lightening:', error);
             SimpleToast.show('Failed to generate lightening. Please try again.', SimpleToast.SHORT);
@@ -129,7 +137,7 @@ export default function SendScreen({ navigation, route }: any) {
 
     const handleSendNext = async () => {
         setIsLoading(true);
-        const amount = isSats ? sats : usd;
+        const amount = info?.receiveType ? isSats ? usd : sats : isSats ? sats : usd;
         if (sender == '' && (!info?.to || info?.to == '')) {
             SimpleToast.show('Please enter an address or username', SimpleToast.SHORT);
             setIsLoading(false);
@@ -146,7 +154,8 @@ export default function SendScreen({ navigation, route }: any) {
                     type: 'lightening',
                     matchedRate: info?.matchedRate,
                     currency: info?.curreny,
-                    recommendedFee
+                    recommendedFee,
+                    receiveType: info?.receiveType
                 });
 
             } catch (error) {
@@ -162,7 +171,7 @@ export default function SendScreen({ navigation, route }: any) {
                 return;
             }
 
-            const feeForBamskki = (0.1 / 100) * Number(amount);
+            const feeForBamskki = info?.receiveType ? (0.1 / 100) * Number(amount) : 0;
             const remainingAmount = Number(amount) - feeForBamskki;
             console.log('feeForBamskki: ', feeForBamskki)
             console.log('remainingAmount: ', remainingAmount)
@@ -187,7 +196,8 @@ export default function SendScreen({ navigation, route }: any) {
                     currency: info?.curreny,
                     type: 'bitcoin',
                     feeForBamskki,
-                    recommendedFee
+                    recommendedFee,
+                    receiveType: info?.receiveType
                 });
             } catch (error) {
                 console.error('Error Send to bitcoin:', error);
@@ -212,7 +222,8 @@ export default function SendScreen({ navigation, route }: any) {
                     type: 'username',
                     matchedRate: info?.matchedRate,
                     currency: info?.curreny,
-                    recommendedFee
+                    recommendedFee,
+                    receiveType: info?.receiveType
                 });
             } catch (error) {
                 console.error('Error Send Lightening:', error);
@@ -248,7 +259,8 @@ export default function SendScreen({ navigation, route }: any) {
                     currency: info?.curreny,
                     type: 'liquid',
                     feeForBamskki,
-                    recommendedFee
+                    recommendedFee,
+                    receiveType: info?.receiveType
                 });
             } catch (error) {
                 console.error('Error Send to liquid:', error);

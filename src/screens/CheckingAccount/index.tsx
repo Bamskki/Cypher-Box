@@ -119,13 +119,13 @@ const reserveData = [
 ];
 
 export default function CheckAccount({ navigation, route }: any) {
-    const { withdrawThreshold, reserveAmount, setWithdrawThreshold, setReserveAmount } = useAuthStore();
+    const { withdrawThreshold, reserveAmount, withdrawStrikeThreshold, reserveStrikeAmount, setWithdrawThreshold, setWithdrawStrikeThreshold, setReserveStrikeAmount, setReserveAmount } = useAuthStore();
+    const { matchedRate, receiveType } = route.params;
     const [isTab, setIsTab] = useState(true);
-    const [value, setValue] = useState(Number(withdrawThreshold));
+    const [value, setValue] = useState(receiveType ? Number(withdrawThreshold) : Number(withdrawStrikeThreshold));
     const [isError, setIsError] = useState(false);
     const [isErrorReserve, setIsErrorReserve] = useState(false);
-    const [reserveAmt, setReserveAmt] = useState(Number(reserveAmount));
-    const { matchedRate, walletType } = route.params;
+    const [reserveAmt, setReserveAmt] = useState(receiveType ? Number(reserveAmount) : Number(reserveStrikeAmount));
     const [isLoading, setIsLoading] = useState(false);
     const [payments, setPayments] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -136,24 +136,43 @@ export default function CheckAccount({ navigation, route }: any) {
     const currency = btc(1);
 
     useEffect(() => {
-        loadPayments();
-    }, [offset, walletType]);
+        if(receiveType)
+            loadPayments();
+        else
+            loadStrikePayments();
+    }, [offset, receiveType]);
 
     useEffect(() => {
-        if (withdrawThreshold < data[0].sats || withdrawThreshold > data[data.length - 1].sats) {
-            setIsError(true);
+        if(receiveType){
+            if (withdrawThreshold < data[0].sats || withdrawThreshold > data[data.length - 1].sats) {
+                setIsError(true);
+            } else {
+                setIsError(false);
+            }
         } else {
-            setIsError(false);
+            if (withdrawStrikeThreshold < data[0].sats || withdrawStrikeThreshold > data[data.length - 1].sats) {
+                setIsError(true);
+            } else {
+                setIsError(false);
+            }
         }
-    }, [withdrawThreshold])
+    }, [withdrawThreshold, withdrawStrikeThreshold, receiveType])
 
     useEffect(() => {
-        if (reserveAmount < reserveData[0].sats || reserveAmount > reserveData[reserveData.length - 1].sats) {
-            setIsErrorReserve(true);
+        if(receiveType) {
+            if (reserveAmount < reserveData[0].sats || reserveAmount > reserveData[reserveData.length - 1].sats) {
+                setIsErrorReserve(true);
+            } else {
+                setIsErrorReserve(false);
+            }
         } else {
-            setIsErrorReserve(false);
+            if (reserveStrikeAmount < reserveData[0].sats || reserveStrikeAmount > reserveData[reserveData.length - 1].sats) {
+                setIsErrorReserve(true);
+            } else {
+                setIsErrorReserve(false);
+            }
         }
-    }, [reserveAmount])
+    }, [reserveAmount, reserveStrikeAmount, receiveType])
 
 
     const [isModalVisible, setModalVisible] = useState(false);
@@ -166,7 +185,8 @@ export default function CheckAccount({ navigation, route }: any) {
     const onPressHandler = (item: any) => {
         dispatchNavigate('Invoice', {
             item: item,
-            matchedRate
+            matchedRate,
+            receiveType
         });
     }
 
@@ -177,7 +197,7 @@ export default function CheckAccount({ navigation, route }: any) {
             console.log('index: ', currentIndex - 1);
             console.log('temp: ', newValue);
             setValue(Number(newValue));
-            setWithdrawThreshold(newValue);
+            receiveType ? setWithdrawThreshold(newValue) : setWithdrawStrikeThreshold(newValue);
         } else {
             SimpleToast.show("Withdraw Threshold cannot be less than 2M", SimpleToast.SHORT);
         }
@@ -190,7 +210,7 @@ export default function CheckAccount({ navigation, route }: any) {
             console.log('index: ', currentIndex + 1);
             console.log('temp: ', newValue);
             setValue(Number(newValue));
-            setWithdrawThreshold(newValue);
+            receiveType ? setWithdrawThreshold(newValue) : setWithdrawStrikeThreshold(newValue);
         } else {
             SimpleToast.show("Withdraw Threshold cannot be greater than 9M", SimpleToast.SHORT);
         }
@@ -203,7 +223,7 @@ export default function CheckAccount({ navigation, route }: any) {
             console.log('index: ', currentIndex - 1);
             console.log('temp: ', newValue);
             setReserveAmt(Number(newValue));
-            setReserveAmount(newValue);
+            receiveType ? setReserveAmount(newValue) : setReserveStrikeAmount(newValue);
         } else {
             SimpleToast.show("Reserve Amount cannot be less than 100K", SimpleToast.SHORT);
         }
@@ -216,20 +236,20 @@ export default function CheckAccount({ navigation, route }: any) {
             console.log('index: ', currentIndex + 1);
             console.log('temp: ', newValue);
             setReserveAmt(Number(newValue));
-            setReserveAmount(newValue);
+            receiveType ? setReserveAmount(newValue) : setReserveStrikeAmount(newValue);
         } else {
             SimpleToast.show("Reserve Amount cannot be greater than 2M", SimpleToast.SHORT);
         }
     }
 
     const selectClickHandler = (val: number) => {
-        setWithdrawThreshold(val)
+        receiveType ? setWithdrawThreshold(val) : setWithdrawStrikeThreshold(val);
         setValue(Number(val));
         setModalVisible(false);
     }
 
     const selectRAClickHandler = (val: number) => {
-        setReserveAmount(val)
+        receiveType ? setReserveAmount(val) : setReserveStrikeAmount(val);
         setReserveAmt(Number(val));
         setModalRAVisible(false);
     }
@@ -246,22 +266,42 @@ export default function CheckAccount({ navigation, route }: any) {
     }
 
     const onSelect = (value: number, index: number) => {
-        if (index == 0) {
-            if (withdrawThreshold < data[0].sats || withdrawThreshold > data[data.length - 1].sats) {
-                setIsError(true);
+        if(receiveType){
+            if (index == 0) {
+                if (withdrawThreshold < data[0].sats || withdrawThreshold > data[data.length - 1].sats) {
+                    setIsError(true);
+                } else {
+                    setIsError(false);
+                }
+                setValue(Number(value));
+                setWithdrawThreshold(value)
             } else {
-                setIsError(false);
+                if (reserveAmount < reserveData[0].sats || reserveAmount > reserveData[reserveData.length - 1].sats) {
+                    setIsErrorReserve(true);
+                } else {
+                    setIsErrorReserve(false);
+                }
+                setReserveAmt(Number(value));
+                receiveType ? setReserveAmount(value) : setReserveStrikeAmount(value)
             }
-            setValue(Number(value));
-            setWithdrawThreshold(value)
         } else {
-            if (reserveAmount < reserveData[0].sats || reserveAmount > reserveData[reserveData.length - 1].sats) {
-                setIsErrorReserve(true);
+            if (index == 0) {
+                if (withdrawStrikeThreshold < data[0].sats || withdrawStrikeThreshold > data[data.length - 1].sats) {
+                    setIsError(true);
+                } else {
+                    setIsError(false);
+                }
+                setValue(Number(value));
+                setWithdrawStrikeThreshold(value)
             } else {
-                setIsErrorReserve(false);
+                if (reserveStrikeAmount < reserveData[0].sats || reserveStrikeAmount > reserveData[reserveData.length - 1].sats) {
+                    setIsErrorReserve(true);
+                } else {
+                    setIsErrorReserve(false);
+                }
+                setReserveAmt(Number(value));
+                setReserveStrikeAmount(value)
             }
-            setReserveAmt(Number(value));
-            setReserveAmount(value)
         }
     }
 
@@ -286,9 +326,12 @@ export default function CheckAccount({ navigation, route }: any) {
     };
 
     const loadStrikePayments = async () => {
+        setIsLoading(true);
         try {
             const paymentList = await getInvoices();
-            setPayments(paymentList.payments);
+            let payments = paymentList.items;
+            payments = payments.filter((item: any) => item.state !== "UNPAID");
+            setPayments(payments);
         } catch (error) {
             console.error('Error loading payments:', error);
         } finally {
@@ -363,21 +406,23 @@ export default function CheckAccount({ navigation, route }: any) {
                                         </View>
                                     )}
                                     refreshControl={
-                                        <RefreshControl
-                                            refreshing={isRefreshing}
-                                            onRefresh={handleRefresh}
-                                            tintColor="white"
-                                        />
+                                        receiveType ? (
+                                            <RefreshControl
+                                                refreshing={isRefreshing}
+                                                onRefresh={handleRefresh}
+                                                tintColor="white"
+                                            />
+                                        ) : null
                                     }
                                     keyExtractor={(item, index) => index.toString()}
-                                    renderItem={({ item }) => <Items matchedRate={matchedRate} item={item} onPressHandler={onPressHandler} />}
+                                    renderItem={({ item }) => <Items matchedRate={matchedRate} item={item} receiveType={receiveType} onPressHandler={onPressHandler} />}
                                     renderSectionHeader={({ section: { title } }) => <Header title={title} />}
                                 // invertStickyHeaders
                                 />
                             </View>
                         )}
                         <View style={styles.bottomView}>
-                            <Image source={CoinOS} />
+                            <Image source={receiveType ? CoinOS : require("../../../img/Strike.png")} />
                         </View>
                     </View>
                     :

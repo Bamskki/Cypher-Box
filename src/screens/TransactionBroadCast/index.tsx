@@ -18,7 +18,7 @@ import Animated, {
 import { resetAndNavigate } from "@Cypher/helpers/navigation";
 
 export default function TransactionBroadCast({navigation, route}: any) {
-    const {matchedRate, type, value, converted, isSats, item} = route?.params;
+    const {matchedRate, type, value, converted, isSats, item, receiveType = true } = route?.params;
     const amountSat = isSats ? value : converted;
     const amountUSD = isSats ? converted : value
     const [response, setResponse] = useState(false);
@@ -51,10 +51,14 @@ export default function TransactionBroadCast({navigation, route}: any) {
     }, [progress]);
 
     const onPressClickHandler = () => {
-        resetAndNavigate('HomeScreen', 'Invoice', {
-            item: item,
-            matchedRate
-        })
+        if(receiveType){
+            dispatchNavigate('HomeScreen');            
+        } else {
+            resetAndNavigate('HomeScreen', 'Invoice', {
+                item: item,
+                matchedRate
+            })
+        }
         // dispatchNavigate('CheckingAccount', {matchedRate});
     }
 
@@ -174,7 +178,7 @@ export default function TransactionBroadCast({navigation, route}: any) {
                 {/* <View style={styles.extra} /> */}
                 {response &&
                     <GradientButton style={styles.invoiceButton} textStyle={{ fontFamily: 'Lato-Medium', }}
-                        title='Transaction Details'
+                        title={receiveType ? 'Transaction Details' : 'Home'}
                         disabled={!response}
                         onPress={onPressClickHandler} />
                     // :

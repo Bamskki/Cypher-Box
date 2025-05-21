@@ -18,6 +18,8 @@ import { btc, formatNumber, matchKeyAndValue } from "@Cypher/helpers/coinosHelpe
 import { FeeSelection } from "./FeeSelection/FeeSelection";
 import { startsWithLn } from "../Send";
 import { calculateBalancePercentage, calculatePercentage } from "../HomeScreen";
+import { getOnChainTiers, getPaymentQoute, getPaymentQouteByLightening, getPaymentQouteByLighteningURL, getPaymentQouteByOnChain } from "@Cypher/api/strikeAPIs";
+import { mostRecentFetchedRate } from "../../../blue_modules/currency";
 
 interface Props {
     route: any;
@@ -40,8 +42,14 @@ export const shortenAddress = (address: string) => {
     return `${start}...${end}`;
 };
 
+function usdToSats(usdAmount: number, exchangeRate: number): string {
+  const btcAmount = usdAmount / exchangeRate;
+  const satoshiAmount = Number(btcAmount * 100000000).toFixed(2);
+  return satoshiAmount;
+}
+
 export default function ReviewPayment({ route }: Props) {
-    const { value, converted, isSats, to, type, recommendedFee, isWithdrawal = false, wallet = null, description } = route?.params;
+    const { value, converted, isSats, to, type, recommendedFee, isWithdrawal = false, wallet = null, description, receiveType } = route?.params;
     const { withdrawThreshold, reserveAmount, vaultTab } = useAuthStore();
     const [note, setNote] = useState(description || '');
     const [balance, setBalance] = useState(0);
@@ -59,6 +67,9 @@ export default function ReviewPayment({ route }: Props) {
     const [isModalVisible, setModalVisible] = useState(false);
     const [isEditAmount, setIsEditAmount] = useState(false);
     const [isCheck, setIsCheck] = useState(false);
+    const [strikeFees, setStrikeFees] = useState<any[]>([]);
+    const [selectedStrikeFee, setSelectedStrikeFee] = useState<any>(null);
+    const [paymentQuoteData, setPaymentQuoteData] = useState<any>(null);
 
     const swipeButtonRef = useRef(null);
     const feeNames: Record<Fee, string> = {
@@ -69,14 +80,158 @@ export default function ReviewPayment({ route }: Props) {
     };
 
     useEffect(() => {
-        handleUser();
-    }, []);
+        if(receiveType)
+            handleUser();
+        else {
+            handleRates();
+        }
+    }, [receiveType]);
 
-    // useEffect(() => {
-    //     if(selectedFeeName){
-    //         handleFeeEstimate();
-    //     }
-    // }, [selectedFeeName])
+    useEffect(() => {
+        if(to.startsWith('bc') && !receiveType){
+            handleStrikeOnChainFee();
+        }
+    }, [to, receiveType])
+
+    useEffect(() => {
+        if(to && !receiveType){
+            handlePaymentQuote();
+        }
+    }, [to, isSats, receiveType])
+
+    useEffect(() => {
+        if(to.startsWith('bc') && selectedStrikeFee && !receiveType){
+            handleStrikeBTCFee(selectedStrikeFee?.id);
+        }
+    }, [to, selectedStrikeFee, receiveType])
+
+    const exchangeRate = async () => {
+        const rates = await mostRecentFetchedRate();
+        return rates
+    }
+
+    const handleRates = async () => {
+        const rates = await exchangeRate();
+        if (rates && rates?.Rate) {
+          const numericAmount = Number(rates.Rate.replace(/[^0-9\.]/g, ''));
+          setMatchedRate(numericAmount);
+        }
+
+    }
+
+    const handleStrikeBTCFee = async (onChainTierId: string) => {
+        const amount =  receiveType ? isSats ? value : converted : isSats ? converted : value;
+        try {
+            let payload = {
+                btcAddress: to,
+                sourceCurrency: "USD",
+                amount: {
+                    amount: Number(amount),
+                    currency: "USD",
+                    feePolicy: "EXCLUSIVE"
+                },
+                description: note,
+                onchainTierId: onChainTierId
+            }
+            let url = 'onchain'
+            const response = await getPaymentQoute(url, payload);
+            console.log('response: ', response)
+            if(response?.amount){
+                setPaymentQuoteData(response)
+            } else if (response?.data?.message){
+                SimpleToast.show(response?.data?.message, SimpleToast.SHORT)
+            }
+        } catch (error) {
+            console.log('error: ', error)
+        }
+    }
+
+    console.log('paymentQuoteData: ', paymentQuoteData, matchedRate)
+
+    const handlePaymentQuote = async () => {
+        setFeeLoading(true);
+        try {
+            let payload = {}, url = '';
+            const amount =  receiveType ? isSats ? value : converted : isSats ? converted : value;
+            if (startsWithLn(to)) {
+                payload = {
+                    lnInvoice: to,
+                    sourceCurrency: "USD",
+                    amount: {
+                        amount: Number(amount),
+                        currency: "USD",
+                        feePolicy: "EXCLUSIVE"
+                    },
+                    description: note
+                }
+                url = 'lightning'
+            } else if (to.includes("@")) { //username
+                payload = {
+                    lnAddressOrUrl: to,
+                    sourceCurrency: "USD",
+                    amount: {
+                        amount: String(amount),
+                        currency: "USD"
+                    },
+                    // description: note
+                }
+                url = 'lightning/lnurl'
+            }
+            const response = await getPaymentQoute(url, payload);
+            if(response?.amount){
+                console.log('setPaymentQuoteData paymentQuoteData?.paymentQuoteId: ', response?.paymentQuoteId)
+                setPaymentQuoteData(response)
+            }
+            console.log('response: ', response)
+        } catch (error) {
+            console.error('Error Send Lightening:', error);
+            SimpleToast.show('Failed to Send. Please try again.', SimpleToast.SHORT);
+        } finally {
+            setFeeLoading(false);
+        }
+    }
+
+    const handleStrikeOnChainFee = async () => {
+        const amount =  receiveType ? isSats ? value : converted : isSats ? converted : value;
+        try {
+            const payload = {
+                btcAddress: to,
+                sourceCurrency: "USD",
+                amount: {
+                    amount: Number(amount),
+                    currency: "USD",
+                    feePolicy: "EXCLUSIVE"
+                },
+                description: note,
+                // onchainTierId: 'tier_fast' + Math.floor(Math.random() * 100)
+            }
+            console.log('payload: ', payload)
+
+            const fees = await getOnChainTiers(payload);
+            console.log('strikeFees, ', fees)
+            const labeledTiers = fees.map((tier: any) => {
+                switch (tier.id) {
+                    case 'tier_fast':
+                        tier.label = 'Fast';
+                        break;
+                    case 'tier_standard':
+                        tier.label = 'Standard';
+                        break;
+                    case 'tier_free':
+                        tier.label = 'Free';
+                        break;
+                    default:
+                        tier.label = 'Unknown';
+                }
+                return tier;
+            });
+
+            // console.log('strikeFees: ', labeledTiers)
+            setStrikeFees(labeledTiers);
+        } catch (error) {
+            console.log('error: ', error);
+        }
+    }
 
     const handleUser = async () => {
         setIsStartLoading(true);
@@ -197,30 +352,63 @@ export default function ReviewPayment({ route }: Props) {
         handleFeeEstimate(fee)
     };
 
+    const handleStrikeFeeSelect = (fee: any) => {
+        console.log('fee: ', fee)
+        setSelectedStrikeFee(fee);
+        setModalVisible(false)
+    };
 
     const handleSendSats = async () => {
         setIsSendLoading(true);
-        const amount = isSats ? value : converted;
+        console.log('value: ', value, converted)
+        console.log('handleSendSats paymentQuoteData?.paymentQuoteId: ', paymentQuoteData?.paymentQuoteId)
+        const amount =  receiveType ? isSats ? value : converted : isSats ? converted : value;
         if (to == '') {
             SimpleToast.show('Please enter an address or username', SimpleToast.SHORT);
             setIsSendLoading(false);
             return;
         } else if (startsWithLn(to)) { //lightening invoice
-            try {
-                const response = await sendLightningPayment(to, note, amount);
-                console.log('response: ', response)
-                if (response?.startsWith('{')) {
-                    const jsonLNResponse = JSON.parse(response);
-                    dispatchNavigate('Transaction', { matchedRate, type, value, converted, isSats, to, item: jsonLNResponse });
-                } else {
-                    SimpleToast.show(response, SimpleToast.SHORT)
-                }
+            if(receiveType){
+                try {
+                    const response = await sendLightningPayment(to, note, amount);
+                    console.log('response: ', response)
+                    if (response?.startsWith('{')) {
+                        const jsonLNResponse = JSON.parse(response);
+                        dispatchNavigate('Transaction', { matchedRate, type, value, converted, isSats, to, item: jsonLNResponse });
+                    } else {
+                        SimpleToast.show(response, SimpleToast.SHORT)
+                    }
 
-            } catch (error) {
-                console.error('Error Send Lightening:', error);
-                SimpleToast.show('Failed to Send Lightening. Please try again.', SimpleToast.SHORT);
-            } finally {
-                setIsSendLoading(false);
+                } catch (error) {
+                    console.error('Error Send Lightening:', error);
+                    SimpleToast.show('Failed to Send Lightening. Please try again.', SimpleToast.SHORT);
+                } finally {
+                    setIsSendLoading(false);
+                }
+            } else {
+                try {
+                    const payload = {
+                        lnInvoice: to,
+                        sourceCurrency: "USD",
+                        amount: {
+                            amount: Number(amount),
+                            currency: "USD",
+                            feePolicy: "EXCLUSIVE"
+                        },
+                        description: note
+                    }
+                    const response = await getPaymentQouteByLighteningURL(payload, paymentQuoteData?.paymentQuoteId);
+                    if(response?.amount){
+                        console.log('responserresponse: ', response)
+                        dispatchNavigate('Transaction', { matchedRate, type, value, converted, receiveType, isSats, to, item: response });
+                    } else {
+                        SimpleToast.show('Failed to Send Lightening. Please try again.', SimpleToast.SHORT)
+                    }
+                } catch (error) {
+                    console.error('Error Send Lightening Strike:', error);
+                } finally {
+                    setIsSendLoading(false);
+                }
             }
         } else if (to.startsWith('bc')) { //bitcoin onchain
             if (amount == '') {
@@ -233,47 +421,84 @@ export default function ReviewPayment({ route }: Props) {
                 setIsSendLoading(false);
                 return;
             }
-            if (selectedFee == null) {
-                SimpleToast.show('Please select fee rate', SimpleToast.SHORT);
-                setIsSendLoading(false);
-                return;
-            }
-            const feeForBamskki = (0.1 / 100) * Number(amount);
-            // const remainingAmount = Number(amount) - feeForBamskki;
-            const remainingAmount = Number(amount);
-            console.log('feeForBamskki: ', feeForBamskki)
-            console.log('remainingAmount: ', remainingAmount)
-            if (remainingAmount <= 0) {
-                SimpleToast.show("You don't have enough balance", SimpleToast.SHORT);
-                setIsSendLoading(false);
-                return;
-            }
-
-            console.log('selectedFee: ', selectedFee)
-            try {
-                const sendResponse = await sendBitcoinPayment(remainingAmount, to, selectedFee, note);
-
-                let jsonSend = null
-                console.log('sendResponse: ', sendResponse)
-                if (sendResponse?.startsWith('{')) { // as estimatedFee is a string so this condition is helpful
-                    jsonSend = JSON.parse(sendResponse);
-
-                    console.log('jsonSend: ', jsonSend)
-                    //send 0.1% fee to bamskii
-                    // const response = await sendCoinsViaUsername("bamskki@coinos.io", feeForBamskki, '');
-                    // console.log('response username: ', response, typeof response)
-                    dispatchNavigate('TransactionBroadCast', { matchedRate, type, value, converted, isSats, to, item: jsonSend });
-
-                } else {
-                    SimpleToast.show(sendResponse, SimpleToast.SHORT);
+            if(receiveType){
+                if (selectedFee == null) {
+                    SimpleToast.show('Please select fee rate', SimpleToast.SHORT);
+                    setIsSendLoading(false);
                     return;
                 }
-            } catch (error) {
-                console.error('Error Send to bitcoin:', error);
-                SimpleToast.show('Failed to Send to bitcoin. Please try again.', SimpleToast.SHORT);
-            } finally {
-                setIsSendLoading(false);
+                const feeForBamskki = (0.1 / 100) * Number(amount);
+                // const remainingAmount = Number(amount) - feeForBamskki;
+                const remainingAmount = Number(amount);
+                console.log('feeForBamskki: ', feeForBamskki)
+                console.log('remainingAmount: ', remainingAmount)
+                if (remainingAmount <= 0) {
+                    SimpleToast.show("You don't have enough balance", SimpleToast.SHORT);
+                    setIsSendLoading(false);
+                    return;
+                }
+
+                console.log('selectedFee: ', selectedFee)
+                try {
+                    const sendResponse = await sendBitcoinPayment(remainingAmount, to, selectedFee, note);
+
+                    let jsonSend = null
+                    console.log('sendResponse: ', sendResponse)
+                    if (sendResponse?.startsWith('{')) { // as estimatedFee is a string so this condition is helpful
+                        jsonSend = JSON.parse(sendResponse);
+
+                        console.log('jsonSend: ', jsonSend)
+                        //send 0.1% fee to bamskii
+                        // const response = await sendCoinsViaUsername("bamskki@coinos.io", feeForBamskki, '');
+                        // console.log('response username: ', response, typeof response)
+                        dispatchNavigate('TransactionBroadCast', { matchedRate, type, value, converted, isSats, to, item: jsonSend });
+
+                    } else {
+                        SimpleToast.show(sendResponse, SimpleToast.SHORT);
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Error Send to bitcoin:', error);
+                    SimpleToast.show('Failed to Send to bitcoin. Please try again.', SimpleToast.SHORT);
+                } finally {
+                    setIsSendLoading(false);
+                }
+            } else {
+                if (selectedStrikeFee == null) {
+                    SimpleToast.show('Please select fee rate', SimpleToast.SHORT);
+                    setIsSendLoading(false);
+                    return;
+                }
+                try {
+                    const payload = {
+                        btcAddress: to,
+                        sourceCurrency: "USD",
+                        amount: {
+                            amount: Number(amount),
+                            currency: "USD",
+                            feePolicy: "EXCLUSIVE"
+                        },
+                        description: note,
+                        onchainTierId: 'tier_fast' + Math.floor(Math.random() * 100)
+                    }
+                    console.log('payload: ', payload)
+                    const response = await getPaymentQouteByOnChain(payload, paymentQuoteData?.paymentQuoteId);
+                    if(response?.amount){
+                        console.log('responserresponse: ', response)
+                        dispatchNavigate('TransactionBroadCast', { matchedRate, type, value, converted, receiveType, isSats, to, item: response });
+                    } else if(response?.data?.message) {
+                        SimpleToast.show(response?.data?.message, SimpleToast.SHORT)
+                    } else {
+                        SimpleToast.show('Failed to Send Bitcoin. Please try again.', SimpleToast.SHORT)
+                    }
+                } catch (error) {
+                    console.error('Error Send to bitcoin:', error);
+                    SimpleToast.show('Failed to Send to bitcoin. Please try again.', SimpleToast.SHORT);
+                } finally {
+                    setIsSendLoading(false);
+                }
             }
+
         } else if (to.includes("@")) { //username
             if (amount == '') {
                 SimpleToast.show('Please enter an amount', SimpleToast.SHORT);
@@ -281,16 +506,42 @@ export default function ReviewPayment({ route }: Props) {
                 return;
             }
             try {
-                const response = await sendCoinsViaUsername(to, Number(amount), note);
-                console.log('response username: ', response, typeof response, amount, to, note)
-                if (typeof response == 'object' && response?.hash) {
-                    dispatchNavigate('Transaction', { matchedRate, type, value, converted, isSats, to, item: response });
-                } else if (response?.startsWith('{')) {
-                    const jsonResponse = JSON.parse(response);
-                    console.log('jsonResponse: ', jsonResponse)
-                    dispatchNavigate('Transaction', { matchedRate, type, value, converted, isSats, to, item: jsonResponse });
+                if(receiveType){
+                    const response = await sendCoinsViaUsername(to, Number(amount), note);
+                    console.log('response username: ', response, typeof response, amount, to, note)
+                    if (typeof response == 'object' && response?.hash) {
+                        dispatchNavigate('Transaction', { matchedRate, type, value, converted, isSats, to, item: response });
+                    } else if (response?.startsWith('{')) {
+                        const jsonResponse = JSON.parse(response);
+                        console.log('jsonResponse: ', jsonResponse)
+                        dispatchNavigate('Transaction', { matchedRate, type, value, converted, isSats, to, item: jsonResponse });
+                    } else {
+                        SimpleToast.show(response, SimpleToast.SHORT);
+                    }
                 } else {
-                    SimpleToast.show(response, SimpleToast.SHORT);
+                    try {
+                        const payload = {
+                            lnAddressOrUrl: to,
+                            sourceCurrency: "USD",
+                            amount: {
+                                amount: String(amount),
+                                currency: "USD"
+                            },
+                            ...(to.includes('blink') ? {} : { description: note })
+                        }
+                        console.log('payload: ', payload)
+                        const response = await getPaymentQouteByLightening(payload, paymentQuoteData?.paymentQuoteId);
+                        if(response?.amount){
+                            console.log('responserresponse: ', response)
+                            dispatchNavigate('Transaction', { matchedRate, type, value, converted, receiveType, isSats, to, item: response });
+                        } else {
+                            SimpleToast.show('Failed to Send Lightening. Please try again.', SimpleToast.SHORT)
+                        }
+                    } catch (error) {
+                        console.error('Error Send Lightening Strike:', error);
+                    } finally {
+                        setIsSendLoading(false);
+                    }
                 }
             } catch (error) {
                 console.error('Error Send Lightening:', error);
@@ -331,7 +582,7 @@ export default function ReviewPayment({ route }: Props) {
                     //send 0.1% fee to bamskii
                     // const response = await sendCoinsViaUsername("bamskki@coinos.io", feeForBamskki, '');
                     // console.log('response username: ', response)
-                    dispatchNavigate('TransactionBroadCast', { matchedRate, type, value, converted, isSats, to, item: jsonSend });
+                    dispatchNavigate('TransactionBroadCast', { matchedRate, type, value, converted, isSats, to, item: jsonSend, receiveType });
                 } else {
                     SimpleToast.show(sendResponse, SimpleToast.SHORT);
                     return;
@@ -369,6 +620,40 @@ export default function ReviewPayment({ route }: Props) {
         const newIndex = (currentIndex - 1 + feeKeys.length) % feeKeys.length;
         const newFeeKey = fromFeeKeys[newIndex];
         handleFeeEstimate(newFeeKey)
+    };
+
+    const increaseStrikeClickHandler = () => {
+        let selectedFee = {}
+        if (!selectedStrikeFee) {
+            selectedFee = strikeFees[0];
+            setSelectedStrikeFee(selectedFee)
+        } else {
+            const currentIndex = strikeFees.findIndex(fee => fee.id === selectedStrikeFee.id);
+            if (currentIndex < strikeFees.length - 1) {
+                selectedFee = strikeFees[currentIndex + 1];
+                setSelectedStrikeFee(selectedFee)
+            } else {
+                SimpleToast.show('You have reached the end of the fee list.', SimpleToast.SHORT);
+            }
+        }
+
+    };
+
+    const decreaseStrikeClickHandler = () => {
+        let selectedFee = {}
+        if (!selectedStrikeFee) {
+            selectedFee = strikeFees[0];
+            setSelectedStrikeFee(selectedFee)
+        } else {
+            const currentIndex = strikeFees.findIndex(fee => fee.id === selectedStrikeFee.id);
+            if (currentIndex > 0) {
+                selectedFee = strikeFees[currentIndex - 1];
+                setSelectedStrikeFee(selectedFee)
+            } else {
+                SimpleToast.show('You have reached the start of the fee list.', SimpleToast.SHORT);
+            }
+        }
+
     };
 
     const editAmountClickHandler = () => {
@@ -410,9 +695,9 @@ export default function ReviewPayment({ route }: Props) {
         return temp;
     }
 
-    console.log('isEditAmount: ', isEditAmount)
+    // console.log('strikeFees: ', strikeFees, receiveType)
     return (
-        <ScreenLayout showToolbar isBackButton title="Review Paymenttt">
+        <ScreenLayout showToolbar isBackButton title="Review Payment">
             <View style={styles.topView}>
                 {/* {isStartLoading ?
                     <ActivityIndicator style={{ marginTop: 10, marginBottom: 20 }} color={colors.white} />
@@ -469,7 +754,7 @@ export default function ReviewPayment({ route }: Props) {
                             </TouchableOpacity>
                         }
                     </View>
-                    <TextViewV2 keytext="Sent from: " text="Coinos Lightning Account" />
+                    <TextViewV2 keytext="Sent from: " text={receiveType ? "Coinos Lightning Account" : "Strike Lightning Account"} />
                     {isWithdrawal ?
                         <View style={{
                             marginBottom:30,
@@ -519,64 +804,100 @@ export default function ReviewPayment({ route }: Props) {
 
                     {to && value && (type === 'bitcoin' || type === 'liquid') && recommendedFee ?
                         <>
-                            <View style={styles.feesView}>
-                                <TextViewV2 keytext="Network Fee:  " text={` ~   ${estimatedFee} sats`} />
-                                <GradientCard disabled
-                                    colors_={['#FFFFFF', '#B6B6B6']}
-                                    style={styles.linearGradientStroke} linearStyle={styles.linearGradient3}>
-                                    <View style={styles.background}>
-                                        <TouchableOpacity onPress={() => setModalVisible(true)}>
-                                            <Text bold style={{ fontSize: 16 }}>{selectedFeeName}</Text>
-                                        </TouchableOpacity>
-                                        <View style={{ paddingVertical: 5 }}>
-                                            <TouchableOpacity style={{ opacity: feeLoading ? 0.5 : 1 }} onPress={increaseClickHandler} disabled={feeLoading}>
-                                                <Icon name="angle-up" type="font-awesome" color="#FFFFFF" />
+                            {receiveType ?
+                                <View style={styles.feesView}>
+                                    <TextViewV2 keytext="Network Fee:  " text={` ~   ${estimatedFee} sats`} />
+                                    <GradientCard disabled
+                                        colors_={['#FFFFFF', '#B6B6B6']}
+                                        style={styles.linearGradientStroke} linearStyle={styles.linearGradient3}>
+                                        <View style={styles.background}>
+                                            <TouchableOpacity onPress={() => setModalVisible(true)}>
+                                                <Text bold style={{ fontSize: 16 }}>{selectedFeeName}</Text>
                                             </TouchableOpacity>
-                                            <TouchableOpacity style={{ opacity: feeLoading ? 0.5 : 1 }} onPress={decreaseClickHandler} disabled={feeLoading}>
-                                                <Icon name="angle-down" type="font-awesome" color="#FFFFFF" />
-                                            </TouchableOpacity>
+                                            <View style={{ paddingVertical: 5 }}>
+                                                <TouchableOpacity style={{ opacity: feeLoading ? 0.5 : 1 }} onPress={increaseClickHandler} disabled={feeLoading}>
+                                                    <Icon name="angle-up" type="font-awesome" color="#FFFFFF" />
+                                                </TouchableOpacity>
+                                                <TouchableOpacity style={{ opacity: feeLoading ? 0.5 : 1 }} onPress={decreaseClickHandler} disabled={feeLoading}>
+                                                    <Icon name="angle-down" type="font-awesome" color="#FFFFFF" />
+                                                </TouchableOpacity>
+                                            </View>
                                         </View>
-                                    </View>
-                                </GradientCard>
-                            </View>
+                                    </GradientCard>
+                                </View>
+                            :
+                                <View style={styles.feesView}>
+                                    <TextViewV2 keytext="Network Fee:  " text={` ~   ${(Number(selectedStrikeFee?.estimatedFee?.amount || 0) * 100000000).toFixed(2)} sats`} />
+                                    <GradientCard disabled
+                                        colors_={['#FFFFFF', '#B6B6B6']}
+                                        style={styles.linearGradientStroke} linearStyle={styles.linearGradient3}>
+                                        <View style={styles.background}>
+                                            <TouchableOpacity onPress={() => setModalVisible(true)}>
+                                                <Text bold style={{ fontSize: 16 }}>{selectedStrikeFee ? selectedStrikeFee.label : selectedFeeName}</Text>
+                                            </TouchableOpacity>
+                                            <View style={{ paddingVertical: 5 }}>
+                                                <TouchableOpacity style={{ opacity: feeLoading ? 0.5 : 1 }} onPress={increaseStrikeClickHandler} disabled={feeLoading}>
+                                                    <Icon name="angle-up" type="font-awesome" color="#FFFFFF" />
+                                                </TouchableOpacity>
+                                                <TouchableOpacity style={{ opacity: feeLoading ? 0.5 : 1 }} onPress={decreaseStrikeClickHandler} disabled={feeLoading}>
+                                                    <Icon name="angle-down" type="font-awesome" color="#FFFFFF" />
+                                                </TouchableOpacity>
+                                            </View>
+                                        </View>
+                                    </GradientCard>
+                                </View>
+                            }
                             {/* <TextViewV2 keytext="Coinos Fee + Service Fee:  " text={` ~   ${(networkFee || 0) + (bamskiiFee || 0)} sats`} /> */}
-                            <TextViewV2 keytext="Coinos Fee:  " text={` ~   ${(networkFee || 0)} sats`} />
-                            <TextViewV2 keytext="Total Fee:  " text={isWithdrawal ? ` ~   ${(networkFee || 0) + (estimatedFee || 0)} sats (~${handleWithdrawalFee((networkFee || 0) + (estimatedFee || 0)).toFixed(0)}%)` : ` ~   ${(networkFee || 0) + (estimatedFee || 0)} sats (~0.2%)`} />
+                            {receiveType && <TextViewV2 keytext="Coinos Fee:  " text={` ~   ${(networkFee || 0)} sats`} /> }
+                            <TextViewV2 keytext="Total Fee:  " text={isWithdrawal ? ` ~   ${(networkFee || 0) + (estimatedFee || 0)} sats (~${handleWithdrawalFee((networkFee || 0) + (estimatedFee || 0)).toFixed(0)}%)` : ` ~   ${receiveType ? (networkFee || 0) + (estimatedFee || 0) : paymentQuoteData ? usdToSats(paymentQuoteData?.totalFee?.amount || 0, (matchedRate || 0)) : 0} sats ${receiveType ? `(~0.2%)` : ``}`} />
                         </>
                         :
-                        <TextView keytext="Fees:  " text={` ~   ${estimatedFee} sats`} />
+                        <TextView keytext="Fees:  " text={` ~   ${receiveType ? estimatedFee : paymentQuoteData ? usdToSats(paymentQuoteData?.totalFee?.amount || 0, (matchedRate || 0)) : 0} sats`} />
                     }
                 </View>
 
                 <ReactNativeModal isVisible={isModalVisible}>
                     <View>
                         <GradientCard disabled
-                            style={styles.modal} linearStyle={styles.linearGradient4}>
-                            <ScrollView style={styles.background2}>
-                                {Object.entries(recommendedFee).map(([feeKey, feeValue], index) => (
-                                    feeKey !== 'minimumFee' && (
-                                        <TouchableOpacity style={[styles.row, index % 2 == 0 && { backgroundColor: colors.primary }]}
-                                            onPress={() => handleFeeSelect(feeKey as Fee)}>
-                                            <Text bold style={{ fontSize: 18 }}>{feeNames[feeKey as Fee]}</Text>
-                                        </TouchableOpacity>
-                                    )
-                                ))}
-                            </ScrollView>
+                            style={[styles.modal, !receiveType ? {height: 150} : {}]} linearStyle={{...styles.linearGradient4, ...{height: receiveType ? 200 : 150}}}>
+                                {receiveType ?
+                                    <ScrollView style={styles.background2}>
+                                        {Object.entries(recommendedFee).map(([feeKey, feeValue], index) => (
+                                            feeKey !== 'minimumFee' && (
+                                                <TouchableOpacity style={[styles.row, index % 2 == 0 && { backgroundColor: colors.primary }]}
+                                                    onPress={() => handleFeeSelect(feeKey as Fee)}>
+                                                    <Text bold style={{ fontSize: 18 }}>{feeNames[feeKey as Fee]}</Text>
+                                                </TouchableOpacity>
+                                            )
+                                        ))}
+                                    </ScrollView>
+                                :
+                                    <ScrollView style={styles.background2}>
+                                        {strikeFees && strikeFees.map((item, index) => (
+                                            <TouchableOpacity style={[styles.row, index % 2 == 0 && { backgroundColor: colors.primary }]}
+                                                onPress={() => handleStrikeFeeSelect(item)}>
+                                                <Text bold style={{ fontSize: 18 }}>{item.label}</Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </ScrollView>
+
+                                }
                         </GradientCard>
                     </View>
                 </ReactNativeModal>
-
-                <GradientCard
-                    style={styles.main}
-                    linearStyle={styles.heigth}
-                    colors_={note ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}>
-                    <Input
-                        onChange={setNote}
-                        value={note}
-                        textInputStyle={styles.heigth2}
-                        label="Add note"
-                    />
-                </GradientCard>
+                {!receiveType && !to.includes('blink') &&
+                    <GradientCard
+                        style={styles.main}
+                        linearStyle={styles.heigth}
+                        colors_={note ? [colors.pink.extralight, colors.pink.default] : [colors.gray.thin, colors.gray.thin2]}>
+                        <Input
+                            onChange={setNote}
+                            value={note}
+                            textInputStyle={styles.heigth2}
+                            label="Add note"
+                        />
+                    </GradientCard>
+                }
             </View>
             <View style={styles.container}>
                 <Text bold style={styles.alert}>Causion: Bitcoin payments are irriversable</Text>

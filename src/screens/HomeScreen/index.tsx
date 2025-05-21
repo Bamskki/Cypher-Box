@@ -95,6 +95,11 @@ export function calculateBalancePercentage(balance: number, withdrawThreshold: n
   return parseFloat(resPercentage.toFixed(2)); // Return percentage rounded to 2 decimal places
 }
 
+function formatStrikeNumber(num: number) {
+  const millions = num / 1000000;
+  return `${millions.toFixed(1)}M`;
+}
+
 export default function HomeScreen({ route }: Props) {
   const { navigate } = useNavigation();
   const routeName = useRoute().name;
@@ -215,7 +220,6 @@ export default function HomeScreen({ route }: Props) {
       try {
           const result = await authorize(config);
           setStrikeToken(result.accessToken);
-          const decoded = jwtDecode(token);
           setStrikeAuth(true);
       } catch (error) {
           console.error("OAuth error", error);
@@ -471,12 +475,12 @@ export default function HomeScreen({ route }: Props) {
     refRBSheet.current.open();
   };
 
-  const sendClickHandler = () => {
-    dispatchNavigate('SendScreen', { currency, matchedRate });
+  const sendClickHandler = (walletType: boolean) => {
+    dispatchNavigate('SendScreen', { currency, matchedRate, receiveType: walletType });
   };
 
-  const checkingAccountClickHandler = (walletType: string) => {
-    dispatchNavigate('CheckingAccount', { matchedRate, walletType });
+  const checkingAccountClickHandler = (walletType: boolean) => {
+    dispatchNavigate('CheckingAccount', { matchedRate, receiveType: walletType });
   }
 
   const withdrawClickHandler = () => {
@@ -786,6 +790,9 @@ export default function HomeScreen({ route }: Props) {
       allBTCWallets.map(wallet => {
         if (walletTabsMap[wallet]) {
           tabs.push(walletTabsMap[wallet]);
+          if(walletTabsMap[wallet].key === 'strike'){
+            tabs.push({ key: "divider", component: () => <StrikeDollarWalletTab /> });            
+          }
         }
       });
   
@@ -802,7 +809,7 @@ export default function HomeScreen({ route }: Props) {
       <>
         {isAuth &&
           <>
-            <TouchableOpacity style={styles.shadowView} onPress={() => checkingAccountClickHandler("COINOS")}>
+            <TouchableOpacity style={styles.shadowView} onPress={() => checkingAccountClickHandler(true)}>
               <Shadow
                 style={StyleSheet.flatten([styles.shadowTop, { shadowColor: colors.pink.shadowTop, padding: 0 }])}
                 inner
@@ -861,7 +868,7 @@ export default function HomeScreen({ route }: Props) {
               />
               <GradientButtonWithShadow
                 title="Send"
-                onPress={sendClickHandler}
+                onPress={() => sendClickHandler(true)}
                 isShadow
                 isTextShadow
               />
@@ -919,12 +926,109 @@ export default function HomeScreen({ route }: Props) {
     )
   }
 
+  console.log('strikeUser?.[1]?.available: ', strikeUser?.[1]?.available)
+  const StrikeDollarWalletTab = () => {
+    const [dollarStrikeText, setDollarStrikeText] = useState(1000000)
+    console.log('dollarStrikeText: ', dollarStrikeText, formatStrikeNumber(dollarStrikeText))
+
+    const addClickHandler = () => {
+      setDollarStrikeText(dollarStrikeText + 100000)
+    }
+
+    const subClickHandler = () => {
+      if(dollarStrikeText !== 0)
+        setDollarStrikeText(dollarStrikeText - 100000)    
+    }
+
+    const buyClickHandler = () => {
+      const amt = Number(dollarStrikeText * matchedRate * btc(1))
+      if(Number(strikeUser?.[1]?.available) < amt){
+        SimpleToast.show('Amount is exceeded', SimpleToast.SHORT);
+        return
+      }
+      dispatchNavigate('SendScreen', { currency, matchedRate, fiatAmount: amt });
+    }
+
+    const sellClickHandler = () => {
+      const amt = Number(dollarStrikeText * matchedRate * btc(1))
+      if(Number(strikeUser?.[1]?.available) < amt){
+        SimpleToast.show('Amount is exceeded', SimpleToast.SHORT);
+        return
+      }
+      dispatchNavigate('SendScreen', { currency, matchedRate, fiatAmount: amt });    
+    }
+
+    return (
+      <>
+        {isStrikeAuth &&
+          <View style={{ height: '42%' }}>
+            <View style={styles.shadowView}>
+              <Shadow
+                style={StyleSheet.flatten([styles.shadowTop, { shadowColor: colors.pink.shadowTop, padding: 0 }])}
+                inner
+                useArt
+              >
+                <View style={styles.view}>
+                  <Text h2 bold style={styles.check}>
+                    Fiat Balance
+                  </Text>
+                  <Image
+                    source={require("../../../img/Strike.png")}
+                    style={styles.blink}
+                    resizeMode="contain"
+                  />
+                </View>
+                <View style={styles.view}>
+                  <Text h2 bold style={styles.sats}>
+                    {`$${Number(strikeUser?.[1]?.available)}`}
+                  </Text>
+                  <View style={{flexDirection: 'row', alignItems: 'center', zIndex: 99}}>
+                    <View style={{marginRight: 20}}>
+                      <Text style={styles.add}>{formatStrikeNumber(dollarStrikeText) + ' sats'}</Text>
+                      <Text style={styles.addSats}>{'$' + (dollarStrikeText * matchedRate * btc(1)).toFixed(2)}</Text>
+                    </View>
+                    <TouchableOpacity style={styles.addView} onPress={() => addClickHandler()}>
+                      <Text style={styles.add}>+</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.subView} onPress={() => subClickHandler()}>
+                      <Text style={styles.sub}>-</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                <Shadow
+                  inner
+                  useArt
+                  style={StyleSheet.flatten([styles.shadowBottom, { shadowColor: colors.pink.shadowBottom }])}
+                />
+              </Shadow>
+            </View>
+            <View style={styles.btnView}>
+              <GradientButtonWithShadow
+                title="Buy"
+                onPress={() => buyClickHandler()}
+                isShadow
+                isTextShadow
+              />
+              <GradientButtonWithShadow
+                title="Sell"
+                onPress={() => sellClickHandler()}
+                isShadow
+                isTextShadow
+              />
+            </View>
+
+          </View>
+        }
+      </>      
+    )
+  }
+
   const StrikeWalletTab = () => {
     return (
       <>
         {isStrikeAuth &&
           <View style={{ height: '42%' }}>
-            <TouchableOpacity style={styles.shadowView} onPress={() => checkingAccountClickHandler('STRIKE')}>
+            <TouchableOpacity style={styles.shadowView} onPress={() => checkingAccountClickHandler(false)}>
               <Shadow
                 style={StyleSheet.flatten([styles.shadowTop, { shadowColor: colors.pink.shadowTop, padding: 0 }])}
                 inner
@@ -984,7 +1088,7 @@ export default function HomeScreen({ route }: Props) {
               />
               <GradientButtonWithShadow
                 title="Send"
-                onPress={sendClickHandler}
+                onPress={() => sendClickHandler(false)}
                 isShadow
                 isTextShadow
               />
@@ -1160,10 +1264,10 @@ export default function HomeScreen({ route }: Props) {
                 >
                   <Text subHeader bold style={styles.price}>
                     {/* {(btc(1) * (Number(balance) || 0)) + (Number(ColdStorageBalanceVault?.split(' ')[0]) || 0) + (Number(balanceVault?.split(' ')[0]) || 0)} BTC */}
-                    {((btc(1) * (Number(balance) || 0)) + (Number(ColdStorageBalanceVault?.split(' ')[0]) || 0) + (Number(balanceVault?.split(' ')[0]) || 0)).toFixed(8)} BTC
+                    {((btc(1) * (Number(balance) || 0)) + Number(strikeUser?.[0]?.available || 0) + (Number(ColdStorageBalanceVault?.split(' ')[0]) || 0) + (Number(balanceVault?.split(' ')[0]) || 0)).toFixed(8)} BTC
                   </Text>
                   <Text bold style={styles.priceusd} >
-                    {"$" + (Number(convertedRate || 0) + ((Number(coldStorageBalanceWithoutSuffix || 0) * Number(matchedRate || 0)) + (Number(balanceWithoutSuffix || 0) * Number(matchedRate || 0)))).toFixed(2)}
+                    {"$" + ((Number(strikeUser?.[0]?.available || 0) * matchedRate) + Number(convertedRate || 0) + ((Number(coldStorageBalanceWithoutSuffix || 0) * Number(matchedRate || 0)) + (Number(balanceWithoutSuffix || 0) * Number(matchedRate || 0)))).toFixed(2)}
                   </Text>
                   {(allBTCWallets.length > 0 && allBTCWallets.length < 2) &&
                     <TouchableOpacity onPress={() => dispatchNavigate('CheckingAccountIntro')} style={{zIndex: 100, alignSelf: 'flex-end', borderRadius: 10, borderWidth: 1, borderColor: colors.pink.light}}>
