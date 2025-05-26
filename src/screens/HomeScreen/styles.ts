@@ -113,6 +113,7 @@ export default StyleSheet.create<Style>({
     addView: {
         height: 40,
         width: 40,
+        zIndex: 2001,
         marginTop: 10,
         marginBottom: 16,
         borderRadius: 10,
@@ -124,6 +125,7 @@ export default StyleSheet.create<Style>({
     subView: {
         height: 40,
         width: 40,
+        zIndex: 2001,
         marginTop: 10,
         marginLeft: 10,
         marginBottom: 16,
@@ -276,7 +278,7 @@ export default StyleSheet.create<Style>({
         height: 5,
         alignSelf: 'flex-start',
         marginVertical: 10,
-        zIndex: 99
+        zIndex: 100
     },
     box: {
         position: 'absolute',
