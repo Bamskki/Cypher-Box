@@ -50,7 +50,7 @@ export default function SendScreen({ navigation, route }: any) {
     useEffect(() => {
         if(info?.fiatAmount){
             let sats = Number(info?.fiatAmount / info?.matchedRate  * 100000000)
-            setUSD(String(info?.fiatAmount))
+            setUSD(String(Number(info?.fiatAmount).toFixed(2)))
             setSats(String(sats))
         }
     }, [info])
@@ -138,7 +138,22 @@ export default function SendScreen({ navigation, route }: any) {
     const handleSendNext = async () => {
         setIsLoading(true);
         const amount = info?.receiveType ? isSats ? usd : sats : isSats ? sats : usd;
-        if (sender == '' && (!info?.to || info?.to == '')) {
+        if(info?.fiatAmount) {
+            dispatchNavigate('ReviewPayment', {
+                ...info,
+                value: sats,
+                converted: usd,
+                isSats: isSats,
+                to: info?.isWithdrawal ? info?.to : sender,
+                fees: 0,
+                type: info?.fiatType,
+                matchedRate: info?.matchedRate,
+                currency: info?.curreny,
+                recommendedFee,
+                receiveType: info?.receiveType
+            });
+            setIsLoading(false);
+        } else if (sender == '' && (!info?.to || info?.to == '')) {
             SimpleToast.show('Please enter an address or username', SimpleToast.SHORT);
             setIsLoading(false);
             return;
@@ -323,7 +338,7 @@ export default function SendScreen({ navigation, route }: any) {
                             />
 
                             {/* <GradientInput isSats={isSats} sats={sats} setSats={setSats} usd={usd} /> */}
-                            {!info?.isWithdrawal &&
+                            {(!info?.isWithdrawal && !info?.fiatAmount) &&
                                 <>
                                     {/* <Text h2 style={styles.destination}>Destination</Text> */}
                                     <View style={styles.priceView}>
@@ -385,9 +400,9 @@ export default function SendScreen({ navigation, route }: any) {
                         </View >
                         <CustomKeyboard
                             title="Next"
-                            prevSats={info?.value ? String(info?.value) : false}
+                            prevSats={info?.value ? String(info?.value) : info?.fiatAmount ? String(info?.fiatAmount / info?.matchedRate  * 100000000) : false}
                             onPress={handleSendNext}
-                            disabled={isLoading || ((!startsWithLn(sender)) ? (sats?.length == 0 && sender?.length == 0) : sender?.length == 0)}
+                            disabled={isLoading || !info?.fiatAmount || ((!startsWithLn(sender)) ? (sats?.length == 0 && sender?.length == 0) : sender?.length == 0)}
                             setSATS={setSats}
                             setUSD={setUSD}
                             setIsSATS={setIsSats}

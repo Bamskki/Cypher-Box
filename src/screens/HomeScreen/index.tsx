@@ -281,22 +281,27 @@ export default function HomeScreen({ route }: Props) {
     }
   }, [sendAddress, isAuth, token])
 
-  useEffect(()  => {
-    const getInit = async () => {
-      if(strikeToken){
-        const balances = await getBalances();
-        if(balances.data?.status === 401){
-          SimpleToast.show("Authorization expired. Please login again to strike account", SimpleToast.SHORT)
-          clearStrikeAuth();
-        } else if (balances) {
-          setStrikeUser(balances);
-          // setStrikeBalance(balances);
+  // useEffect(()  => {
+  useFocusEffect(
+    useCallback(() => {
+      const getInit = async () => {
+        if(strikeToken){
+          setTimeout(async () => {
+            const balances = await getBalances();
+            if(balances.data?.status === 401){
+              SimpleToast.show("Authorization expired. Please login again to strike account", SimpleToast.SHORT)
+              clearStrikeAuth();
+            } else if (balances) {
+              setStrikeUser(balances);
+              // setStrikeBalance(balances);
+            }
+          }, 1000);
         }
       }
-    }
 
-    getInit();
-  }, [strikeToken])
+      getInit();
+    }, [strikeToken])
+  )
 
   console.log('strikeToken: ', strikeToken)
   const successfullyAuthenticated = async () => {
@@ -942,27 +947,36 @@ export default function HomeScreen({ route }: Props) {
 
     const buyClickHandler = () => {
       const amt = Number(dollarStrikeText * matchedRate * btc(1))
+      console.log('amt: ', amt)
+      if(amt == 0){
+        SimpleToast.show('Amount cannot be 0', SimpleToast.SHORT);
+        return
+      }
       if(Number(strikeUser?.[1]?.available) < amt){
         SimpleToast.show('Amount is exceeded', SimpleToast.SHORT);
         return
       }
-      dispatchNavigate('SendScreen', { currency, matchedRate, fiatAmount: amt });
+      dispatchNavigate('SendScreen', { currency, matchedRate, fiatAmount: amt, fiatType: "BUY" });
     }
 
     const sellClickHandler = () => {
       const amt = Number(dollarStrikeText * matchedRate * btc(1))
+      if(amt == 0){
+        SimpleToast.show('Amount cannot be 0', SimpleToast.SHORT);
+        return
+      }
       if(Number(strikeUser?.[1]?.available) < amt){
         SimpleToast.show('Amount is exceeded', SimpleToast.SHORT);
         return
       }
-      dispatchNavigate('SendScreen', { currency, matchedRate, fiatAmount: amt });    
+      dispatchNavigate('SendScreen', { currency, matchedRate, fiatAmount: amt, fiatType: "SELL" });    
     }
 
     return (
       <>
         {isStrikeAuth &&
           <View style={{ height: '42%' }}>
-            <View style={styles.shadowView}>
+            <View style={[styles.shadowView]}>
               <Shadow
                 style={StyleSheet.flatten([styles.shadowTop, { shadowColor: colors.pink.shadowTop, padding: 0 }])}
                 inner
@@ -978,11 +992,16 @@ export default function HomeScreen({ route }: Props) {
                     resizeMode="contain"
                   />
                 </View>
-                <View style={styles.view}>
+                <Shadow
+                  inner
+                  useArt
+                  style={{...styles.shadowBottom, ...{ shadowColor: colors.pink.shadowBottom }}}
+                />
+                <View style={[styles.view]}>
                   <Text h2 bold style={styles.sats}>
                     {`$${Number(strikeUser?.[1]?.available)}`}
                   </Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center', zIndex: 99}}>
+                  <View style={{flexDirection: 'row', alignItems: 'center', zIndex: 2000}}>
                     <View style={{marginRight: 20}}>
                       <Text style={styles.add}>{formatStrikeNumber(dollarStrikeText) + ' sats'}</Text>
                       <Text style={styles.addSats}>{'$' + (dollarStrikeText * matchedRate * btc(1)).toFixed(2)}</Text>
@@ -995,11 +1014,7 @@ export default function HomeScreen({ route }: Props) {
                     </TouchableOpacity>
                   </View>
                 </View>
-                <Shadow
-                  inner
-                  useArt
-                  style={StyleSheet.flatten([styles.shadowBottom, { shadowColor: colors.pink.shadowBottom }])}
-                />
+
               </Shadow>
             </View>
             <View style={styles.btnView}>
@@ -1329,7 +1344,7 @@ export default function HomeScreen({ route }: Props) {
           {/* */}
 
           {!isLoading && !isWalletLoaded && !isColdWalletLoaded &&
-            <View style={[{height: isIOS && !isAuth ? '36.2%' : isAuth ? '37%' : '35%' }, isIOS && {bottom: 20}, isAuth && styles.bottom]}>
+            <View style={[{ height: isIOS && !isAuth ? '36.2%' : isAuth ? '37%' : '35%' }, isIOS && {bottom: 20}, isAuth && styles.bottom]}>
               <Carousel
                 data={tabs}
                 ref={carouselRef}

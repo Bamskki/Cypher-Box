@@ -35,12 +35,13 @@ export default function CustomKeyBoard({ title, prevSats, disabled, onPress, set
                 setSATS(sats);
                 setUSD(String(amount));
             } else {
-                amount = parseInt((Number(sats) / (matchedRate || 0)) * 100000000);
+                amount = ((matchedRate || 0) * currency * Number(sats)).toFixed(5)
+                // amount = parseInt((Number(sats) / (matchedRate || 0)) * 100000000);
                 const multiplier = isSats ? 0.000594 : 1683.79;
                 const total = multiplier * Number(sats);
                 const total_ = total.toFixed(4);
-                setSATS(sats);
-                setUSD(String(amount));
+                setSATS(String(amount));
+                setUSD(sats);
             }
         } else {
             setUSD('');

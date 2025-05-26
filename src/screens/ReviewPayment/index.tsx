@@ -18,7 +18,7 @@ import { btc, formatNumber, matchKeyAndValue } from "@Cypher/helpers/coinosHelpe
 import { FeeSelection } from "./FeeSelection/FeeSelection";
 import { startsWithLn } from "../Send";
 import { calculateBalancePercentage, calculatePercentage } from "../HomeScreen";
-import { getOnChainTiers, getPaymentQoute, getPaymentQouteByLightening, getPaymentQouteByLighteningURL, getPaymentQouteByOnChain } from "@Cypher/api/strikeAPIs";
+import { createFiatExchangeQuote, executeFiatExchangeQuote, getOnChainTiers, getPaymentQoute, getPaymentQouteByLightening, getPaymentQouteByLighteningURL, getPaymentQouteByOnChain } from "@Cypher/api/strikeAPIs";
 import { mostRecentFetchedRate } from "../../../blue_modules/currency";
 
 interface Props {
@@ -105,6 +105,12 @@ export default function ReviewPayment({ route }: Props) {
         }
     }, [to, selectedStrikeFee, receiveType])
 
+    useEffect(() => {
+        if(type == 'SELL' || type == 'BUY'){
+            handleFiatPayment();
+        }
+    }, [type])
+
     const exchangeRate = async () => {
         const rates = await mostRecentFetchedRate();
         return rates
@@ -117,6 +123,26 @@ export default function ReviewPayment({ route }: Props) {
           setMatchedRate(numericAmount);
         }
 
+    }
+
+    const handleFiatPayment = async () => {
+        const amount =  isSats ? converted : value;
+        console.log('amount: ', amount)
+        let payload = {
+            sell: type == "BUY" ? "BTC" : "USD",
+            buy: type == "BUY" ? "USD" : "BTC",
+            amount: {
+                amount: Number(amount),
+                currency: "USD",
+                feePolicy: "EXCLUSIVE"
+            }
+        }
+        const response = await createFiatExchangeQuote(payload);
+        if(response?.source){
+            setPaymentQuoteData(response)
+        } else if (response?.data?.message){
+            SimpleToast.show(response?.data?.message, SimpleToast.SHORT)
+        }
     }
 
     const handleStrikeBTCFee = async (onChainTierId: string) => {
@@ -361,9 +387,22 @@ export default function ReviewPayment({ route }: Props) {
     const handleSendSats = async () => {
         setIsSendLoading(true);
         console.log('value: ', value, converted)
-        console.log('handleSendSats paymentQuoteData?.paymentQuoteId: ', paymentQuoteData?.paymentQuoteId)
         const amount =  receiveType ? isSats ? value : converted : isSats ? converted : value;
-        if (to == '') {
+        if(type == "SELL" || type == "BUY"){
+            try {
+                const response = await executeFiatExchangeQuote(paymentQuoteData?.id);
+                if(response?.status === 202){
+                    dispatchNavigate('Transaction', { matchedRate, type, value, converted, receiveType, isSats, to, item: paymentQuoteData });
+                } else {
+                    SimpleToast.show(response?.data?.message ? response?.data?.message + " Please Try again" : 'Failed to execute payment. Please try again.', SimpleToast.SHORT)
+                    handleFiatPayment()
+                }
+            } catch (error) {
+                console.error('Error execute payment Strike:', error);
+            } finally {
+                setIsSendLoading(false);
+            }
+        } else if (to == '') {
             SimpleToast.show('Please enter an address or username', SimpleToast.SHORT);
             setIsSendLoading(false);
             return;
@@ -739,7 +778,7 @@ export default function ReviewPayment({ route }: Props) {
                         <Text style={{ color: colors.yellow2, marginLeft: 15, marginBottom: 25 }}>You haven't reached your withdrawal threshold yet.</Text>
                     }
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginRight: 15 }}>
-                        <TextViewV2 keytext="Recipient will get: " text={isSats ? `${value} sats ~ $${converted}` : `$${value} ~ $${converted} sats`} textStyle={styles.price} />
+                        <TextViewV2 keytext={type == 'SELL' ? "You will send: " : type == 'BUY' ? "You will receive: " : "Recipient will get: "} text={isSats ? `${value} sats ~ $${converted}` : `$${value} ~ $${converted} sats`} textStyle={styles.price} />
                         {isWithdrawal &&
                             <TouchableOpacity activeOpacity={0.7} onPress={editAmountClickHandler} style={{
                                 borderWidth: 3,
@@ -754,8 +793,8 @@ export default function ReviewPayment({ route }: Props) {
                             </TouchableOpacity>
                         }
                     </View>
-                    <TextViewV2 keytext="Sent from: " text={receiveType ? "Coinos Lightning Account" : "Strike Lightning Account"} />
-                    {isWithdrawal ?
+                    <TextViewV2 keytext="Sent from: " text={receiveType ? "Coinos Lightning Account" : type == 'SELL' || type == 'BUY' ? "Strike Fiat Account" : "Strike Lightning Account"} />
+                    {isWithdrawal && to.length > 0 ?
                         <View style={{
                             marginBottom:30,
                             marginStart:15,
@@ -782,7 +821,7 @@ export default function ReviewPayment({ route }: Props) {
                                 <Image source={Edit} style={styles.editImage} resizeMode='contain' />
                             </TouchableOpacity>
                         </View>
-                    :
+                    : to.length > 0 &&
                         <TextViewV2 keytext="To: " text={!to.includes('@') && to.length > 20 ? shortenAddress(to) : to} />
                     }
                     {/* {isWithdrawal &&
@@ -852,7 +891,7 @@ export default function ReviewPayment({ route }: Props) {
                             <TextViewV2 keytext="Total Fee:  " text={isWithdrawal ? ` ~   ${(networkFee || 0) + (estimatedFee || 0)} sats (~${handleWithdrawalFee((networkFee || 0) + (estimatedFee || 0)).toFixed(0)}%)` : ` ~   ${receiveType ? (networkFee || 0) + (estimatedFee || 0) : paymentQuoteData ? usdToSats(paymentQuoteData?.totalFee?.amount || 0, (matchedRate || 0)) : 0} sats ${receiveType ? `(~0.2%)` : ``}`} />
                         </>
                         :
-                        <TextView keytext="Fees:  " text={` ~   ${receiveType ? estimatedFee : paymentQuoteData ? usdToSats(paymentQuoteData?.totalFee?.amount || 0, (matchedRate || 0)) : 0} sats`} />
+                        <TextView keytext="Fees:  " text={` ~   ${receiveType ? estimatedFee : paymentQuoteData && to?.length > 0 ? usdToSats(paymentQuoteData?.totalFee?.amount || 0, (matchedRate || 0)) : paymentQuoteData && to.length == 0 ? usdToSats(paymentQuoteData?.fee?.amount || 0, (matchedRate || 0)) : 0} sats`} />
                     }
                 </View>
 
@@ -885,7 +924,7 @@ export default function ReviewPayment({ route }: Props) {
                         </GradientCard>
                     </View>
                 </ReactNativeModal>
-                {!receiveType && !to.includes('blink') &&
+                {!receiveType && !to.includes('blink') && to?.length > 0 &&
                     <GradientCard
                         style={styles.main}
                         linearStyle={styles.heigth}
@@ -901,7 +940,7 @@ export default function ReviewPayment({ route }: Props) {
             </View>
             <View style={styles.container}>
                 <Text bold style={styles.alert}>Causion: Bitcoin payments are irriversable</Text>
-                {type === 'bitcoin' ?
+                {type === 'bitcoin' || type == "SELL" || type == "BUY" ?
                     <SwipeButton ref={swipeButtonRef} onToggle={handleToggle} isLoading={isSendLoading} />
                     :
                     <GradientButton style={styles.invoiceButton} textStyle={{ fontFamily: 'Lato-Medium', }}

@@ -100,6 +100,46 @@ export const getPaymentQouteByLightening = async (data: any, paymentQouteID: str
     }
 };
 
+export const createFiatExchangeQuote = async (data: any) => {
+    const idempotencyKey = uuidv4();
+    try {
+        const responsePayment = await fetch(`${BASE_URL}/currency-exchange-quotes`, await withAuthToken({
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'idempotency-key': idempotencyKey
+            },
+            body: JSON.stringify(data),
+        }));
+        const responseJSON = await responsePayment.json();
+        if(responseJSON?.data && responseJSON?.data?.status === 401){
+            SimpleToast.show("Authorization expired. Please login again to continue", SimpleToast.SHORT)
+            useAuthStore.getState().clearStrikeAuth();
+        }
+        return responseJSON;
+    } catch (error) {
+        console.error('Error fetching invoice by lightening:', error);
+        throw error;
+    }
+};
+
+export const executeFiatExchangeQuote = async (paymentQouteID: string) => {
+    try {
+        const responsePayment = await fetch(`${BASE_URL}/currency-exchange-quotes/${paymentQouteID}/execute`, await withAuthToken({
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }));
+        // const responsePaymentJSON = await responsePayment.json();
+        // console.log('responsePaymentJSON: ', responsePaymentJSON)
+        return responsePayment;
+    } catch (error) {
+        console.error('Error fetching invoice by lightening:', error);
+        throw error;
+    }
+};
+
 export const getPaymentQouteByLighteningURL = async (data: any, paymentQouteID: string) => {
     const idempotencyKey = uuidv4();
     console.log('idempotencyKey: ', idempotencyKey)
