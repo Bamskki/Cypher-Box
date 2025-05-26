@@ -106,10 +106,16 @@
 			<array>
 				<string>bitcoin</string>
 				<string>lightning</string>
-				<string>cypherbox.io</string>
+				<string>cypherbox</string>
 				<string>lapp</string>
 				<string>blue</string>
+				<string>http</string>
+	            <string>https</string>
 			</array>
+			<key>CFBundleURLName</key>
+			<string>cypherbox</string>
+			<key>CFBundleURLHost</key>
+			<string>oauth/callback</string>
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>

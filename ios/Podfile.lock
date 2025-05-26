@@ -1,4 +1,10 @@
 PODS:
+  - AppAuth (1.7.6):
+    - AppAuth/Core (= 1.7.6)
+    - AppAuth/ExternalUserAgent (= 1.7.6)
+  - AppAuth/Core (1.7.6)
+  - AppAuth/ExternalUserAgent (1.7.6):
+    - AppAuth/Core
   - BEMCheckBox (1.4.1)
   - boost (1.76.0)
   - BugsnagReactNative (7.22.3):
@@ -330,6 +336,9 @@ PODS:
   - React-jsinspector (0.72.10)
   - React-logger (0.72.10):
     - glog
+  - react-native-app-auth (8.0.1):
+    - AppAuth (>= 1.7.6)
+    - React-Core
   - react-native-blue-crypto (1.0.0):
     - React
   - react-native-blur (4.4.0):
@@ -587,6 +596,7 @@ DEPENDENCIES:
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
+  - react-native-app-auth (from `../node_modules/react-native-app-auth`)
   - react-native-blue-crypto (from `../node_modules/react-native-blue-crypto`)
   - "react-native-blur (from `../node_modules/@react-native-community/blur`)"
   - react-native-bw-file-access (from `../blue_modules/react-native-bw-file-access`)
@@ -654,6 +664,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - AppAuth
     - BEMCheckBox
     - CocoaAsyncSocket
     - fmt
@@ -716,6 +727,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
   React-logger:
     :path: "../node_modules/react-native/ReactCommon/logger"
+  react-native-app-auth:
+    :path: "../node_modules/react-native-app-auth"
   react-native-blue-crypto:
     :path: "../node_modules/react-native-blue-crypto"
   react-native-blur:
@@ -846,6 +859,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
+  AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
   BEMCheckBox: 5ba6e37ade3d3657b36caecc35c8b75c6c2b1a4e
   boost: 7dcd2de282d72e344012f7d6564d024930a6a440
   BugsnagReactNative: d9fa0824cea1beb5ab1f12828d79a2bd1b383e60
@@ -878,6 +892,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 45ef2ec6dcde31b90469175ec76ddac77b91dfc3
   React-jsinspector: de0198127395fec3058140a20c045167f761bb16
   React-logger: dc3a2b174d79c2da635059212747d8d929b54e06
+  react-native-app-auth: 79605228ffe689f63ad5b046319f5e154e3e96c2
   react-native-blue-crypto: 23f1558ad3d38d7a2edb7e2f6ed1bc520ed93e56
   react-native-blur: 69ecfe61d81b32ee7baae10f5d17aeb4e2594b10
   react-native-bw-file-access: b232fd1d902521ca046f3fc5990ab1465e1878d7
