@@ -1,25 +1,22 @@
+import { bitcoinSendFee, getCurrencyRates, getMe, sendBitcoinPayment, sendCoinsViaUsername, sendLightningPayment } from "@Cypher/api/coinOSApis";
+import { getOnChainTiers, getPaymentQoute, getPaymentQouteByLightening, getPaymentQouteByLighteningURL, getPaymentQouteByOnChain } from "@Cypher/api/strikeAPIs";
+import { Check, Edit } from "@Cypher/assets/images";
+import { Input, ScreenLayout, Text } from "@Cypher/component-library";
+import { GradientButton, GradientCard, SwipeButton } from "@Cypher/components";
+import { dispatchNavigate, isIOS } from "@Cypher/helpers";
+import { btc, matchKeyAndValue } from "@Cypher/helpers/coinosHelper";
+import useAuthStore from "@Cypher/stores/authStore";
+import { colors } from "@Cypher/style-guide";
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Image, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
-import SimpleToast from "react-native-simple-toast";
+import { Image, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Icon } from "react-native-elements";
 import ReactNativeModal from "react-native-modal";
-import styles from "./styles";
-import { Input, LoadingSpinner, ScreenLayout, Text } from "@Cypher/component-library";
-import { Check, CoinOSSmall, Edit } from "@Cypher/assets/images";
-import { GradientButton, GradientCard, GradientCardWithShadow, GradientText, ImageText, SwipeButton } from "@Cypher/components";
-import { colors } from "@Cypher/style-guide";
-import { dispatchNavigate, isIOS } from "@Cypher/helpers";
-import LinearGradient from "react-native-linear-gradient";
-import TextView from "./TextView";
-import TextViewV2 from "../Invoice/TextView"
-import useAuthStore from "@Cypher/stores/authStore";
-import { bitcoinSendFee, getCurrencyRates, getMe, sendBitcoinPayment, sendCoinsViaUsername, sendLightningPayment } from "@Cypher/api/coinOSApis";
-import { btc, formatNumber, matchKeyAndValue } from "@Cypher/helpers/coinosHelper";
-import { FeeSelection } from "./FeeSelection/FeeSelection";
-import { startsWithLn } from "../Send";
-import { calculateBalancePercentage, calculatePercentage } from "../HomeScreen";
-import { getOnChainTiers, getPaymentQoute, getPaymentQouteByLightening, getPaymentQouteByLighteningURL, getPaymentQouteByOnChain } from "@Cypher/api/strikeAPIs";
+import SimpleToast from "react-native-simple-toast";
 import { mostRecentFetchedRate } from "../../../blue_modules/currency";
+import TextViewV2 from "../Invoice/TextView";
+import { startsWithLn } from "../Send";
+import styles from "./styles";
+import TextView from "./TextView";
 
 interface Props {
     route: any;

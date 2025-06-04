@@ -1,4 +1,4 @@
-import { colors, widths, shadow } from "@Cypher/style-guide";
+import { shadow, widths } from "@Cypher/style-guide";
 import { StyleSheet, ViewStyle } from "react-native";
 
 interface Style {

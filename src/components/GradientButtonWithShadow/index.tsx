@@ -1,3 +1,6 @@
+import { Copy } from "@Cypher/assets/images";
+import { Text } from "@Cypher/component-library";
+import { colors, shadow } from "@Cypher/style-guide";
 import React from "react";
 import {
   ButtonProps,
@@ -8,11 +11,8 @@ import {
   TouchableOpacityProps,
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
-import { colors, shadow } from "@Cypher/style-guide";
-import styles from "./styles";
-import { Copy } from "@Cypher/assets/images";
-import { Text } from "@Cypher/component-library";
 import { Shadow } from "react-native-neomorph-shadows";
+import styles from "./styles";
 
 interface Props extends ButtonProps, TouchableOpacityProps {
   onPress?(): void;
@@ -54,7 +54,7 @@ export default function GradientButtonWithShadow({
         colors={
           disabled
             ? [colors.gray.light, colors.gray.light]
-            : ['#333333', '#282727']
+            : [colors.black.gradientTop, colors.black.gradientBottom]
         }
         style={[styles.linearGradient, isBorder && styles.border, isIcon && styles.pureview, style]}
       >

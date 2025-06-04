@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet, TouchableOpacity, View, Dimensions } from 'react-native';
-import styles from './styles';
+import { getCurrencyRates, getMe, getTransactionHistory } from '@Cypher/api/coinOSApis';
 import { CoinOSSmall, ProgressBar1, ProgressIndicator } from '@Cypher/assets/images';
 import { ScreenLayout, Text } from '@Cypher/component-library';
-import { dispatchNavigate } from '@Cypher/helpers';
-import { Shadow } from 'react-native-neomorph-shadows';
-import { colors } from '@Cypher/style-guide';
-import LinearGradient from 'react-native-linear-gradient';
-import useAuthStore from '@Cypher/stores/authStore';
-import { getCurrencyRates, getMe, getTransactionHistory } from '@Cypher/api/coinOSApis';
-import { matchKeyAndValue } from '@Cypher/helpers/coinosHelper';
-import Svg, { SvgProps, Path } from 'react-native-svg';
 import { ProgressBar } from '@Cypher/components';
+import { calculatePercentage, dispatchNavigate } from '@Cypher/helpers';
+import { matchKeyAndValue } from '@Cypher/helpers/coinosHelper';
+import useAuthStore from '@Cypher/stores/authStore';
+import { colors } from '@Cypher/style-guide';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import { Shadow } from 'react-native-neomorph-shadows';
+import Svg, { Path, SvgProps } from 'react-native-svg';
 import { mostRecentFetchedRate } from '../../../blue_modules/currency';
+import styles from './styles';
 
 const { width } = Dimensions.get('screen');
 
@@ -28,14 +28,6 @@ const Arrow = (props: SvgProps) => (
         />
     </Svg>
 );
-
-export const calculatePercentage = (withdrawThreshold: number, reserveAmount: number) => {
-    const threshold = Number(withdrawThreshold);
-    const reserve = Number(reserveAmount);
-
-    const percentage = (threshold / (threshold + reserve)) * 100;
-    return Math.min(percentage, 100);
-};
 
 export default function WithdrawToSavingsVault({ route }: Props) {
     const [isLoading, setIsLoading] = useState<boolean>(true);

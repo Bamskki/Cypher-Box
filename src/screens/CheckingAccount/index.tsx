@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Image, RefreshControl, ScrollView, SectionList, StyleSheet, TouchableOpacity, View } from "react-native";
-import styles from "./styles";
-import { Icon } from 'react-native-elements';
-import SimpleToast from "react-native-simple-toast";
+import { getTransactionHistory } from "@Cypher/api/coinOSApis";
+import { getInvoices } from "@Cypher/api/strikeAPIs";
+import { CoinOS, Line, Time } from "@Cypher/assets/images";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 import { GradientCard, GradientTab, GradientText } from "@Cypher/components";
-import { CoinOS, Information, Line, Time } from "@Cypher/assets/images";
-import { colors } from "@Cypher/style-guide";
-import Items from "./Items";
-import Header from "./Header";
 import { dispatchNavigate } from "@Cypher/helpers";
-import Modal from "react-native-modal";
-import { getTransactionHistory } from "@Cypher/api/coinOSApis";
-import screenHeight from "@Cypher/style-guide/screenHeight";
 import { btc, formatNumber } from "@Cypher/helpers/coinosHelper";
 import useAuthStore from "@Cypher/stores/authStore";
-import { getInvoices } from "@Cypher/api/strikeAPIs";
+import { colors } from "@Cypher/style-guide";
+import screenHeight from "@Cypher/style-guide/screenHeight";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Image, RefreshControl, ScrollView, SectionList, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Icon } from 'react-native-elements';
+import Modal from "react-native-modal";
+import SimpleToast from "react-native-simple-toast";
+import Header from "./Header";
+import Items from "./Items";
+import styles from "./styles";
 
 interface Transaction {
     date: string;
@@ -373,7 +373,7 @@ export default function CheckAccount({ navigation, route }: any) {
     return (
         <ScreenLayout disableScroll showToolbar isBackButton>
             <View style={styles.container}>
-                <View style={[styles.innerView, { borderBottomColor: isTab ? '#333333' : colors.primary }]}>
+                <View style={[styles.innerView, { borderBottomColor: isTab ? colors.black.gradientTop : colors.primary }]}>
                     <Text subHeader bold>Lightning Account</Text>
                     <GradientTab isTextAfter firstTabImg={Time} secondTabImg={
                         <View style={[styles.lineView, !isTab && { borderColor: colors.white }]}>

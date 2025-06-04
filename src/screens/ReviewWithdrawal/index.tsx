@@ -1,26 +1,3 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, TouchableOpacity, View, KeyboardAvoidingView } from 'react-native';
-import SimpleToast from 'react-native-simple-toast';
-import { Icon } from 'react-native-elements';
-import ReactNativeModal from 'react-native-modal';
-import styles from './styles';
-import { Input, LoadingSpinner, ScreenLayout, Text } from '@Cypher/component-library';
-import { CoinOSSmall, ProgressBar2 } from '@Cypher/assets/images';
-import {
-    GradientButton,
-    GradientCard,
-    GradientCardWithShadow,
-    GradientText,
-    ImageText,
-    ProgressBar,
-    SwipeButton,
-} from '@Cypher/components';
-import { colors } from '@Cypher/style-guide';
-import { dispatchNavigate } from '@Cypher/helpers';
-import LinearGradient from 'react-native-linear-gradient';
-import TextView from './TextView';
-import TextViewV2 from '../Invoice/TextView';
-import useAuthStore from '@Cypher/stores/authStore';
 import {
     bitcoinRecommendedFee,
     bitcoinSendFee,
@@ -30,10 +7,28 @@ import {
     sendCoinsViaUsername,
     sendLightningPayment,
 } from '@Cypher/api/coinOSApis';
+import { CoinOSSmall, ProgressBar2 } from '@Cypher/assets/images';
+import { Input, ScreenLayout, Text } from '@Cypher/component-library';
+import {
+    GradientCard,
+    GradientCardWithShadow,
+    ProgressBar,
+    SwipeButton
+} from '@Cypher/components';
+import { calculatePercentage, dispatchNavigate } from '@Cypher/helpers';
 import { btc, formatNumber, matchKeyAndValue } from '@Cypher/helpers/coinosHelper';
-import { FeeSelection } from './FeeSelection/FeeSelection';
+import useAuthStore from '@Cypher/stores/authStore';
+import { colors } from '@Cypher/style-guide';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Image, ScrollView, TouchableOpacity, View } from 'react-native';
+import { Icon } from 'react-native-elements';
+import LinearGradient from 'react-native-linear-gradient';
+import ReactNativeModal from 'react-native-modal';
+import SimpleToast from 'react-native-simple-toast';
+import TextViewV2 from '../Invoice/TextView';
 import { startsWithLn } from '../Send';
-import { calculatePercentage } from '../HomeScreen';
+import styles from './styles';
+import TextView from './TextView';
 
 interface Props {
     route: any;

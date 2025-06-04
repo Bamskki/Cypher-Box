@@ -1,4 +1,4 @@
-import { colors, widths } from "@Cypher/style-guide";
+import { colors } from "@Cypher/style-guide";
 import { ImageStyle, StyleSheet, TextStyle, ViewStyle } from "react-native";
 
 interface Style {
@@ -32,13 +32,13 @@ export default StyleSheet.create<Style>({
         paddingHorizontal: 25,
         alignItems: 'center',
         borderBottomWidth: 2,
-        borderBottomColor: '#333333',
+        borderBottomColor: colors.black.gradientTop,
     },
     bottomView: {
         alignItems: 'center',
         marginBottom: 25,
         borderTopWidth: 2,
-        borderTopColor: '#333333',
+        borderTopColor: colors.black.gradientTop,
         padding: 30,
     },
     lineView: {

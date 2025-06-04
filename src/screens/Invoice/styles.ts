@@ -29,7 +29,7 @@ export default StyleSheet.create<Style>({
         alignItems: 'center',
         marginBottom: 25,
         // borderTopWidth: 2,
-        borderTopColor: '#333333',
+        borderTopColor: colors.black.gradientTop,
         padding: 30,
         // position: 'absolute',
         // bottom: 0,

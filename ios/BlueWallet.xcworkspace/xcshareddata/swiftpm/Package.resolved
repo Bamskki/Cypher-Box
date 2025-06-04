@@ -1,4 +1,5 @@
 {
+  "originHash" : "89509f555bc90a15b96ca0a326a69850770bdaac04a46f9cf482d81533702e3c",
   "pins" : [
     {
       "identity" : "bugsnag-cocoa",
@@ -28,5 +29,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }
