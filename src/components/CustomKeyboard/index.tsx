@@ -7,6 +7,7 @@ import GradientButton from "../GradientButton";
 import { Cancel, Currency, CurrencyWhite, Sats } from "@Cypher/assets/images";
 import { Text } from "@Cypher/component-library";
 import { btc } from "@Cypher/helpers/coinosHelper";
+import { colors } from "@Cypher/style-guide";
 
 interface Props {
     onPress(): void;
@@ -19,9 +20,11 @@ interface Props {
     isError?: boolean;
     matchedRate?: number;
     currency?: string;
+    colors_?: string[];
+    isGradient?: boolean;
 }
 
-export default function CustomKeyBoard({ title, prevSats, disabled, onPress, setSATS, setUSD, setIsSATS, isError, matchedRate }: Props) {
+export default function CustomKeyBoard({ title, prevSats, disabled, onPress, setSATS, setUSD, setIsSATS, isError, matchedRate, colors_ = [colors.pink.extralight, colors.pink.default], isGradient = true }: Props) {
     const KEYSARRAY = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0'];
     const [isSats, setIsSats] = useState(true);
     const [sats, setSats] = useState(prevSats ? String(prevSats) : '');
@@ -35,13 +38,12 @@ export default function CustomKeyBoard({ title, prevSats, disabled, onPress, set
                 setSATS(sats);
                 setUSD(String(amount));
             } else {
-                amount = ((matchedRate || 0) * currency * Number(sats)).toFixed(5)
-                // amount = parseInt((Number(sats) / (matchedRate || 0)) * 100000000);
+                amount = parseInt((Number(sats) / (matchedRate || 0)) * 100000000);
                 const multiplier = isSats ? 0.000594 : 1683.79;
                 const total = multiplier * Number(sats);
                 const total_ = total.toFixed(4);
-                setSATS(String(amount));
-                setUSD(sats);
+                setSATS(sats);
+                setUSD(String(amount));
             }
         } else {
             setUSD('');
@@ -68,10 +70,10 @@ export default function CustomKeyBoard({ title, prevSats, disabled, onPress, set
 
     return (
         <View style={styles.container}>
-            <GradientTab firstTabImg={Sats} secondTabImg={isSats ? Currency : CurrencyWhite} tab1="Sats" tab2="USD" isSats={isSats} setIsSats={setIsSats} />
+            <GradientTab tabColor_={colors_} firstTabImg={Sats} secondTabImg={isSats ? Currency : CurrencyWhite} tab1="Sats" tab2="USD" isSats={isSats} setIsSats={setIsSats} />
             <LinearGradient
                 start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
-                colors={['#FF65D4', '#D617A1']}
+                colors={colors_}
                 style={styles.linearGradient} />
             <View style={styles.keypad}>
                 {KEYSARRAY.map((key) => (
@@ -83,11 +85,28 @@ export default function CustomKeyBoard({ title, prevSats, disabled, onPress, set
                     <Image source={Cancel} />
                 </TouchableOpacity>
             </View>
-            <GradientButton style={styles.invoiceButton} textStyle={{ fontFamily: 'Lato-Medium', }}
-                title={title}
-                disabled={disabled}
-                isError={isError}
-                onPress={onPress} />
+            {isGradient ?
+                <GradientButton style={styles.invoiceButton} textStyle={{ fontFamily: 'Lato-Medium', }}
+                    title={title}
+                    disabled={disabled}
+                    isError={isError}
+                    onPress={onPress} />
+                :
+                <TouchableOpacity onPress={onPress} style={{ width: '90%', }}>
+                    <LinearGradient style={{
+                        height: 47,
+                        borderRadius: 12,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderWidth: 1,
+                        borderColor: '#FFFCFC',
+                    }}
+                        colors={['#2A2A2A', '#1E1E1E']}
+                    >
+                        <Text h3>{title}</Text>
+                    </LinearGradient>
+                </TouchableOpacity>
+            }
         </View>
     )
 }
