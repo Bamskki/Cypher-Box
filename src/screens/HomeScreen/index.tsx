@@ -554,7 +554,7 @@ export default function HomeScreen({ route }: Props) {
   };
 
   const handleCreateColdVault = () => {
-    dispatchNavigate('ConnectColdStorage');
+    dispatchNavigate('ColdVaultIntro');
   }
 
   const hotStorageClickHandler = () => {
@@ -620,7 +620,7 @@ export default function HomeScreen({ route }: Props) {
     <View style={styles.bottominner}>
         <GradientView
           onPress={topupClickHandler}
-          topShadowStyle={[styles.outerShadowStyle, isVault && { shadowColor: colors.blueText }]}
+          topShadowStyle={[styles.outerShadowStyle, isVault && { shadowColor: '#21C7FB' }]}
           bottomShadowStyle={styles.innerShadowStyle}
           style={styles.linearGradientStyle}
           linearGradientStyle={styles.mainShadowStyle}
@@ -634,7 +634,7 @@ export default function HomeScreen({ route }: Props) {
         </GradientView>
        <GradientView
           onPress={withdrawClickHandler}
-          topShadowStyle={[styles.outerShadowStyle, isVault && { shadowColor: colors.blueText }]}
+          topShadowStyle={[styles.outerShadowStyle, isVault && { shadowColor: '#21C7FB' }]}
           bottomShadowStyle={styles.innerShadowStyle}
           style={styles.linearGradientStyle}
           linearGradientStyle={styles.mainShadowStyle}
@@ -694,11 +694,11 @@ export default function HomeScreen({ route }: Props) {
             onPress={handleCreateVault}
           >
             <LinearGradient
-              colors={['#32D38E', '#24C47F']}
+              colors={['#109471', '#32D38E']}
               // start={{ x: 0, y: -0.3 }}
               // end={{ x: 0, y: 2 }}
-              start = {{ x: 0, y: 1} }
-              end = {{ x: 1, y: 1 }}
+              start = {{ x: 0, y: 0} }
+              end = {{ x: 0, y: 1 }}
                         // locations={[0, 1]}
               style={styles.createVault}>
               {/* <Text h3 style={styles.advancedText}>⚠  Advanced</Text> */}
@@ -735,10 +735,10 @@ export default function HomeScreen({ route }: Props) {
         />
       ) : (
         // (
-          <View style={[styles.createVaultContainer, { top: -10 }]}>
+          <View style={[styles.createVaultContainer, { top: 0 }]}>
             <TouchableOpacity onPress={handleCreateColdVault}>
               <LinearGradient
-                colors={['#1693EDFA', '#15A7A7']}
+                colors={[colors.coldBlue, colors.coldGreen]}
                 // start={{ x: 0, y: -0.3 }}
                 // end={{ x: 0, y: 2 }}
                 start={{ x: 0, y: 0 }}
@@ -814,9 +814,10 @@ export default function HomeScreen({ route }: Props) {
       <>
         {isAuth &&
           <>
-            <TouchableOpacity style={styles.shadowView} onPress={() => checkingAccountClickHandler(true)}>
+          <View style={{overflow: 'visible'}}>
+            <TouchableOpacity style={[styles.shadowView, {shadowOffset: {width: 5, height: 5}, shadowOpacity: 0.7, shadowColor: '#000000', shadowRadius: 9, overflow: "visible"}]} onPress={() => checkingAccountClickHandler(true)}>
               <Shadow
-                style={StyleSheet.flatten([styles.shadowTop, { shadowColor: colors.pink.shadowTop, padding: 0 }])}
+                style={StyleSheet.flatten([styles.shadowTop, {shadowColor: colors.pink.shadowTop, padding: 0 }])}
                 inner
                 useArt
               >
@@ -895,6 +896,7 @@ export default function HomeScreen({ route }: Props) {
                   </Text>
               )
             }
+            </View>
           </>
         }
 
@@ -1228,6 +1230,7 @@ export default function HomeScreen({ route }: Props) {
   console.log('allBTCWallets: ', allBTCWallets)
   return (
     <ScreenLayout
+      
       RefreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -1246,7 +1249,7 @@ export default function HomeScreen({ route }: Props) {
             <>
               <View style={styles.title}>
                 <Text subHeader bold>
-                  Total Balance
+                  Total Assets
                 </Text>
                 <View style={styles.row}>
                   <TouchableOpacity
@@ -1271,9 +1274,10 @@ export default function HomeScreen({ route }: Props) {
                   </TouchableOpacity>
                 </View>
               </View>
-              <View style={styles.shadowView}>
+              <View style={[styles.shadowView , {shadowOffset: {width: 5, height: 5}, shadowOpacity: 0.7, shadowColor: '#000000', shadowRadius: 9}]}>
+              <View>
                 <Shadow
-                  style={styles.shadowTop}
+                  style={[styles.shadowTop, {backgroundColor: '#111111'}]}
                   inner
                   useArt
                 >
@@ -1285,8 +1289,8 @@ export default function HomeScreen({ route }: Props) {
                     {"$" + ((Number(strikeUser?.[0]?.available || 0) * matchedRate) + Number(convertedRate || 0) + ((Number(coldStorageBalanceWithoutSuffix || 0) * Number(matchedRate || 0)) + (Number(balanceWithoutSuffix || 0) * Number(matchedRate || 0)))).toFixed(2)}
                   </Text>
                   {(allBTCWallets.length > 0 && allBTCWallets.length < 2) &&
-                    <TouchableOpacity onPress={() => dispatchNavigate('CheckingAccountIntro')} style={{zIndex: 100, alignSelf: 'flex-end', borderRadius: 10, borderWidth: 1, borderColor: colors.pink.light}}>
-                      <Text h4 style={styles.descption}>Add Account</Text>
+                    <TouchableOpacity onPress={() => dispatchNavigate('CheckingAccountIntro')} style={{zIndex: 100, alignSelf: 'flex-end', borderRadius: 10, borderWidth: 0, borderColor: colors.pink.light}}>
+                      <Text h4 style={styles.descption}>+ Add Account</Text>
                     </TouchableOpacity>
                   }
                   <Shadow
@@ -1296,6 +1300,7 @@ export default function HomeScreen({ route }: Props) {
                   />
                 </Shadow>
               </View>
+              </View>
             </>
           )}
 
@@ -1303,8 +1308,31 @@ export default function HomeScreen({ route }: Props) {
 
           <View>
             {!isAuth && !isLoading && !isStrikeAuth ?
-              <View style={{ height: '42%' }}>
-                <GradientCardWithShadow
+              <View style={{ height: '42%'}}>
+                <TouchableOpacity onPress={loginClickHandler}>
+                <LinearGradient
+                  colors={[colors.pink.default,colors.pink.extralight]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  // locations={[0, 1]}
+                  style={[styles.createVault, { flexDirection:'row', justifyContent: 'center'}]}
+                >
+                  <Image
+                      style={styles.arrow}
+                      resizeMode="contain"
+                      source={require("../../../img/arrow-right.png")}
+                    />
+                  <View style={styles.middle}>
+                    
+                    <View style={{alignItems: 'center', justifyContent: 'center', alignSelf:'center', marginRight: 35}}>
+                      <Text h2 style={styles.shadow} center>
+                        Create Lightning Account
+                      </Text>
+                    </View>
+                  </View>
+                </LinearGradient>
+                </TouchableOpacity>
+            {/*<GradientCardWithShadow
                   style={styles.createView}
                   onPress={loginClickHandler}
                 >
@@ -1314,18 +1342,19 @@ export default function HomeScreen({ route }: Props) {
                       resizeMode="contain"
                       source={require("../../../img/arrow-right.png")}
                     />
-                    <View style={{alignItems: 'center', justifyContent: 'center', alignSelf: 'center'}}>
+                    <View style={{alignItems: 'center', justifyContent: 'center', alignSelf: 'center', margin:40}}>
                       <Text h2 style={styles.shadow} center>
                         Create Lightning Account
                       </Text>
                     </View>
                   </View>
-                </GradientCardWithShadow>
+                </GradientCardWithShadow>*/}
               </View>
             : !isLoading &&
               // <View style={{ height: '42%' }}>
                 <Carousel
                   data={wTabs}
+                  style={{overflow:'visible'}}
                   // ref={carouselRef}
                   renderItem={renderWalletItem}
                   firstItem={indexStrike}
@@ -1344,7 +1373,7 @@ export default function HomeScreen({ route }: Props) {
           {/* */}
 
           {!isLoading && !isWalletLoaded && !isColdWalletLoaded &&
-            <View style={[{ height: isIOS && !isAuth ? '36.2%' : isAuth ? '37%' : '35%' }, isIOS && {bottom: 20}, isAuth && styles.bottom]}>
+            <View style={[{ height: isIOS && !isAuth ? '33.5%' : isAuth ? '35%' : '35%' }, isIOS && {bottom: 10}, isAuth && styles.bottom]}>
               <Carousel
                 data={tabs}
                 ref={carouselRef}

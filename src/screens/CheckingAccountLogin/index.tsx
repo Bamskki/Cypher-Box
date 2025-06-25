@@ -94,7 +94,7 @@ export default function CheckingAccountLogin() {
   return (
     <ScreenLayout showToolbar>
       <View style={styles.container}>
-        <HeaderWithLine title="Login to Checking Account" />
+        <HeaderWithLine title="Login to Lightning Account" />
         <View style={styles.content}>
           {!isStrikeAuth && (
             <>

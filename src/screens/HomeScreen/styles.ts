@@ -42,6 +42,7 @@ interface Style {
     shadow10: any;
     shadow11: any;
     shadowBottom: any;
+    savingHeight?: ViewStyle;
     shadowView: ViewStyle;
     shadowTopBottom: any;
     shadowBottomBottom: any;
@@ -106,6 +107,8 @@ export default StyleSheet.create<Style>({
         justifyContent: 'space-between',
         paddingHorizontal: 20,
         paddingBottom: 60,
+        overflow: 'visible'
+        //zIndex:999
     },
     container2: {
         flex: 1,
@@ -152,8 +155,8 @@ export default StyleSheet.create<Style>({
     },
     container3: {
         height: 62,
-        marginTop: 12.5,
-        marginBottom: 16,
+        marginTop: 0,
+        marginBottom: 0,
         opacity: 0.5,
     },
     container4: {
@@ -170,9 +173,9 @@ export default StyleSheet.create<Style>({
     },
     descption: {
         fontFamily: 'Archivo-SemiBold',
-        color: colors.white,
+        color: colors.pink.light,
         margin: 8,
-        fontSize: 18,
+        fontSize: 13,
     },
     alreadyView: {
         flexDirection: 'row',
@@ -218,6 +221,8 @@ export default StyleSheet.create<Style>({
     middle: {
         flexDirection: 'row',
         alignItems: 'center',
+        alignSelf:'center',
+        justifyContent:'center',
         flex: 1
     },
     text: {
@@ -353,7 +358,7 @@ export default StyleSheet.create<Style>({
     },
     shadowTop: {
         shadowOffset: { width: 2, height: 2 },
-        shadowOpacity: 1,
+        shadowOpacity: 0.7,
         shadowColor: colors.white,
         shadowRadius: 2,
         borderRadius: 24,
@@ -401,8 +406,8 @@ export default StyleSheet.create<Style>({
     shadowBottom: {
         shadowOffset: { width: -3, height: -3 },
         shadowOpacity: 1,
-        shadowColor: '#DBDBDB',
-        shadowRadius: 2,
+        shadowColor: '#000000',
+        shadowRadius: 5,
         borderRadius: 25,
         width: widths - 40,
         height: 128,
@@ -674,6 +679,9 @@ export default StyleSheet.create<Style>({
     savingVault: {
         width: widths - 40,
     },
+    savingHeight: {
+        height: 200
+    },
     bitcoinText: {
         fontSize: 16,
     },
@@ -698,7 +706,7 @@ export default StyleSheet.create<Style>({
     },
     createVault: {
         borderRadius: 25,
-        marginTop: 20,
+        marginTop: 13,
         height: 132,
         justifyContent: 'center',
         alignItems: 'center',

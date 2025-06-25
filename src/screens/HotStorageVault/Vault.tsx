@@ -115,6 +115,7 @@ export default function Vault({ wallet, matchedRate, setSelectedTab }: { wallet:
                 />
             }
         >
+            <View>
             <SavingVault
                 container={styles.savingVault}
                 innerContainer={styles.savingVault}
@@ -127,7 +128,9 @@ export default function Vault({ wallet, matchedRate, setSelectedTab }: { wallet:
                 bitcoinValue={balance}
                 inDollars={`$${(Number(balanceWithoutSuffix) * Number(matchedRate)).toFixed(2)}`}
             />
+            
             <View style={styles.base}>
+            
                 <GradientView
                     onPress={addressHandler}
                     style={styles.linearGradientStyle}
@@ -138,6 +141,9 @@ export default function Vault({ wallet, matchedRate, setSelectedTab }: { wallet:
                 >
                     <Text h3 center>Vault Addresses</Text>
                 </GradientView>
+                <Text style={{paddingRight: 20, paddingLeft:20, paddingTop: 20}}>
+            ⚠️ DO NOT use these addresses to receive funds without verifying their authenticity from your hardware device! 
+            </Text>
                 {/* <GradientView
                     onPress={addressClickHandler}
                     topShadowStyle={styles.outerShadowStyle}
@@ -149,7 +155,8 @@ export default function Vault({ wallet, matchedRate, setSelectedTab }: { wallet:
                     <Text h3 center>Send Coins</Text>
                 </GradientView> */}
             </View>
-            {!vaultTab ?
+            </View>
+            {/* {!vaultTab ?
                 <View style={[styles.base, { marginHorizontal: 20 }]}>
                     <Image style={styles.info} source={InformationNew} />
                     <Text style={styles.textInfo} italic>What is a Savings Vault?</Text>
@@ -158,14 +165,14 @@ export default function Vault({ wallet, matchedRate, setSelectedTab }: { wallet:
                 <View style={[{ flex: 1, marginTop: 20, width: '80%', justifyContent: 'center', alignItems: 'center', alignSelf: 'center' }]}>
                     <Text style={[{fontSize: 14}]}>⚠️ DO NOT use these addresses to receive funds without verifying their authenticity from your hardware device! </Text>
                 </View>
-            }
+            } */}
             {address ?
                 <>
                     {!vaultTab &&
                         <Text h4 style={styles.infoText}>You can use this vault address to receive coins from another vault on the Bitcoin Network</Text>
                     }
                     <View style={[styles.qrcode, vaultTab && { borderColor: colors.blueText, height: "40%", width: "60%" }]}>
-                        <View style={{ width: "80%", height: "80%", margin: 25, padding: 20, backgroundColor: 'white', borderRadius: 30 }}>
+                        <View style={{ alignItems:'center', justifyContent: 'center',width: "100%", height: "100%", margin: 0, padding: 20, backgroundColor: 'white', borderRadius: 30 }}>
                             <QRCode
                                 getRef={c => {
                                     if (!c?.toDataURL) return;
@@ -174,7 +181,8 @@ export default function Vault({ wallet, matchedRate, setSelectedTab }: { wallet:
                                     });
                                 }}
                                 value={address}
-                                size={150}
+                                size={175}
+                                
                                 color="black"
                                 backgroundColor="white"
                             />

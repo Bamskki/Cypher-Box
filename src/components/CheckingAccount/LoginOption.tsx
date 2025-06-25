@@ -23,7 +23,9 @@ export default function LoginOption({ logo, onPress }: LoginOptionProps) {
     >
       <LinearGradient
         colors={["#FF65D4", "rgba(214, 23, 161, 0.9)"]}
-        style={styles.loginOptionGradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={styles.loginOptionGradient, {padding: 3}}
       >
         <View style={styles.loginOption}>
           <Image source={logo} style={styles.logo} resizeMode="contain" />

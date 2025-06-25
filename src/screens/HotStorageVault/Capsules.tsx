@@ -242,7 +242,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
 
     return (
         <View style={styles.flex}>
-            <Text bold style={styles.desc}>Tap on your coins to label them. Select multiple coins and batch them together to optimize fees for future transactions:</Text>
+            <Text bold style={styles.desc}>Select your UTXO capsules to send, consolidate, move to Cold Vault, or Top-up your Lightening Account:</Text>
             <View style={styles.titleStyle}>
                 <Text bold style={styles.coin}>Capsules</Text>
                 <Text bold style={styles.size}>Size</Text>
@@ -258,7 +258,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
                     keyExtractor={(_, index) => index.toString()}
                     showsVerticalScrollIndicator={false}
                     ListEmptyComponent={() => (
-                        <View style={{ height: screenHeight / 3.2, justifyContent: 'center', alignItems: 'center', marginTop: 30 }}>
+                        <View style={{ height: screenHeight / 3.5, justifyContent: 'center', alignItems: 'center', marginTop: 30 }}>
                             <Text white h3 bold>This wallet does not have any coins at the moment.</Text>
                         </View>
                     )}
@@ -281,7 +281,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
                     />
                     <Text h2 bold numberOfLines={1} style={{ marginStart: 10, width: 100, }}>~$ {inUSD.toFixed(2)}</Text>
                 </View>
-                <Text bold center style={styles.tips}>Tip: Selecting dust coins will increase network fees</Text>
+                <Text bold center style={styles.tips}>Tip: Selecting small capsules will increase network fees</Text>
                 {vaultTab ?
                     <View style={{
                         flexDirection: 'row',
@@ -295,7 +295,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
                             bottomShadowStyle={[styles.capsuleInnerShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
                             linearGradientStyleMain={styles.capsuleLinearGradientStyleMain}
                         >
-                            <Text h3 center>Send Capsule</Text>
+                            <Text h3 center>Send</Text>
                         </GradientView>
                         <GradientView
                             onPress={addressClickHandler}
@@ -321,7 +321,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
                             bottomShadowStyle={[styles.capsuleInnerShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
                             linearGradientStyleMain={styles.capsuleLinearGradientStyleMain}
                         >
-                            <Text h3 center>Send Capsule</Text>
+                            <Text h3 center>Send</Text>
                         </GradientView>
                         <GradientView
                             onPress={addressClickHandler}
@@ -350,7 +350,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
                         bottomShadowStyle={[styles.capsuleInnerShadowStyle, vaultTab && { shadowColor: colors.blueText}]}
                         linearGradientStyleMain={styles.capsuleLinearGradientStyleMain}
                     >
-                        <Text h3 center>Batch</Text>
+                        <Text h3 center>Consolidate</Text>
                     </GradientView>
                     <GradientView
                         onPress={moveToVaultClickHandler}
@@ -360,7 +360,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
                         linearGradientStyle={styles.capsuleMainShadowStyle}
                         linearGradientStyleMain={[styles.capsuleLinearGradientStyleMain]}
                     >
-                        <Text h3 center>{vaultTab ? "Move to Hot Vault" : "Move to Cold Vault"}</Text>
+                        <Text h4 center>{vaultTab ? "Move to Hot Vault" : "Move to Cold Vault"}</Text>
                     </GradientView>
                 </View>
             </View>
