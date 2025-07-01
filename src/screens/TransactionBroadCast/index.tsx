@@ -18,7 +18,7 @@ import Animated, {
 import { resetAndNavigate } from "@Cypher/helpers/navigation";
 
 export default function TransactionBroadCast({navigation, route}: any) {
-    const {matchedRate, type, value, converted, isSats, item, receiveType = true } = route?.params;
+    const {matchedRate, type, value, converted, isSats, item, receiveType } = route?.params;
     const amountSat = isSats ? value : converted;
     const amountUSD = isSats ? converted : value
     const [response, setResponse] = useState(false);

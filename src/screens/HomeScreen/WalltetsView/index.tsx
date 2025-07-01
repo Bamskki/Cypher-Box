@@ -8,11 +8,13 @@ import Carousel from "react-native-snap-carousel";
 interface Props {
     balance: any;
     wallet: any;
+    coldStorageWallet: any;
     isLoading: boolean;
     matchedRate: any;
     currency: any;
     convertedRate: any;
     refRBSheet: any;
+    refSendRBSheet: any;
     setReceiveType: any;
     strikeBalance: any;
 }
@@ -20,11 +22,13 @@ interface Props {
 export default function WalletsView({
     balance,
     wallet,
+    coldStorageWallet,
     isLoading,
     matchedRate,
     currency,
     convertedRate,
     refRBSheet,
+    refSendRBSheet,
     setReceiveType,
     strikeBalance,
 }: Props) {
@@ -34,15 +38,17 @@ export default function WalletsView({
     const [wTabs, setWTabs] = useState([]);
 
     useEffect(() => {
-        const tabs: any = [...wTabs];
+        const tabs: any = [];
 
         if (allBTCWallets && !isLoading) {
             (allBTCWallets as WalletName[]).map(wallet => {
                 if (walletTabsMap[wallet]) {
                     tabs.push(walletTabsMap[wallet]);
-                    if (walletTabsMap[wallet].key === 'strike') {
+                    if(allBTCWallets.length > 1) {
+                        tabs.length = 0;
+                        tabs.push({ key: "divider", component: () => <CircularView balance={balance} convertedRate={convertedRate} currency={currency} wallet={wallet} matchedRate={matchedRate} refRBSheet={refRBSheet} refSendRBSheet={refSendRBSheet} setReceiveType={setReceiveType} /> });                                    
+                    } if (walletTabsMap[wallet].key === 'strike') {
                         tabs.push({ key: "divider", component: () => <StrikeDollarWallet currency={currency} matchedRate={matchedRate} /> });
-                        tabs.push({ key: "divider", component: () => <CircularView balance={balance} convertedRate={convertedRate} currency={currency} wallet={wallet} matchedRate={matchedRate} refRBSheet={refRBSheet} setReceiveType={setReceiveType} /> });            
                     }
                 }
             });
@@ -54,8 +60,8 @@ export default function WalletsView({
     type WalletName = keyof typeof walletTabsMap;
 
     const walletTabsMap = {
-        COINOS: { key: 'coinos', component: () => <CoinosWallet balance={balance} convertedRate={convertedRate} currency={currency} isLoading={isLoading} matchedRate={matchedRate} refRBSheet={refRBSheet} setReceiveType={setReceiveType} wallet={wallet}/> },
-        STRIKE: { key: 'strike', component: () => <StrikeWallet balance={balance} currency={currency} isLoading={isLoading} matchedRate={matchedRate} refRBSheet={refRBSheet} setReceiveType={setReceiveType} strikeBalance={strikeBalance} /> },
+        COINOS: { key: 'coinos', component: () => <CoinosWallet balance={balance} convertedRate={convertedRate} currency={currency} isLoading={isLoading} matchedRate={matchedRate} refRBSheet={refRBSheet} refSendRBSheet={refSendRBSheet} setReceiveType={setReceiveType} wallet={wallet}/> },
+        STRIKE: { key: 'strike', component: () => <StrikeWallet balance={balance} currency={currency} isLoading={isLoading} matchedRate={matchedRate} refRBSheet={refRBSheet} refSendRBSheet={refSendRBSheet} setReceiveType={setReceiveType} strikeBalance={strikeBalance} /> },
     };
 
 
@@ -69,6 +75,7 @@ export default function WalletsView({
         )
     };
 
+    console.log('allBTCWallets: ', allBTCWallets, wTabs)
     return (
         <Carousel
             data={wTabs}

@@ -124,7 +124,7 @@ export default function BuyBitcoin({ navigation, route }: any) {
                 });
             }
         } catch (error) {
-            console.error('Error Send Lightening:', error);
+            console.error('Error handleLighteningInvoice:', error);
             SimpleToast.show('Failed to generate lightening. Please try again.', SimpleToast.SHORT);
         } finally {
             setIsLoading(false);

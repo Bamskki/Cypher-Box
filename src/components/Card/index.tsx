@@ -1,6 +1,6 @@
 import { CoinOSSmall } from "@Cypher/assets/images";
 import { Text } from "@Cypher/component-library";
-import { calculateBalancePercentage, calculatePercentage } from "@Cypher/helpers";
+import { calculateBalancePercentage, calculatePercentage, dispatchNavigate } from "@Cypher/helpers";
 import { formatNumber } from "@Cypher/helpers/coinosHelper";
 import { colors } from "@Cypher/style-guide";
 import React from "react";
@@ -9,12 +9,15 @@ import LinearGradient from "react-native-linear-gradient";
 import { Shadow } from "react-native-neomorph-shadows";
 import GradientButtonWithShadow from "../GradientButtonWithShadow";
 import styles from "./styles";
+import useAuthStore from "@Cypher/stores/authStore";
 
 interface Props {
     onPress?: (value: boolean) => void;
     title?: string;
     balance: any;
     convertedRate: any;
+    matchedRate: any;
+    currency: any;
     withdrawThreshold: any;
     reserveAmount: any;
     isShowButtons?: boolean;
@@ -28,11 +31,13 @@ export default function Card({ onPress,
     convertedRate,
     withdrawThreshold,
     reserveAmount,
+    matchedRate,
+    currency,
     isShowButtons = false,
     receiveClickHandler,
     sendClickHandler,
 }: Props) {
-
+    const {coldStorageWalletID, walletID, allBTCWallets} = useAuthStore();
 
     const onCardClickHandler = () => {
         onPress?.(true);
@@ -53,13 +58,30 @@ export default function Card({ onPress,
     const getWidth = () => {
         return `${calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount))}%`
     }
+    console.log('allBTCWallets: ', allBTCWallets)
 
     const onReceiveClickHandler = () => {
-        receiveClickHandler?.(true);
+        if(allBTCWallets.length == 1 && !coldStorageWalletID && !walletID) {
+            dispatchNavigate('CreateInvoice', {
+                matchedRate,
+                currency,
+                receiveType: true
+            });
+        } else {
+            receiveClickHandler?.(true);
+        }
     }
 
     const onSendClickHandler = () => {
-        sendClickHandler?.(true);
+        if(allBTCWallets.length == 1 && !coldStorageWalletID && !walletID) {
+            dispatchNavigate('SendScreen', {
+                matchedRate,
+                currency,
+                receiveType: true
+            });
+        } else {
+            sendClickHandler?.(true);
+        }
     }
 
     return (

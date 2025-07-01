@@ -4,6 +4,8 @@ import Svg, { Circle, ClipPath, Defs, G, LinearGradient, Rect, Stop } from 'reac
 import { Text } from '@Cypher/component-library';
 import styles from './styles';
 import { colors } from '@Cypher/style-guide';
+import useAuthStore from '@Cypher/stores/authStore';
+import { calculateBalancePercentage, calculatePercentage } from '@Cypher/helpers';
 
 type CircleTimerProps = {
   backgroundColor?: string;
@@ -13,6 +15,7 @@ type CircleTimerProps = {
   value?: string;
   convertedValue?: string;
   image?: ImageSourcePropType;
+  type?: string
 };
 
 const COLORS = {
@@ -30,7 +33,9 @@ const CircleTimer = ({
   value,
   convertedValue,
   image,
+  type,
 }: CircleTimerProps) => {
+  const {withdrawStrikeThreshold, withdrawThreshold, reserveAmount, reserveStrikeAmount} = useAuthStore()
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const clampedProgress = Math.min(progress, MAX_PROGRESS) / MAX_PROGRESS;
@@ -51,6 +56,27 @@ const CircleTimer = ({
 
   // Size of the square marker
   const markerSize = strokeWidth / 2;
+
+  const thresholdPercentage = type == "STRIKE" ? calculatePercentage(Number(withdrawStrikeThreshold), Number(reserveStrikeAmount)) : calculatePercentage(Number(withdrawThreshold), Number(reserveAmount));
+
+  // Convert to angle along the arc
+  const thresholdAngleDeg = ROTATION_DEG + (thresholdPercentage / 100) * totalArcAngle;
+  const thresholdAngleRad = thresholdAngleDeg * (Math.PI / 180);
+
+  // Calculate marker coordinates
+  const thresholdX = centerX + radius * Math.cos(thresholdAngleRad);
+  const thresholdY = centerY + radius * Math.sin(thresholdAngleRad);
+
+  const balancePercentage = calculateBalancePercentage(
+    Number(value?.split(' ')[0]), // or parseFloat(value) if it's string
+    Number(type == "STRIKE" ? withdrawStrikeThreshold : withdrawThreshold),
+    Number(type == "STRIKE" ? reserveStrikeAmount : reserveAmount)
+  );
+
+
+  const clampedBalanceProgress = Math.min(balancePercentage, 100) / 100;
+  const strokeBalanceDashoffset = circumference * (1 - clampedBalanceProgress);
+  // Convert to progress (0 to MAX_PROGRESS range)
 
   return (
     <View style={[styles.container, { width: size, height: size / 2 }]}>
@@ -85,16 +111,17 @@ const CircleTimer = ({
             stroke="url(#progressGradient)"
             strokeWidth={strokeWidth}
             strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
+            // strokeDashoffset={strokeDashoffset}
+            strokeDashoffset={strokeBalanceDashoffset}
             strokeLinecap="round"
           />
 
           {/* White square marker at the end of the progress arc */}
           <G rotation={-ROTATION_DEG} origin={`${size / 2}, ${size / 2}`}>
             <Circle
-              cx={endX - markerSize / 2} // Adjust for Rect's top-left anchoring
-              cy={endY - markerSize / 2}
-              r={strokeWidth / 2}
+              cx={thresholdX}
+              cy={thresholdY}
+              r={strokeWidth / 2.5}
               fill="white"
             />
           </G>

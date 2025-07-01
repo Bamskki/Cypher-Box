@@ -21,7 +21,7 @@ import { AbstractWallet } from "../../../class";
 import useAuthStore from "@Cypher/stores/authStore";
 // import { Bitcoin, Transaction, TransactionN } from "@Cypher/assets/svg";
 
-export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
+export default function Capsules({ wallet, matchedRate, to, vaultTab, toStrike }: any) {
     const { colors: themeColors } = useTheme();
     const [ids, setIds] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -78,7 +78,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
                 setBitcoinHash(response.hash)
                 console.log('response: ', response)
             } catch (error) {
-                console.error('Error generating bitcoin address:', error);
+                console.error('Error generating bitcoin address Capsules:', error);
             }
         })();
     }, []);
@@ -176,7 +176,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
             capsuleTotal += Number(result)
         });
         if (ids.length > 0) {
-            dispatchNavigate('ColdStorage', {wallet, capsuleTotal, utxo, ids, vaultTab, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to: bitcoinHash, type: "TOPUP"});
+            dispatchNavigate('ColdStorage', {wallet, capsuleTotal, utxo, ids, vaultTab, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to: bitcoinHash, toStrike, type: "TOPUP"});
         } else {
             SimpleToast.show("Please select Capsules to Send", SimpleToast.SHORT)
         }
@@ -213,7 +213,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab }: any) {
     const handleSendBars = () => {
         if (ids.length > 0) {
             const usd = inUSD.toFixed(2);
-            dispatchNavigate('EditAmount', { isEdit: false, vaultTab, wallet, utxo, ids, maxUSD: total, inUSD: inUSD.toFixed(2), total, matchedRate, to });
+            dispatchNavigate('EditAmount', { isEdit: false, vaultTab, wallet, utxo, ids, maxUSD: total, inUSD: inUSD.toFixed(2), total, matchedRate, to, toStrike });
         } else {
             SimpleToast.show("Please select Capsules to Send", SimpleToast.SHORT)
         }

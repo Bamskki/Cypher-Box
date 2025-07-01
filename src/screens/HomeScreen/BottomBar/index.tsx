@@ -12,6 +12,7 @@ import SimpleToast from "react-native-simple-toast";
 import Carousel from "react-native-snap-carousel";
 import styles from "../styles";
 import TabBar from "../TabBar";
+import { createInvoice as createInvoiceStrike } from "@Cypher/api/strikeAPIs";
 
 interface Props {
     balance: any;
@@ -28,11 +29,13 @@ interface Props {
     coldStorageBalanceWithoutSuffix: any;
     vaultAddress: any;
     recommendedFee: any;
+    refWithdrawRBSheet: any
 }
 
 export default function BottomBar({
     balance,
     wallet,
+    refWithdrawRBSheet,
     currency,
     matchedRate,
     balanceVault,
@@ -47,7 +50,7 @@ export default function BottomBar({
     recommendedFee,
 }: Props) {
     console.log("🚀 ~ hasSavingVault:", hasSavingVault)
-    const { isAuth, withdrawThreshold, vaultTab, setVaultTab } = useAuthStore();
+    const { isAuth, isStrikeAuth, withdrawThreshold, vaultTab, setVaultTab } = useAuthStore();
 
     const carouselRef = useRef<Carousel<any>>(null);
 
@@ -78,52 +81,64 @@ export default function BottomBar({
         // dispatchNavigate('PurchaseVault', {
         //   data: {}
         // });
-        if (!isAuth) {
-            SimpleToast.show('You need to be logged in to Coinos.io to top up', SimpleToast.SHORT);
+        if (!isAuth && !isStrikeAuth) {
+            SimpleToast.show('You need to be logged in to wallet to top up', SimpleToast.SHORT);
             return
         }
-        if (vaultTab && !coldStorageWallet) {
-            SimpleToast.show('You need to have a cold storage wallet to top up', SimpleToast.SHORT);
-            return
-        }
+
+        // if (!isAuth) {
+        //     SimpleToast.show('You need to be logged in to Coinos.io to top up', SimpleToast.SHORT);
+        //     return
+        // }
+        // if (vaultTab && !coldStorageWallet) {
+        //     SimpleToast.show('You need to have a cold storage wallet to top up', SimpleToast.SHORT);
+        //     return
+        // }
         try {
             const response = await createInvoice({
                 type: 'bitcoin',
             });
-            dispatchNavigate('HotStorageVault', { wallet: vaultTab ? coldStorageWallet : wallet, matchedRate, to: response.hash });
+            const responseStrike = await createInvoiceStrike({
+                onchain: {
+                },
+                targetCurrency: "USD"
+            });
+
+            dispatchNavigate('HotStorageVault', { wallet: vaultTab ? coldStorageWallet : wallet, matchedRate, to: response.hash, toStrike: responseStrike.onchain?.address });
         } catch (error) {
-            console.error('Error generating bitcoin address:', error);
+            console.error('Error generating bitcoin address topupClickHandler:', error);
         } finally {
             // setIsLoading(false);
         }
     };
 
     const withdrawClickHandler = () => {
-        if (!isAuth) {
-            SimpleToast.show('You need to be logged in to Coinos.io to withdraw', SimpleToast.SHORT);
+        if (!isAuth && !isStrikeAuth) {
+            SimpleToast.show('You need to be logged in to wallet to withdraw', SimpleToast.SHORT);
             return
         }
-        if (vaultTab && !coldStorageWallet) {
-            SimpleToast.show('You need to have a cold storage wallet to withdraw', SimpleToast.SHORT);
-            return
-        }
+        // if (vaultTab && !coldStorageWallet) {
+        //     SimpleToast.show('You need to have a cold storage wallet to withdraw', SimpleToast.SHORT);
+        //     return
+        // }
 
         if (wallet || coldStorageWallet) {
-            const amount = withdrawThreshold > balance ? balance : withdrawThreshold;
-            dispatchNavigate('ReviewPayment', {
-                value: amount,
-                converted: ((Number(matchedRate) || 0) * btc(1) * Number(amount)).toFixed(2),
-                isSats: true,
-                to: vaultTab ? coldStorageAddress : vaultAddress,
-                fees: 0,
-                matchedRate: matchedRate,
-                currency: currency,
-                type: 'bitcoin',
-                feeForBamskki: 0,
-                recommendedFee,
-                wallet: vaultTab ? coldStorageWallet : wallet,
-                isWithdrawal: true
-            });
+            refWithdrawRBSheet.current?.open();
+            // const amount = withdrawThreshold > balance ? balance : withdrawThreshold;
+            // dispatchNavigate('ReviewPayment', {
+            //     value: amount,
+            //     converted: ((Number(matchedRate) || 0) * btc(1) * Number(amount)).toFixed(2),
+            //     isSats: true,
+            //     to: vaultTab ? coldStorageAddress : vaultAddress,
+            //     fees: 0,
+            //     matchedRate: matchedRate,
+            //     currency: currency,
+            //     type: 'bitcoin',
+            //     feeForBamskki: 0,
+            //     recommendedFee,
+            //     wallet: vaultTab ? coldStorageWallet : wallet,
+            //     isWithdrawal: true,
+            // });
         } else {
             dispatchNavigate('SavingVaultIntro');
         }
@@ -140,11 +155,6 @@ export default function BottomBar({
 
     const HotStorageTab = () => (
         <View>
-            {hasSavingVault && wallet ?
-                <TopUpWithdrawView isVault={false} />
-                :
-                <View style={{ height: 0 }} />
-            }
             {(hasSavingVault && wallet) ? (
                 <SavingVault
                     container={StyleSheet.flatten([styles.savingVault, { marginTop: 14 }])}
@@ -189,11 +199,11 @@ export default function BottomBar({
 
     const ColdStorageTab = () => (
         <View>
-            {coldStorageWallet ?
+            {/* {coldStorageWallet ?
                 <TopUpWithdrawView isVault={true} />
                 :
                 <View style={{ height: 40 }} />
-            }
+            } */}
             {(hasColdStorage && coldStorageWallet) ? (
                 <SavingVault
                     container={StyleSheet.flatten([styles.savingVault, { marginTop: 10 }])}
@@ -263,20 +273,25 @@ export default function BottomBar({
         )
     };
 
-    return <>
-        <Carousel
-            data={tabs}
-            ref={carouselRef}
-            renderItem={renderItem}
-            firstItem={index}
-            vertical={false}
-            sliderWidth={screenWidth}
-            itemWidth={screenWidth}
-            onSnapToItem={(index) => {
-                setIndex(index)
-                setVaultTab(index === 1);
-            }}
-        />
-        <TabBar coldStorageClickHandler={coldStorageClickHandler} hotStorageClickHandler={hotStorageClickHandler} />
-    </>
+    return (
+        <>
+            {((hasSavingVault && wallet) || coldStorageWallet ) &&
+                <TopUpWithdrawView isVault={index == 1 ? true : false} />
+            }
+            <Carousel
+                data={tabs}
+                ref={carouselRef}
+                renderItem={renderItem}
+                firstItem={index}
+                vertical={false}
+                sliderWidth={screenWidth}
+                itemWidth={screenWidth}
+                onSnapToItem={(index) => {
+                    setIndex(index)
+                    setVaultTab(index === 1);
+                }}
+            />
+            <TabBar coldStorageClickHandler={coldStorageClickHandler} hotStorageClickHandler={hotStorageClickHandler} />
+        </>
+    )
 }

@@ -14,6 +14,7 @@ interface Props {
     currency: any;
     convertedRate: any;
     refRBSheet: any;
+    refSendRBSheet: any;
     setReceiveType: any;
 }
 
@@ -25,6 +26,7 @@ export default function CoinosWallet({
     currency,
     convertedRate,
     refRBSheet,
+    refSendRBSheet,
     setReceiveType,
 }: Props) {
     const { isAuth, withdrawThreshold, reserveAmount } = useAuthStore();
@@ -39,7 +41,8 @@ export default function CoinosWallet({
     };
 
     const sendClickHandler = (walletType: boolean) => {
-        dispatchNavigate('SendScreen', { currency, matchedRate, receiveType: walletType });
+        refSendRBSheet.current.open();
+        // dispatchNavigate('SendScreen', { currency, matchedRate, receiveType: walletType });
     };
 
     const hasFilledTheBar = calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount)) === 100
@@ -69,6 +72,8 @@ export default function CoinosWallet({
                         withdrawThreshold={withdrawThreshold}
                         onPress={checkingAccountClickHandler}
                         isShowButtons
+                        matchedRate={matchedRate}
+                        currency={currency}
                         receiveClickHandler={receiveClickHandler}
                         sendClickHandler={sendClickHandler}
                     />

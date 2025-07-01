@@ -135,7 +135,7 @@ export const getInvoiceByLightening = async (hash: string) => {
     }));
     return await response.json();
   } catch (error) {
-    console.error('Error fetching invoice by lightening:', error);
+    console.error('Error fetching invoice by lightening coinos:', error);
     throw error;
   }
 };

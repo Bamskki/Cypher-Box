@@ -153,7 +153,7 @@ function StrikeView({ showLogo = false, isShowButtons = false,
                 </View>
             }
             <BlackBGView linearFirstStyle={styles.bitcoinPriceContainer}>
-                <Text bold style={styles.bitcoinPriceText}>{btcValue}</Text>
+                <Text bold style={styles.bitcoinPriceText}>{matchedRate.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) + ' /BTC' || '$0.00' + ' /BTC'}</Text>
             </BlackBGView>
             {showLogo &&
                 <Image source={Strike} style={styles.strikeLogo} resizeMode='contain' />

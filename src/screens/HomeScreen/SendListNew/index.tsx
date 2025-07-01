@@ -44,10 +44,10 @@ interface Props {
   receiveType: boolean;
 }
 
-export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldStorageWallet, matchedRate, currency }: Props) {
+export default function SendListNew({ refRBSheet, receiveType, wallet, coldStorageWallet, matchedRate, currency }: Props) {
   const { user, strikeMe, vaultTab, isAuth, isStrikeAuth, walletID, coldStorageWalletID } = useAuthStore();
   const [selectedItem, setSelectedItem] = useState<number | null>(null);
-  console.log("🚀 ~ ReceivedListNew ~ selectedItem:", selectedItem);
+  console.log("🚀 ~ SendListNew ~ selectedItem:", selectedItem);
   const [data, setData] = useState([
     ...(isStrikeAuth ? [{
       id: 1,
@@ -55,7 +55,15 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
       type: 0,
       icon: StrikeFull,
       description: user + "@coinos.io",
-      navigation: {},
+      // navigation: {},
+      navigation: {
+        screen: "SendScreen",
+        params: {
+          matchedRate,
+          currency,
+          receiveType: false
+        },
+      },
     }] : []),
     ...(isAuth ? [{
       id: 2,
@@ -65,11 +73,11 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
       description:
         "Receive from wallets and exchanges that support the Lightning Network",
       navigation: {
-        screen: "CreateInvoice",
+        screen: "SendScreen",
         params: {
           matchedRate,
           currency,
-          receiveType: false
+          receiveType: true
         },
       },
     }] : []),
@@ -139,7 +147,7 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
         setHashLiquid(hash);
       }
     } catch (error) {
-      console.error('Error generating bitcoin address handleCreateInvoice:', error);
+      console.error('Error generating bitcoin address handleCreateInvoice 2:', error);
       SimpleToast.show(`Failed to generating ${type == 'bitcoin' ? "bitcoin" : "liquid"} address. Please try again.`, SimpleToast.SHORT);
     } finally {
       setIsLoading(false);
@@ -173,9 +181,14 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
 
   const onPress = (item: any) => {
     if (item?.id == 1 || item?.id == 2) {
-      setSelectedItem(item.id);
-      setTab(0);
-      animateToSecondView();
+      // setSelectedItem(item.id);
+      // setTab(0);
+      // animateToSecondView();
+      refRBSheet?.current?.close();
+      setTimeout(() => {
+        dispatchNavigate(item?.navigation?.screen, item?.navigation?.params);
+      }, 150);
+
     } else if(item?.id == 3 || item?.id == 4){
       refRBSheet?.current?.close();
       setTimeout(() => {
@@ -195,7 +208,7 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
     description:
       "To receive from wallets and exchanges that support the Lightning Network",
     navigation: {
-      screen: "CreateInvoice",
+      screen: "SendScreen",
       params: {
         matchedRate,
         currency,
@@ -207,11 +220,11 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
   const onPressNew = (item: any) => {
     refRBSheet?.current?.close();
 
-    if (item?.id == 1) {
-      Clipboard.setString(selectedItem === 2 ? user + '@coinos.io' : strikeMe?.username + '@strike.me');
-      SimpleToast.show('Copied to clipboard', SimpleToast.SHORT);
+    // if (item?.id == 1) {
+    //   Clipboard.setString(selectedItem === 2 ? user + '@coinos.io' : strikeMe?.username + '@strike.me');
+    //   SimpleToast.show('Copied to clipboard', SimpleToast.SHORT);
 
-    }
+    // }
     console.log('item?.navigation?.params: ', item?.navigation?.params)
     item?.navigation?.screen &&
       setTimeout(() => {
@@ -328,7 +341,7 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
               ))}
             </View>
             <Text h2 bold style={styles.receiveToLabel}>
-              RECEIVE TO
+              SEND TO
             </Text>
           </Animated.View>
           <Animated.View

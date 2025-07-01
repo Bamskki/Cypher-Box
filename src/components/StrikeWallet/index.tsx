@@ -18,6 +18,7 @@ interface Props {
     matchedRate: any;
     currency: any;
     refRBSheet: any;
+    refSendRBSheet: any;
     setReceiveType: any;
     strikeBalance: any;
 }
@@ -54,20 +55,34 @@ export default function StrikeWallet({
     matchedRate,
     currency,
     refRBSheet,
+    refSendRBSheet,
     setReceiveType,
     strikeBalance,
 }: Props) {
-    const { isStrikeAuth, withdrawStrikeThreshold, reserveStrikeAmount, strikeUser, setStrikeToken, setStrikeAuth, withdrawThreshold, reserveAmount } = useAuthStore();
+    const { isStrikeAuth, withdrawStrikeThreshold, reserveStrikeAmount, strikeUser, coldStorageWalletID, walletID, setStrikeToken, setStrikeAuth, withdrawThreshold, reserveAmount, allBTCWallets } = useAuthStore();
 
     const receiveClickHandler = (type: boolean) => {
         // dispatchNavigate('CheckingAccountNew', { wallet: wallet, matchedRate });
-        setReceiveType(type);
-        refRBSheet.current.open();
+        if(allBTCWallets.length == 1 && !coldStorageWalletID && !walletID) {
+            dispatchNavigate('CreateInvoice', {
+                matchedRate,
+                currency,
+                receiveType: false
+            });
+        } else {
+            setReceiveType(type);
+            refRBSheet.current.open();
+        }
     };
 
     const sendClickHandler = (walletType: boolean) => {
         // dispatchNavigate('BuyBitcoin', { currency, matchedRate, receiveType: walletType });
-        dispatchNavigate('SendScreen', { currency, matchedRate, receiveType: walletType });
+        if(allBTCWallets.length == 1 && !coldStorageWalletID && !walletID) {
+            dispatchNavigate('SendScreen', { currency, matchedRate, receiveType: false });
+        } else {
+            setReceiveType(walletType);
+            refSendRBSheet.current.open();
+        }
     };
 
     const hasFilledTheBar = calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount)) === 100

@@ -53,6 +53,8 @@ import BalanceView from "./BalanceView";
 import BottomBar from "./BottomBar";
 import CreateLightningAccount from "./CreateLightningAccount";
 import WalletsView from "./WalltetsView";
+import SendListNew from "./SendListNew";
+import WithdrawList from "./WithdrawList";
 
 interface Props {
   route: any;
@@ -149,6 +151,8 @@ export default function HomeScreen({ route }: Props) {
   const [isColdWalletLoaded, setIsColdWalletLoaded] = useState(true);
   const [receiveType, setReceiveType] = useState(false);
   const refRBSheet = useRef<any>(null);
+  const refSendRBSheet = useRef<any>(null);
+  const refWithdrawRBSheet = useRef<any>(null);
   const carouselRef = useRef<Carousel<any>>(null);
 
   const getWalletID = async () => {
@@ -354,7 +358,7 @@ export default function HomeScreen({ route }: Props) {
         dispatchNavigate('SendScreen', { currency, matchedRate, destination: sendAddress.toLowerCase() });
       }
     } catch (error) {
-        console.error('Error Send Lightening:', error);
+        console.error('Error handleLighteningInvoice:', error);
         SimpleToast.show('Failed to generate lightening. Please try again.', SimpleToast.SHORT);
     }
 }
@@ -582,9 +586,11 @@ export default function HomeScreen({ route }: Props) {
                 isLoading={isLoading}
                 matchedRate={matchedRate}
                 refRBSheet={refRBSheet}
+                refSendRBSheet={refSendRBSheet}
                 setReceiveType={setReceiveType}
                 strikeBalance={strikeBalance}
                 wallet={wallet}
+                coldStorageWallet={coldStorageWallet}
               />
             }
           </View>
@@ -596,11 +602,12 @@ export default function HomeScreen({ route }: Props) {
               <BottomBar
                 balance={balance}
                 balanceVault={balanceVault}
+                refWithdrawRBSheet={refWithdrawRBSheet}
                 balanceWithoutSuffix={balanceWithoutSuffix}
                 coldStorageAddress={coldStorageAddress}
                 coldStorageBalanceVault={ColdStorageBalanceVault}
                 coldStorageBalanceWithoutSuffix={coldStorageBalanceWithoutSuffix}
-                coldStorageWallet={coldStorageAddress}
+                coldStorageWallet={coldStorageWallet}
                 currency={currency}
                 hasColdStorage={hasColdStorage}
                 hasSavingVault={hasSavingVault}
@@ -636,8 +643,70 @@ export default function HomeScreen({ route }: Props) {
         }}
       >
         {/* <ReceivedList refRBSheet={refRBSheet} receiveType={receiveType} matchedRate={matchedRate} currency={currency} /> */}
-        <ReceivedListNew refRBSheet={refRBSheet} matchedRate={matchedRate} currency={currency} />
+        <ReceivedListNew refRBSheet={refRBSheet} receiveType={receiveType} matchedRate={matchedRate} currency={currency} wallet={wallet} coldStorageWallet={coldStorageWallet} />
       </RBSheet>
+
+      <RBSheet
+        ref={refSendRBSheet}
+        customStyles={{
+          wrapper: {
+            backgroundColor: 'transparent',
+          },
+          draggableIcon: {
+            backgroundColor: 'red',
+          },
+          container: {
+            height: heights / 2 + 20,
+            backgroundColor: 'transparent',
+          }
+        }}
+        customModalProps={{
+          animationType: 'slide',
+          statusBarTranslucent: true,
+        }}
+        customAvoidingViewProps={{
+          enabled: false,
+        }}
+      >
+        <SendListNew refRBSheet={refSendRBSheet} receiveType={receiveType} matchedRate={matchedRate} currency={currency} wallet={wallet} coldStorageWallet={coldStorageWallet} />
+      </RBSheet>
+
+      <RBSheet
+        ref={refWithdrawRBSheet}
+        customStyles={{
+          wrapper: {
+            backgroundColor: 'transparent',
+          },
+          draggableIcon: {
+            backgroundColor: 'red',
+          },
+          container: {
+            height: heights / 2 + 20,
+            backgroundColor: 'transparent',
+          }
+        }}
+        customModalProps={{
+          animationType: 'slide',
+          statusBarTranslucent: true,
+        }}
+        customAvoidingViewProps={{
+          enabled: false,
+        }}
+      >
+        <WithdrawList 
+          balance={balance}
+          refRBSheet={refWithdrawRBSheet} 
+          receiveType={receiveType} 
+          matchedRate={matchedRate} 
+          currency={currency} 
+          wallet={wallet} 
+          recommendedFee={recommendedFee}
+          coldStorageAddress={coldStorageAddress}
+          vaultAddress={vaultAddress}
+          coldStorageWallet={coldStorageWallet} 
+        />
+      </RBSheet>
+      
     </ScreenLayout>
   );
 }

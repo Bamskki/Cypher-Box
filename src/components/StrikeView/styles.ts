@@ -286,7 +286,7 @@ export default StyleSheet.create<Style>({
         marginTop: 16,
     },
     bitcoinPriceText: {
-        fontSize: 32,
+        fontSize: 30,
         lineHeight: 40
     },
     strikeLogo: {

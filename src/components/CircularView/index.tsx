@@ -14,12 +14,13 @@ interface Props {
     wallet: any;
     matchedRate: any;
     refRBSheet: any;
+    refSendRBSheet: any;
     setReceiveType: any;
     currency: any;
     balance: any;
     convertedRate: any;
 }
-export default function CircularView({ matchedRate, wallet, refRBSheet, setReceiveType, currency, balance, convertedRate }: Props) {
+export default function CircularView({ matchedRate, wallet, refRBSheet, refSendRBSheet, setReceiveType, currency, balance, convertedRate }: Props) {
     const { strikeUser } = useAuthStore();
 
 // {`${Math.round(Number(strikeUser?.[0]?.available || 0) * SATS)} sats ~ $${(Number(strikeUser?.[0]?.available || 0) * matchedRate).toFixed(2)}`}
@@ -44,7 +45,8 @@ export default function CircularView({ matchedRate, wallet, refRBSheet, setRecei
     };
 
     const sendClickHandler = (walletType: boolean) => {
-        dispatchNavigate('SendScreen', { currency, matchedRate, receiveType: walletType });
+        refSendRBSheet.current.open();
+        // dispatchNavigate('SendScreen', { currency, matchedRate, receiveType: walletType });
     };
 
 
@@ -59,10 +61,10 @@ export default function CircularView({ matchedRate, wallet, refRBSheet, setRecei
     }}>
         <View style={styles.circularView}>
             <TouchableOpacity onPress={() => clickHandler(false)} style={styles.circleContainer}>
-                <CircleTimer progress={90} size={135} strokeWidth={7} {...checkingAccount.first} />
+                <CircleTimer type={"STRIKE"} progress={90} size={135} strokeWidth={7} {...checkingAccount.first} />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => clickHandler(true)} style={styles.circleContainer}>
-                <CircleTimer progress={0} size={135} strokeWidth={7}{...checkingAccount.second} />
+                <CircleTimer type={"COINOS"} progress={0} size={135} strokeWidth={7}{...checkingAccount.second} />
             </TouchableOpacity>
         </View>
         <View style={styles.btnView}>
@@ -75,7 +77,7 @@ export default function CircularView({ matchedRate, wallet, refRBSheet, setRecei
             >
                 <Text h3 style={{ ...shadow.text25 }}>Receive</Text>
             </GradientView>
-            <GradientView
+            {/* <GradientView
                 topShadowStyle={styles.shadowTop2}
                 bottomShadowStyle={styles.shadowBottom2}
                 style={styles.refresh}
@@ -83,7 +85,7 @@ export default function CircularView({ matchedRate, wallet, refRBSheet, setRecei
                 isShadow
             >
                 <Image source={Refresh} />
-            </GradientView>
+            </GradientView> */}
             <GradientView
                 onPress={() => sendClickHandler(false)}
                 topShadowStyle={styles.outerShadowStyle}

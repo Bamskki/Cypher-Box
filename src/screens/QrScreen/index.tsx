@@ -44,7 +44,7 @@ export default function QrScreen({ route }: Props) {
             const hash = receiveType ? response.hash : response.onchain?.address
             setHash(hash);
         } catch (error) {
-            console.error('Error generating bitcoin address:', error);
+            console.error('Error generating bitcoin address handleCreateInvoice QR:', error);
             SimpleToast.show(`Failed to generating ${type == 'bitcoin' ? "bitcoin" : "liquid"} address. Please try again.`, SimpleToast.SHORT);
         } finally {
             setIsLoading(false);

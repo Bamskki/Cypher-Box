@@ -13,7 +13,7 @@ import { dispatchNavigate } from "@Cypher/helpers";
 import { bitcoinRecommendedFee, getInvoiceByLightening } from "../../api/coinOSApis";
 import { shortenAddress } from "../ColdStorage";
 import { emailRegex } from "@Cypher/helpers/regex";
-import { btc } from "@Cypher/helpers/coinosHelper";
+import { btc, SATS } from "@Cypher/helpers/coinosHelper";
 
 
 export function startsWithLn(str: string) {
@@ -38,6 +38,7 @@ export default function SendScreen({ navigation, route }: any) {
     const [selectedFee, setSelectedFee] = useState<number | null>(null);
     const [isScannerActive, setIsScannerActive] = useState(false);
     const [addressFocused, setAddressFocused] = useState(false);
+    const [maxUSD, setMaxUSD] = useState(0);
     const [isPaste, setIsPaste] = useState(info?.destination && info?.destination?.startsWith('ln') ? true : false)
 
     useEffect(() => {
@@ -128,7 +129,7 @@ export default function SendScreen({ navigation, route }: any) {
                 });    
             }
         } catch (error) {
-            console.error('Error Send Lightening:', error);
+            console.error('Error handleLighteningInvoice:', error);
             SimpleToast.show('Failed to generate lightening. Please try again.', SimpleToast.SHORT);
         } finally {
             setIsLoading(false);
@@ -174,7 +175,7 @@ export default function SendScreen({ navigation, route }: any) {
                 });
 
             } catch (error) {
-                console.error('Error Send Lightening:', error);
+                console.error('Error handleSendNext:', error);
                 SimpleToast.show('Failed to Send Lightening. Please try again.', SimpleToast.SHORT);
             } finally {
                 setIsLoading(false);
@@ -207,6 +208,7 @@ export default function SendScreen({ navigation, route }: any) {
                     isSats: isSats,
                     to: info?.isWithdrawal ? info?.to : sender,
                     fees: 0,
+                    total: info?.total,
                     matchedRate: info?.matchedRate,
                     currency: info?.curreny,
                     type: 'bitcoin',
@@ -241,7 +243,7 @@ export default function SendScreen({ navigation, route }: any) {
                     receiveType: info?.receiveType
                 });
             } catch (error) {
-                console.error('Error Send Lightening:', error);
+                console.error('Error handleSendNext:', error);
                 SimpleToast.show('Failed to Send Lightening. Please try again.', SimpleToast.SHORT);
             } finally {
                 setIsLoading(false);
@@ -305,7 +307,53 @@ export default function SendScreen({ navigation, route }: any) {
         setIsScannerActive(false); // Close scanner after successful scan
     };
 
-    console.log('sender: ', sender, info)
+    useEffect(() => {
+        if(info?.editAmount){
+
+        }
+    }, [info?.editAmount])
+
+    const maxSendClickHandler = () => {
+        info?.editAmount && info?.editAmount();
+        const amount = info?.receiveType ? isSats ? usd : sats : isSats ? sats : usd;
+        const feeForBamskki = info?.receiveType ? (0.1 / 100) * Number(amount) : 0;
+        const remainingAmount = Number(amount) - feeForBamskki;
+        console.log('feeForBamskki: ', feeForBamskki)
+        console.log('remainingAmount: ', remainingAmount)
+        if (remainingAmount <= 0) {
+            SimpleToast.show("You don't have enough balance", SimpleToast.SHORT);
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            if (info && info?.editAmount) {
+                info?.editAmount()
+            }
+            dispatchNavigate('ReviewPayment', {
+                ...info,
+                value: info?.total * SATS,
+                converted: (info?.total * info?.matchedRate).toFixed(2), //convert in ysd
+                isSats: true,
+                to: info?.isWithdrawal ? info?.to : sender,
+                fees: 0,
+                total: info?.total,
+                matchedRate: info?.matchedRate,
+                currency: info?.curreny,
+                type: 'bitcoin',
+                feeForBamskki,
+                recommendedFee,
+                receiveType: info?.receiveType
+            });
+        } catch (error) {
+            console.error('Error Send to bitcoin:', error);
+            SimpleToast.show('Failed to Send to bitcoin. Please try again.', SimpleToast.SHORT);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    console.log('senderrr: ', info?.total)
     return (
         <>
             {isScannerActive ? (
@@ -336,6 +384,14 @@ export default function SendScreen({ navigation, route }: any) {
                                 _colors={[colors.pink.extralight, colors.pink.default]}
                                 showTitle={false}
                             />
+
+                            {info?.isWithdrawal && 
+                                <>
+                                    <TouchableOpacity onPress={maxSendClickHandler} style={[styles.btn]}>
+                                        <Text bold style={{ fontSize: 13 }}>Send Max: {info?.total} BTC</Text>
+                                    </TouchableOpacity>
+                                </>
+                            }
 
                             {/* <GradientInput isSats={isSats} sats={sats} setSats={setSats} usd={usd} /> */}
                             {(!info?.isWithdrawal && !info?.fiatAmount) &&
@@ -402,7 +458,7 @@ export default function SendScreen({ navigation, route }: any) {
                             title="Next"
                             prevSats={info?.value ? String(info?.value) : info?.fiatAmount ? String(info?.fiatAmount / info?.matchedRate  * 100000000) : false}
                             onPress={handleSendNext}
-                            disabled={isLoading || !info?.fiatAmount || ((!startsWithLn(sender)) ? (sats?.length == 0 && sender?.length == 0) : sender?.length == 0)}
+                            disabled={isLoading || ((!startsWithLn(sender)) ? (sats?.length == 0 && sender?.length == 0) : sender?.length == 0)}
                             setSATS={setSats}
                             setUSD={setUSD}
                             setIsSATS={setIsSats}

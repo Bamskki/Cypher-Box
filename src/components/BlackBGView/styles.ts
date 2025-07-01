@@ -9,14 +9,14 @@ interface Style {
 export default StyleSheet.create<Style>({
     gradientBorder: {
         borderRadius: 25,
-        height: 91,
+        height: 85,
         width: widths - 40,
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
     },
     gradientBackground: {
-        height: 85,
+        height: 80,
         width: widths - 46,
         borderRadius: 23,
         justifyContent: 'center',

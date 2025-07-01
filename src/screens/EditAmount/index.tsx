@@ -35,7 +35,7 @@ export default function SendScreen({ route, navigation }: Props) {
 
     const maxSendClickHandler = () => {
         setSatsEdit && setSatsEdit();
-        dispatchNavigate('ColdStorage', { wallet, vaultTab, utxo, ids, maxUSD, inUSD: inUSD, total: total, matchedRate, capsulesData, vaultSend, to, title, isBatch, capsuleTotal });
+        dispatchNavigate('ColdStorage', { wallet, vaultTab, utxo, ids, maxUSD, inUSD: inUSD, total: total, isMaxEdit: true, matchedRate, capsulesData, vaultSend, to, title, isBatch, capsuleTotal });
     }
 
     return (

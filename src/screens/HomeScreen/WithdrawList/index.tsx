@@ -27,27 +27,31 @@ import {
 import { dispatchNavigate } from "@Cypher/helpers";
 import useAuthStore from "@Cypher/stores/authStore";
 import { colors } from "@Cypher/style-guide";
-import Clipboard from "@react-native-clipboard/clipboard";
 import styles from "./styles";
 import { createInvoice } from "@Cypher/api/coinOSApis";
 import { createInvoice as createInvoiceStrike } from "@Cypher/api/strikeAPIs";
-import QRCode from 'react-native-qrcode-svg';
+import { btc, SATS } from "@Cypher/helpers/coinosHelper";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
 interface Props {
+  balance: any;
   refRBSheet: any;
   matchedRate: any;
   currency: any;
   wallet: any;
+  coldStorageAddress: any;
+  vaultAddress: any;
+  recommendedFee: any;
   coldStorageWallet: any;
   receiveType: boolean;
 }
 
-export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldStorageWallet, matchedRate, currency }: Props) {
-  const { user, strikeMe, vaultTab, isAuth, isStrikeAuth, walletID, coldStorageWalletID } = useAuthStore();
+export default function WithdrawList({ refRBSheet, balance, recommendedFee, coldStorageAddress, vaultAddress, receiveType, wallet, coldStorageWallet, matchedRate, currency }: Props) {
+  const { user, strikeMe, vaultTab, isAuth, isStrikeAuth, walletID, coldStorageWalletID, withdrawThreshold, withdrawStrikeThreshold, strikeUser } = useAuthStore();
   const [selectedItem, setSelectedItem] = useState<number | null>(null);
-  console.log("🚀 ~ ReceivedListNew ~ selectedItem:", selectedItem);
+  const [selectedWallet, setSelectedWallet] = useState<number | null>(null);
+  console.log("🚀 ~ WithdrawList ~ selectedItem:", selectedItem);
   const [data, setData] = useState([
     ...(isStrikeAuth ? [{
       id: 1,
@@ -55,7 +59,15 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
       type: 0,
       icon: StrikeFull,
       description: user + "@coinos.io",
-      navigation: {},
+      // navigation: {},
+      navigation: {
+        screen: "SendScreen",
+        params: {
+          matchedRate,
+          currency,
+          receiveType: false
+        },
+      },
     }] : []),
     ...(isAuth ? [{
       id: 2,
@@ -65,14 +77,17 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
       description:
         "Receive from wallets and exchanges that support the Lightning Network",
       navigation: {
-        screen: "CreateInvoice",
+        screen: "SendScreen",
         params: {
           matchedRate,
           currency,
-          receiveType: false
+          receiveType: true
         },
       },
-    }] : []),
+    }] : [])
+  ]);
+
+  const [wallets, setWallets] = useState([    
     ...(walletID ? [{
       id: 3,
       name: "Hot Vault",
@@ -102,8 +117,9 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
           type: "bitcoin",
         },
       },
-    }] : []),
+    }] : [])
   ]);
+
   const [tab, setTab] = useState(0);
   const [showSecondView, setShowSecondView] = useState(false);
   const [hashLiquid, setHashLiquid] = useState('');
@@ -139,7 +155,7 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
         setHashLiquid(hash);
       }
     } catch (error) {
-      console.error('Error generating bitcoin address handleCreateInvoice:', error);
+      console.error('Error generating bitcoin address handleCreateInvoice 3:', error);
       SimpleToast.show(`Failed to generating ${type == 'bitcoin' ? "bitcoin" : "liquid"} address. Please try again.`, SimpleToast.SHORT);
     } finally {
       setIsLoading(false);
@@ -172,17 +188,26 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
   }));
 
   const onPress = (item: any) => {
-    if (item?.id == 1 || item?.id == 2) {
+    // if (item?.id == 1 || item?.id == 2) {
+      // setSelectedItem(item.id);
+      // setTab(0);
+      // animateToSecondView();
+      // refRBSheet?.current?.close();
+      // setTimeout(() => {
+      //   dispatchNavigate(item?.navigation?.screen, item?.navigation?.params);
+      // }, 150);
       setSelectedItem(item.id);
-      setTab(0);
-      animateToSecondView();
-    } else if(item?.id == 3 || item?.id == 4){
-      refRBSheet?.current?.close();
-      setTimeout(() => {
-        dispatchNavigate('HotStorageVault', { wallet: item?.id == 3 ? wallet : coldStorageWallet, matchedRate });
-      }, 150);
-    }
+    // } else if(item?.id == 3 || item?.id == 4){
+    //   refRBSheet?.current?.close();
+    //   setTimeout(() => {
+    //     dispatchNavigate('HotStorageVault', { wallet: item?.id == 3 ? wallet : coldStorageWallet, matchedRate });
+    //   }, 150);
+    // }
   };
+
+  const onPressWallet = (item: any) => {
+    setSelectedWallet(item.id);
+  }
 
   const backClickHandler = () => {
     animateToFirstView();
@@ -195,7 +220,7 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
     description:
       "To receive from wallets and exchanges that support the Lightning Network",
     navigation: {
-      screen: "CreateInvoice",
+      screen: "SendScreen",
       params: {
         matchedRate,
         currency,
@@ -207,11 +232,11 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
   const onPressNew = (item: any) => {
     refRBSheet?.current?.close();
 
-    if (item?.id == 1) {
-      Clipboard.setString(selectedItem === 2 ? user + '@coinos.io' : strikeMe?.username + '@strike.me');
-      SimpleToast.show('Copied to clipboard', SimpleToast.SHORT);
+    // if (item?.id == 1) {
+    //   Clipboard.setString(selectedItem === 2 ? user + '@coinos.io' : strikeMe?.username + '@strike.me');
+    //   SimpleToast.show('Copied to clipboard', SimpleToast.SHORT);
 
-    }
+    // }
     console.log('item?.navigation?.params: ', item?.navigation?.params)
     item?.navigation?.screen &&
       setTimeout(() => {
@@ -255,7 +280,32 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
     return [];
   };
 
-  const tabs = getTabs();
+  const onNext = () => {
+    refRBSheet?.current?.close();
+    setTimeout(() => {
+      const strikeBalance = Math.round(Number(strikeUser?.[0]?.available || 0) * SATS);
+      const amount = selectedItem === 1 ? withdrawStrikeThreshold > strikeBalance ? strikeBalance : withdrawStrikeThreshold : withdrawThreshold > balance ? balance : withdrawThreshold;
+      console.log('amount: ', amount)
+      dispatchNavigate('ReviewPayment', {
+          value: amount,
+          converted: ((Number(matchedRate) || 0) * btc(1) * Number(amount)).toFixed(2),
+          isSats: true,
+          to: selectedWallet === 4 ? coldStorageAddress : vaultAddress,
+          fees: 0,
+          total: btc(Number(amount)),
+          matchedRate: matchedRate,
+          currency: currency,
+          type: 'bitcoin',
+          feeForBamskki: 0,
+          recommendedFee,
+          vaultTab: selectedWallet === 4 ? true : false,
+          receiveType: selectedItem === 2 ? true : false,
+          wallet: selectedWallet === 4 ? coldStorageWallet : wallet,
+          isWithdrawal: true,
+      });
+      // dispatchNavigate('SendScreen', { matchedRate, currency, receiveType: selectedItem === 2 ? true : false });      
+    }, 500)
+  }
 
   return (
     <>
@@ -272,7 +322,11 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
           style={styles.containerGradientView}
         >
           <Animated.View style={[{}, view1Style]}>
-            <View style={styles.cardListContainer}>
+            <Text h2 bold style={styles.receiveToLabel}>
+              WITHDRAW FROM
+            </Text>
+            
+            <View style={[styles.cardListContainer, data?.length == 1 && { justifyContent: 'center' }]}>
               {data?.map((item) => (
                 <GradientView
                   onPress={() => onPress(item)}
@@ -280,15 +334,71 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
                   linearGradientStyle={styles.cardOuterShadow}
                   topShadowStyle={[
                     styles.cardTopShadow,
+                    (selectedItem == null || selectedItem != item?.id) && { shadowColor : colors.gray.disable }
+                  ]}
+                  bottomShadowStyle={[
+                    styles.cardInnerShadow,
+                    (selectedItem == null || selectedItem != item?.id) && { shadowColor : colors.gray.disable }
+                  ]}
+                  linearGradientStyleMain={styles.cardGradientMainStyle}
+                  gradiantColors={[colors.black.bg, colors.black.bg]}
+                >
+                  <View
+                    style={{
+                      flexDirection: item?.type !== 0 ? "column" : "row",
+                      justifyContent:
+                        item?.type !== 0 ? "center" : "center",
+                      alignItems: item?.type !== 0 ? "center" : "center",
+                    }}
+                  >
+                    {item?.type !== 0 && (
+                      <Image
+                        source={item?.icon}
+                        style={
+                          item?.id == 3
+                            ? styles.coldVaultIconImage
+                            : styles.vaultIconImage
+                        }
+                        resizeMode="contain"
+                      />
+                    )}
+                    {item?.type === 0 ? (
+                      <Image
+                        source={item?.icon}
+                        style={styles.logoImage}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <Text h2 bold>
+                        {item?.name}
+                      </Text>
+                    )}
+                  </View>
+                </GradientView>
+              ))}
+            </View>
+            <Text h2 bold style={[styles.receiveToLabel, { marginTop: 30 }]}>
+              SEND TO
+            </Text>
+            <View style={[styles.cardListContainer, wallets?.length == 1 && { justifyContent: 'center' }]}>
+              {wallets?.map((item) => (
+                <GradientView
+                  onPress={() => onPressWallet(item)}
+                  style={styles.cardGradientStyle}
+                  linearGradientStyle={styles.cardOuterShadow}
+                  topShadowStyle={[
+                    styles.cardTopShadow,
                     item?.id == 4
                       ? { shadowColor: colors.blueText }
                       : item?.id == 3 && { shadowColor: colors.greenShadow },
+                    (selectedWallet == null || selectedWallet != item?.id) && { shadowColor : colors.gray.disable }
                   ]}
                   bottomShadowStyle={[
                     styles.cardInnerShadow,
                     item?.id == 4
                       ? { shadowColor: colors.blueText }
                       : item?.id == 3 && { shadowColor: colors.greenShadow },
+                    (selectedWallet == null || selectedWallet != item?.id) && { shadowColor : colors.gray.disable }
                   ]}
                   linearGradientStyleMain={styles.cardGradientMainStyle}
                   gradiantColors={[colors.black.bg, colors.black.bg]}
@@ -327,140 +437,10 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
                 </GradientView>
               ))}
             </View>
-            <Text h2 bold style={styles.receiveToLabel}>
-              RECEIVE TO
-            </Text>
           </Animated.View>
-          <Animated.View
-            style={[{ flex: 1, position: "absolute" }, view2Style]}
-          >
-            {tabs.length > 0 && (
-              <CustomTabView
-                tabs={tabs}
-                selectedTab={tab}
-                onTabChange={setTab}
-              />
-            )}
-            {tab === 0 ? (
-              <View style={styles.lightningTabContent}>
-                <View style={styles.addressRow}>
-                  <Text bold h2 style={styles.addressText} numberOfLines={1}>
-                    {selectedItem === 2
-                      ? user + "@coinos.io"
-                      : strikeMe?.username + "@strike.me"}
-                  </Text>
-                  <TouchableOpacity onPress={() => onPressNew(data[0])}>
-                    <Image source={Copy} style={styles.copyIconImage} />
-                  </TouchableOpacity>
-                </View>
-                {/* {selectedItem === 2 && ( */}
-                <GradientCard
-                  colors_={[colors.gray.light, colors.white]}
-                  style={styles.invoiceCardContainer}
-                  linearStyle={styles.invoiceCardHeight}
-                  onPress={() => onPressNew(bitcoinLightning)}
-                >
-                  <View style={styles.invoiceCardBackground}>
-                    <View style={styles.invoiceCardContentRow}>
-                      <View style={styles.invoiceCardTextContainer}>
-                        <Text subHeader bold style={styles.invoiceCardTitle}>
-                          {bitcoinLightning.name}
-                        </Text>
-                        <Text h4 bold style={styles.invoiceCardDescription}>
-                          {bitcoinLightning.description}
-                        </Text>
-                      </View>
-                      <View style={styles.socketIconContainer}>
-                        <Image
-                          source={Electrik}
-                          style={styles.vaultIconImage}
-                          resizeMode="contain"
-                        />
-                      </View>
-                    </View>
-                  </View>
-                </GradientCard>
-                {/* )} */}
-              </View>
-            ) : tab === 1 ? (
-              <View style={styles.bitcoinTabContent}>
-                <Text h2 bold>
-                  Bitcoin Network Address
-                </Text>
-                {isLoading ? <ActivityIndicator size="large" color="#ffffff" />
-                  :
-                  <>
-                    <Text semibold style={styles.bitcoinAddressText}>
-                      {hashBitcoin}
-                    </Text>
-                    {hashBitcoin &&
-                      <View style={{ marginTop: 10, padding: 2, backgroundColor: 'white', borderRadius: 2 }}>
-                        <QRCode
-                          getRef={c => {
-                            if (!c?.toDataURL) return;
-                            c?.toDataURL((base64Image: string) => {
-                              base64QrCodeRef.current = base64Image?.replace(/(\r\n|\n|\r)/gm, '');
-                            });
-                          }}
-                          value={hashBitcoin}
-                          size={50}
-                          color="black"
-                          backgroundColor="white"
-                        />
-                      </View>
-                    }
-                  </>
-                }
-              </View>
-            ) : (
-              <View style={styles.liquidTabContent}>
-                <Text h2 bold>
-                  Liquid Federation Address
-                </Text>
-                {isLoading ? <ActivityIndicator size="large" color="#ffffff" />
-                  :
-                  <>
-                    <Text semibold style={styles.bitcoinAddressText}>
-                      {hashLiquid}
-                    </Text>
-                    {hashLiquid &&
-                      <View style={{ marginTop: 10, padding: 2, backgroundColor: 'white', borderRadius: 2 }}>
-                        <QRCode
-                          getRef={c => {
-                            if (!c?.toDataURL) return;
-                            c?.toDataURL((base64Image: string) => {
-                              base64QrCodeRef.current = base64Image?.replace(/(\r\n|\n|\r)/gm, '');
-                            });
-                          }}
-                          value={hashLiquid}
-                          size={50}
-                          color="black"
-                          backgroundColor="white"
-                        />
-                      </View>
-                    }
-                  </>
-                }
-                <Text semibold style={styles.bitcoinAddressText}>
-                  Receive from wallets and exchanges that support the Liquid Federation
-                </Text>
-              </View>
-            )}
-            <View style={styles.bottomActionRow}>
-              <TouchableOpacity onPress={backClickHandler}>
-                <Image
-                  source={Back}
-                  style={styles.backButtonImage}
-                  resizeMode="contain"
-                />
-              </TouchableOpacity>
-              <Image
-                source={selectedItem === 1 ? StrikeFull : CoinOS}
-                style={styles.strikeLogoImage}
-                resizeMode="contain"
-              />
-            </View>
-          </Animated.View>
+          <TouchableOpacity onPress={onNext} disabled={selectedItem === null || selectedWallet === null} style={[styles.nextBtn, (selectedItem == null || selectedWallet == null) && {backgroundColor: colors.gray.disable}]}>
+              <Text h3>Next</Text>
+          </TouchableOpacity>
         </LinearGradient>
       </LinearGradient>
     </>
