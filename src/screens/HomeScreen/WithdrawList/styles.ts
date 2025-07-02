@@ -95,10 +95,10 @@ export default StyleSheet.create<Style>({
     justifyContent: "center",
   },
   vaultIconImage: {
-    width: 12,
-    height: 10,
+    width: 39,
+    height: 29,
     marginEnd: 5,
-    marginStart: 5,
+    // marginStart: 5,
   },
   coldVaultIconImage: {
     width: 39,

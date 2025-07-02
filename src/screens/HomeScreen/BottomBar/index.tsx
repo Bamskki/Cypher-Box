@@ -2,11 +2,11 @@ import { createInvoice } from "@Cypher/api/coinOSApis";
 import { Text } from "@Cypher/component-library";
 import { GradientCardWithShadow, GradientView, SavingVault } from "@Cypher/components";
 import { dispatchNavigate } from "@Cypher/helpers";
-import { btc } from "@Cypher/helpers/coinosHelper";
+import { btc, SATS } from "@Cypher/helpers/coinosHelper";
 import useAuthStore from "@Cypher/stores/authStore";
 import { colors, shadow } from "@Cypher/style-guide";
 import screenWidth from "@Cypher/style-guide/screenWidth";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import SimpleToast from "react-native-simple-toast";
 import Carousel from "react-native-snap-carousel";
@@ -50,11 +50,19 @@ export default function BottomBar({
     recommendedFee,
 }: Props) {
     console.log("🚀 ~ hasSavingVault:", hasSavingVault)
-    const { isAuth, isStrikeAuth, withdrawThreshold, vaultTab, setVaultTab } = useAuthStore();
+    const { isAuth, isStrikeAuth, strikeUser, withdrawStrikeThreshold, withdrawThreshold, vaultTab, setVaultTab } = useAuthStore();
 
     const carouselRef = useRef<Carousel<any>>(null);
 
     const [index, setIndex] = useState(vaultTab ? 1 : 0);
+
+    useEffect(() => {
+        if(vaultTab) {
+            carouselRef.current?.snapToItem(1, true);
+        } else {
+            carouselRef.current?.snapToItem(0, true);
+        }
+    }, [vaultTab]);
 
     const coldStorageClickHandler = () => {
         setVaultTab(true);
@@ -117,12 +125,15 @@ export default function BottomBar({
             SimpleToast.show('You need to be logged in to wallet to withdraw', SimpleToast.SHORT);
             return
         }
+        if(!wallet && !coldStorageWallet) {
+            dispatchNavigate('SavingVaultIntro');
+        }
         // if (vaultTab && !coldStorageWallet) {
         //     SimpleToast.show('You need to have a cold storage wallet to withdraw', SimpleToast.SHORT);
         //     return
         // }
 
-        if (wallet || coldStorageWallet) {
+        if ((wallet && coldStorageWallet) || (isAuth && isStrikeAuth)) {
             refWithdrawRBSheet.current?.open();
             // const amount = withdrawThreshold > balance ? balance : withdrawThreshold;
             // dispatchNavigate('ReviewPayment', {
@@ -139,8 +150,47 @@ export default function BottomBar({
             //     wallet: vaultTab ? coldStorageWallet : wallet,
             //     isWithdrawal: true,
             // });
-        } else {
-            dispatchNavigate('SavingVaultIntro');
+        } else if(isAuth) {
+            const amount = withdrawThreshold > balance ? balance : withdrawThreshold;
+            console.log('amount: ', amount)
+            dispatchNavigate('ReviewPayment', {
+                value: amount,
+                converted: ((Number(matchedRate) || 0) * btc(1) * Number(amount)).toFixed(2),
+                isSats: true,
+                to: coldStorageWallet ? coldStorageAddress : vaultAddress,
+                fees: 0,
+                total: btc(Number(amount)),
+                matchedRate: matchedRate,
+                currency: currency,
+                type: 'bitcoin',
+                feeForBamskki: 0,
+                recommendedFee,
+                vaultTab: coldStorageWallet ? true : false,
+                receiveType: true,
+                wallet: coldStorageWallet ? coldStorageWallet : wallet,
+                isWithdrawal: true,
+            });
+        } else if (isStrikeAuth) {
+              const strikeBalance = Math.round(Number(strikeUser?.[0]?.available || 0) * SATS);
+              const amount = withdrawStrikeThreshold > strikeBalance ? strikeBalance : withdrawStrikeThreshold;
+              console.log('amount: ', amount)
+              dispatchNavigate('ReviewPayment', {
+                  value: amount,
+                  converted: ((Number(matchedRate) || 0) * btc(1) * Number(amount)).toFixed(2),
+                  isSats: true,
+                  to: coldStorageWallet ? coldStorageAddress : vaultAddress,
+                  fees: 0,
+                  total: btc(Number(amount)),
+                  matchedRate: matchedRate,
+                  currency: currency,
+                  type: 'bitcoin',
+                  feeForBamskki: 0,
+                  recommendedFee,
+                  vaultTab: coldStorageWallet ? true : false,
+                  receiveType: false,
+                  wallet: coldStorageWallet ? coldStorageWallet : wallet,
+                  isWithdrawal: true,
+              });
         }
     };
 

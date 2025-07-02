@@ -45,7 +45,7 @@ interface Props {
 }
 
 export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldStorageWallet, matchedRate, currency }: Props) {
-  const { user, strikeMe, vaultTab, isAuth, isStrikeAuth, walletID, coldStorageWalletID } = useAuthStore();
+  const { user, strikeMe, vaultTab, setVaultTab, isAuth, isStrikeAuth, walletID, coldStorageWalletID } = useAuthStore();
   const [selectedItem, setSelectedItem] = useState<number | null>(null);
   console.log("🚀 ~ ReceivedListNew ~ selectedItem:", selectedItem);
   const [data, setData] = useState([
@@ -179,6 +179,7 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
     } else if(item?.id == 3 || item?.id == 4){
       refRBSheet?.current?.close();
       setTimeout(() => {
+        setVaultTab(item?.id == 3 ? false : true);
         dispatchNavigate('HotStorageVault', { wallet: item?.id == 3 ? wallet : coldStorageWallet, matchedRate });
       }, 150);
     }

@@ -630,7 +630,7 @@ export default function HomeScreen({ route }: Props) {
             backgroundColor: 'red',
           },
           container: {
-            height: heights / 2 + 20,
+            maxHeight: heights / 2 + 20,
             backgroundColor: 'transparent',
           }
         }}
@@ -656,7 +656,7 @@ export default function HomeScreen({ route }: Props) {
             backgroundColor: 'red',
           },
           container: {
-            height: heights / 2 + 20,
+            maxHeight: heights / 2 + 20,
             backgroundColor: 'transparent',
           }
         }}

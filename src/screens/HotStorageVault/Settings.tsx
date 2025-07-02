@@ -444,11 +444,11 @@ export default function Settings({wallet, to, matchedRate, toStrike}: any) {
                                 <Text bold style={styles.text}>{loc.send.psbt_sign}</Text>
                             </TouchableOpacity>
                         )}
-                        {wallet && !vaultTab && wallet.allowCosignPsbt() && (
+                        {/* {wallet && !vaultTab && wallet.allowCosignPsbt() && (
                             <TouchableOpacity onPress={() => handlePsbtSign(toStrike)}>
                                 <Text bold style={styles.text}>{"Sign a transaction for Strike"}</Text>
                             </TouchableOpacity>
-                        )}
+                        )} */}
                         {wallet && vaultTab && wallet.type === WatchOnlyWallet.type && wallet.isHd() && (
                             <>
                                 <TouchableOpacity onPress={importTransaction}>

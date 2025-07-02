@@ -45,7 +45,7 @@ interface Props {
 }
 
 export default function SendListNew({ refRBSheet, receiveType, wallet, coldStorageWallet, matchedRate, currency }: Props) {
-  const { user, strikeMe, vaultTab, isAuth, isStrikeAuth, walletID, coldStorageWalletID } = useAuthStore();
+  const { user, strikeMe, vaultTab, setVaultTab, isAuth, isStrikeAuth, walletID, coldStorageWalletID } = useAuthStore();
   const [selectedItem, setSelectedItem] = useState<number | null>(null);
   console.log("🚀 ~ SendListNew ~ selectedItem:", selectedItem);
   const [data, setData] = useState([
@@ -191,8 +191,9 @@ export default function SendListNew({ refRBSheet, receiveType, wallet, coldStora
 
     } else if(item?.id == 3 || item?.id == 4){
       refRBSheet?.current?.close();
-      setTimeout(() => {
-        dispatchNavigate('HotStorageVault', { wallet: item?.id == 3 ? wallet : coldStorageWallet, matchedRate });
+      setTimeout(() => {  
+        setVaultTab(item?.id == 3 ? false : true);
+        dispatchNavigate('HotStorageVault', { to: true, wallet: item?.id == 3 ? wallet : coldStorageWallet, matchedRate });
       }, 150);
     }
   };
@@ -341,7 +342,7 @@ export default function SendListNew({ refRBSheet, receiveType, wallet, coldStora
               ))}
             </View>
             <Text h2 bold style={styles.receiveToLabel}>
-              SEND TO
+              SEND FROM
             </Text>
           </Animated.View>
           <Animated.View
