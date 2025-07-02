@@ -46,7 +46,6 @@ export const shortenAddress = (address: string) => {
 
 export default function ColdStorage({ route, navigation }: Props) {
     const {wallet, vaultTab, utxo, ids, maxUSD, inUSD, total, isMaxEdit, matchedRate, capsulesData = null, to = null, toStrike = null, vaultSend, title, type, isBatch, capsuleTotal} = route?.params;
-    console.log('inUSDinUSD: ', inUSD)
     const [feePrecalc, setFeePrecalc] = useState({ current: null, slowFee: null, mediumFee: null, fastestFee: null });
     const [usd, setUSD] = useState(inUSD);
     const [sats, setSats] = useState('100K sats  ~$' + usd);
@@ -79,6 +78,7 @@ export default function ColdStorage({ route, navigation }: Props) {
     const { wallets, setSelectedWalletID, sleep, txMetadata, saveToDisk, isElectrumDisabled } = useContext(BlueStorageContext);
     const { walletID, coldStorageWalletID, isStrikeAuth, isAuth } = useAuthStore();
     const { navigate } = useNavigation();
+    console.log('inUSDinUSD: ', usd, inUSD)
 
 
     const [feeUSD, setFeeUSD] = useState(1);
@@ -128,6 +128,8 @@ export default function ColdStorage({ route, navigation }: Props) {
     useEffect(() => {
       if(feePrecalc?.current && isMaxEdit){
         setUSD(inUSD - ((Number(feePrecalc?.current || 0) / SATS) * matchedRate))
+      } else {
+        setUSD(inUSD)
       }
     }, [inUSD, feePrecalc?.current, isMaxEdit])
 
@@ -157,6 +159,8 @@ export default function ColdStorage({ route, navigation }: Props) {
       if(selectedItem == 1 && toStrike){
         setDestinationAddress(toStrike)
       } else if (selectedItem == 2 && to){
+        setDestinationAddress(to)
+      } else if (to) {
         setDestinationAddress(to)
       }
     }, [to, selectedItem])
@@ -468,12 +472,6 @@ export default function ColdStorage({ route, navigation }: Props) {
         }
     
         if (wallet.type === MultisigHDWallet.type) {
-        //   navigation.navigate('PsbtMultisig', {
-        //     memo: transactionMemo,
-        //     psbtBase64: psbt.toBase64(),
-        //     walletID: wallet.getID(),
-        //     launchedBy: routeParams.launchedBy,
-        //   });
           setIsLoading(false);
           return;
         }
@@ -527,15 +525,6 @@ export default function ColdStorage({ route, navigation }: Props) {
         dispatchNavigate('ConfirmTransction', {
             data: data,
         });
-        // dispatchNavigate('ConfirmTransction', {
-        //     fee: new BigNumber(fee).dividedBy(100000000).toNumber(),
-        //     memo: transactionMemo,
-        //     walletID: wallet.getID(),
-        //     tx: tx.toHex(),
-        //     recipients,
-        //     satoshiPerByte: requestedSatPerByte,
-        //     psbt,
-        // });
         setIsLoading(false);
     };
     
@@ -551,60 +540,6 @@ export default function ColdStorage({ route, navigation }: Props) {
         }
         if (btcAddressRx.test(destinationAddress) || destinationAddress.startsWith('bc1') || destinationAddress.startsWith('BC1')) {
             createTransaction()
-            // const selectedFee = options.find(item => item.active);
-            // const requestedSatPerByte = Number(feeRate);
-            // const lutxo = utxo || wallet.getUtxo();
-            // const change = await getChangeAddressAsync();
-            // const targets = [{ address, value: parseInt(Number(usd) / Number(matchedRate) * 100000000) }]
-
-            // const { tx, outputs, psbt, fee } = wallet.createTransaction(
-            //     lutxo,
-            //     targets,
-            //     requestedSatPerByte,
-            //     change,
-            //     isTransactionReplaceable ? HDSegwitBech32Wallet.defaultRBFSequence : HDSegwitBech32Wallet.finalRBFSequence,
-            // );
-        
-            // txMetadata[tx.getId()] = {
-            // txhex: tx.toHex(),
-            // memo: transactionMemo,
-            // };
-            // await saveToDisk();
-        
-            // let recipients = outputs.filter(({ address }) => address !== change);
-          
-            // if (recipients.length === 0) {
-            //     // special case. maybe the only destination in this transaction is our own change address..?
-            //     // (ez can be the case for single-address wallet when doing self-payment for consolidation)
-            //     recipients = outputs;
-            // }
-          
-            // let data = {
-            //     sats: parseInt(Number(usd) / Number(matchedRate) * 100000000),
-            //     coinsSelected: ids.length,
-            //     usd: Number(usd).toFixed(4),
-            //     sentFrom: address,
-            //     destinationAddress: destinationAddress,
-            //     networkFees: isCustomFee ? customFee : selectedFee?.fee,
-            //     serviceFees: serviceFees,
-            //     isCustomFee: isCustomFee,
-            //     totalFees: totalFees,
-            //     note: transactionMemo,
-            //     createTransaction: createTransaction,
-            //     memo: transactionMemo,
-            //     targets: [{ address, value: parseInt(Number(usd) / Number(matchedRate) * 100000000) }],
-            //     walletID: wallet.getID(),
-            //     satoshiPerByte: requestedSatPerByte,
-            //     payjoinUrl,
-            //     tx: tx.toHex(),
-            //     recipients,
-            //     psbt,
-            //     fee: new BigNumber(fee).dividedBy(100000000).toNumber(),          
-            // }
-            // console.log('data: ', data)
-            // dispatchNavigate('ConfirmTransction', {
-            //     data: data,
-            // });
         } else {
             SimpleToast.show("Destination Address is not valid", SimpleToast.SHORT)
         }
@@ -619,9 +554,9 @@ export default function ColdStorage({ route, navigation }: Props) {
     }
 
     const setSats_ = (sats: any, usd: any) => {
-        setUSD(usd);
-        const value = Number(sats) / 10000;
-        setSats(value + 'K sats ~$' + usd);
+        // setUSD(usd);
+        // const value = Number(sats) / 10000;
+        // setSats(value + 'K sats ~$' + usd);
         setSatsEditable(true);
     }
 
@@ -906,58 +841,60 @@ export default function ColdStorage({ route, navigation }: Props) {
                           <View>
                               {!isBatch &&
                                 <>
-                                  <Text style={[styles.recipientTitle, {marginBottom: -10}]}>Sent to:</Text>
-                                  <View style={[styles.cardListContainer]}>
-                                    {data?.map((item) => (
-                                      <GradientView
-                                        onPress={() => setSelectedItem(item.id)}
-                                        style={styles.cardGradientStyle}
-                                        linearGradientStyle={styles.cardOuterShadow}
-                                        topShadowStyle={[
-                                          styles.cardTopShadow,
-                                          (selectedItem == null || selectedItem != item?.id) && { shadowColor : colors.gray.disable }
-                                        ]}
-                                        bottomShadowStyle={[
-                                          styles.cardInnerShadow,
-                                          (selectedItem == null || selectedItem != item?.id) && { shadowColor : colors.gray.disable }
-                                        ]}
-                                        linearGradientStyleMain={styles.cardGradientMainStyle}
-                                        gradiantColors={[colors.black.bg, colors.black.bg]}
-                                      >
-                                        <View
-                                          style={{
-                                            flexDirection: item?.type !== 0 ? "column" : "row",
-                                            justifyContent:
-                                              item?.type !== 0 ? "center" : "center",
-                                            alignItems: item?.type !== 0 ? "center" : "center",
-                                          }}
+                                  <Text style={[styles.recipientTitle, !vaultSend ? {marginBottom: -10} : {}]}>Sent to:</Text>
+                                  {!vaultSend &&
+                                    <View style={[styles.cardListContainer]}>
+                                      {data?.map((item) => (
+                                        <GradientView
+                                          onPress={() => setSelectedItem(item.id)}
+                                          style={styles.cardGradientStyle}
+                                          linearGradientStyle={styles.cardOuterShadow}
+                                          topShadowStyle={[
+                                            styles.cardTopShadow,
+                                            (selectedItem == null || selectedItem != item?.id) && { shadowColor : colors.gray.disable }
+                                          ]}
+                                          bottomShadowStyle={[
+                                            styles.cardInnerShadow,
+                                            (selectedItem == null || selectedItem != item?.id) && { shadowColor : colors.gray.disable }
+                                          ]}
+                                          linearGradientStyleMain={styles.cardGradientMainStyle}
+                                          gradiantColors={[colors.black.bg, colors.black.bg]}
                                         >
-                                          {item?.type !== 0 && (
-                                            <Image
-                                              source={item?.icon}
-                                              style={
-                                                item?.id == 3
-                                                  ? styles.coldVaultIconImage
-                                                  : styles.vaultIconImage
-                                              }
-                                              resizeMode="contain"
-                                            />
-                                          )}
-                                          {item?.type === 0 ? (
-                                            <Image
-                                              source={item?.icon}
-                                              style={styles.logoImage}
-                                              resizeMode="contain"
-                                            />
-                                          ) : (
-                                            <Text h2 bold>
-                                              {item?.name}
-                                            </Text>
-                                          )}
-                                        </View>
-                                      </GradientView>
-                                    ))}
-                                  </View>
+                                          <View
+                                            style={{
+                                              flexDirection: item?.type !== 0 ? "column" : "row",
+                                              justifyContent:
+                                                item?.type !== 0 ? "center" : "center",
+                                              alignItems: item?.type !== 0 ? "center" : "center",
+                                            }}
+                                          >
+                                            {item?.type !== 0 && (
+                                              <Image
+                                                source={item?.icon}
+                                                style={
+                                                  item?.id == 3
+                                                    ? styles.coldVaultIconImage
+                                                    : styles.vaultIconImage
+                                                }
+                                                resizeMode="contain"
+                                              />
+                                            )}
+                                            {item?.type === 0 ? (
+                                              <Image
+                                                source={item?.icon}
+                                                style={styles.logoImage}
+                                                resizeMode="contain"
+                                              />
+                                            ) : (
+                                              <Text h2 bold>
+                                                {item?.name}
+                                              </Text>
+                                            )}
+                                          </View>
+                                        </GradientView>
+                                      ))}
+                                    </View>
+                                  }
                                 </>
                               }
                               {!vaultSend &&

@@ -19,6 +19,7 @@ import { OutputModalContent } from "../../../screen/send/coinControl";
 import { createInvoice } from "@Cypher/api/coinOSApis";
 import { AbstractWallet } from "../../../class";
 import useAuthStore from "@Cypher/stores/authStore";
+import { createInvoice as createInvoiceStrike } from "@Cypher/api/strikeAPIs";
 // import { Bitcoin, Transaction, TransactionN } from "@Cypher/assets/svg";
 
 export default function Capsules({ wallet, matchedRate, to, vaultTab, toStrike }: any) {
@@ -27,6 +28,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab, toStrike }
     const [loading, setLoading] = useState(true);
     const [output, setOutput] = useState();
     const [bitcoinHash, setBitcoinHash] = useState();
+    const [bitcoinStrikeHash, setBitcoinStrikeHash] = useState();
     console.log("🚀 ~ Capsules ~ ids:", ids)
     const [btc, setBtc] = useState('0.00');
     const [sendToAddress, setSendToAddress] = useState();
@@ -36,7 +38,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab, toStrike }
     const [frozen, setFrozen] = useState(
         utxo.filter(out => wallet.getUTXOMetadata(out.txid, out.vout).frozen).map(({ txid, vout }) => `${txid}:${vout}`),
     );
-    const { walletID, coldStorageWalletID, isAuth } = useAuthStore();
+    const { walletID, coldStorageWalletID, isAuth, isStrikeAuth } = useAuthStore();
     const { wallets, saveToDisk, sleep, isElectrumDisabled } = useContext(BlueStorageContext);
 
     const debouncedSaveFronen = useRef(
@@ -82,6 +84,24 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab, toStrike }
             }
         })();
     }, []);
+
+    useEffect(() => {
+        if(isStrikeAuth){
+            (async () => {
+                try {
+                    const responseStrike = await createInvoiceStrike({
+                        onchain: {
+                        },
+                        targetCurrency: "USD"
+                    });
+
+                    setBitcoinStrikeHash(responseStrike.onchain?.address)
+                } catch (error) {
+                    console.error('Error generating bitcoin address Capsules:', error);
+                }
+            })();
+        }
+    }, [isStrikeAuth])
 
     const obtainWalletAddress = async () => {
         let newAddress;
@@ -176,7 +196,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab, toStrike }
             capsuleTotal += Number(result)
         });
         if (ids.length > 0) {
-            dispatchNavigate('ColdStorage', {wallet, capsuleTotal, utxo, ids, vaultTab, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to: bitcoinHash, toStrike, type: "TOPUP"});
+            dispatchNavigate('ColdStorage', {wallet, capsuleTotal, utxo, ids, vaultTab, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to: bitcoinHash, toStrike: bitcoinStrikeHash, type: "TOPUP"});
         } else {
             SimpleToast.show("Please select Capsules to Send", SimpleToast.SHORT)
         }
