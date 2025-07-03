@@ -53,6 +53,7 @@ export const createInvoice = async (invoiceData: any) => {
 
 export const getPaymentQoute = async (url: string, data: any) => {
         const idempotencyKey = uuidv4();
+        console.log('idempotencyKey: ' ,idempotencyKey)
         const response = await fetch(`${BASE_URL}/payment-quotes/${url}`, await withAuthToken({
             method: 'POST',
             headers: {
@@ -95,7 +96,7 @@ export const getPaymentQouteByLightening = async (data: any, paymentQouteID: str
         console.log('responsePaymentJSON: ', responsePaymentJSON)
         return responsePaymentJSON;
     } catch (error) {
-        console.error('Error fetching invoice by lightening:', error);
+        console.error('Error fetching getPaymentQouteByLightening:', error);
         throw error;
     }
 };
@@ -118,7 +119,7 @@ export const createFiatExchangeQuote = async (data: any) => {
         }
         return responseJSON;
     } catch (error) {
-        console.error('Error fetching invoice by lightening:', error);
+        console.error('Error fetching createFiatExchangeQuote:', error);
         throw error;
     }
 };
@@ -135,7 +136,7 @@ export const executeFiatExchangeQuote = async (paymentQouteID: string) => {
         // console.log('responsePaymentJSON: ', responsePaymentJSON)
         return responsePayment;
     } catch (error) {
-        console.error('Error fetching invoice by lightening:', error);
+        console.error('Error fetching executeFiatExchangeQuote:', error);
         throw error;
     }
 };
@@ -163,7 +164,7 @@ export const getPaymentQouteByLighteningURL = async (data: any, paymentQouteID: 
         const responsePaymentJSON = await responsePayment.json();
         return responsePaymentJSON;
     } catch (error) {
-        console.error('Error fetching invoice by lightening:', error);
+        console.error('Error fetching getPaymentQouteByLighteningURL:', error);
         throw error;
     }
 };
@@ -187,7 +188,7 @@ export const getOnChainTiers = async (data: any) => {
         }
         return responseJSON;
     } catch (error) {
-        console.error('Error fetching invoice by lightening:', error);
+        console.error('Error fetching getOnChainTiers:', error);
         throw error;
     }
 };
@@ -221,7 +222,7 @@ export const getPaymentQouteByOnChain = async (data: any, paymentQouteID: string
         }
         return responsePaymentJSON;
     } catch (error) {
-        console.error('Error fetching invoice by lightening:', error);
+        console.error('Error fetching getPaymentQouteByOnChain:', error);
         throw error;
     }
 };

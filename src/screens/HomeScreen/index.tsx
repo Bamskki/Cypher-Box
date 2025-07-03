@@ -13,14 +13,17 @@ import DeeplinkSchemaMatch from "../../../class/deeplink-schema-match";
 import triggerHapticFeedback, {
   HapticFeedbackTypes,
 } from "../../../blue_modules/hapticFeedback";
-import { CoinOSSmall } from "@Cypher/assets/images";
+import { CoinOSSmall, PlusNew } from "@Cypher/assets/images";
 import {
+  BlackBGView,
+  CircularView,
   GradientButtonWithShadow,
   GradientCard,
   GradientCardWithShadow,
   GradientText,
   GradientView,
   SavingVault,
+  StrikeDollarWallet,
 } from "@Cypher/components";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 import { dispatchNavigate, isIOS } from "@Cypher/helpers";
@@ -44,6 +47,14 @@ import screenWidth from "@Cypher/style-guide/screenWidth";
 import { mostRecentFetchedRate } from "../../../blue_modules/currency";
 import { authorize } from "react-native-app-auth";
 import { getBalances } from "@Cypher/api/strikeAPIs";
+import ReceivedListNew from "./ReceivedListNew";
+import Header from "./Header";
+import BalanceView from "./BalanceView";
+import BottomBar from "./BottomBar";
+import CreateLightningAccount from "./CreateLightningAccount";
+import WalletsView from "./WalltetsView";
+import SendListNew from "./SendListNew";
+import WithdrawList from "./WithdrawList";
 
 interface Props {
   route: any;
@@ -111,9 +122,11 @@ export default function HomeScreen({ route }: Props) {
   // const [storage, setStorage] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [balance, setBalance] = useState(0);
-  const [strikeBalance, setStrikeBalance] = useState();
+  console.log("🚀 ~ balanceMAIN:", balance)
+  const [strikeBalance, setStrikeBalance] = useState(0);
   const [currency, setCurrency] = useState('$');
   const [convertedRate, setConvertedRate] = useState(0);
+  console.log("🚀 ~ convertedRate:", convertedRate)
   const [convertedStrikeRate, setConvertedStrikeRate] = useState(0);
   const [matchedRate, setMatchedRate] = useState(0);
   const [matchedStrikeRate, setMatchedStrikeRate] = useState(0);
@@ -138,6 +151,9 @@ export default function HomeScreen({ route }: Props) {
   const [isColdWalletLoaded, setIsColdWalletLoaded] = useState(true);
   const [receiveType, setReceiveType] = useState(false);
   const refRBSheet = useRef<any>(null);
+  const refSendRBSheet = useRef<any>(null);
+  const refWithdrawRBSheet = useRef<any>(null);
+  const [receivedListSecondTab, setReceivedListSecondTab] = useState(false);
   const carouselRef = useRef<Carousel<any>>(null);
 
   const getWalletID = async () => {
@@ -293,7 +309,7 @@ export default function HomeScreen({ route }: Props) {
               clearStrikeAuth();
             } else if (balances) {
               setStrikeUser(balances);
-              // setStrikeBalance(balances);
+              setStrikeBalance((balances?.[0]?.available * SATS) || 0);
             }
           }, 1000);
         }
@@ -303,7 +319,7 @@ export default function HomeScreen({ route }: Props) {
     }, [strikeToken])
   )
 
-  console.log('strikeToken: ', strikeToken)
+  // console.log('strikeToken: ', strikeToken)
   const successfullyAuthenticated = async () => {
     // const hasAcceptedTerms = await AsyncStorage.getItem('hasAcceptedTermsOfService')
     await startAndDecrypt()
@@ -343,7 +359,7 @@ export default function HomeScreen({ route }: Props) {
         dispatchNavigate('SendScreen', { currency, matchedRate, destination: sendAddress.toLowerCase() });
       }
     } catch (error) {
-        console.error('Error Send Lightening:', error);
+        console.error('Error handleLighteningInvoice:', error);
         SimpleToast.show('Failed to generate lightening. Please try again.', SimpleToast.SHORT);
     }
 }
@@ -440,14 +456,6 @@ export default function HomeScreen({ route }: Props) {
     }
   };
 
-  const navigateToSettings = () => {
-    dispatchNavigate("Settings");
-  };
-
-  const onScanButtonPressed = () => {
-    scanQrHelper(navigate, routeName).then(onBarScanned);
-  };
-
   const loginClickHandler = () => {
     // dispatchNavigate('LoginCoinOSScreen');
     dispatchNavigate('CheckingAccountIntro');
@@ -464,116 +472,6 @@ export default function HomeScreen({ route }: Props) {
     //   }
     // );
   };
-
-  const createChekingAccountClickHandler = () => {
-    Linking.openURL('https://coinos.io/register')
-    // dispatchNavigate("CheckAccount");
-  };
-
-  const createStrikeAccountClickHandler = () => {
-    Linking.openURL('https://dashboard.strike.me/signup')
-    // dispatchNavigate("CheckAccount");
-  };
-
-  const receiveClickHandler = (type: boolean) => {
-    setReceiveType(type);
-    refRBSheet.current.open();
-  };
-
-  const sendClickHandler = (walletType: boolean) => {
-    dispatchNavigate('SendScreen', { currency, matchedRate, receiveType: walletType });
-  };
-
-  const checkingAccountClickHandler = (walletType: boolean) => {
-    dispatchNavigate('CheckingAccount', { matchedRate, receiveType: walletType });
-  }
-
-  const withdrawClickHandler = () => {
-    if(!isAuth){
-      SimpleToast.show('You need to be logged in to Coinos.io to withdraw', SimpleToast.SHORT);
-      return
-    }
-    if(vaultTab && !coldStorageWallet){
-      SimpleToast.show('You need to have a cold storage wallet to withdraw', SimpleToast.SHORT);
-      return
-    }
-
-    if (wallet || coldStorageWallet) {
-      const amount = withdrawThreshold > balance ? balance : withdrawThreshold;
-      dispatchNavigate('ReviewPayment', {
-        value: amount,
-        converted: ((Number(matchedRate) || 0) * btc(1) * Number(amount)).toFixed(2),
-        isSats: true,
-        to: vaultTab ? coldStorageAddress : vaultAddress,
-        fees: 0,
-        matchedRate: matchedRate,
-        currency: currency,
-        type: 'bitcoin',
-        feeForBamskki: 0,
-        recommendedFee,
-        wallet: vaultTab ? coldStorageWallet : wallet,
-        isWithdrawal: true
-      });
-    } else {
-      dispatchNavigate('SavingVaultIntro');
-    }
-  };
-
-  const topupClickHandler = async () => {
-    // dispatchNavigate('PurchaseVault', {
-    //   data: {}
-    // });
-    if(!isAuth){
-      SimpleToast.show('You need to be logged in to Coinos.io to top up', SimpleToast.SHORT);
-      return
-    }
-    if(vaultTab && !coldStorageWallet){
-      SimpleToast.show('You need to have a cold storage wallet to top up', SimpleToast.SHORT);
-      return
-    }
-    try {
-      const response = await createInvoice({
-        type: 'bitcoin',
-      });
-      dispatchNavigate('HotStorageVault', { wallet: vaultTab ? coldStorageWallet : wallet, matchedRate, to: response.hash });
-    } catch (error) {
-      console.error('Error generating bitcoin address:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const savingVaultClickHandler = () => {
-    dispatchNavigate('HotStorageVault', { wallet: vaultTab ? coldStorageWallet : wallet, matchedRate });
-  };
-
-  const coldStorageClickHandler = () => {
-    setVaultTab(true);
-    // setIndex(1)
-    carouselRef.current?.snapToItem(1, true);
-  };
-
-  const handleCreateColdVault = () => {
-    dispatchNavigate('ColdVaultIntro');
-  }
-
-  const hotStorageClickHandler = () => {
-    setVaultTab(false);
-    // setIndex(0);
-    carouselRef.current?.snapToItem(0, true);
-    // if(!walletID){
-    //   dispatchNavigate('SavingVaultIntroNew');      
-    // }
-  };
-
-  const handleCreateVault = () => {
-    dispatchNavigate('SavingVaultIntro');
-  }
-
-  const handleRecoverSavingVault = () => {
-    dispatchNavigate('RecoverSavingVault');
-  };
-
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -609,153 +507,10 @@ export default function HomeScreen({ route }: Props) {
     }
   };
 
-  const [indexStrike, setIndexStrike] = useState(0); // Used for the tab index
-  const [index, setIndex] = useState(vaultTab ? 1 : 0); // Used for the tab index
-  const [routes] = useState([
-    { key: 'hot', title: 'Hot Storage' },
-    { key: 'cold', title: 'Cold Storage' }
-  ]);
-
-  const TopUpWithdrawView = ({isVault}: any) => (
-    <View style={styles.bottominner}>
-        <GradientView
-          onPress={topupClickHandler}
-          topShadowStyle={[styles.outerShadowStyle, isVault && { shadowColor: '#21C7FB' }]}
-          bottomShadowStyle={styles.innerShadowStyle}
-          style={styles.linearGradientStyle}
-          linearGradientStyle={styles.mainShadowStyle}
-        >
-          <Image
-            style={styles.arrowLeft}
-            resizeMode="contain"
-            source={require("../../../img/arrow-right.png")}
-          />
-          <Text bold h3 center style={{ textAlign: 'center' }}>Top-up</Text>
-        </GradientView>
-       <GradientView
-          onPress={withdrawClickHandler}
-          topShadowStyle={[styles.outerShadowStyle, isVault && { shadowColor: '#21C7FB' }]}
-          bottomShadowStyle={styles.innerShadowStyle}
-          style={styles.linearGradientStyle}
-          linearGradientStyle={styles.mainShadowStyle}
-        >
-          <Text bold h3 center style={{ textAlign: 'center' }}>Withdraw</Text>
-          <Image
-            style={styles.arrowRight}
-            resizeMode="contain"
-            source={require("../../../img/arrow-right.png")}
-          />
-        </GradientView>
-    </View>
-  );
-
   const exchangeRate = async () => {
     const rates = await mostRecentFetchedRate();
     return rates
   }
-
-  const HotStorageTab = () => (
-    <View style={{flex: 1}}>
-      {hasSavingVault && wallet ?
-        <TopUpWithdrawView isVault={false} />
-      :
-        <View style={{height: 40}} />
-      }
-      {(hasSavingVault && wallet) ? (
-        <SavingVault
-          container={StyleSheet.flatten([styles.savingVault, { marginTop: 10 }])}
-          innerContainer={styles.savingVault}
-          shadowTopBottom={styles.savingVault}
-          shadowBottomBottom={styles.savingVault}
-          bitcoinText={styles.bitcoinText}
-          isVault={false}
-          title={"Hot Vault"}
-          onPress={savingVaultClickHandler}
-          bitcoinValue={balanceVault}
-          inDollars={`$${(Number(balanceWithoutSuffix || 0) * Number(matchedRate || 0)).toFixed(2)}`}
-          isColorable
-        />
-      )
-      :
-      (
-        <View style={[styles.createVaultContainer, { top: '-20%' }]}>
-        {/* <View style={styles.createVaultContainer}> */}
-          <View style={styles.alreadyView}>
-            <Text bold style={styles.text}>
-              Already have a vault?
-            </Text>
-            <TouchableOpacity onPress={handleRecoverSavingVault}>
-              <Text bold style={[styles.login, { color: colors.green }]}>
-                Recover
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <TouchableOpacity
-            onPress={handleCreateVault}
-          >
-            <LinearGradient
-              colors={['#109471', '#32D38E']}
-              // start={{ x: 0, y: -0.3 }}
-              // end={{ x: 0, y: 2 }}
-              start = {{ x: 0, y: 0} }
-              end = {{ x: 0, y: 1 }}
-                        // locations={[0, 1]}
-              style={styles.createVault}>
-              {/* <Text h3 style={styles.advancedText}>⚠  Advanced</Text> */}
-              <Text h2 style={[styles.createVaultText, shadow.text25]}>
-                Create Hot Vault
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
-  );
-
-  const ColdStorageTab = () => (
-    <View style={{flex: 1}}>
-      {coldStorageWallet ?
-        <TopUpWithdrawView isVault={true} />
-      :
-        <View style={{height: 40}} />
-      }
-      {(hasColdStorage && coldStorageWallet) ? (
-        <SavingVault
-          container={StyleSheet.flatten([styles.savingVault, { marginTop: 10 }])}
-          innerContainer={styles.savingVault}
-          shadowTopBottom={styles.savingVault}
-          shadowBottomBottom={styles.savingVault}
-          bitcoinText={styles.bitcoinText}
-          title={"Cold Storage"}
-          isVault={true}
-          onPress={savingVaultClickHandler}
-          bitcoinValue={ColdStorageBalanceVault}
-          inDollars={`$${(Number(coldStorageBalanceWithoutSuffix) * Number(matchedRate)).toFixed(2)}`}
-          isColorable
-        />
-      ) : (
-        // (
-          <View style={[styles.createVaultContainer, { top: 0 }]}>
-            <TouchableOpacity onPress={handleCreateColdVault}>
-              <LinearGradient
-                colors={[colors.coldBlue, colors.coldGreen]}
-                // start={{ x: 0, y: -0.3 }}
-                // end={{ x: 0, y: 2 }}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 0, y: 1 }}
-                // locations={[0, 1]}
-                style={[styles.createVault, { justifyContent: 'center' }]}
-              >
-                <Text h2 style={[styles.createVaultText, shadow.text25]}>
-                  Create Cold Vault
-                </Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-        // )
-      )}
-    </View>
-  );
 
   // const renderScene = ({ route }: { route: any }) => {
   //   switch (route.key) {
@@ -772,462 +527,6 @@ export default function HomeScreen({ route }: Props) {
   //   cold: ColdStorageTab,
   // });
 
-  const tabs = [
-    { key: "hot", title: "Hot Storage", component: () => <HotStorageTab /> },
-    { key: "cold", title: "Cold Storage", component: () => <ColdStorageTab /> },
-  ];
-
-  const walletTabs = [
-    { key: "coinos", component: () => <CoinosWalletTab /> },
-    { key: "strike", component: () => <StrikeWalletTab /> },
-  ];
-
-  const walletTabsMap = {
-    COINOS: { key: 'coinos', component: () => <CoinosWalletTab /> },
-    STRIKE: { key: 'strike', component: () => <StrikeWalletTab /> },
-  };
-  
-  const [wTabs, setWTabs] = useState([])
-  useEffect(() => {
-    const tabs: any = [...wTabs];
-
-    if(allBTCWallets && !isLoading){
-      allBTCWallets.map(wallet => {
-        if (walletTabsMap[wallet]) {
-          tabs.push(walletTabsMap[wallet]);
-          if(walletTabsMap[wallet].key === 'strike'){
-            tabs.push({ key: "divider", component: () => <StrikeDollarWalletTab /> });            
-          }
-        }
-      });
-  
-      setWTabs(tabs)
-    }
-  }, [allBTCWallets, isLoading]);
-
-  const coinOSTab = [
-    { key: "coinos", component: () => <CoinosWalletTab /> },
-  ];
-
-  const CoinosWalletTab = () => {
-    return (
-      <>
-        {isAuth &&
-          <>
-          <View style={{overflow: 'visible'}}>
-            <TouchableOpacity style={[styles.shadowView, {shadowOffset: {width: 5, height: 5}, shadowOpacity: 0.7, shadowColor: '#000000', shadowRadius: 9, overflow: "visible"}]} onPress={() => checkingAccountClickHandler(true)}>
-              <Shadow
-                style={StyleSheet.flatten([styles.shadowTop, {shadowColor: colors.pink.shadowTop, padding: 0 }])}
-                inner
-                useArt
-              >
-                <View style={styles.view}>
-                  <Text h2 bold style={styles.check}>
-                    Lightning Account
-                  </Text>
-                  <Image
-                    source={CoinOSSmall}
-                    style={styles.blink}
-                    resizeMode="contain"
-                  />
-                </View>
-                <View style={styles.view}>
-                  <Text h2 bold style={styles.sats}>
-                    {balance} sats ~ {"$" + convertedRate.toFixed(2)}
-                  </Text>
-                  <Text bold style={styles.totalsats}>
-                    {formatNumber(Number(withdrawThreshold) + Number(reserveAmount))} sats
-                  </Text>
-                </View>
-                <View>
-                  <View style={styles.showLine} />
-                  <View style={[styles.box, { left: `${calculatePercentage(Number(withdrawThreshold), (Number(reserveAmount)))}%` }]} />
-                  <LinearGradient
-                    start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
-                    colors={[colors.white, colors.pink.dark]}
-                    style={[styles.linearGradient2, { width: `${calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount))}%` }]}>
-                    {/* <View style={[styles.box, {marginLeft: `${Math.min((withdrawThreshold / (Number(withdrawThreshold + reserveAmount) || 0)) * 100, 100)}%`}]} /> */}
-                    {/* <Shadow
-                        inner // <- enable inner shadow
-                        useArt // <- set this prop to use non-native shadow on ios
-                        style={styles.top2} >
-                    </Shadow> */}
-                  </LinearGradient>
-
-                  {/* <View style={styles.showLine} /> */}
-                  {/* <View style={[styles.box, {marginLeft: `${Math.min((balance / (Number(withdrawThreshold) || 0)) * 100, 100)}%`}]} />
-                  </View> */}
-                </View>
-                <Shadow
-                  inner
-                  useArt
-                  style={StyleSheet.flatten([styles.shadowBottom, { shadowColor: colors.pink.shadowBottom }])}
-                />
-              </Shadow>
-            </TouchableOpacity>
-            <View style={styles.btnView}>
-              <GradientButtonWithShadow
-                title="Receive"
-                onPress={() => receiveClickHandler(true)}
-                isShadow
-                isTextShadow
-              />
-              <GradientButtonWithShadow
-                title="Send"
-                onPress={() => sendClickHandler(true)}
-                isShadow
-                isTextShadow
-              />
-            </View>
-            {!isLoading &&
-              (hasFilledTheBar ?
-                <Text h4 style={styles.alert}>
-                  Your sats have materialized! You can create a Hot Storage Savings Vault and take full self-custody of your money by withdrawing a large chunk of a bitcoin from your custodian Lightning Account. Click the Withdraw button to know more
-                  {/* You can receive, send, and accumulate bitcoin using your Lightning Account. New security features will be revealed once you meet the withdrawal threshold at 2 million sats */}
-                </Text>
-                : (Number(balance) === Number(withdrawThreshold + reserveAmount)) ?
-                  <Text h4 style={styles.alert}>
-                    Congrats! You've completed the bar, It's time to create your Hot Storage Savings Vault and take full self-custody of your bitcoi. Click 'Withdraw' to know more.
-                  </Text>
-                :
-                  <Text h4 style={styles.alertGrey}>
-                    {/* New security upgrades will be revealed once you meet fill up the bar displayed on your Lightning Account. */}
-                    {'\n'}
-                  </Text>
-              )
-            }
-            </View>
-          </>
-        }
-
-        {!isAuth &&
-          <View style={{ height: '42%' }}>
-            <GradientCardWithShadow
-              style={styles.createView}
-              onPress={loginClickHandler}
-            >
-              <View style={styles.middle}>
-                <Image
-                  style={styles.arrow}
-                  resizeMode="contain"
-                  source={require("../../../img/arrow-right.png")}
-                />
-                <Text h2 style={styles.shadow} center>
-                  Login to Your Lightning Account
-                </Text>
-              </View>
-            </GradientCardWithShadow>
-            <View style={styles.createAccount}>
-              <Text bold style={styles.text}>
-                Don’t have an account?
-              </Text>
-              <TouchableOpacity onPress={createChekingAccountClickHandler}>
-                <Text bold style={styles.login}>
-                  Create on Coinos.io
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        }
-      </>
-    )
-  }
-
-  console.log('strikeUser?.[1]?.available: ', strikeUser?.[1]?.available)
-  const StrikeDollarWalletTab = () => {
-    const [dollarStrikeText, setDollarStrikeText] = useState(1000000)
-    console.log('dollarStrikeText: ', dollarStrikeText, formatStrikeNumber(dollarStrikeText))
-
-    const addClickHandler = () => {
-      setDollarStrikeText(dollarStrikeText + 100000)
-    }
-
-    const subClickHandler = () => {
-      if(dollarStrikeText !== 0)
-        setDollarStrikeText(dollarStrikeText - 100000)    
-    }
-
-    const buyClickHandler = () => {
-      const amt = Number(dollarStrikeText * matchedRate * btc(1))
-      console.log('amt: ', amt)
-      if(amt == 0){
-        SimpleToast.show('Amount cannot be 0', SimpleToast.SHORT);
-        return
-      }
-      if(Number(strikeUser?.[1]?.available) < amt){
-        SimpleToast.show('Amount is exceeded', SimpleToast.SHORT);
-        return
-      }
-      dispatchNavigate('SendScreen', { currency, matchedRate, fiatAmount: amt, fiatType: "BUY" });
-    }
-
-    const sellClickHandler = () => {
-      const amt = Number(dollarStrikeText * matchedRate * btc(1))
-      if(amt == 0){
-        SimpleToast.show('Amount cannot be 0', SimpleToast.SHORT);
-        return
-      }
-      if(Number(strikeUser?.[1]?.available) < amt){
-        SimpleToast.show('Amount is exceeded', SimpleToast.SHORT);
-        return
-      }
-      dispatchNavigate('SendScreen', { currency, matchedRate, fiatAmount: amt, fiatType: "SELL" });    
-    }
-
-    return (
-      <>
-        {isStrikeAuth &&
-          <View style={{ height: '42%' }}>
-            <View style={[styles.shadowView]}>
-              <Shadow
-                style={StyleSheet.flatten([styles.shadowTop, { shadowColor: colors.pink.shadowTop, padding: 0 }])}
-                inner
-                useArt
-              >
-                <View style={styles.view}>
-                  <Text h2 bold style={styles.check}>
-                    Fiat Balance
-                  </Text>
-                  <Image
-                    source={require("../../../img/Strike.png")}
-                    style={styles.blink}
-                    resizeMode="contain"
-                  />
-                </View>
-                <Shadow
-                  inner
-                  useArt
-                  style={{...styles.shadowBottom, ...{ shadowColor: colors.pink.shadowBottom }}}
-                />
-                <View style={[styles.view]}>
-                  <Text h2 bold style={styles.sats}>
-                    {`$${Number(strikeUser?.[1]?.available)}`}
-                  </Text>
-                  <View style={{flexDirection: 'row', alignItems: 'center', zIndex: 2000}}>
-                    <View style={{marginRight: 20}}>
-                      <Text style={styles.add}>{formatStrikeNumber(dollarStrikeText) + ' sats'}</Text>
-                      <Text style={styles.addSats}>{'$' + (dollarStrikeText * matchedRate * btc(1)).toFixed(2)}</Text>
-                    </View>
-                    <TouchableOpacity style={styles.addView} onPress={() => addClickHandler()}>
-                      <Text style={styles.add}>+</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.subView} onPress={() => subClickHandler()}>
-                      <Text style={styles.sub}>-</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
-              </Shadow>
-            </View>
-            <View style={styles.btnView}>
-              <GradientButtonWithShadow
-                title="Buy"
-                onPress={() => buyClickHandler()}
-                isShadow
-                isTextShadow
-              />
-              <GradientButtonWithShadow
-                title="Sell"
-                onPress={() => sellClickHandler()}
-                isShadow
-                isTextShadow
-              />
-            </View>
-
-          </View>
-        }
-      </>      
-    )
-  }
-
-  const StrikeWalletTab = () => {
-    return (
-      <>
-        {isStrikeAuth &&
-          <View style={{ height: '42%' }}>
-            <TouchableOpacity style={styles.shadowView} onPress={() => checkingAccountClickHandler(false)}>
-              <Shadow
-                style={StyleSheet.flatten([styles.shadowTop, { shadowColor: colors.pink.shadowTop, padding: 0 }])}
-                inner
-                useArt
-              >
-                <View style={styles.view}>
-                  <Text h2 bold style={styles.check}>
-                    Lightning Account
-                  </Text>
-                  <Image
-                    source={require("../../../img/Strike.png")}
-                    style={styles.blink}
-                    resizeMode="contain"
-                  />
-                </View>
-                <View style={styles.view}>
-                  <Text h2 bold style={styles.sats}>
-                    {`${Math.round(Number(strikeUser?.[0]?.available || 0) * SATS)} sats ~ $${(Number(strikeUser?.[0]?.available || 0) * matchedRate).toFixed(2)}`}
-                    {/* {strikeUser && strikeUser[0]?.available || 0} sats ~ {"$" + convertedRate.toFixed(2)} */}
-                  </Text>
-                  <Text bold style={styles.totalsats}>
-                    {formatNumber(Number(withdrawStrikeThreshold) + Number(reserveStrikeAmount))} sats
-                  </Text>
-                </View>
-                <View>
-                  <View style={styles.showLine} />
-                  <View style={[styles.box, { left: `${calculatePercentage(Number(withdrawStrikeThreshold), (Number(reserveStrikeAmount)))}%` }]} />
-                  <LinearGradient
-                    start={{ x: 0, y: 1 }} end={{ x: 1, y: 1 }}
-                    colors={[colors.white, colors.pink.dark]}
-                    style={[styles.linearGradient2, { width: `${calculateBalancePercentage(Number(strikeBalance), Number(withdrawStrikeThreshold), Number(reserveStrikeAmount))}%` }]}>
-                    {/* <View style={[styles.box, {marginLeft: `${Math.min((withdrawThreshold / (Number(withdrawThreshold + reserveAmount) || 0)) * 100, 100)}%`}]} /> */}
-                    {/* <Shadow
-                        inner // <- enable inner shadow
-                        useArt // <- set this prop to use non-native shadow on ios
-                        style={styles.top2} >
-                    </Shadow> */}
-                  </LinearGradient>
-
-                  {/* <View style={styles.showLine} /> */}
-                  {/* <View style={[styles.box, {marginLeft: `${Math.min((balance / (Number(withdrawThreshold) || 0)) * 100, 100)}%`}]} />
-                  </View> */}
-                </View>
-                <Shadow
-                  inner
-                  useArt
-                  style={StyleSheet.flatten([styles.shadowBottom, { shadowColor: colors.pink.shadowBottom }])}
-                />
-              </Shadow>
-            </TouchableOpacity>
-            <View style={styles.btnView}>
-              <GradientButtonWithShadow
-                title="Receive"
-                onPress={() => receiveClickHandler(false)}
-                isShadow
-                isTextShadow
-              />
-              <GradientButtonWithShadow
-                title="Send"
-                onPress={() => sendClickHandler(false)}
-                isShadow
-                isTextShadow
-              />
-            </View>
-            {!isLoading &&
-              (hasFilledTheBar ?
-                <Text h4 style={styles.alert}>
-                  Your sats have materialized! You can create a Hot Storage Savings Vault and take full self-custody of your money by withdrawing a large chunk of a bitcoin from your custodian Lightning Account. Click the Withdraw button to know more
-                  {/* You can receive, send, and accumulate bitcoin using your Lightning Account. New security features will be revealed once you meet the withdrawal threshold at 2 million sats */}
-                </Text>
-                : (Number(strikeBalance) === Number(withdrawStrikeThreshold + reserveStrikeAmount)) ?
-                  <Text h4 style={styles.alert}>
-                    Congrats! You've completed the bar, It's time to create your Hot Storage Savings Vault and take full self-custody of your bitcoi. Click 'Withdraw' to know more.
-                  </Text>
-                :
-                  <Text h4 style={styles.alertGrey}>
-                    {/* New security upgrades will be revealed once you meet fill up the bar displayed on your Lightning Account. */}
-                    {'\n'}
-                  </Text>
-              )
-            }
-          </View>
-        }
-
-        {!isStrikeAuth &&
-          <View style={{ height: '42%' }}>
-            <GradientCardWithShadow
-              style={styles.createView}
-              onPress={handleStrikeLogin}
-            >
-              <View style={styles.middle}>
-                <Image
-                  style={styles.arrow}
-                  resizeMode="contain"
-                  source={require("../../../img/arrow-right.png")}
-                />
-                <Text h2 style={styles.shadow} center>
-                  Login to Your Strike Account
-                </Text>
-              </View>
-            </GradientCardWithShadow>
-            <View style={styles.createAccount}>
-              <Text bold style={styles.text}>
-                Don’t have an account?
-              </Text>
-              <TouchableOpacity onPress={createStrikeAccountClickHandler}>
-                <Text bold style={styles.login}>
-                  Create on Strike
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        }
-      </>      
-    )
-  }
-  
-  const RenderTabBar = (props: any) => {
-    return (
-        <View style={[styles.container3, { opacity: 1 }]}>
-          {/* {hasSavingVault && walletID && ( */}
-            <GradientCard colors_={['#464D6854', '#FFF']} style={styles.container2} linearStyle={styles.main} disabled={true}>
-              <View style={styles.container4}>
-                {/* {!hasSavingVault ? (
-                  <Text h3 bold style={styles.storageText} onPress={hotStorageClickHandler}>Hot Storage</Text>
-                ) : ( */}
-                  <TouchableOpacity
-                    activeOpacity={0.7}
-                    onPress={hotStorageClickHandler}
-                    style={[styles.bottomBtn, !vaultTab && { borderWidth: !vaultTab ? 2 : 0, borderColor: !vaultTab ? colors.greenShadow : 'transparent', borderRadius: 25 }]}>
-                    <LinearGradient
-                      start={{ x: 1, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      locations={[0.25, 1]}
-                      colors={!vaultTab ? ['#333333', '#282727'] : ['transparent', 'transparent']}
-                      style={styles.linearGradientbottom}>
-                      <Text h3 bold style={{ color: '#FD7A68' }}>Hot Storage</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                {/* )} */}
-                {/* {isAllDone && ( */}
-                  <TouchableOpacity
-                    activeOpacity={0.7}
-                    onPress={coldStorageClickHandler}
-                    style={[styles.bottomBtn, { marginEnd: 7.5, marginStart: 0 }, vaultTab && { borderWidth: vaultTab ? 2 : 0, borderColor: vaultTab ? colors.blueText : 'transparent' }]}>
-                    <LinearGradient
-                      start={{ x: 1, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      locations={[0.25, 1]}
-                      colors={ vaultTab ? ['#333333', '#282727'] : ['transparent', 'transparent']}
-                      style={styles.linearGradientbottom}>
-                      <Text h3 bold style={{ color: colors.blueText }}>Cold Storage</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                {/* )} */}
-              </View>
-            </GradientCard>
-          {/* )} */}
-        </View>
-    );
-  };
-
-  const renderItem = ({ item }: any) => {
-    return(
-      <View style={{ flex: 1 }}>
-        {item.component()}
-      </View>
-    )
-  };
-
-  const renderWalletItem = ({ item }: any) => {
-    return(
-      <View>
-        {item.component()}
-      </View>
-    )
-  };
-
-  const hasFilledTheBar = calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount)) === 100
-  const layout = useWindowDimensions();
-
-  console.log('allBTCWallets: ', allBTCWallets)
   return (
     <ScreenLayout
       
@@ -1247,184 +546,81 @@ export default function HomeScreen({ route }: Props) {
           :
           (
             <>
-              <View style={styles.title}>
-                <Text subHeader bold>
-                  Total Assets
-                </Text>
-                <View style={styles.row}>
-                  <TouchableOpacity
-                    style={styles.imageView}
-                    onPress={navigateToSettings}
-                  >
-                    <Image
-                      style={styles.image}
-                      resizeMode="contain"
-                      source={require("../../../img/settings.png")}
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.imageViews}
-                    onPress={onScanButtonPressed}
-                  >
-                    <Image
-                      style={styles.scan}
-                      resizeMode="contain"
-                      source={require("../../../img/scan-new.png")}
-                    />
-                  </TouchableOpacity>
-                </View>
-              </View>
-              <View style={[styles.shadowView , {shadowOffset: {width: 5, height: 5}, shadowOpacity: 0.7, shadowColor: '#000000', shadowRadius: 9}]}>
-              <View>
-                <Shadow
-                  style={[styles.shadowTop, {backgroundColor: '#111111'}]}
-                  inner
-                  useArt
-                >
-                  <Text subHeader bold style={styles.price}>
-                    {/* {(btc(1) * (Number(balance) || 0)) + (Number(ColdStorageBalanceVault?.split(' ')[0]) || 0) + (Number(balanceVault?.split(' ')[0]) || 0)} BTC */}
-                    {((btc(1) * (Number(balance) || 0)) + Number(strikeUser?.[0]?.available || 0) + (Number(ColdStorageBalanceVault?.split(' ')[0]) || 0) + (Number(balanceVault?.split(' ')[0]) || 0)).toFixed(8)} BTC
-                  </Text>
-                  <Text bold style={styles.priceusd} >
-                    {"$" + ((Number(strikeUser?.[0]?.available || 0) * matchedRate) + Number(convertedRate || 0) + ((Number(coldStorageBalanceWithoutSuffix || 0) * Number(matchedRate || 0)) + (Number(balanceWithoutSuffix || 0) * Number(matchedRate || 0)))).toFixed(2)}
-                  </Text>
-                  {(allBTCWallets.length > 0 && allBTCWallets.length < 2) &&
-                    <TouchableOpacity onPress={() => dispatchNavigate('CheckingAccountIntro')} style={{zIndex: 100, alignSelf: 'flex-end', borderRadius: 10, borderWidth: 0, borderColor: colors.pink.light}}>
-                      <Text h4 style={styles.descption}>+ Add Account</Text>
-                    </TouchableOpacity>
-                  }
-                  <Shadow
-                    inner
-                    useArt
-                    style={styles.shadowBottom}
-                  />
-                </Shadow>
-              </View>
-              </View>
+              <Header onBarScanned={onBarScanned} />
+              <BalanceView
+                // balance={`${(btc(1) * (Number(balance) || 0)) + (Number(ColdStorageBalanceVault?.split(' ')[0]) || 0) + (Number(balanceVault?.split(' ')[0]) || 0)} BTC`}
+                balance={`${((btc(1) * (Number(balance) || 0)) + Number(strikeUser?.[0]?.available || 0) + (Number(ColdStorageBalanceVault?.split(' ')[0]) || 0) + (Number(balanceVault?.split(' ')[0]) || 0)).toFixed(8)} BTC`}
+                convertedRate={`$${((Number(strikeUser?.[0]?.available || 0) * matchedRate) + Number(convertedRate || 0) + ((Number(coldStorageBalanceWithoutSuffix || 0) * Number(matchedRate || 0)) + (Number(balanceWithoutSuffix || 0) * Number(matchedRate || 0)))).toFixed(2)}`}
+              />
             </>
           )}
 
           {/* */}
 
+          {(allBTCWallets.length > 0 && allBTCWallets.length < 2) && !isLoading &&
+            <View style={styles.checkingaccContainer}>
+              <Text bold h2 style={{ height: 32 }}>Checking Accounts</Text>
+              <TouchableOpacity
+                onPress={() => dispatchNavigate('CheckingAccountIntro')}
+                style={{ flex: 1, alignItems: 'flex-end' }}>
+                <BlackBGView
+                  linearFirstStyle={styles.linearFirstStyle}
+                  linearSecondStyle={styles.linearSecondStyle}
+                  linearFirstColors={[colors.pink.gradient2, colors.pink.gradient1]}
+                  linearSecondColors={[colors.primary, colors.primary]}
+                >
+                  <Image source={PlusNew} style={styles.plusImage} resizeMode="contain" />
+                  <Text h4 semibold style={{ marginStart: 15 }}>Add Account</Text>
+                </BlackBGView>
+              </TouchableOpacity>
+            </View>
+          }
+
           <View>
             {!isAuth && !isLoading && !isStrikeAuth ?
-              <View style={{ height: '42%'}}>
-                <TouchableOpacity onPress={loginClickHandler}>
-                <LinearGradient
-                  colors={[colors.pink.default,colors.pink.extralight]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 0, y: 1 }}
-                  // locations={[0, 1]}
-                  style={[styles.createVault, { flexDirection:'row', justifyContent: 'center'}]}
-                >
-                  <Image
-                      style={styles.arrow}
-                      resizeMode="contain"
-                      source={require("../../../img/arrow-right.png")}
-                    />
-                  <View style={styles.middle}>
-                    
-                    <View style={{alignItems: 'center', justifyContent: 'center', alignSelf:'center', marginRight: 35}}>
-                      <Text h2 style={styles.shadow} center>
-                        Create Lightning Account
-                      </Text>
-                    </View>
-                  </View>
-                </LinearGradient>
-                </TouchableOpacity>
-            {/*<GradientCardWithShadow
-                  style={styles.createView}
-                  onPress={loginClickHandler}
-                >
-                  <View style={styles.middle}>
-                    <Image
-                      style={styles.arrow}
-                      resizeMode="contain"
-                      source={require("../../../img/arrow-right.png")}
-                    />
-                    <View style={{alignItems: 'center', justifyContent: 'center', alignSelf: 'center', margin:40}}>
-                      <Text h2 style={styles.shadow} center>
-                        Create Lightning Account
-                      </Text>
-                    </View>
-                  </View>
-                </GradientCardWithShadow>*/}
-              </View>
+              <CreateLightningAccount onPress={loginClickHandler} />
             : !isLoading &&
-              // <View style={{ height: '42%' }}>
-                <Carousel
-                  data={wTabs}
-                  style={{overflow:'visible'}}
-                  // ref={carouselRef}
-                  renderItem={renderWalletItem}
-                  firstItem={indexStrike}
-                  vertical={false}
-                  sliderWidth={screenWidth * 0.905}
-                  itemWidth={screenWidth * 0.905}
-                  onSnapToItem={(index) => {
-                    setIndexStrike(index)
-                    setWalletTab(index === 1);
-                  }} // Update pagination index
-                />
-              // </View>
+              <WalletsView
+                balance={balance}
+                convertedRate={convertedRate}
+                currency={currency}
+                isLoading={isLoading}
+                matchedRate={matchedRate}
+                refRBSheet={refRBSheet}
+                refSendRBSheet={refSendRBSheet}
+                setReceiveType={setReceiveType}
+                strikeBalance={strikeBalance}
+                wallet={wallet}
+                coldStorageWallet={coldStorageWallet}
+              />
             }
           </View>
           
           {/* */}
 
           {!isLoading && !isWalletLoaded && !isColdWalletLoaded &&
-            <View style={[{ height: isIOS && !isAuth ? '33.5%' : isAuth ? '35%' : '35%' }, isIOS && {bottom: 10}, isAuth && styles.bottom]}>
-              <Carousel
-                data={tabs}
-                ref={carouselRef}
-                renderItem={renderItem}
-                firstItem={index}
-                vertical={false}
-                sliderWidth={screenWidth * 0.905}
-                itemWidth={screenWidth * 0.905}
-                onSnapToItem={(index) => {
-                  setIndex(index)
-                  setVaultTab(index === 1);
-                }} // Update pagination index
+            <View style={{height: 205,marginVertical: 15}}>
+              <BottomBar
+                balance={balance}
+                balanceVault={balanceVault}
+                refWithdrawRBSheet={refWithdrawRBSheet}
+                balanceWithoutSuffix={balanceWithoutSuffix}
+                coldStorageAddress={coldStorageAddress}
+                coldStorageBalanceVault={ColdStorageBalanceVault}
+                coldStorageBalanceWithoutSuffix={coldStorageBalanceWithoutSuffix}
+                coldStorageWallet={coldStorageWallet}
+                currency={currency}
+                hasColdStorage={hasColdStorage}
+                hasSavingVault={hasSavingVault}
+                matchedRate={matchedRate}
+                recommendedFee={recommendedFee}
+                vaultAddress={vaultAddress}
+                wallet={wallet}
               />
-              <RenderTabBar />
             </View>
           }
         </View>
       </View>
-      {/* <>
-        {!walletID &&
-          <View style={styles.createVaultContainer}>
-            <TouchableOpacity
-              onPress={handleCreateVault}
-            >
-              <LinearGradient
-                colors={['#32D38E', '#24C47F']}
-                // start={{ x: 0, y: -0.3 }}
-                // end={{ x: 0, y: 2 }}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 0, y: 1 }}
-                // locations={[0, 1]}
-                style={styles.createVault}>
-                <Text h3 style={styles.advancedText}>⚠  Advanced</Text>
-                <Text h2 style={[styles.createVaultText, shadow.text25]}>
-                  Create Vault
-                </Text>
-              </LinearGradient>
-            </TouchableOpacity>
-            <View style={styles.alreadyView}>
-              <Text bold style={styles.text}>
-                Already have a vault?
-              </Text>
-              <TouchableOpacity onPress={handleRecoverSavingVault}>
-                <Text bold style={[styles.login, { color: colors.green }]}>
-                  Recover
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        }
-      </> */}
       <RBSheet
         ref={refRBSheet}
         customStyles={{
@@ -1435,7 +631,9 @@ export default function HomeScreen({ route }: Props) {
             backgroundColor: 'red',
           },
           container: {
-            height: heights / 2 + 80,
+            // ...receivedListSecondTab ? { height: heights / 2 + 20 } : { maxHeight: heights / 2 + 20 },
+            height: heights / 2 + 20,
+            backgroundColor: 'transparent',
           }
         }}
         customModalProps={{
@@ -1446,8 +644,71 @@ export default function HomeScreen({ route }: Props) {
           enabled: false,
         }}
       >
-        <ReceivedList refRBSheet={refRBSheet} receiveType={receiveType} matchedRate={matchedRate} currency={currency} />
+        {/* <ReceivedList refRBSheet={refRBSheet} receiveType={receiveType} matchedRate={matchedRate} currency={currency} /> */}
+        <ReceivedListNew setReceivedListSecondTab={setReceivedListSecondTab} refRBSheet={refRBSheet} receiveType={receiveType} matchedRate={matchedRate} currency={currency} wallet={wallet} coldStorageWallet={coldStorageWallet} />
       </RBSheet>
+
+      <RBSheet
+        ref={refSendRBSheet}
+        customStyles={{
+          wrapper: {
+            backgroundColor: 'transparent',
+          },
+          draggableIcon: {
+            backgroundColor: 'red',
+          },
+          container: {
+            height: heights / 2 + 20,
+            backgroundColor: 'transparent',
+          }
+        }}
+        customModalProps={{
+          animationType: 'slide',
+          statusBarTranslucent: true,
+        }}
+        customAvoidingViewProps={{
+          enabled: false,
+        }}
+      >
+        <SendListNew refRBSheet={refSendRBSheet} receiveType={receiveType} matchedRate={matchedRate} currency={currency} wallet={wallet} coldStorageWallet={coldStorageWallet} />
+      </RBSheet>
+
+      <RBSheet
+        ref={refWithdrawRBSheet}
+        customStyles={{
+          wrapper: {
+            backgroundColor: 'transparent',
+          },
+          draggableIcon: {
+            backgroundColor: 'red',
+          },
+          container: {
+            height: heights / 2 + 20,
+            backgroundColor: 'transparent',
+          }
+        }}
+        customModalProps={{
+          animationType: 'slide',
+          statusBarTranslucent: true,
+        }}
+        customAvoidingViewProps={{
+          enabled: false,
+        }}
+      >
+        <WithdrawList 
+          balance={balance}
+          refRBSheet={refWithdrawRBSheet} 
+          receiveType={receiveType} 
+          matchedRate={matchedRate} 
+          currency={currency} 
+          wallet={wallet} 
+          recommendedFee={recommendedFee}
+          coldStorageAddress={coldStorageAddress}
+          vaultAddress={vaultAddress}
+          coldStorageWallet={coldStorageWallet} 
+        />
+      </RBSheet>
+      
     </ScreenLayout>
   );
 }

@@ -14,7 +14,7 @@ import TextView from "./TextView";
 import TextViewV2 from "../Invoice/TextView"
 import useAuthStore from "@Cypher/stores/authStore";
 import { bitcoinSendFee, getCurrencyRates, getMe, sendBitcoinPayment, sendCoinsViaUsername, sendLightningPayment } from "@Cypher/api/coinOSApis";
-import { btc, formatNumber, matchKeyAndValue } from "@Cypher/helpers/coinosHelper";
+import { btc, formatNumber, matchKeyAndValue, SATS } from "@Cypher/helpers/coinosHelper";
 import { FeeSelection } from "./FeeSelection/FeeSelection";
 import { startsWithLn } from "../Send";
 import { calculateBalancePercentage, calculatePercentage } from "../HomeScreen";
@@ -22,6 +22,7 @@ import { createFiatExchangeQuote, executeFiatExchangeQuote, getOnChainTiers, get
 import { mostRecentFetchedRate } from "../../../blue_modules/currency";
 
 interface Props {
+    navigation: any;
     route: any;
 }
 type Fee = keyof Fees;
@@ -48,9 +49,9 @@ function usdToSats(usdAmount: number, exchangeRate: number): string {
   return satoshiAmount;
 }
 
-export default function ReviewPayment({ route }: Props) {
-    const { value, converted, isSats, to, type, recommendedFee, isWithdrawal = false, wallet = null, description, receiveType } = route?.params;
-    const { withdrawThreshold, reserveAmount, vaultTab } = useAuthStore();
+export default function ReviewPayment({ navigation, route }: Props) {
+    const { value, converted, isSats, to, type, recommendedFee, isWithdrawal = false, wallet = null, description, receiveType, vaultTab, total } = route?.params;
+    const { withdrawThreshold, reserveAmount, strikeUser } = useAuthStore();
     const [note, setNote] = useState(description || '');
     const [balance, setBalance] = useState(0);
     const [currency, setCurrency] = useState('$');
@@ -84,6 +85,7 @@ export default function ReviewPayment({ route }: Props) {
             handleUser();
         else {
             handleRates();
+            handleStrikeUser();
         }
     }, [receiveType]);
 
@@ -91,13 +93,14 @@ export default function ReviewPayment({ route }: Props) {
         if(to.startsWith('bc') && !receiveType){
             handleStrikeOnChainFee();
         }
-    }, [to, receiveType])
+    }, [to, receiveType, isWithdrawal])
 
     useEffect(() => {
-        if(to && !receiveType){
+        console.log('receiveType: ', receiveType)
+        if(to && !receiveType && !isWithdrawal){
             handlePaymentQuote();
         }
-    }, [to, isSats, receiveType])
+    }, [to, isSats, receiveType, isWithdrawal])
 
     useEffect(() => {
         if(to.startsWith('bc') && selectedStrikeFee && !receiveType){
@@ -114,6 +117,10 @@ export default function ReviewPayment({ route }: Props) {
     const exchangeRate = async () => {
         const rates = await mostRecentFetchedRate();
         return rates
+    }
+
+    const handleStrikeUser = () => {
+        setBalance(Math.round(Number(strikeUser?.[0]?.available || 0) * SATS))
     }
 
     const handleRates = async () => {
@@ -134,7 +141,7 @@ export default function ReviewPayment({ route }: Props) {
             amount: {
                 amount: Number(amount),
                 currency: "USD",
-                feePolicy: "EXCLUSIVE"
+                feePolicy: "INCLUSIVE"
             }
         }
         const response = await createFiatExchangeQuote(payload);
@@ -147,6 +154,7 @@ export default function ReviewPayment({ route }: Props) {
 
     const handleStrikeBTCFee = async (onChainTierId: string) => {
         const amount =  receiveType ? isSats ? value : converted : isSats ? converted : value;
+        console.log('amount: ', amount)
         try {
             let payload = {
                 btcAddress: to,
@@ -154,14 +162,14 @@ export default function ReviewPayment({ route }: Props) {
                 amount: {
                     amount: Number(amount),
                     currency: "USD",
-                    feePolicy: "EXCLUSIVE"
+                    feePolicy: "INCLUSIVE"
                 },
                 description: note,
                 onchainTierId: onChainTierId
             }
             let url = 'onchain'
             const response = await getPaymentQoute(url, payload);
-            console.log('response: ', response)
+            console.log('response handleStrikeBTCFee: ', response)
             if(response?.amount){
                 setPaymentQuoteData(response)
             } else if (response?.data?.message){
@@ -186,7 +194,7 @@ export default function ReviewPayment({ route }: Props) {
                     amount: {
                         amount: Number(amount),
                         currency: "USD",
-                        feePolicy: "EXCLUSIVE"
+                        feePolicy: "INCLUSIVE"
                     },
                     description: note
                 }
@@ -210,7 +218,7 @@ export default function ReviewPayment({ route }: Props) {
             }
             console.log('response: ', response)
         } catch (error) {
-            console.error('Error Send Lightening:', error);
+            console.error('Error handlePaymentQuote:', error);
             SimpleToast.show('Failed to Send. Please try again.', SimpleToast.SHORT);
         } finally {
             setFeeLoading(false);
@@ -226,7 +234,7 @@ export default function ReviewPayment({ route }: Props) {
                 amount: {
                     amount: Number(amount),
                     currency: "USD",
-                    feePolicy: "EXCLUSIVE"
+                    feePolicy: "INCLUSIVE"
                 },
                 description: note,
                 // onchainTierId: 'tier_fast' + Math.floor(Math.random() * 100)
@@ -235,6 +243,13 @@ export default function ReviewPayment({ route }: Props) {
 
             const fees = await getOnChainTiers(payload);
             console.log('strikeFees, ', fees)
+            if(fees?.data?.code === "AMOUNT_TOO_LOW"){
+                SimpleToast.show(fees?.data?.message, SimpleToast.SHORT);
+                setTimeout(() => {
+                    navigation.goBack();
+                }, 2000)
+                return
+            }
             const labeledTiers = fees.map((tier: any) => {
                 switch (tier.id) {
                     case 'tier_fast':
@@ -419,7 +434,7 @@ export default function ReviewPayment({ route }: Props) {
                     }
 
                 } catch (error) {
-                    console.error('Error Send Lightening:', error);
+                    console.error('Error handleSendSats:', error);
                     SimpleToast.show('Failed to Send Lightening. Please try again.', SimpleToast.SHORT);
                 } finally {
                     setIsSendLoading(false);
@@ -432,7 +447,7 @@ export default function ReviewPayment({ route }: Props) {
                         amount: {
                             amount: Number(amount),
                             currency: "USD",
-                            feePolicy: "EXCLUSIVE"
+                            feePolicy: "INCLUSIVE"
                         },
                         description: note
                     }
@@ -515,7 +530,7 @@ export default function ReviewPayment({ route }: Props) {
                         amount: {
                             amount: Number(amount),
                             currency: "USD",
-                            feePolicy: "EXCLUSIVE"
+                            feePolicy: "INCLUSIVE"
                         },
                         description: note,
                         onchainTierId: 'tier_fast' + Math.floor(Math.random() * 100)
@@ -583,7 +598,7 @@ export default function ReviewPayment({ route }: Props) {
                     }
                 }
             } catch (error) {
-                console.error('Error Send Lightening:', error);
+                console.error('Error handleSendSats:', error);
                 SimpleToast.show('Failed Send to User. Please try again.', SimpleToast.SHORT);
             } finally {
                 setIsSendLoading(false);
@@ -705,10 +720,12 @@ export default function ReviewPayment({ route }: Props) {
             isSats,
             to,
             type,
+            total,
             recommendedFee,
             isWithdrawal,
             wallet,
             editAmount: () => {
+                //set max amount value to show in recipient
                 setIsEditAmount(true)
             }
         });
@@ -734,7 +751,7 @@ export default function ReviewPayment({ route }: Props) {
         return temp;
     }
 
-    // console.log('strikeFees: ', strikeFees, receiveType)
+    console.log('strikeFees: ', strikeFees, receiveType)
     return (
         <ScreenLayout showToolbar isBackButton title="Review Payment">
             <View style={styles.topView}>
@@ -888,7 +905,7 @@ export default function ReviewPayment({ route }: Props) {
                             }
                             {/* <TextViewV2 keytext="Coinos Fee + Service Fee:  " text={` ~   ${(networkFee || 0) + (bamskiiFee || 0)} sats`} /> */}
                             {receiveType && <TextViewV2 keytext="Coinos Fee:  " text={` ~   ${(networkFee || 0)} sats`} /> }
-                            <TextViewV2 keytext="Total Fee:  " text={isWithdrawal ? ` ~   ${(networkFee || 0) + (estimatedFee || 0)} sats (~${handleWithdrawalFee((networkFee || 0) + (estimatedFee || 0)).toFixed(0)}%)` : ` ~   ${receiveType ? (networkFee || 0) + (estimatedFee || 0) : paymentQuoteData ? usdToSats(paymentQuoteData?.totalFee?.amount || 0, (matchedRate || 0)) : 0} sats ${receiveType ? `(~0.2%)` : ``}`} />
+                            <TextViewV2 keytext="Total Fee:  " text={isWithdrawal && receiveType ? ` ~   ${(networkFee || 0) + (estimatedFee || 0)} sats (~${handleWithdrawalFee((networkFee || 0) + (estimatedFee || 0)).toFixed(0)}%)` : isWithdrawal && receiveType ? ` ~   ${(Number(selectedStrikeFee?.estimatedFee?.amount || 0) * 100000000).toFixed(2)} sats` : ` ~   ${receiveType ? (networkFee || 0) + (estimatedFee || 0) : paymentQuoteData ? usdToSats(paymentQuoteData?.totalFee?.amount || 0, (matchedRate || 0)) : 0} sats ${receiveType ? `(~0.2%)` : ``}`} />
                         </>
                         :
                         <TextView keytext="Fees:  " text={` ~   ${receiveType ? estimatedFee : paymentQuoteData && to?.length > 0 ? usdToSats(paymentQuoteData?.totalFee?.amount || 0, (matchedRate || 0)) : paymentQuoteData && to.length == 0 ? usdToSats(paymentQuoteData?.fee?.amount || 0, (matchedRate || 0)) : 0} sats`} />
@@ -913,9 +930,10 @@ export default function ReviewPayment({ route }: Props) {
                                 :
                                     <ScrollView style={styles.background2}>
                                         {strikeFees && strikeFees.map((item, index) => (
-                                            <TouchableOpacity style={[styles.row, index % 2 == 0 && { backgroundColor: colors.primary }]}
+                                            <TouchableOpacity disabled={item?.label == 'Free' && item?.minimumAmount && item?.minimumAmount?.amount > (isSats ? value / SATS : converted / SATS)} style={[styles.row, index % 2 == 0 && { backgroundColor: colors.primary }, item?.label == 'Free' && item?.minimumAmount && item?.minimumAmount?.amount > (isSats ? value / SATS : converted / SATS) && { opacity: 0.5, flexDirection: 'column' }]}
                                                 onPress={() => handleStrikeFeeSelect(item)}>
                                                 <Text bold style={{ fontSize: 18 }}>{item.label}</Text>
+                                                { item?.label == 'Free' && item?.minimumAmount && item?.minimumAmount?.amount > (isSats ? value / SATS : converted / SATS) && <Text style={{ fontSize: 9 }}>Minimum Amount: {item.minimumAmount?.amount}</Text> }
                                             </TouchableOpacity>
                                         ))}
                                     </ScrollView>
@@ -945,9 +963,8 @@ export default function ReviewPayment({ route }: Props) {
                     :
                     <GradientButton style={styles.invoiceButton} textStyle={{ fontFamily: 'Lato-Medium', }}
                         title={'Send'}
-                        disabled={isSendLoading}
+                        disabled={isSendLoading || feeLoading}
                         onPress={handleSendSats}
-
                     />
                 }
                 {/* <SwipeButton ref={swipeButtonRef} onToggle={handleToggle} isLoading={isSendLoading} /> */}
