@@ -41,13 +41,14 @@ export default function WalletsView({
         const tabs: any = [];
 
         if (allBTCWallets && !isLoading) {
-            (allBTCWallets as WalletName[]).map(wallet => {
+            (allBTCWallets as WalletName[]).map((wallet, index) => {
                 if (walletTabsMap[wallet]) {
                     tabs.push(walletTabsMap[wallet]);
                     if(allBTCWallets.length > 1) {
                         tabs.length = 0;
                         tabs.push({ key: "divider", component: () => <CircularView balance={balance} convertedRate={convertedRate} currency={currency} wallet={wallet} matchedRate={matchedRate} refRBSheet={refRBSheet} refSendRBSheet={refSendRBSheet} setReceiveType={setReceiveType} /> });                                    
-                    } if (walletTabsMap[wallet].key === 'strike') {
+                        tabs.push({ key: "divider", component: () => <StrikeDollarWallet currency={currency} matchedRate={matchedRate} /> });
+                    } else if (walletTabsMap[wallet].key === 'strike') {
                         tabs.push({ key: "divider", component: () => <StrikeDollarWallet currency={currency} matchedRate={matchedRate} /> });
                     }
                 }
@@ -61,7 +62,7 @@ export default function WalletsView({
 
     const walletTabsMap = {
         COINOS: { key: 'coinos', component: () => <CoinosWallet balance={balance} convertedRate={convertedRate} currency={currency} isLoading={isLoading} matchedRate={matchedRate} refRBSheet={refRBSheet} refSendRBSheet={refSendRBSheet} setReceiveType={setReceiveType} wallet={wallet}/> },
-        STRIKE: { key: 'strike', component: () => <StrikeWallet balance={balance} currency={currency} isLoading={isLoading} matchedRate={matchedRate} refRBSheet={refRBSheet} refSendRBSheet={refSendRBSheet} setReceiveType={setReceiveType} strikeBalance={strikeBalance} /> },
+        STRIKE: { key: 'strike', component: () => <StrikeWallet currency={currency} isLoading={isLoading} matchedRate={matchedRate} refRBSheet={refRBSheet} refSendRBSheet={refSendRBSheet} setReceiveType={setReceiveType} strikeBalance={strikeBalance} /> },
     };
 
 

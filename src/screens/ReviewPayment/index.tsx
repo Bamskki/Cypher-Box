@@ -963,9 +963,8 @@ export default function ReviewPayment({ navigation, route }: Props) {
                     :
                     <GradientButton style={styles.invoiceButton} textStyle={{ fontFamily: 'Lato-Medium', }}
                         title={'Send'}
-                        disabled={isSendLoading}
+                        disabled={isSendLoading || feeLoading}
                         onPress={handleSendSats}
-
                     />
                 }
                 {/* <SwipeButton ref={swipeButtonRef} onToggle={handleToggle} isLoading={isSendLoading} /> */}

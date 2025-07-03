@@ -13,7 +13,6 @@ import styles from "./styles";
 
 
 interface Props {
-    balance: any;
     isLoading: boolean;
     matchedRate: any;
     currency: any;
@@ -50,7 +49,6 @@ const config = {
 };
 
 export default function StrikeWallet({
-    balance,
     isLoading,
     matchedRate,
     currency,
@@ -59,7 +57,7 @@ export default function StrikeWallet({
     setReceiveType,
     strikeBalance,
 }: Props) {
-    const { isStrikeAuth, withdrawStrikeThreshold, reserveStrikeAmount, strikeUser, coldStorageWalletID, walletID, setStrikeToken, setStrikeAuth, withdrawThreshold, reserveAmount, allBTCWallets } = useAuthStore();
+    const { isStrikeAuth, withdrawStrikeThreshold, reserveStrikeAmount, strikeUser, coldStorageWalletID, walletID, setStrikeToken, setStrikeAuth, allBTCWallets } = useAuthStore();
 
     const receiveClickHandler = (type: boolean) => {
         // dispatchNavigate('CheckingAccountNew', { wallet: wallet, matchedRate });
@@ -85,7 +83,7 @@ export default function StrikeWallet({
         }
     };
 
-    const hasFilledTheBar = calculateBalancePercentage(Number(balance), Number(withdrawThreshold), Number(reserveAmount)) === 100
+    const hasFilledTheBar = calculateBalancePercentage(Number(strikeBalance), Number(withdrawStrikeThreshold), Number(reserveStrikeAmount)) === 100
 
     const checkingAccountClickHandler = (walletType: boolean) => {
         dispatchNavigate('CheckingAccount', { matchedRate, receiveType: walletType });

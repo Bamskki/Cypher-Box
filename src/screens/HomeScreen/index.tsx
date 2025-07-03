@@ -123,7 +123,7 @@ export default function HomeScreen({ route }: Props) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [balance, setBalance] = useState(0);
   console.log("🚀 ~ balanceMAIN:", balance)
-  const [strikeBalance, setStrikeBalance] = useState();
+  const [strikeBalance, setStrikeBalance] = useState(0);
   const [currency, setCurrency] = useState('$');
   const [convertedRate, setConvertedRate] = useState(0);
   console.log("🚀 ~ convertedRate:", convertedRate)
@@ -153,6 +153,7 @@ export default function HomeScreen({ route }: Props) {
   const refRBSheet = useRef<any>(null);
   const refSendRBSheet = useRef<any>(null);
   const refWithdrawRBSheet = useRef<any>(null);
+  const [receivedListSecondTab, setReceivedListSecondTab] = useState(false);
   const carouselRef = useRef<Carousel<any>>(null);
 
   const getWalletID = async () => {
@@ -308,7 +309,7 @@ export default function HomeScreen({ route }: Props) {
               clearStrikeAuth();
             } else if (balances) {
               setStrikeUser(balances);
-              // setStrikeBalance(balances);
+              setStrikeBalance((balances?.[0]?.available * SATS) || 0);
             }
           }, 1000);
         }
@@ -526,7 +527,6 @@ export default function HomeScreen({ route }: Props) {
   //   cold: ColdStorageTab,
   // });
 
-  console.log('allBTCWallets: ', allBTCWallets)
   return (
     <ScreenLayout
       RefreshControl={
@@ -630,8 +630,9 @@ export default function HomeScreen({ route }: Props) {
             backgroundColor: 'red',
           },
           container: {
-            maxHeight: heights / 2 + 20,
-            backgroundColor: 'transparent',
+            // ...receivedListSecondTab ? { height: heights / 2 + 20 } : { maxHeight: heights / 2 + 20 },
+            height: heights / 2 + 20,
+            backgroundColor: 'red',
           }
         }}
         customModalProps={{
@@ -643,7 +644,7 @@ export default function HomeScreen({ route }: Props) {
         }}
       >
         {/* <ReceivedList refRBSheet={refRBSheet} receiveType={receiveType} matchedRate={matchedRate} currency={currency} /> */}
-        <ReceivedListNew refRBSheet={refRBSheet} receiveType={receiveType} matchedRate={matchedRate} currency={currency} wallet={wallet} coldStorageWallet={coldStorageWallet} />
+        <ReceivedListNew setReceivedListSecondTab={setReceivedListSecondTab} refRBSheet={refRBSheet} receiveType={receiveType} matchedRate={matchedRate} currency={currency} wallet={wallet} coldStorageWallet={coldStorageWallet} />
       </RBSheet>
 
       <RBSheet

@@ -42,9 +42,10 @@ interface Props {
   wallet: any;
   coldStorageWallet: any;
   receiveType: boolean;
+  setReceivedListSecondTab: (val: boolean) => void;
 }
 
-export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldStorageWallet, matchedRate, currency }: Props) {
+export default function ReceivedListNew({ setReceivedListSecondTab, refRBSheet, receiveType, wallet, coldStorageWallet, matchedRate, currency }: Props) {
   const { user, strikeMe, vaultTab, setVaultTab, isAuth, isStrikeAuth, walletID, coldStorageWalletID } = useAuthStore();
   const [selectedItem, setSelectedItem] = useState<number | null>(null);
   console.log("🚀 ~ ReceivedListNew ~ selectedItem:", selectedItem);
@@ -176,8 +177,10 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
       setSelectedItem(item.id);
       setTab(0);
       animateToSecondView();
+      setReceivedListSecondTab(true);
     } else if(item?.id == 3 || item?.id == 4){
       refRBSheet?.current?.close();
+      setReceivedListSecondTab(false);
       setTimeout(() => {
         setVaultTab(item?.id == 3 ? false : true);
         dispatchNavigate('HotStorageVault', { wallet: item?.id == 3 ? wallet : coldStorageWallet, matchedRate });
@@ -187,6 +190,7 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
 
   const backClickHandler = () => {
     animateToFirstView();
+    setReceivedListSecondTab(false);
   };
 
   const bitcoinLightning = {
@@ -207,7 +211,7 @@ export default function ReceivedListNew({ refRBSheet, receiveType, wallet, coldS
 
   const onPressNew = (item: any) => {
     refRBSheet?.current?.close();
-
+    setReceivedListSecondTab(false);
     if (item?.id == 1) {
       Clipboard.setString(selectedItem === 2 ? user + '@coinos.io' : strikeMe?.username + '@strike.me');
       SimpleToast.show('Copied to clipboard', SimpleToast.SHORT);
