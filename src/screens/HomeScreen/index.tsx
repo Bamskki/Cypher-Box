@@ -658,7 +658,7 @@ export default function HomeScreen({ route }: Props) {
             backgroundColor: 'red',
           },
           container: {
-            maxHeight: heights / 2 + 20,
+            height: heights / 2 + 20,
             backgroundColor: 'transparent',
           }
         }}
