@@ -47,12 +47,26 @@ export default function SavingVault({ isVault, container, innerContainer, shadow
         <TouchableOpacity style={[styles.container, container]} onPress={onPress}>
             <View style={[styles.innerContainer, innerContainer]}>
                 <Shadow
-                    style={StyleSheet.flatten([styles.shadowTopBottom, shadowTopBottom, vaultTabCheck && { shadowColor: colors.blueText }])}
+                    style={StyleSheet.flatten([styles.shadowTopBottom, shadowTopBottom, vaultTabCheck && { shadowColor: '#21C7FB' }])}
                     inner
                     useArt
                 >
                     <View style={styles.bottominner}>
+                        <View style={{flexDirection: "row", flex:1, justifyContent: "start", alignItems: "center"}}>
+                        {title === 'Hot Vault' ? 
+                            <Image
+                            source={require('@Cypher/assets/images/fireShield.png')}
+                            style={{width:25, height: 25, marginRight:8}}
+                            resizeMode="contain"
+                            /> :
+                            <Image
+                                source={require('@Cypher/assets/images/coldShield.png')}
+                                style={{width:25, height: 25, marginRight:8}}
+                                resizeMode="contain"
+                            />
+                        }
                         <Text h3 bold style={titleStyle}>{title}</Text>
+                        </View>
                         <View style={styles.row}>
                             <Text h4 bold style={StyleSheet.flatten([styles.bitcointext, bitcoinText])}>
                                 Bitcoin Network
@@ -83,7 +97,7 @@ export default function SavingVault({ isVault, container, innerContainer, shadow
                     <Shadow
                         inner
                         useArt
-                        style={StyleSheet.flatten([styles.shadowBottomBottom, shadowBottomBottom, vaultTabCheck && { shadowColor: colors.blueText }])}
+                        style={StyleSheet.flatten([styles.shadowBottomBottom, shadowBottomBottom, vaultTabCheck && { shadowColor: colors.shadowBlue }])}
                     />
                 </Shadow>
             </View>

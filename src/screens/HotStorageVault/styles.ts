@@ -68,6 +68,10 @@ interface Style {
 export default StyleSheet.create<Style>({
     flex: {
         flex: 1,
+        flexDirection:'column',
+        alignContent: 'center',
+        justifyContent: 'center',
+        paddingBottom: 20
         // paddingBottom: 40,
     },
     container: {
@@ -152,10 +156,10 @@ export default StyleSheet.create<Style>({
         // backgroundColor: 'green'
     },
     base: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         flex: 1,
         marginTop: 20,
-
+        justifyContent:'center'
         // backgroundColor: 'red',
         // justifyContent: 'space-between'
         // alignSelf: 'center',
@@ -179,11 +183,13 @@ export default StyleSheet.create<Style>({
     qrcode: {
         borderColor: colors.greenShadow,
         borderWidth: 2,
-        borderRadius: 40,
+        borderRadius: 30,
         width: "62%",
-        height: "36%",
+        aspectRatio:1,
+        //height: "36%",
         alignSelf: 'center',
         marginTop: 20,
+        backgroundColor: colors.white
     },
     qrcodeImage: {
         borderColor: colors.greenShadow,
@@ -372,7 +378,7 @@ export default StyleSheet.create<Style>({
     tips: {
         fontSize: 15,
         marginBottom: 10,
-        marginTop: 20,
+        marginTop: 10,
     },
     priceView: {
         flexDirection: 'row',

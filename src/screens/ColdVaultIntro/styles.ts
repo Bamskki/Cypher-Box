@@ -30,12 +30,12 @@ export default StyleSheet.create<Style>({
         lineHeight: 24,
     },
     title: {
-        color: colors.blueText,
+        color: colors.coldBlue,
         fontFamily: 'Archivo-SemiBold',
         fontSize: 18,
     },
     button: {
-        backgroundColor: colors.blueText,
+        backgroundColor: colors.coldBlue,
         borderWidth: 0,
         marginHorizontal: 20,
     },

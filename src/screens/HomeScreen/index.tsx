@@ -529,6 +529,7 @@ export default function HomeScreen({ route }: Props) {
 
   return (
     <ScreenLayout
+      
       RefreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -632,7 +633,7 @@ export default function HomeScreen({ route }: Props) {
           container: {
             // ...receivedListSecondTab ? { height: heights / 2 + 20 } : { maxHeight: heights / 2 + 20 },
             height: heights / 2 + 20,
-            backgroundColor: 'red',
+            backgroundColor: 'transparent',
           }
         }}
         customModalProps={{

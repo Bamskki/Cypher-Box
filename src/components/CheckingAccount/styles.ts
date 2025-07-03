@@ -12,14 +12,15 @@ export default StyleSheet.create({
     borderTopWidth: 2,
     borderLeftWidth: 2,
     borderColor: colors.pink.extralight,
-    borderRadius: 20,
+    borderRadius: 20
   },
   loginOption: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#111111',
     height: 80,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 17,
+    padding: 0
   },
   logo: {
     height: 50,

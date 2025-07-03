@@ -42,17 +42,17 @@ export default function ColdVaultIntro2() {
               {'\n\n'}
               This{' '}
               <TouchableOpacity onPress={() => Linking.openURL('https://bitcoinpizza.substack.com/p/these-are-the-only-7-hardware-wallets')}>
-                <Text style={[styles.guideText, {textDecorationLine: 'underline'}]}>
+                <Text style={[styles.guideText, {textDecorationLine: 'underline', color: colors.coldBlue}]}>
                   guide
                 </Text>
               </TouchableOpacity> 
-              {' '}can help you choose between the 7 most secure wallets in Bitcoin sorted by; degree of protection, price, and ease of use. It also contains security tips and discount links. 
+              {' '}can help you choose between out most reccomended wallets in Bitcoin sorted by; security, price, and ease of use, and how to connect them to Cypher Box. It also contains security tips and discount links. 
               {/* {'\n\n'}
               Your Hot and Cold Vaults can work in conjunction. You can use your Hot Vault as a heating funnel that melts your small capsules and transfer them to your Cold Vault as one large cold capsule thereby reducing future fee costs (UTXO consolidation). */}
             </Text>
             <Image source={Cold2} style={{ marginTop: 25, width: 330, height: 190, resizeMode: "contain"}} />
           </View>
-          <Button text="Setup  Cold Storage" onPress={createWallet} loading={isLoading} style={styles.button} textStyle={styles.btnText} />
+          <Button text="Connect Device" onPress={createWallet} loading={isLoading} style={styles.button} textStyle={styles.btnText} />
         </View>
       </ScreenLayout>
     )
