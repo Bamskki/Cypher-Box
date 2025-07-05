@@ -325,7 +325,7 @@ export default function BottomBar({
 
     return (
         <>
-            {((hasSavingVault && wallet) || coldStorageWallet ) &&
+            {((hasSavingVault && wallet) || coldStorageWallet ) && (isAuth || isStrikeAuth) &&
                 <TopUpWithdrawView isVault={index == 1 ? true : false} />
             }
             <Carousel

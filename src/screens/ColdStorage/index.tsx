@@ -946,7 +946,7 @@ export default function ColdStorage({ route, navigation }: Props) {
                               // await scanButtonTapped();
                               Keyboard.dismiss();
                               // @ts-ignore: Fix later
-                              scanQrHelper(navigate, "ColdStorage", { wallet, utxo, ids, usd, total, matchedRate }).then(processAddressData);
+                              scanQrHelper(navigate, "ColdStorage", { wallet, utxo, ids, usd, total, matchedRate, ...route?.params }).then(processAddressData);
                           }}>
                               <Image source={require("../../../img/scan-new.png")} style={styles.qrcode} resizeMode="contain" />
                           </TouchableOpacity>

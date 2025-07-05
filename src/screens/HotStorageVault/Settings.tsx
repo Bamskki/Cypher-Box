@@ -259,11 +259,11 @@ export default function Settings({wallet, to, matchedRate, toStrike}: any) {
         );
     };
 
-    const handlePsbtSign = async (address: string) => {
+    const handlePsbtSign = async () => {
         setIsLoading(true);
         await new Promise(resolve => setTimeout(resolve, 100)); // sleep for animations
         console.log('routeName: ', routeName)
-        const scannedData = await scanQrHelper(navigation.navigate, routeName, { wallet, matchedRate, address });
+        const scannedData = await scanQrHelper(navigation.navigate, routeName, { wallet, matchedRate });
         if (!scannedData) return setIsLoading(false);
     
         let tx;
@@ -440,7 +440,7 @@ export default function Settings({wallet, to, matchedRate, toStrike}: any) {
                         </TouchableOpacity>
                         <View style={styles.line} />
                         {wallet && !vaultTab && wallet.allowCosignPsbt() && (
-                            <TouchableOpacity onPress={() => handlePsbtSign(to)}>
+                            <TouchableOpacity onPress={() => handlePsbtSign()}>
                                 <Text bold style={styles.text}>{loc.send.psbt_sign}</Text>
                             </TouchableOpacity>
                         )}
