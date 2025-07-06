@@ -182,9 +182,13 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab, toStrike }
     }
 
     const addressClickHandler = async () => {
-        if(!isAuth){
-            SimpleToast.show('You need to be logged in to Coinos.io to top up', SimpleToast.SHORT);
-            return;
+        // if(!isAuth){
+        //     SimpleToast.show('You need to be logged in to Coinos.io to top up', SimpleToast.SHORT);
+        //     return;
+        // }
+        if (!isAuth && !isStrikeAuth) {
+            SimpleToast.show('You need to be logged in to wallet to top up', SimpleToast.SHORT);
+            return
         }
         let capsulesData: any = [];
         let capsuleTotal: any = 0;

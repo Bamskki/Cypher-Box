@@ -32,6 +32,7 @@ import styles from "./styles";
 import { createInvoice } from "@Cypher/api/coinOSApis";
 import { createInvoice as createInvoiceStrike } from "@Cypher/api/strikeAPIs";
 import QRCode from 'react-native-qrcode-svg';
+import { shortenAddress } from "@Cypher/screens/ColdStorage";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
@@ -395,9 +396,17 @@ export default function ReceivedListNew({ setReceivedListSecondTab, refRBSheet, 
                 {isLoading ? <ActivityIndicator size="large" color="#ffffff" />
                   :
                   <>
-                    <Text semibold style={styles.bitcoinAddressText}>
-                      {hashBitcoin}
-                    </Text>
+                    <View style={styles.addressRow}>
+                      <Text semibold style={styles.bitcoinAddressText}>
+                        {hashBitcoin}
+                      </Text>
+                      <TouchableOpacity onPress={() =>{
+                        Clipboard.setString(hashBitcoin);
+                        SimpleToast.show('Copied to clipboard', SimpleToast.SHORT)
+                      }}>
+                        <Image source={Copy} style={styles.copyIconImage} />
+                      </TouchableOpacity>
+                    </View>
                     {hashBitcoin &&
                       <View style={{ marginTop: 10, padding: 2, backgroundColor: 'white', borderRadius: 2 }}>
                         <QRCode
@@ -425,9 +434,18 @@ export default function ReceivedListNew({ setReceivedListSecondTab, refRBSheet, 
                 {isLoading ? <ActivityIndicator size="large" color="#ffffff" />
                   :
                   <>
-                    <Text semibold style={styles.bitcoinAddressText}>
-                      {hashLiquid}
-                    </Text>
+                    <View style={styles.addressRow}>
+                      <Text semibold style={styles.bitcoinAddressText}>
+                        {shortenAddress(hashLiquid)}
+                      </Text>
+                      <TouchableOpacity onPress={() =>{
+                        Clipboard.setString(hashLiquid);
+                        SimpleToast.show('Copied to clipboard', SimpleToast.SHORT)
+                      }}>
+                        <Image source={Copy} style={styles.copyIconImage} />
+                      </TouchableOpacity>
+                    </View>
+
                     {hashLiquid &&
                       <View style={{ marginTop: 10, padding: 2, backgroundColor: 'white', borderRadius: 2 }}>
                         <QRCode
