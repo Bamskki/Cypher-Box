@@ -20,10 +20,10 @@ const HotStorageVault = ({ _, route }: any) => {
     const { vaultTab } = useAuthStore();
 
     useEffect(() => {
-        if (to) {
+        if (to || toStrike) {
             setSelectedTab(1)
         }
-    }, [to])
+    }, [to, toStrike])
 
     const onChangeSelectedTab = useCallback((id: number) => {
         setSelectedTab(id);

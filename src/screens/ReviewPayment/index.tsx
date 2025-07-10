@@ -712,12 +712,13 @@ export default function ReviewPayment({ navigation, route }: Props) {
 
     const editAmountClickHandler = () => {
         dispatchNavigate('SendScreen', {
+            ...route.params,
             currency,
             matchedRate,
             walletID: wallet.getID(),
-            value,
-            converted,
-            isSats,
+            value: isSats ? value : converted,
+            converted: isSats ? converted : value,
+            isSats: true,
             to,
             type,
             total,
@@ -795,7 +796,7 @@ export default function ReviewPayment({ navigation, route }: Props) {
                         <Text style={{ color: colors.yellow2, marginLeft: 15, marginBottom: 25 }}>You haven't reached your withdrawal threshold yet.</Text>
                     }
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginRight: 15 }}>
-                        <TextViewV2 keytext={type == 'SELL' ? "You will send: " : type == 'BUY' ? "You will receive: " : "Recipient will get: "} text={isSats ? `${value} sats ~ $${converted}` : `$${value} ~ $${converted} sats`} textStyle={styles.price} />
+                        <TextViewV2 keytext={type == 'SELL' ? "You will send: " : type == 'BUY' ? "You will receive: " : "Recipient will get: "} text={isSats ? `${value} sats ~ $${converted}` : `$${value} ~ ${converted} sats`} textStyle={styles.price} />
                         {isWithdrawal &&
                             <TouchableOpacity activeOpacity={0.7} onPress={editAmountClickHandler} style={{
                                 borderWidth: 3,

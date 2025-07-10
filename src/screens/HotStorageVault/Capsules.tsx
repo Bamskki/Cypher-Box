@@ -155,7 +155,7 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab, toStrike }
             SimpleToast.show("Before creating a transaction, you must first add a Cold Vault wallet", SimpleToast.SHORT)
         }
         else if (ids.length > 0) {
-            dispatchNavigate('ColdStorage', {wallet, utxo, ids, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to: sendToAddress, vaultTab, vaultSend: true, title: !vaultTab ? "Transfer To Cold Vault" : undefined, capsuleTotal});
+            dispatchNavigate('ColdStorage', {wallet, utxo, ids, maxUSD: total, isMaxEdit: true, inUSD: inUSD, total: total, matchedRate, capsulesData, to: sendToAddress, vaultTab, vaultSend: true, title: !vaultTab ? "Transfer To Cold Vault" : undefined, capsuleTotal});
         } else {
             SimpleToast.show("Please select Capsules to Send", SimpleToast.SHORT)
         }
@@ -175,16 +175,20 @@ export default function Capsules({ wallet, matchedRate, to, vaultTab, toStrike }
         });
         console.log('capsuleTotal: ', capsuleTotal)
         if (ids.length > 0) {
-            dispatchNavigate('ColdStorage', {wallet, capsuleTotal, utxo, ids, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to: selfAddress, vaultTab, vaultSend: true, title: vaultTab ? "Batch Capsules" : undefined, isBatch: true});
+            dispatchNavigate('ColdStorage', {wallet, capsuleTotal, utxo, ids, isMaxEdit: true, maxUSD: total, inUSD: inUSD, total: total, matchedRate, capsulesData, to: selfAddress, vaultTab, vaultSend: true, title: vaultTab ? "Batch Capsules" : undefined, isBatch: true});
         } else {
             SimpleToast.show("Please select Capsules to Send", SimpleToast.SHORT)
         }
     }
 
     const addressClickHandler = async () => {
-        if(!isAuth){
-            SimpleToast.show('You need to be logged in to Coinos.io to top up', SimpleToast.SHORT);
-            return;
+        // if(!isAuth){
+        //     SimpleToast.show('You need to be logged in to Coinos.io to top up', SimpleToast.SHORT);
+        //     return;
+        // }
+        if (!isAuth && !isStrikeAuth) {
+            SimpleToast.show('You need to be logged in to wallet to top up', SimpleToast.SHORT);
+            return
         }
         let capsulesData: any = [];
         let capsuleTotal: any = 0;

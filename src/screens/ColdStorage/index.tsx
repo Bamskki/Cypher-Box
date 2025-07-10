@@ -756,7 +756,7 @@ export default function ColdStorage({ route, navigation }: Props) {
                 /> */}
                 <View style={styles.recipientView}>
                     {/* <TouchableOpacity onPress={coinThresholdClickHandler}> */}
-                    {to ?
+                    {to || toStrike ?
                       <View>
                         <Text bold style={styles.coinselected}>Capsules selected:</Text>
                         <View style={{flexDirection: 'row', alignItems: 'center', marginLeft: 2, marginTop: 18 }}>
@@ -820,7 +820,7 @@ export default function ColdStorage({ route, navigation }: Props) {
                     :
                       <View style={styles.priceView}>
                           <View>
-                              <Text style={styles.recipientTitle}>{title == "Transfer To Cold Vault" ? "Transfer amount" : to ? "Top-up amount" : "Recipient will get:"}</Text>
+                              <Text style={styles.recipientTitle}>{title == "Transfer To Cold Vault" ? "Transfer amount" : to || toStrike ? "Top-up amount" : "Recipient will get:"}</Text>
                               <Text bold style={[styles.value, vaultTab && {color: colors.blueText}]}>{((Number(usd || 0) / Number(matchedRate || 0) || 0) * 100000000).toFixed(2) + ' sats ~$' + Number(usd).toFixed(2)}</Text>
                           </View>
                           <TouchableOpacity style={[styles.editAmount, { borderColor: satsEditable ? primaryColor : '#B6B6B6' }]} onPress={editAmountClickHandler}>
@@ -836,7 +836,7 @@ export default function ColdStorage({ route, navigation }: Props) {
                             </View>
                         </View>
                     }
-                    {to ?
+                    {to || toStrike ?
                         <View style={styles.priceView}>
                           <View>
                               {!isBatch &&
@@ -946,7 +946,7 @@ export default function ColdStorage({ route, navigation }: Props) {
                               // await scanButtonTapped();
                               Keyboard.dismiss();
                               // @ts-ignore: Fix later
-                              scanQrHelper(navigate, "ColdStorage", { wallet, utxo, ids, usd, total, matchedRate }).then(processAddressData);
+                              scanQrHelper(navigate, "ColdStorage", { wallet, utxo, ids, usd, total, matchedRate, ...route?.params }).then(processAddressData);
                           }}>
                               <Image source={require("../../../img/scan-new.png")} style={styles.qrcode} resizeMode="contain" />
                           </TouchableOpacity>

@@ -103,16 +103,21 @@ export default function BottomBar({
         //     return
         // }
         try {
-            const response = await createInvoice({
-                type: 'bitcoin',
-            });
-            const responseStrike = await createInvoiceStrike({
-                onchain: {
-                },
-                targetCurrency: "USD"
-            });
+            let response, responseStrike;
+            if(isAuth){
+                response = await createInvoice({
+                    type: 'bitcoin',
+                });
+            }
+            if(isStrikeAuth) {
+                responseStrike = await createInvoiceStrike({
+                    onchain: {
+                    },
+                    targetCurrency: "USD"
+                });
+            }
 
-            dispatchNavigate('HotStorageVault', { wallet: vaultTab ? coldStorageWallet : wallet, matchedRate, to: response.hash, toStrike: responseStrike.onchain?.address });
+            dispatchNavigate('HotStorageVault', { wallet: vaultTab ? coldStorageWallet : wallet, matchedRate, to: isAuth ? response?.hash : null, toStrike: isStrikeAuth ? responseStrike.onchain?.address : null });
         } catch (error) {
             console.error('Error generating bitcoin address topupClickHandler:', error);
         } finally {
@@ -325,7 +330,7 @@ export default function BottomBar({
 
     return (
         <>
-            {((hasSavingVault && wallet) || coldStorageWallet ) &&
+            {((hasSavingVault && wallet) || coldStorageWallet ) && (isAuth || isStrikeAuth) &&
                 <TopUpWithdrawView isVault={index == 1 ? true : false} />
             }
             <Carousel
