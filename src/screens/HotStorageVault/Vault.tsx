@@ -141,9 +141,9 @@ export default function Vault({ wallet, matchedRate, setSelectedTab }: { wallet:
                 >
                     <Text h3 center>Vault Addresses</Text>
                 </GradientView>
-                <Text style={{paddingRight: 20, paddingLeft:20, paddingTop: 20}}>
+                {/* <Text style={{paddingRight: 20, paddingLeft:20, paddingTop: 20}}>
             ⚠️ DO NOT use these addresses to receive funds without verifying their authenticity from your hardware device! 
-            </Text>
+            </Text> */}
                 {/* <GradientView
                     onPress={addressClickHandler}
                     topShadowStyle={styles.outerShadowStyle}
@@ -169,7 +169,7 @@ export default function Vault({ wallet, matchedRate, setSelectedTab }: { wallet:
             {address ?
                 <>
                     {!vaultTab &&
-                        <Text h4 style={styles.infoText}>You can use this vault address to receive coins from another vault on the Bitcoin Network</Text>
+                        <Text h4 style={styles.infoText}>You can use this vault address to receive sizable coins from another vault on the Bitcoin Network</Text>
                     }
                     <View style={[styles.qrcode, vaultTab && { borderColor: colors.blueText, height: "40%", width: "60%" }]}>
                         <View style={{ alignItems:'center', justifyContent: 'center',width: "100%", height: "100%", margin: 0, padding: 20, backgroundColor: 'white', borderRadius: 30 }}>

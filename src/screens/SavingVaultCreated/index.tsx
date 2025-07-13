@@ -32,7 +32,7 @@ export default function SavingVaultCreated() {
             <View style={styles.container}>
                 <Text style={[styles.title, vaultTab ? { color: colors.blueText } : { }]} center>{vaultTab ? "Cold Storage Vault Created!" : "Savings Vault Created!"}</Text>
                 <View style={styles.inner}>
-                    <SavingVault title={vaultTab ? "Cold Vault" : "Savings Vault"} />
+                    <SavingVault title={vaultTab ? "Cold Vault" : "Hot Vault"} />
                     <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
                         {vaultTab ?
                             <>

@@ -15,7 +15,7 @@ interface Props {
 
 export default function BalanceView({ balance, convertedRate }: Props) {
     return (
-        <View style={[styles.innerContainer]}>
+        <View style={[styles.innerContainer]} >
             <Shadow
                 style={StyleSheet.flatten([styles.shadowTopBottom2])}
                 inner
@@ -27,11 +27,13 @@ export default function BalanceView({ balance, convertedRate }: Props) {
                 <Text bold style={styles.priceusd} >
                     {convertedRate}
                 </Text>
+                
                 <Shadow
                     inner
                     useArt
                     style={StyleSheet.flatten([styles.shadowBottomBottom])}
                 />
+                
             </Shadow>
         </View>
     )

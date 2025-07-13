@@ -18,7 +18,7 @@ export default StyleSheet.create<Style>({
     },
     inner: {
         flex: 1,
-        marginTop: 40,
+        marginTop: 20,
     },
     descption: {
         fontFamily: 'Archivo-Regular',

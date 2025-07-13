@@ -744,7 +744,7 @@ export default StyleSheet.create<Style>({
     circularView: {
         // flex: 1,
         // paddingVertical: 40,
-        marginTop: 20,
+        marginTop: 10,
         flexDirection: 'row',
         justifyContent: 'space-between',
         // backgroundColor: 'red'
