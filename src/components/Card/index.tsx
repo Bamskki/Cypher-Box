@@ -61,15 +61,15 @@ export default function Card({ onPress,
     console.log('allBTCWallets: ', allBTCWallets)
 
     const onReceiveClickHandler = () => {
-        if(allBTCWallets.length == 1 && !coldStorageWalletID && !walletID) {
-            dispatchNavigate('CreateInvoice', {
-                matchedRate,
-                currency,
-                receiveType: true
-            });
-        } else {
+        // if(allBTCWallets.length == 1 && !coldStorageWalletID && !walletID) {
+        //     dispatchNavigate('CreateInvoice', {
+        //         matchedRate,
+        //         currency,
+        //         receiveType: true
+        //     });
+        // } else {
             receiveClickHandler?.(true);
-        }
+        // }
     }
 
     const onSendClickHandler = () => {
