@@ -61,16 +61,16 @@ export default function StrikeWallet({
 
     const receiveClickHandler = (type: boolean) => {
         // dispatchNavigate('CheckingAccountNew', { wallet: wallet, matchedRate });
-        if(allBTCWallets.length == 1 && !coldStorageWalletID && !walletID) {
-            dispatchNavigate('CreateInvoice', {
-                matchedRate,
-                currency,
-                receiveType: false
-            });
-        } else {
+        // if(allBTCWallets.length == 1 && !coldStorageWalletID && !walletID) {
+        //     dispatchNavigate('CreateInvoice', {
+        //         matchedRate,
+        //         currency,
+        //         receiveType: false
+        //     });
+        // } else {
             setReceiveType(type);
             refRBSheet.current.open();
-        }
+        // }
     };
 
     const sendClickHandler = (walletType: boolean) => {
