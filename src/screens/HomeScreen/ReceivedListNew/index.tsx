@@ -269,9 +269,9 @@ export default function ReceivedListNew({ setReceivedListSecondTab, refRBSheet, 
 
   const tabs = getTabs();
 
-  const showBackButton = 
-  (allBTCWallets.length !== 1 && coldStorageWalletID) || 
-  (allBTCWallets.length !== 1 && walletID) || 
+  const showBackButton = allBTCWallets.length > 1 ||
+  (allBTCWallets.length == 1 && coldStorageWalletID) || 
+  (allBTCWallets.length == 1 && walletID) || 
   (coldStorageWalletID && walletID);
 
   return (
