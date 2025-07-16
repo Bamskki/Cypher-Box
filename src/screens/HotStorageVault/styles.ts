@@ -377,7 +377,7 @@ export default StyleSheet.create<Style>({
     },
     tips: {
         fontSize: 15,
-        marginBottom: 10,
+        marginBottom: 15,
         marginTop: 10,
     },
     priceView: {

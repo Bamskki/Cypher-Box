@@ -24,7 +24,7 @@ export default function Header({ onBarScanned }: Props) {
 
     return <View style={styles.title}>
         <Text subHeader bold>
-            Total Balance
+            Total Assests
         </Text>
         <View style={styles.row}>
             <TouchableOpacity
@@ -44,7 +44,7 @@ export default function Header({ onBarScanned }: Props) {
                 <Image
                     style={styles.scan}
                     resizeMode="contain"
-                    source={require("../../../../img/scan-new.png")}
+                    source={require("../../../../img/scan-new@3x2.png")}
                 />
             </TouchableOpacity>
         </View>

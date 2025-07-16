@@ -434,9 +434,9 @@ export default StyleSheet.create<Style>({
         position: 'absolute',
     },
     shadowView: {
-        shadowOffset: { width: -8, height: -8 },
+        shadowOffset: { width: 8, height: 8 },
         shadowOpacity: 0.48,
-        shadowColor: '#27272C',
+        shadowColor: '#000000',
         shadowRadius: 12,
         elevation: 24,
         borderRadius: 25,

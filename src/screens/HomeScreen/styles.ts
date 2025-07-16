@@ -418,11 +418,11 @@ export default StyleSheet.create<Style>({
         shadowOffset: { width: 2, height: 2 },
         shadowRadius: 2,
         shadowOpacity: 1,
-        shadowColor: colors.white,
+        shadowColor: '#ffffff',
         borderRadius: 25,
         width: widths - 40,
         height: 128,
-        backgroundColor: colors.primary,
+        backgroundColor: '#111111',
         padding: 15,
         paddingStart: 20,
         paddingEnd: 10,
@@ -452,7 +452,7 @@ export default StyleSheet.create<Style>({
     shadowBottomBottom: {
         shadowOffset: { width: -3, height: -3 },
         shadowOpacity: 1,
-        shadowColor: '#DBDBDB',
+        shadowColor: '#000000',
         shadowRadius: 2,
         borderRadius: 25,
         width: widths - 40,
@@ -781,7 +781,7 @@ export default StyleSheet.create<Style>({
         shadowOffset: { width: 8, height: 8 },
         shadowOpacity: 0.80,
         shadowRadius: 16,
-        elevation: 8,
+        //elevation: 8,
     },
     checkingaccContainer: {
         flexDirection: 'row',
@@ -792,7 +792,7 @@ export default StyleSheet.create<Style>({
         justifyContent: 'space-between',
     },
     plusImage: {
-        width: 17,
+        width: 10,
         height: 17,
     },
     linearFirstStyle: {
