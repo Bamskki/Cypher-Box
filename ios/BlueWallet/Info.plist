@@ -102,6 +102,10 @@
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
+			<key>CFBundleURLHost</key>
+			<string>oauth/callback</string>
+			<key>CFBundleURLName</key>
+			<string>cypherbox</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>bitcoin</string>
@@ -110,12 +114,8 @@
 				<string>lapp</string>
 				<string>blue</string>
 				<string>http</string>
-	            <string>https</string>
+				<string>https</string>
 			</array>
-			<key>CFBundleURLName</key>
-			<string>cypherbox</string>
-			<key>CFBundleURLHost</key>
-			<string>oauth/callback</string>
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>

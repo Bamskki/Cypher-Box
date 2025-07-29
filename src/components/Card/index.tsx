@@ -1,4 +1,4 @@
-import { CoinOSSmall } from "@Cypher/assets/images";
+import { CoinOSSmall, Strike2 } from "@Cypher/assets/images";
 import { Text } from "@Cypher/component-library";
 import { calculateBalancePercentage, calculatePercentage, dispatchNavigate } from "@Cypher/helpers";
 import { formatNumber } from "@Cypher/helpers/coinosHelper";
@@ -21,6 +21,7 @@ interface Props {
     withdrawThreshold: any;
     reserveAmount: any;
     isShowButtons?: boolean;
+    receiveType?: boolean;
     receiveClickHandler?(value: boolean): void;
     sendClickHandler?(value: boolean): void;
 }
@@ -33,6 +34,7 @@ export default function Card({ onPress,
     reserveAmount,
     matchedRate,
     currency,
+    receiveType,
     isShowButtons = false,
     receiveClickHandler,
     sendClickHandler,
@@ -97,7 +99,7 @@ export default function Card({ onPress,
                             {title}
                         </Text>
                         <Image
-                            source={CoinOSSmall}
+                            source={receiveType ? CoinOSSmall : Strike2}
                             style={styles.blink}
                             resizeMode="contain"
                         />
