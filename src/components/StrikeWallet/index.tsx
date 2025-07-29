@@ -16,6 +16,8 @@ interface Props {
     isLoading: boolean;
     matchedRate: any;
     currency: any;
+    convertedRate: any;
+    wallet: any;
     refRBSheet: any;
     refSendRBSheet: any;
     setReceiveType: any;
@@ -52,7 +54,9 @@ export default function StrikeWallet({
     isLoading,
     matchedRate,
     currency,
+    wallet,
     refRBSheet,
+    convertedRate,
     refSendRBSheet,
     setReceiveType,
     strikeBalance,
@@ -86,7 +90,8 @@ export default function StrikeWallet({
     const hasFilledTheBar = calculateBalancePercentage(Number(strikeBalance), Number(withdrawStrikeThreshold), Number(reserveStrikeAmount)) === 100
 
     const checkingAccountClickHandler = (walletType: boolean) => {
-        dispatchNavigate('CheckingAccount', { matchedRate, receiveType: walletType });
+        // dispatchNavigate('CheckingAccount', { matchedRate, receiveType: walletType });
+        dispatchNavigate('CheckingAccountNew', { wallet: wallet, matchedRate, receiveType: false, balance: Math.round(Number(strikeUser?.[0]?.available || 0) * SATS), converted: (Number(strikeUser?.[0]?.available || 0) * matchedRate).toFixed(2), currency, reserveAmount: Number(reserveStrikeAmount), withdrawThreshold: Number(withdrawStrikeThreshold) });
     }
 
     const handleStrikeLogin = async () => {

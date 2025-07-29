@@ -62,7 +62,7 @@ export default function WalletsView({
 
     const walletTabsMap = {
         COINOS: { key: 'coinos', component: () => <CoinosWallet balance={balance} convertedRate={convertedRate} currency={currency} isLoading={isLoading} matchedRate={matchedRate} refRBSheet={refRBSheet} refSendRBSheet={refSendRBSheet} setReceiveType={setReceiveType} wallet={wallet}/> },
-        STRIKE: { key: 'strike', component: () => <StrikeWallet currency={currency} isLoading={isLoading} matchedRate={matchedRate} refRBSheet={refRBSheet} refSendRBSheet={refSendRBSheet} setReceiveType={setReceiveType} strikeBalance={strikeBalance} /> },
+        STRIKE: { key: 'strike', component: () => <StrikeWallet currency={currency} convertedRate={convertedRate} isLoading={isLoading} matchedRate={matchedRate} refRBSheet={refRBSheet} refSendRBSheet={refSendRBSheet} setReceiveType={setReceiveType} strikeBalance={strikeBalance} wallet={wallet} /> },
     };
 
 
