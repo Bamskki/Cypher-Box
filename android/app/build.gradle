@@ -73,13 +73,13 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "io.cypherbox.btc"
+    namespace "io.cypherbox.llc"
     defaultConfig {
-        applicationId "io.cypherbox.btc"
+        applicationId "io.cypherbox.llc"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 5
-        versionName "0.0.5"
+        versionCode 1
+        versionName "0.0.1"
         testBuildType System.getProperty('testBuildType', 'debug')
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         missingDimensionStrategy 'react-native-camera', 'general' //add this line
