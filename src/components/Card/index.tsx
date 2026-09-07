@@ -472,25 +472,37 @@ export default function Card({ onPress,
                     <Reanimated.View style={[styles.linearGradient2, { backgroundColor: colors.pink.dark, minWidth: 6 } as any, fillStyle]} />
                 </View>
             )}
-            {/* Vault connectivity, bottom-left. Last child of the card's
-                column, so it sits under the capsule slots without absolute
-                positioning that could ride over them on a narrow screen.
-                Deliberately small and quiet: on a healthy vault this is
-                reassurance the user should be able to ignore, and the loud
-                signal for an unhealthy one is the warning watermark behind
-                it rather than this line.
+            {/* Vault connectivity, bottom-right corner.
+                ABSOLUTE, not a flow child. `shadowTop` is a fixed 128pt box
+                (Card/styles.ts), so the card has no spare vertical room: an
+                appended row pushes past the border and gets clipped by it.
+                Anchoring to the container instead keeps the line inside the
+                card whatever the rows above it do. `right: 30` matches the
+                card's paddingHorizontal so it lines up with the brand mark
+                and the capsule slot row rather than the raw border edge,
+                since absolute children position against the padding box.
+
+                Quiet by design: on a healthy vault this is reassurance the
+                user can ignore, and the loud signal for an unhealthy one is
+                the warning watermark behind it rather than this line.
 
                 COPY: Bam finalizes. Same status vocabulary as the fuller
                 pill on the Capsules tab, shortened because the card is
                 already titled "Bark Vault" and repeating the noun here
                 reads as stutter. */}
             {vaultConnectivity && (
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
+                <View style={{
+                    position: 'absolute',
+                    right: 30,
+                    bottom: 12,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                }}>
                     <View
                         style={{
-                            width: 7,
-                            height: 7,
-                            borderRadius: 3.5,
+                            width: 8,
+                            height: 8,
+                            borderRadius: 4,
                             marginRight: 6,
                             backgroundColor:
                                 vaultConnectivity.level === 'green'
@@ -502,7 +514,7 @@ export default function Card({ onPress,
                     />
                     <Text
                         style={{
-                            fontSize: 10,
+                            fontSize: 12,
                             fontWeight: '600',
                             color:
                                 vaultConnectivity.level === 'green'
