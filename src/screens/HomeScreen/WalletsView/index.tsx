@@ -10,6 +10,7 @@ import { CarouselPageVisibilityContext } from "@Cypher/custom-hooks";
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { Animated, AppState, FlatList, Image, NativeScrollEvent, NativeSyntheticEvent, Platform, TouchableOpacity, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
+import SimpleToast from "react-native-simple-toast";
 
 interface Props {
     balance: any;
@@ -81,6 +82,7 @@ const WalletsView = forwardRef<WalletsViewHandle, Props>(function WalletsView({
         arkRefreshStuck,
         setArkPendingOnchainRecoverOpen,
         arkExitFeeReserveSats,
+        setArkExitFeeReserveSats,
     } = useAuthStore();
 
     // Per-card vertical nudge for the Ark slide.
@@ -265,11 +267,19 @@ const WalletsView = forwardRef<WalletsViewHandle, Props>(function WalletsView({
             // and the recover section this deep-links to is hidden anyway.
             if (stuckSats > 0 && stuckSats < STUCK_BOARD_MIN_SATS && (arkExitFeeReserveSats ?? 0) <= 0) {
                 return {
-                    text: `You have ${stuckSats.toLocaleString()} sats failing to board your Bark vault. Recover here.`,
+                    text: `You have ${stuckSats.toLocaleString()} sats failing to board your Bark vault. Recover here, or use them for Emergency Exit fees.`,
                     linkText: 'here',
                     tapTab: 0, // Capsules tab
                     openOnchainRecover: true,
                     error: true,
+                    // Drives the second action under this banner. The in-card
+                    // path (ArkWallet) has offered this since the reserve
+                    // landed, but that whole block is gated behind
+                    // `!hideActionButtons`, so in shared-button mode (the
+                    // default home layout) the only option ever shown was
+                    // Recover. Same call and same wording as the in-card link
+                    // so the two surfaces stay one feature.
+                    reserveExitFeeSats: stuckSats,
                 };
             }
         }
@@ -1094,6 +1104,45 @@ const WalletsView = forwardRef<WalletsViewHandle, Props>(function WalletsView({
                                 {body}
                             </Text>
                         </TouchableOpacity>
+                        {/* Second action: keep the un-boardable funds on-chain
+                            as the exit-fee reserve instead of recovering them.
+                            Arms arkExitFeeReserveSats, which tells sync.ts to
+                            stop trying to board them and suppresses this
+                            banner on the next tick.
+
+                            Separate TouchableOpacity rather than a second link
+                            inside `body`, because the banner's whole text is
+                            already one tap target routing to Recover, and
+                            nesting a differently-routed link inside it makes
+                            the hit areas ambiguous. */}
+                        {Number((bgRefreshStatus as any).reserveExitFeeSats ?? 0) > 0 && (
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setArkExitFeeReserveSats(
+                                        Number((bgRefreshStatus as any).reserveExitFeeSats),
+                                    );
+                                    SimpleToast.show('Kept on-chain for exit fees.', SimpleToast.SHORT);
+                                }}
+                                activeOpacity={0.7}
+                                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                accessibilityRole="button"
+                                accessibilityLabel="Leave on-chain funds as exit fees"
+                                style={{ marginTop: 6 }}
+                            >
+                                <Text
+                                    h4
+                                    bold
+                                    style={{
+                                        color: colors.gray.light,
+                                        textAlign: 'center',
+                                        textDecorationLine: 'underline',
+                                        paddingHorizontal: 12,
+                                    }}
+                                >
+                                    Leave on-chain funds as exit fees
+                                </Text>
+                            </TouchableOpacity>
+                        )}
                     </Animated.View>
                 );
             })()}
