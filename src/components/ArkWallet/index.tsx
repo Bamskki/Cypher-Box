@@ -12,6 +12,7 @@ import {
     isVtxoMidRound,
     recoverArkOnchainBoard,
 } from "@Cypher/services/ark";
+import { deriveVaultConnectivity } from "@Cypher/services/ark/chainTipFreshness";
 import { getCapsuleColorBand } from "@Cypher/helpers/arkCapsuleColor";
 import { btc } from "@Cypher/helpers/bitcoinUnits";
 import useAuthStore from "@Cypher/stores/authStore";
@@ -65,6 +66,12 @@ export default function ArkWallet({
         reserveArkAmount,
         arkVtxos,
         arkChainTipHeight,
+        // Timestamps behind the card's connectivity dot. Both are only
+        // written on SUCCESS (tip on a good esplora read, sync at the end of
+        // a completed cycle), which is exactly what makes their AGE the
+        // signal: an outage stops updating them rather than recording itself.
+        arkChainTipHeightAt,
+        arkLastSyncedAt,
         arkRefreshingVtxoIds,
         arkBgRefreshEnabled,
         arkBgRefreshLastSuccessAt,
@@ -83,6 +90,35 @@ export default function ArkWallet({
     // which drains a stuck on-chain boarding deposit back to a fresh Hot
     // Vault change address. Same source HomeScreen uses to find the vault.
     const { wallets } = useContext(BlueStorageContext);
+
+    /**
+     * Slow clock for the connectivity dot.
+     *
+     * The dot has to be able to degrade with NO store activity at all. Both
+     * timestamps it reads are written only on success, so the exact failure it
+     * exists to report (sync loop wedged, esplora unreachable) is the one that
+     * produces no re-render. Without a tick of its own the card would hold its
+     * last green indefinitely while the vault sat dead, which is the failure
+     * direction that misleads.
+     *
+     * 30s matches the Capsules tab's tick. The thresholds are minutes wide, so
+     * anything faster is waste.
+     */
+    const [connTick, setConnTick] = useState(() => Date.now());
+    useEffect(() => {
+        const t = setInterval(() => setConnTick(Date.now()), 30_000);
+        return () => clearInterval(t);
+    }, []);
+
+    const vaultConnectivity = useMemo(
+        () =>
+            deriveVaultConnectivity({
+                tipFetchedAtMs: arkChainTipHeightAt,
+                lastSyncedAtMs: arkLastSyncedAt,
+                nowMs: connTick,
+            }),
+        [arkChainTipHeightAt, arkLastSyncedAt, connTick],
+    );
 
     // OS notification permission state for the bgRefreshStatus pill.
     // Drives the "Notifications off" branch that replaced the v0.1.1-dropped
@@ -617,6 +653,7 @@ export default function ArkWallet({
                             ? { count: pendingRoundCount, sats: pendingRoundSats }
                             : null}
                         arkCapsuleSlots={arkCapsuleSlots}
+                        vaultConnectivity={vaultConnectivity}
                     />
                     {/* When shared buttons are active (`hideActionButtons`),
                         skip this minHeight-40 reserve so the shared row can
