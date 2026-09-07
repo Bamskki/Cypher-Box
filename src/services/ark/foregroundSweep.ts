@@ -7,8 +7,10 @@ import {
     ARK_REFRESH_MIN_SATS,
     ARK_SWEEP_MAX_RUNWAY_HOURS,
 } from './config';
+import { buildDustSweepPlan } from './dustSweep';
 import {
     ArkRefreshInFlightError,
+    estimateArkRefreshFee,
     fetchArkPendingRoundStates,
     refreshArkVtxosDelegatedAndSync,
 } from './refresh';
@@ -28,8 +30,10 @@ import type { ArkVtxoView } from './vtxos';
  *    we must NOT refresh — a delegated round that hangs would eat the exit
  *    window; the user should spend/exit instead (expiry warnings + escalation
  *    own that zone). Above a week there is no reason to spend the fee yet.
- *  - Dust: sub-ARK_REFRESH_MIN_SATS inputs are STRANDED, never ridden along
- *    (one sub-floor input makes bark reject the whole round). User spends them.
+ *  - Dust: sub-ARK_REFRESH_MIN_SATS inputs never ride along in this batch (one
+ *    sub-floor input makes bark reject the whole round). They are handled by
+ *    maybeSweepDustArkVtxos below, which folds them into ONE capsule in a dust
+ *    only round, the single shape the ASP is known to accept.
  *  - Covers regular + arkoor VTXOs uniformly (any kind, real expiry).
  *
  * Why this is safe now (it deadlocked in July on the self-signed path): the
@@ -51,6 +55,11 @@ import type { ArkVtxoView } from './vtxos';
 let sweepInFlight = false;
 let lastSweepAt = 0;
 let consecutiveFailures = 0;
+// Same pacing, kept separately so a dust sweep and a band sweep do not consume
+// each other's gap. `sweepInFlight` is deliberately SHARED: one submission at a
+// time per wallet, whichever kind it is.
+let lastDustSweepAt = 0;
+let dustFailures = 0;
 
 // Base pacing between sweep submissions. Only actual submissions consume it;
 // empty ticks (nothing in-band) re-run the cheap in-memory selection freely.
@@ -61,6 +70,171 @@ const FG_SWEEP_MAX_GAP_MS = 60 * 60 * 1000;
 
 function blocksForHours(hours: number): number {
     return Math.round((hours * 60) / AVG_BLOCK_MINUTES);
+}
+
+/**
+ * Fold the wallet's dust capsules into one, unprompted.
+ *
+ * WHY THIS IS SEPARATE FROM THE BAND SWEEP ABOVE
+ *
+ * The band sweep is driven by EXPIRY: it acts on capsules in their last week
+ * and skips everything else, dust included. That leaves a hole exactly where
+ * users get hurt. A Lightning receive is paid out of the ASP's VTXO pool and can
+ * arrive as several sub floor pieces (a 700 sat receive landed as a 300 and a
+ * 400, reported to Second.tech 2026-09), and those pieces are arkoor, so they
+ * report expiryHeight 0 and the band never even sees them. Nothing automatic
+ * could rescue them: the receive prompt refuses them as too small to refresh
+ * alone, this sweep counted them as stranded, and only the manual "Dust refresh"
+ * button on the Capsules tab could act. Users do not find that button.
+ *
+ * The trigger here is SIZE, not expiry: as soon as the wallet holds enough dust
+ * to make a batch the ASP will take, fold it into one capsule that is large
+ * enough to look after itself from then on.
+ *
+ * The batch is dust only, always. That is the shape confirmed live on mainnet
+ * (2026-08-20, two 400s into one, on the same bark core we ship today). Dust is
+ * still never mixed into a batch of healthy capsules: one sub floor input has
+ * made the ASP reject an entire round, and taking healthy capsules down with the
+ * dust is a strictly worse failure than leaving the dust alone.
+ *
+ * Shares `sweepInFlight` and the pending round check with the band sweep, so the
+ * wallet never has two submissions racing, and gets its own pacing so a wallet
+ * that sits just under the total does not re-submit on every tick.
+ */
+export async function maybeSweepDustArkVtxos(
+    spendable: ArkVtxoView[],
+    tip: number,
+    strandedInBand = 0,
+): Promise<void> {
+    if (sweepInFlight) return;
+    // Callable on its own from the background wake, so it repeats the two
+    // preconditions the band sweep checks before delegating to it.
+    if (getArkWalletHandle() == null) return;
+    const store = useAuthStore.getState();
+    if (store.arkRefreshStuck) return;
+    const refreshing = new Set(store.arkRefreshingVtxoIds);
+
+    const plan = buildDustSweepPlan({
+        vtxos: spendable.map((v) => ({
+            id: v.id,
+            sats: v.sats,
+            // expiryHeight 0 is arkoor: bark does not surface the ASP's trust
+            // window, so the height is unknown rather than imminent. null tells
+            // the rule to include it, which is the whole point here.
+            blocksUntilExpiry: v.expiryHeight > 0 ? v.expiryHeight - tip : null,
+            // A capsule mid unilateral exit is committed on chain already.
+            stateTag: v.exiting ? 'exiting' : v.state,
+            alreadyRefreshing: refreshing.has(v.id),
+        })),
+        exitInProgress: store.arkExitInProgress,
+        minRefreshSats: ARK_REFRESH_MIN_SATS,
+    });
+
+    if (!plan.sweep) {
+        // Only a wallet that HOLDS dust it cannot sweep is worth a feed entry.
+        // "Not enough dust yet" is the normal resting state of most wallets and
+        // would just be noise; report the genuinely stuck shapes.
+        const stuck = plan.reason === 'single-capsule' || plan.reason === 'below-min-total';
+        if (stuck || strandedInBand > 0) {
+            recordEvent({
+                kind: 'ark-bg-refresh',
+                trigger: 'foreground',
+                outcome: 'dust_stranded',
+                elapsedMs: 0,
+                vtxoCount: stuck ? plan.candidateCount : strandedInBand,
+            });
+        }
+        return;
+    }
+
+    const now = Date.now();
+    const gap = Math.min(FG_SWEEP_MIN_GAP_MS * (dustFailures + 1), FG_SWEEP_MAX_GAP_MS);
+    if (now - lastDustSweepAt < gap) return;
+
+    const pending = await fetchArkPendingRoundStates();
+    if (pending.some((r) => r.ongoing)) {
+        console.log('[Ark dust sweep] skip: a round is already ongoing');
+        return;
+    }
+
+    // The real gate. The size rule above is a pre-filter; only bark can price the
+    // round, and the fee is what decides whether the swept capsule lands above
+    // the refresh floor or straight back in dust. Same shape as the receive
+    // prompt's single capsule decision, for the same reason.
+    let feeSats: number;
+    let spendsOnlyOurDust: boolean;
+    try {
+        const est = await estimateArkRefreshFee(plan.ids);
+        feeSats = est.feeSats;
+        const ours = new Set(plan.ids);
+        spendsOnlyOurDust = est.vtxosSpent.every((id) => ours.has(id));
+    } catch (estErr: any) {
+        // Wallet not ready or a transient network fault. Leave the dust alone and
+        // let a later tick price it again; do not count this as a failure, it
+        // never reached the ASP.
+        console.warn('[Ark dust sweep] fee estimate failed, will retry:', estErr?.message ?? estErr);
+        return;
+    }
+
+    if (!spendsOnlyOurDust) {
+        // The round would drag capsules in that we did not choose, which is the
+        // mixed batch we refuse to build. Never seen in QA; refusing costs
+        // nothing and the alternative risks healthy capsules.
+        console.warn('[Ark dust sweep] skip: the estimate would spend capsules outside the dust batch');
+        return;
+    }
+
+    const outputSats = plan.totalSats - feeSats;
+    if (outputSats < ARK_REFRESH_MIN_SATS) {
+        console.log(
+            '[Ark dust sweep] skip: output', outputSats,
+            'sats would still be below the', ARK_REFRESH_MIN_SATS, 'sat refresh floor',
+        );
+        recordEvent({
+            kind: 'ark-bg-refresh',
+            trigger: 'foreground',
+            outcome: 'dust_stranded',
+            elapsedMs: 0,
+            vtxoCount: plan.ids.length,
+        });
+        return;
+    }
+
+    sweepInFlight = true;
+    lastDustSweepAt = now;
+    console.log(
+        '[Ark dust sweep] firing for', plan.ids.length, 'capsule(s), total',
+        plan.totalSats, 'sats, fee', feeSats, 'sats, output', outputSats,
+        'sats; excluded=', plan.excludedCount,
+    );
+    try {
+        await refreshArkVtxosDelegatedAndSync(plan.ids, plan.totalSats);
+        dustFailures = 0;
+        recordEvent({
+            kind: 'ark-bg-refresh',
+            trigger: 'foreground',
+            outcome: 'success',
+            elapsedMs: Date.now() - now,
+            vtxoCount: plan.ids.length,
+        });
+    } catch (err: any) {
+        if (err instanceof ArkRefreshInFlightError) {
+            console.log('[Ark dust sweep] skipped: refresh already in flight');
+        } else {
+            dustFailures += 1;
+            console.warn('[Ark dust sweep] failed:', err?.message ?? err);
+            recordEvent({
+                kind: 'ark-bg-refresh',
+                trigger: 'foreground',
+                outcome: 'error',
+                elapsedMs: Date.now() - now,
+                vtxoCount: plan.ids.length,
+                errorMsg: String(err?.message ?? err).slice(0, 200),
+            });
+        }
+    } finally {
+        sweepInFlight = false;
+    }
 }
 
 /**
@@ -104,18 +278,13 @@ export async function maybeSweepDueArkVtxos(
     }
 
     if (refreshable.length === 0) {
-        // Surface stranded in-band dust so the user knows to spend it (rare;
-        // most dust sits above the floor's runway). Cheap outcomes like an
-        // empty sweep are intentionally NOT recorded to keep the feed sparse.
-        if (strandedDust > 0) {
-            recordEvent({
-                kind: 'ark-bg-refresh',
-                trigger: 'foreground',
-                outcome: 'dust_stranded',
-                elapsedMs: 0,
-                vtxoCount: strandedDust,
-            });
-        }
+        // Nothing in band. Dust is not simply "stranded" any more: a dust ONLY
+        // batch that clears the sweep total is the one shape the ASP accepts,
+        // so try that before reporting a problem. Runs on the whole spendable
+        // set, not the in-band selection above: the dust a Lightning receive
+        // leaves is arkoor, which reports no expiry height at all and is
+        // therefore invisible to the band. See dustSweep.ts.
+        await maybeSweepDustArkVtxos(spendable, tip, strandedDust);
         return;
     }
 
