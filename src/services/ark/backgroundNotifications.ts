@@ -124,7 +124,7 @@ function fire(
 export function notifyConsecutiveFailures(): void {
     fire(
         'Auto-refresh trouble',
-        "Couldn't auto-refresh — tap to refresh manually.",
+        "Couldn't auto-refresh. Tap to refresh manually.",
         'low',
     );
 }
@@ -593,7 +593,7 @@ export function notifyDustUneconomic(
 ): void {
     fire(
         'Tiny capsules at risk',
-        `${vtxoCount} capsule${vtxoCount === 1 ? '' : 's'} totalling ${totalSats} sats will expire — refresh fee (${feeSats} sats) exceeds their value.`,
+        `${vtxoCount} capsule${vtxoCount === 1 ? '' : 's'} totalling ${totalSats} sats will expire. The refresh fee (${feeSats} sats) exceeds their value.`,
         'low',
         { feeSats, totalSats, vtxoCount },
     );

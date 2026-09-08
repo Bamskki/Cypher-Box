@@ -168,10 +168,10 @@ export function messageForSafError(cls: SafErrorClass): string {
         case 'folder-unreachable':
             return "The backup folder is no longer reachable (it may have been deleted, moved, or the storage was removed). Tap 'Pick folder' to choose a new one.";
         case 'create-failed':
-            return "Couldn't create the backup file in the chosen folder. The folder may be read-only — pick a different one.";
+            return "Couldn't create the backup file in the chosen folder. The folder may be read-only, so pick a different one.";
         case 'open-failed':
         case 'write-failed':
-            return "Couldn't write the backup to the chosen folder. The storage may be full or read-only — pick a different folder.";
+            return "Couldn't write the backup to the chosen folder. The storage may be full or read-only, so pick a different folder.";
         case 'native-not-loaded':
             return 'Local-folder backup is not available on this build.';
         case 'unknown':
