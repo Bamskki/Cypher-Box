@@ -50,7 +50,11 @@ export default function ArkInvoiceScreen({ navigation, route }: any) {
     // Small-amount warning: in sats mode the typed value is the sat amount; in
     // fiat mode CustomKeyboard mirrors the sat equivalent into `usd`.
     const currentSats = Math.round(isSats ? Number(sats) : Number(usd)) || 0;
-    const smallAmountWarn = currentSats > 0 && currentSats <= SMALL_RECEIVE_SATS;
+    // Strictly below the floor. 700 is the amount the warning tells users to
+    // reach, so warning AT 700 contradicted its own advice: you typed the
+    // number it asked for and it still called the amount small. 699 warns,
+    // 700 does not.
+    const smallAmountWarn = currentSats > 0 && currentSats < SMALL_RECEIVE_SATS;
 
     const handleCreate = async () => {
         if (!sats) {
@@ -139,7 +143,7 @@ export default function ArkInvoiceScreen({ navigation, route }: any) {
             </View>
             {smallAmountWarn && (
                 <Text style={{ textAlign: 'center', marginHorizontal: 24, marginBottom: 6, fontSize: 12, color: '#FFD54F', lineHeight: 17 }}>
-                    Small amounts can leave un-refreshable dust that expires. Receiving above 700 sats keeps them refreshable.
+                    Small amounts can leave un-refreshable dust that expires. Receiving 700 sats or more keeps them refreshable.
                 </Text>
             )}
             <CustomKeyboard
