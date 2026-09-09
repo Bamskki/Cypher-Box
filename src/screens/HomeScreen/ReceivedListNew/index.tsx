@@ -942,7 +942,12 @@ export default function ReceivedListNew({ setReceivedListSecondTab, refRBSheet, 
             )}
 
             {selectedItem === 5 && tab === 2 && (
-              <View style={styles.liquidTabContent}>
+              // Lift the whole Bark tab body (address row, expanded address,
+              // QR, caption) up 50pt. Same paint-only translateY the Bitcoin
+              // tab above uses, and for the same reason: a transform moves what
+              // is drawn without shifting the layout flow beneath it, so the
+              // sheet's own height and the content under it stay put.
+              <View style={[styles.liquidTabContent, { transform: [{ translateY: -50 }] }]}>
                 {!arkAddress ? (
                   <ActivityIndicator size="large" color="#ffffff" />
                 ) : (
