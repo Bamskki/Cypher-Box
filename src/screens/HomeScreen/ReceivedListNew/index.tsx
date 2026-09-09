@@ -78,6 +78,14 @@ export default function ReceivedListNew({ setReceivedListSecondTab, refRBSheet, 
   if (__DEV__) console.log("🚀 ~ ReceivedListNew ~ selectedItem:", selectedItem);
 
   const [tab, setTab] = useState(0);
+
+  // Whether the Bark address is shown in full. Collapsed by default: the
+
+  // short form is what a returning user needs, and the full string is 60+
+
+  // characters of opaque hex that would dominate the sheet.
+
+  const [arkAddressExpanded, setArkAddressExpanded] = useState(false);
   const [showSecondView, setShowSecondView] = useState(initialVaultType !== null || allBTCWallets.length == 1 ? true : false);
   const [hashLiquid, setHashLiquid] = useState('');
   const [hashBitcoin, setHashBitcoin] = useState('');
@@ -590,6 +598,11 @@ export default function ReceivedListNew({ setReceivedListSecondTab, refRBSheet, 
                     bold
                     style={{
                       fontSize: 22,
+                      // Explicit lineHeight: without one, iOS lays a bold 22pt
+                      // face out in a box shorter than its ascenders and clips
+                      // the tops of the capitals. Only shows up on this label
+                      // because it is the largest text in the header row.
+                      lineHeight: 28,
                       color: '#FFFFFF',
                       letterSpacing: 0.5,
                     }}
@@ -627,6 +640,18 @@ export default function ReceivedListNew({ setReceivedListSecondTab, refRBSheet, 
                 address while the app is closed has no reminder attached to it at
                 all. Sits with the tip above rather than under the QR so the
                 advice reads as one block. COPY: Bam finalizes. */}
+            {/* Tabs */}
+            {tabs.length > 0 && (
+              <CustomTabView
+                tabs={tabs}
+                selectedTab={tab}
+                onTabChange={setTab}
+              />
+            )}
+
+            {/* Below the tabs, not above: it describes the Bark tab's
+                address, so it read as a caption for the tab row itself
+                when it sat on top of it. */}
             {selectedItem === 5 && tab === 2 && (
               <Text
                 center
@@ -636,14 +661,6 @@ export default function ReceivedListNew({ setReceivedListSecondTab, refRBSheet, 
               </Text>
             )}
 
-            {/* Tabs */}
-            {tabs.length > 0 && (
-              <CustomTabView
-                tabs={tabs}
-                selectedTab={tab}
-                onTabChange={setTab}
-              />
-            )}
 
             {/* ---- Vault Sub-menu (Hot/Cold) ---- */}
             {(selectedItem === 3 || selectedItem === 4) && tab === 0 && (
@@ -926,25 +943,40 @@ export default function ReceivedListNew({ setReceivedListSecondTab, refRBSheet, 
 
             {selectedItem === 5 && tab === 2 && (
               <View style={styles.liquidTabContent}>
-                <Text h2 bold>
-                  Bark Address
-                </Text>
                 {!arkAddress ? (
                   <ActivityIndicator size="large" color="#ffffff" />
                 ) : (
                   <>
+                    {/* Label and address share one line. As two stacked blocks
+                        the heading took a full row to say something the address
+                        underneath already implied, and pushed the QR down. */}
                     <View style={styles.addressRow}>
-                      {/* Ark addresses are long opaque pubkey hex; the
-                          full string isn't human-verifiable anyway, so
-                          show first 6 + last 6 chars (e.g.
-                          "ark1ab…xyz999") to keep the row tidy. The
-                          tap-to-copy button below ships the full
-                          address to clipboard, unchanged. */}
-                      <Text semibold style={styles.bitcoinAddressText}>
-                        {arkAddress.length > 13
-                          ? `${arkAddress.slice(0, 6)}…${arkAddress.slice(-6)}`
-                          : arkAddress}
+                      <Text semibold style={styles.addressLabel}>
+                        Bark Address
                       </Text>
+                      {/* Ark addresses are long opaque pubkey hex and do not
+                          fit this row, so the row shows first 6 + last 6.
+                          Tapping expands the full string below rather than
+                          truncating it out of reach: the short form is fine for
+                          recognising an address you already have, and useless
+                          for reading one out. Copy still ships the full
+                          address, unchanged. */}
+                      <TouchableOpacity
+                        onPress={() => setArkAddressExpanded((v) => !v)}
+                        accessibilityRole="button"
+                        accessibilityLabel={
+                          arkAddressExpanded
+                            ? 'Hide the full Bark address'
+                            : 'Show the full Bark address'
+                        }
+                        style={styles.addressValueTap}
+                      >
+                        <Text semibold style={styles.bitcoinAddressText}>
+                          {arkAddress.length > 13
+                            ? `${arkAddress.slice(0, 6)}…${arkAddress.slice(-6)}`
+                            : arkAddress}
+                        </Text>
+                      </TouchableOpacity>
                       <TouchableOpacity onPress={() => {
                         Clipboard.setString(arkAddress);
                         SimpleToast.show('Copied to clipboard', SimpleToast.SHORT);
@@ -952,6 +984,17 @@ export default function ReceivedListNew({ setReceivedListSecondTab, refRBSheet, 
                         <Image source={Copy} style={styles.copyIconImage} />
                       </TouchableOpacity>
                     </View>
+
+                    {/* Expanded form. Wrapped rather than side-scrolled: the
+                        whole point is seeing the address at once, and a
+                        horizontal scroller hides how much is left. */}
+                    {arkAddressExpanded && (
+                      <View style={styles.fullAddressBox}>
+                        <Text style={styles.fullAddressText}>
+                          {arkAddress}
+                        </Text>
+                      </View>
+                    )}
                     <View style={{ marginTop: 10, padding: 2, backgroundColor: 'white', borderRadius: 2 }}>
                       <QRCode
                         value={arkAddress}
