@@ -478,6 +478,27 @@ export default function ArkWallet({
      * subsumes it.
      */
     const bgRefreshStatus = useMemo(() => {
+        // 0. OFFLINE, ahead of everything below.
+        //
+        // Same branch and same copy as the shared-row version in WalletsView.
+        // It is here as well as there because the two layouts show different
+        // status rows, and a warning that exists in only one of them is
+        // invisible to whichever users are in the other. That is not
+        // hypothetical: the exit-fee reserve nudge lived in this file alone and
+        // no one in the default layout ever saw it.
+        //
+        // Everything below this point is derived from the cached chain tip, so
+        // when the vault is unreachable those numbers are projections rather
+        // than reads, and they keep counting down as if nothing were wrong.
+        if (vaultConnectivity.level === 'red') {
+            // COPY: Bam finalizes. Kept identical to WalletsView on purpose.
+            return {
+                text: 'Bark vault is offline. Capsule times shown are estimates until it reconnects.',
+                error: true,
+                tapTab: 0,
+            };
+        }
+
         // 1. Refresh / send / board in flight. Short-circuits the rest of
         //    the chain because the Card itself now renders a prominent
         //    pulsing "Refreshing N capsules · X sats" line inside the
@@ -554,6 +575,9 @@ export default function ArkWallet({
         arkIosBackupReminderActive,
         pendingRoundCount,
         pendingRoundSats,
+        // Or the offline branch never re-evaluates and the pill keeps showing
+        // whatever it said while the vault was last reachable.
+        vaultConnectivity,
     ]);
 
     // IMPORTANT: the parent's `convertedRate` prop is globally computed from

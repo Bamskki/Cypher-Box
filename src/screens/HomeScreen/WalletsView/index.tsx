@@ -3,6 +3,7 @@ import { Text } from "@Cypher/component-library";
 import { Refresh } from "@Cypher/assets/images";
 import { ARK_REFRESH_MIN_SATS, FEATURE_ARK_ENABLED, areBgNotificationsEnabled, blocksToDays, cancelArkPendingRound, isVtxoMidRound, sumMidRoundVtxos } from "@Cypher/services/ark";
 import useAuthStore from "@Cypher/stores/authStore";
+import { deriveVaultConnectivity } from "@Cypher/services/ark/chainTipFreshness";
 import screenWidth from "@Cypher/style-guide/screenWidth";
 import { colors } from "@Cypher/style-guide";
 import { dispatchNavigate } from "@Cypher/helpers";
@@ -81,7 +82,38 @@ const WalletsView = forwardRef<WalletsViewHandle, Props>(function WalletsView({
         arkRefreshStuck,
         setArkPendingOnchainRecoverOpen,
         arkExitFeeReserveSats,
+        // Behind the offline warning below. All three are written only on a
+        // SUCCESSFUL read, which is what makes their age the signal.
+        arkChainTipHeightAt,
+        arkLastSyncedAt,
+        arkSyncFailStreak,
     } = useAuthStore();
+
+    /**
+     * Slow clock for the offline warning.
+     *
+     * The warning has to be able to APPEAR with no store activity at all: the
+     * failure it reports is exactly the one that stops anything being written.
+     * Without a tick of its own the row would keep showing whatever it last
+     * said while the vault sat unreachable. 30s matches the Capsules tab and
+     * the home card, and the thresholds it feeds are minutes wide.
+     */
+    const [connTick, setConnTick] = useState(() => Date.now());
+    useEffect(() => {
+        const t = setInterval(() => setConnTick(Date.now()), 30_000);
+        return () => clearInterval(t);
+    }, []);
+
+    const vaultConnectivity = useMemo(
+        () =>
+            deriveVaultConnectivity({
+                tipFetchedAtMs: arkChainTipHeightAt,
+                lastSyncedAtMs: arkLastSyncedAt,
+                nowMs: connTick,
+                syncFailStreak: arkSyncFailStreak,
+            }),
+        [arkChainTipHeightAt, arkLastSyncedAt, arkSyncFailStreak, connTick],
+    );
 
     // Per-card vertical nudge for the Ark slide.
     //
@@ -239,6 +271,29 @@ const WalletsView = forwardRef<WalletsViewHandle, Props>(function WalletsView({
     }, []);
 
     const bgRefreshStatus = useMemo(() => {
+        // OFFLINE FIRST, ahead of everything below including an in-flight
+        // refresh.
+        //
+        // Every other line in this chain is derived from the cached chain tip:
+        // how many days a capsule has left, whether it is dust, whether a
+        // refresh is due. When the vault cannot be reached none of those
+        // numbers are reads, they are projections off a tip that stopped
+        // moving, and they keep counting down as if nothing were wrong. That
+        // is the failure that misleads in the expensive direction, so it
+        // outranks the advice built on top of it.
+        //
+        // The card's own status dot says the same thing quietly. This row says
+        // it in red, because the dot answers "is it connected" and this answers
+        // "should you trust the numbers you are looking at".
+        if (vaultConnectivity.level === 'red') {
+            return {
+                // COPY: Bam finalizes.
+                text: 'Bark vault is offline. Capsule times shown are estimates until it reconnects.',
+                error: true,
+                tapTab: 0,
+            };
+        }
+
         // Refresh in flight: short-circuit to all-clear. The Ark Card
         // itself surfaces the live "Refreshing N capsules · X sats" line
         // inside its balance area (see Card's `refreshingInfo` prop) so
@@ -327,6 +382,11 @@ const WalletsView = forwardRef<WalletsViewHandle, Props>(function WalletsView({
         arkIosBackupReminderActive,
         pendingRound,
         arkBalanceDetail,
+        // Without this the offline branch never re-evaluates and the row keeps
+        // showing whatever it said when the vault was last reachable, which is
+        // the exact failure the branch exists to report.
+        vaultConnectivity,
+        arkExitFeeReserveSats,
     ]);
 
     const [indexStrike, setIndexStrike] = useState(0);
