@@ -995,17 +995,17 @@ export default function ReceivedListNew({ setReceivedListSecondTab, refRBSheet, 
                         </Text>
                       </View>
                     )}
-                    {/* 120. It was 50, which was unscannable, and 150 was
-                        overcorrected and dominated the sheet. 120 sits just
-                        above the Bitcoin tab's 100 on purpose: an Ark address
-                        carries more data than an on-chain one, so the same
-                        square holds more modules and needs a little more room
-                        per module. The white quiet zone around it matters to a
-                        decoder as much as the size does, hence the padding. */}
+                    {/* 100, matching the Bitcoin tab in this same sheet. It
+                        was 50, which was unscannable because an Ark address
+                        packs more modules into the square than an on-chain one
+                        and each fell under a pixel. 150 and 120 were both too
+                        large for the panel. 100 is the floor I would not go
+                        below: the white quiet zone around it matters to a
+                        decoder as much as the size, hence the padding. */}
                     <View style={{ marginTop: 12, padding: 8, backgroundColor: 'white', borderRadius: 8 }}>
                       <QRCode
                         value={arkAddress}
-                        size={120}
+                        size={100}
                         color="black"
                         backgroundColor="white"
                       />
