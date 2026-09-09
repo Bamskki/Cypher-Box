@@ -12,6 +12,8 @@ import {
     fetchArkPendingRoundStates,
     refreshArkVtxosDelegatedAndSync,
 } from './refresh';
+import { classifyArkNetworkFault } from './networkFault';
+import { ARK_SERVER_URL, ESPLORA_URLS } from './config';
 import { getArkWalletHandle } from './walletHandle';
 import type { ArkVtxoView } from './vtxos';
 
@@ -51,6 +53,16 @@ import type { ArkVtxoView } from './vtxos';
 let sweepInFlight = false;
 let lastSweepAt = 0;
 let consecutiveFailures = 0;
+/**
+ * Wall clock before which the sweep must not submit again, set when the chain
+ * source refuses us on quota.
+ *
+ * Separate from `consecutiveFailures` because a quota rejection is not the
+ * same kind of failure. An ordinary error might succeed on the next attempt;
+ * a 429 says the provider is working fine and is refusing THIS IP until its
+ * window rolls. Retrying into that spends the very quota needed to recover.
+ */
+let rateLimitedUntil = 0;
 
 // Base pacing between sweep submissions. Only actual submissions consume it;
 // empty ticks (nothing in-band) re-run the cheap in-memory selection freely.
@@ -58,6 +70,18 @@ const FG_SWEEP_MIN_GAP_MS = 5 * 60 * 1000;
 // S2: cap the backed-off gap so the sweep still retries a few times an hour
 // during a long outage (the fail-streak escalation is the user-facing signal).
 const FG_SWEEP_MAX_GAP_MS = 60 * 60 * 1000;
+/**
+ * How long to stand down after a quota rejection.
+ *
+ * An hour, because Blockstream's unauthenticated cap is stated per hour (700
+ * requests/hour per IP), so the window we are waiting on is an hour wide.
+ * Anything shorter is a guess that spends quota to discover it was too short.
+ *
+ * Safe against the deadline this sweep exists to meet: it fires on capsules
+ * inside ARK_SWEEP_MAX_RUNWAY_HOURS (a week) of expiry, so an hour of silence
+ * costs at most one attempt out of dozens still available.
+ */
+const FG_SWEEP_RATE_LIMIT_BACKOFF_MS = 60 * 60 * 1000;
 
 function blocksForHours(hours: number): number {
     return Math.round((hours * 60) / AVG_BLOCK_MINUTES);
@@ -121,27 +145,47 @@ export async function maybeSweepDueArkVtxos(
 
     // S2 backoff: only now (we have work) enforce pacing between submissions.
     const now = Date.now();
+    if (now < rateLimitedUntil) return;
     const gap = Math.min(FG_SWEEP_MIN_GAP_MS * (consecutiveFailures + 1), FG_SWEEP_MAX_GAP_MS);
     if (now - lastSweepAt < gap) return;
 
-    // Belt-and-suspenders on top of refresh.ts's own guard: skip if a round is
-    // genuinely ongoing so we don't waste a submit + log noise.
-    const pending = await fetchArkPendingRoundStates();
-    if (pending.some((r) => r.ongoing)) {
-        console.log('[Ark sweep] skip: a round is already ongoing');
-        return;
-    }
-
-    sweepInFlight = true;
-    lastSweepAt = now;
+    // CLAIM THE SLOT BEFORE ANY await.
+    //
+    // The latch used to be set after the pending-rounds fetch below, which put
+    // a network round trip between reading `sweepInFlight` and writing it.
+    // Every caller that arrived during that fetch read false, waited, and then
+    // submitted. Worse, the window is widest exactly when it must not be: when
+    // the chain source is slow, the fetch takes longer, so more callers get in,
+    // and every extra submission spends more of the quota that made it slow.
+    //
+    // Measured on device 2026-09-09: 174 submissions in 12 minutes, about one
+    // every two seconds while each one took 18 seconds to fail, all of them on
+    // Blockstream's 429. A restart cleared it only because it emptied the pile
+    // of in-flight calls.
+    //
+    // Everything from here to the finally must therefore be inside the try, so
+    // no early return can leave the latch stuck on.
     const ids = refreshable.map((v) => v.id);
     const totalSats = refreshable.reduce((sum, v) => sum + v.sats, 0);
-    console.log(
-        '[Ark sweep] firing for', ids.length, 'vtxo(s), total', totalSats,
-        'sats; strandedDust=', strandedDust,
-    );
+
+    sweepInFlight = true;
     const startedAt = now;
     try {
+        // Belt-and-suspenders on top of refresh.ts's own guard: skip if a round
+        // is genuinely ongoing so we don't waste a submit + log noise.
+        const pending = await fetchArkPendingRoundStates();
+        if (pending.some((r) => r.ongoing)) {
+            console.log('[Ark sweep] skip: a round is already ongoing');
+            return;
+        }
+
+        // Only stamp the pacing clock once we are actually going to submit.
+        // Stamping it above would let a skipped tick eat the next window.
+        lastSweepAt = Date.now();
+        console.log(
+            '[Ark sweep] firing for', ids.length, 'vtxo(s), total', totalSats,
+            'sats; strandedDust=', strandedDust,
+        );
         await refreshArkVtxosDelegatedAndSync(ids, totalSats);
         consecutiveFailures = 0;
         recordEvent({
@@ -165,6 +209,32 @@ export async function maybeSweepDueArkVtxos(
             // A round started between our check and the submit. Not a failure;
             // don't inflate the backoff. Next eligible tick retries.
             console.log('[Ark sweep] skipped: refresh already in flight');
+        } else if (
+            classifyArkNetworkFault(err, { chainUrls: ESPLORA_URLS, arkUrl: ARK_SERVER_URL }) ===
+            'chain-source-rate-limited'
+        ) {
+            // A quota rejection is a REFUSAL, not a transient failure. The
+            // provider is up and is refusing this IP until its window rolls,
+            // so every retry inside that window spends the quota needed to
+            // recover and pushes the recovery further out.
+            //
+            // Stand down for the width of the window rather than inflating
+            // consecutiveFailures, which tops out at FG_SWEEP_MAX_GAP_MS only
+            // after several failures and would let the next few attempts land
+            // inside the same exhausted hour.
+            rateLimitedUntil = Date.now() + FG_SWEEP_RATE_LIMIT_BACKOFF_MS;
+            console.warn(
+                '[Ark sweep] chain source is rate limiting this connection; standing down for',
+                Math.round(FG_SWEEP_RATE_LIMIT_BACKOFF_MS / 60000), 'min',
+            );
+            recordEvent({
+                kind: 'ark-bg-refresh',
+                trigger: 'foreground',
+                outcome: 'error',
+                elapsedMs: Date.now() - startedAt,
+                vtxoCount: ids.length,
+                errorMsg: 'rate-limited by chain source; backing off',
+            });
         } else {
             consecutiveFailures += 1;
             console.warn('[Ark sweep] failed:', err?.message ?? err);
