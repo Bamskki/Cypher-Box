@@ -128,8 +128,8 @@ export default React.memo(function Header({
         if (!vaultWallet) {
             SimpleToast.show(
                 which === 'hot'
-                    ? 'Hot Vault not ready — open the vault once and try again.'
-                    : 'Cold Vault not ready — open the vault once and try again.',
+                    ? 'Hot Vault not ready. Open the vault once and try again.'
+                    : 'Cold Vault not ready. Open the vault once and try again.',
                 SimpleToast.LONG,
             );
             return;

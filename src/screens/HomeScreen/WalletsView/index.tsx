@@ -154,7 +154,7 @@ const WalletsView = forwardRef<WalletsViewHandle, Props>(function WalletsView({
     }, [arkVtxos, arkChainTipHeight]);
 
     const expiryWarning = soonestDaysLeft !== null && soonestDaysLeft < 7
-        ? `Oldest capsule expires in ${Math.round(soonestDaysLeft)}d — refresh soon`
+        ? `Oldest capsule expires in ${Math.round(soonestDaysLeft)}d, refresh soon`
         : null;
 
     // Dust capsules: below the PER-INPUT refresh floor (ARK_REFRESH_MIN_SATS,
@@ -314,7 +314,7 @@ const WalletsView = forwardRef<WalletsViewHandle, Props>(function WalletsView({
 
         if (Platform.OS === 'ios' && arkIosBackupReminderActive) {
             return {
-                text: 'Backup not synced — enable iCloud Drive in iOS Settings',
+                text: 'Backup not synced. Enable iCloud Drive in iOS Settings',
                 error: true,
             };
         }

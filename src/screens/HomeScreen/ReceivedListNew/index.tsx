@@ -867,7 +867,7 @@ export default function ReceivedListNew({ setReceivedListSecondTab, refRBSheet, 
                           Lightning invoice
                         </Text>
                         <Text h4 bold style={styles.invoiceCardDescription}>
-                          Receive Lightning payments into Ark — paid out as a VTXO once the next round commits.
+                          Receive Lightning payments into Ark, paid out as a VTXO once the next round commits.
                         </Text>
                       </View>
                       <View style={styles.socketIconContainer}>

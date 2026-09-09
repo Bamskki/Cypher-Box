@@ -197,10 +197,10 @@ export const sendStrikeLightningPayment = async (invoice: string, amount?: numbe
       // wallet card whose balance reads now-stale data.
       if (quoteResponse.status === 401) {
         useAuthStore.getState().clearStrikeAuth();
-        throw new Error('Strike session expired — please log into Strike again.');
+        throw new Error('Strike session expired. Please log into Strike again.');
       }
       throw new Error(
-        `Strike quote error: ${quoteResponse.status}${body ? ` — ${body.slice(0, 200)}` : ''}`,
+        `Strike quote error: ${quoteResponse.status}${body ? `: ${body.slice(0, 200)}` : ''}`,
       );
     }
 
@@ -221,10 +221,10 @@ export const sendStrikeLightningPayment = async (invoice: string, amount?: numbe
       try { body = await executeResponse.text(); } catch { /* ignore */ }
       if (executeResponse.status === 401) {
         useAuthStore.getState().clearStrikeAuth();
-        throw new Error('Strike session expired — please log into Strike again.');
+        throw new Error('Strike session expired. Please log into Strike again.');
       }
       throw new Error(
-        `Strike execute error: ${executeResponse.status}${body ? ` — ${body.slice(0, 200)}` : ''}`,
+        `Strike execute error: ${executeResponse.status}${body ? `: ${body.slice(0, 200)}` : ''}`,
       );
     }
     
@@ -467,13 +467,13 @@ export const getStrikePaymentStatus = async (paymentId: string): Promise<any> =>
         }));
         if (response.status === 401) {
             useAuthStore.getState().clearStrikeAuth();
-            throw new Error('Strike session expired — please log into Strike again.');
+            throw new Error('Strike session expired. Please log into Strike again.');
         }
         if (!response.ok) {
             let body = '';
             try { body = await response.text(); } catch { /* ignore */ }
             throw new Error(
-                `Strike payment-status error: ${response.status}${body ? ` — ${body.slice(0, 200)}` : ''}`,
+                `Strike payment-status error: ${response.status}${body ? `: ${body.slice(0, 200)}` : ''}`,
             );
         }
         return await response.json();

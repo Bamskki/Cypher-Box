@@ -252,7 +252,7 @@ export default function SwapAmount() {
             const fallback = 'Swap failed. Please try again.';
             let message = fallback;
             if (error instanceof InvoiceCreationFailedError) {
-                message = `${toProvider?.displayName ?? sendTo} couldn't create an invoice — ${(error.cause as Error)?.message ?? error.message}`;
+                message = `${toProvider?.displayName ?? sendTo} couldn't create an invoice: ${(error.cause as Error)?.message ?? error.message}`;
             } else if (error instanceof PaymentFailedError) {
                 // A VTXO the Ark server reports as "unregistered" is a stuck
                 // capsule that blocks EVERY Ark send until it's cleared. The raw

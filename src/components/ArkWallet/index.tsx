@@ -347,7 +347,7 @@ export default function ArkWallet({
     }, [arkVtxos, arkChainTipHeight, refreshingIds]);
 
     const expiryWarning = soonestDaysLeft !== null && soonestDaysLeft < 7
-        ? `Oldest capsule expires in ${Math.round(soonestDaysLeft)}d — refresh soon`
+        ? `Oldest capsule expires in ${Math.round(soonestDaysLeft)}d, refresh soon`
         : null;
 
     /**
@@ -499,7 +499,7 @@ export default function ArkWallet({
         //    enabling iCloud Drive). Android never sets this flag.
         if (Platform.OS === 'ios' && arkIosBackupReminderActive) {
             return {
-                text: 'Backup not synced — enable iCloud Drive in iOS Settings',
+                text: 'Backup not synced. Enable iCloud Drive in iOS Settings',
                 error: true,
             };
         }
@@ -815,7 +815,7 @@ export default function ArkWallet({
                         </Text>
                         <TouchableOpacity onPress={createArkWalletClickHandler}>
                             <Text bold style={styles.login}>
-                                ⚠ Experimental — tap to learn more
+                                ⚠ Experimental · tap to learn more
                             </Text>
                         </TouchableOpacity>
                     </View>

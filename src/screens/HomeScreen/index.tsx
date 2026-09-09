@@ -999,7 +999,7 @@ export default function HomeScreen({ route }: Props) {
     }
 
     if (smallUtxos.length > 5 && feesAreLow) {
-      return "Fees are low — good time to consolidate your small UTXOs to save on future transaction costs.";
+      return "Fees are low, a good time to consolidate your small UTXOs to save on future transaction costs.";
     }
 
     return null;

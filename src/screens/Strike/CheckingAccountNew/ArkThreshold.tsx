@@ -171,7 +171,7 @@ export default function ArkThreshold({ matchedRate, currency }: Props) {
       </Text>
       <Text style={{ marginTop: 6 }}>
         When your Ark vault balance crosses this amount, you'll be prompted to
-        move funds into deeper self-custody — your Hot or Cold Vault.
+        move funds into deeper self-custody: your Hot or Cold Vault.
       </Text>
 
       {/* Wide dark-rectangle dropdown — matches the new picker design used
@@ -247,7 +247,7 @@ export default function ArkThreshold({ matchedRate, currency }: Props) {
         </Text>
       </View>
       <Text style={{ marginTop: 6 }}>
-        Sats kept in your Ark vault after a withdrawal — your spending buffer
+        Sats kept in your Ark vault after a withdrawal: your spending buffer
         for everyday Lightning sends.
       </Text>
       <TouchableOpacity

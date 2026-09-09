@@ -1551,7 +1551,7 @@ export default function ArkCapsules({ matchedRate, currency }: ArkCapsulesProps)
         );
         if (lockedSelected.length > 0) {
             SimpleToast.show(
-                `${lockedSelected.length} capsule(s) already in a pending round — wait for it to finalise before refreshing again`,
+                `${lockedSelected.length} capsule(s) already in a pending round. Wait for it to finalise before refreshing again`,
                 SimpleToast.LONG,
             );
             return;
@@ -2191,17 +2191,17 @@ export default function ArkCapsules({ matchedRate, currency }: ArkCapsulesProps)
             }
             if (succeeded === ongoing.length) {
                 SimpleToast.show(
-                    `Cancelled ${succeeded} refresh${succeeded === 1 ? '' : 'es'} — funds unlocked`,
+                    `Cancelled ${succeeded} refresh${succeeded === 1 ? '' : 'es'}, funds unlocked`,
                     SimpleToast.SHORT,
                 );
             } else if (succeeded > 0) {
                 SimpleToast.show(
-                    `Cancelled ${succeeded} of ${ongoing.length} — the rest will settle in ~1 min`,
+                    `Cancelled ${succeeded} of ${ongoing.length}, the rest will settle in ~1 min`,
                     SimpleToast.LONG,
                 );
             } else {
                 SimpleToast.show(
-                    'Cancel held up server-side — the round will settle in ~1 min',
+                    'Cancel held up server-side. The round will settle in ~1 min',
                     SimpleToast.LONG,
                 );
             }
@@ -2671,7 +2671,7 @@ export default function ArkCapsules({ matchedRate, currency }: ArkCapsulesProps)
                             {queuedRoundsCount} refresh rounds queued at Ark server
                         </Text>
                         <Text style={{ fontSize: 11, color: '#999', marginTop: 4, lineHeight: 15 }}>
-                            Tapping Refresh again won't speed it up — each tap
+                            Tapping Refresh again won't speed it up, because each tap
                             submits a new round and burns another fee on
                             completion. Wait for the round to finalise (typically
                             under a minute) or time out (~few hours) before

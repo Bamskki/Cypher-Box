@@ -919,7 +919,7 @@ export default function ReviewPayment({ navigation, route }: Props) {
                 console.error(`[BUY → ${dest}] swap failed:`, error);
                 let message = 'Swap failed. Your purchase succeeded — try again from Home → Swap.';
                 if (error instanceof InvoiceCreationFailedError) {
-                    message = `${dest === 'coinos' ? 'CoinOS' : 'Ark'} couldn't create an invoice — ${(error.cause as Error)?.message ?? error.message}`;
+                    message = `${dest === 'coinos' ? 'CoinOS' : 'Ark'} couldn't create an invoice: ${(error.cause as Error)?.message ?? error.message}`;
                 } else if (error instanceof PaymentFailedError) {
                     const causeMsg = (error.cause as Error)?.message ?? error.message;
                     // Strike's BALANCE_TOO_LOW response means the trade
@@ -928,7 +928,7 @@ export default function ReviewPayment({ navigation, route }: Props) {
                     if (/BALANCE_TOO_LOW|Insufficient funds/i.test(causeMsg)) {
                         message = 'Your purchase succeeded but Strike\'s balance hasn\'t settled yet. Try the swap from Home → Swap in a few seconds.';
                     } else {
-                        message = `Strike payment failed — ${causeMsg}`;
+                        message = `Strike payment failed: ${causeMsg}`;
                     }
                 } else if (error instanceof LightningSwapError) {
                     message = error.message;
@@ -2066,7 +2066,7 @@ export default function ReviewPayment({ navigation, route }: Props) {
             {isSendLoading && buyProgress.some(s => s.state === 'slow') && (
                 <View style={{ marginHorizontal: 24, marginBottom: 14, alignItems: 'center' }}>
                     <Text style={{ color: '#AAAAAA', fontSize: 13, lineHeight: 18, textAlign: 'center', marginBottom: 12 }}>
-                        This is taking longer than usual. The swap keeps confirming in the background — it's safe to go Home, your balance updates when it lands.
+                        This is taking longer than usual. The swap keeps confirming in the background. It's safe to go Home, your balance updates when it lands.
                     </Text>
                     <TouchableOpacity
                         onPress={() => {
