@@ -995,10 +995,16 @@ export default function ReceivedListNew({ setReceivedListSecondTab, refRBSheet, 
                         </Text>
                       </View>
                     )}
-                    <View style={{ marginTop: 10, padding: 2, backgroundColor: 'white', borderRadius: 2 }}>
+                    {/* 150, up from 50. At 50 the QR was smaller than the
+                        Bitcoin tab's and too dense to scan reliably: an Ark
+                        address is long, so it packs more modules into the same
+                        square than an on-chain address does, and each module
+                        was under a pixel on a phone screen. The white quiet
+                        zone matters for the same reason, hence the padding. */}
+                    <View style={{ marginTop: 12, padding: 10, backgroundColor: 'white', borderRadius: 8 }}>
                       <QRCode
                         value={arkAddress}
-                        size={50}
+                        size={150}
                         color="black"
                         backgroundColor="white"
                       />
