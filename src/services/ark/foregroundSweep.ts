@@ -6,6 +6,8 @@ import {
     ARK_EXIT_RUNWAY_HOURS,
     ARK_REFRESH_MIN_SATS,
     ARK_SWEEP_MAX_RUNWAY_HOURS,
+    ARK_SERVER_URL,
+    ESPLORA_URLS,
 } from './config';
 import { buildDustSweepPlan } from './dustSweep';
 import {
@@ -14,6 +16,7 @@ import {
     fetchArkPendingRoundStates,
     refreshArkVtxosDelegatedAndSync,
 } from './refresh';
+import { classifyArkNetworkFault } from './networkFault';
 import { getArkWalletHandle } from './walletHandle';
 import type { ArkVtxoView } from './vtxos';
 
@@ -60,6 +63,25 @@ let consecutiveFailures = 0;
 // time per wallet, whichever kind it is.
 let lastDustSweepAt = 0;
 let dustFailures = 0;
+/**
+ * Wall clock before which NEITHER sweep may submit, set when the chain source
+ * refuses us on quota. Shared for the same reason `sweepInFlight` is: the quota
+ * belongs to the connection, not to one sweep, so a rejection earned by either
+ * has to silence both.
+ *
+ * Separate from the failure counters because a quota rejection is a different
+ * kind of failure. An ordinary error might succeed next tick; a 429 says the
+ * provider is fine and is refusing THIS IP until its window rolls, and retrying
+ * into that spends the quota needed to recover.
+ */
+let rateLimitedUntil = 0;
+/**
+ * How long to stand down after a quota rejection. An hour, because Blockstream
+ * states its unauthenticated cap per hour (700 requests/hour per IP), so that is
+ * the width of the window being waited on. Guessing shorter spends quota to find
+ * out it was too short.
+ */
+const FG_SWEEP_RATE_LIMIT_BACKOFF_MS = 60 * 60 * 1000;
 
 // Base pacing between sweep submissions. Only actual submissions consume it;
 // empty ticks (nothing in-band) re-run the cheap in-memory selection freely.
@@ -148,89 +170,121 @@ export async function maybeSweepDustArkVtxos(
     }
 
     const now = Date.now();
+    if (now < rateLimitedUntil) return;
     const gap = Math.min(FG_SWEEP_MIN_GAP_MS * (dustFailures + 1), FG_SWEEP_MAX_GAP_MS);
     if (now - lastDustSweepAt < gap) return;
 
-    const pending = await fetchArkPendingRoundStates();
-    if (pending.some((r) => r.ongoing)) {
-        console.log('[Ark dust sweep] skip: a round is already ongoing');
-        return;
-    }
-
-    // The real gate. The size rule above is a pre-filter; only bark can price the
-    // round, and the fee is what decides whether the swept capsule lands above
-    // the refresh floor or straight back in dust. Same shape as the receive
-    // prompt's single capsule decision, for the same reason.
-    let feeSats: number;
-    let spendsOnlyOurDust: boolean;
-    try {
-        const est = await estimateArkRefreshFee(plan.ids);
-        feeSats = est.feeSats;
-        const ours = new Set(plan.ids);
-        spendsOnlyOurDust = est.vtxosSpent.every((id) => ours.has(id));
-    } catch (estErr: any) {
-        // Wallet not ready or a transient network fault. Leave the dust alone and
-        // let a later tick price it again; do not count this as a failure, it
-        // never reached the ASP.
-        console.warn('[Ark dust sweep] fee estimate failed, will retry:', estErr?.message ?? estErr);
-        return;
-    }
-
-    if (!spendsOnlyOurDust) {
-        // The round would drag capsules in that we did not choose, which is the
-        // mixed batch we refuse to build. Never seen in QA; refusing costs
-        // nothing and the alternative risks healthy capsules.
-        console.warn('[Ark dust sweep] skip: the estimate would spend capsules outside the dust batch');
-        return;
-    }
-
-    const outputSats = plan.totalSats - feeSats;
-    if (outputSats < ARK_REFRESH_MIN_SATS) {
-        console.log(
-            '[Ark dust sweep] skip: output', outputSats,
-            'sats would still be below the', ARK_REFRESH_MIN_SATS, 'sat refresh floor',
-        );
-        recordEvent({
-            kind: 'ark-bg-refresh',
-            trigger: 'foreground',
-            outcome: 'dust_stranded',
-            elapsedMs: 0,
-            vtxoCount: plan.ids.length,
-        });
-        return;
-    }
-
+    // CLAIM THE SLOT BEFORE ANY await.
+    //
+    // Same defect the band sweep below carried, and worse here: the latch
+    // used to be set after the pending-round fetch AND the fee estimate, so
+    // two network round trips sat between reading `sweepInFlight` and
+    // writing it. Every caller arriving in that window read false and went
+    // on to submit, and the window is widest exactly when it must not be,
+    // because a slow chain source lengthens both calls.
+    //
+    // Measured on the band sweep on device 2026-09-09: 174 submissions in
+    // 12 minutes, every one refused by a rate-limited chain source. This
+    // path has two awaits rather than one, so it is wider still.
+    //
+    // Everything below sits inside the try so none of the early returns can
+    // leave the latch stuck on.
     sweepInFlight = true;
-    lastDustSweepAt = now;
-    console.log(
-        '[Ark dust sweep] firing for', plan.ids.length, 'capsule(s), total',
-        plan.totalSats, 'sats, fee', feeSats, 'sats, output', outputSats,
-        'sats; excluded=', plan.excludedCount,
-    );
     try {
-        await refreshArkVtxosDelegatedAndSync(plan.ids, plan.totalSats);
-        dustFailures = 0;
-        recordEvent({
-            kind: 'ark-bg-refresh',
-            trigger: 'foreground',
-            outcome: 'success',
-            elapsedMs: Date.now() - now,
-            vtxoCount: plan.ids.length,
-        });
-    } catch (err: any) {
-        if (err instanceof ArkRefreshInFlightError) {
-            console.log('[Ark dust sweep] skipped: refresh already in flight');
-        } else {
-            dustFailures += 1;
-            console.warn('[Ark dust sweep] failed:', err?.message ?? err);
+
+        const pending = await fetchArkPendingRoundStates();
+        if (pending.some((r) => r.ongoing)) {
+            console.log('[Ark dust sweep] skip: a round is already ongoing');
+            return;
+        }
+
+        // The real gate. The size rule above is a pre-filter; only bark can price the
+        // round, and the fee is what decides whether the swept capsule lands above
+        // the refresh floor or straight back in dust. Same shape as the receive
+        // prompt's single capsule decision, for the same reason.
+        let feeSats: number;
+        let spendsOnlyOurDust: boolean;
+        try {
+            const est = await estimateArkRefreshFee(plan.ids);
+            feeSats = est.feeSats;
+            const ours = new Set(plan.ids);
+            spendsOnlyOurDust = est.vtxosSpent.every((id) => ours.has(id));
+        } catch (estErr: any) {
+            // Wallet not ready or a transient network fault. Leave the dust alone and
+            // let a later tick price it again; do not count this as a failure, it
+            // never reached the ASP.
+            console.warn('[Ark dust sweep] fee estimate failed, will retry:', estErr?.message ?? estErr);
+            return;
+        }
+
+        if (!spendsOnlyOurDust) {
+            // The round would drag capsules in that we did not choose, which is the
+            // mixed batch we refuse to build. Never seen in QA; refusing costs
+            // nothing and the alternative risks healthy capsules.
+            console.warn('[Ark dust sweep] skip: the estimate would spend capsules outside the dust batch');
+            return;
+        }
+
+        const outputSats = plan.totalSats - feeSats;
+        if (outputSats < ARK_REFRESH_MIN_SATS) {
+            console.log(
+                '[Ark dust sweep] skip: output', outputSats,
+                'sats would still be below the', ARK_REFRESH_MIN_SATS, 'sat refresh floor',
+            );
             recordEvent({
                 kind: 'ark-bg-refresh',
                 trigger: 'foreground',
-                outcome: 'error',
+                outcome: 'dust_stranded',
+                elapsedMs: 0,
+                vtxoCount: plan.ids.length,
+            });
+            return;
+        }
+
+        sweepInFlight = true;
+        lastDustSweepAt = now;
+        console.log(
+            '[Ark dust sweep] firing for', plan.ids.length, 'capsule(s), total',
+            plan.totalSats, 'sats, fee', feeSats, 'sats, output', outputSats,
+            'sats; excluded=', plan.excludedCount,
+        );
+        try {
+            await refreshArkVtxosDelegatedAndSync(plan.ids, plan.totalSats);
+            dustFailures = 0;
+            recordEvent({
+                kind: 'ark-bg-refresh',
+                trigger: 'foreground',
+                outcome: 'success',
                 elapsedMs: Date.now() - now,
                 vtxoCount: plan.ids.length,
-                errorMsg: String(err?.message ?? err).slice(0, 200),
             });
+        } catch (err: any) {
+            if (err instanceof ArkRefreshInFlightError) {
+                console.log('[Ark dust sweep] skipped: refresh already in flight');
+            } else if (
+                classifyArkNetworkFault(err, { chainUrls: ESPLORA_URLS, arkUrl: ARK_SERVER_URL }) ===
+                'chain-source-rate-limited'
+            ) {
+                // A quota rejection is a REFUSAL, not a transient failure. The
+                // provider is up and refusing this IP until its window rolls, so
+                // retrying inside it spends the quota needed to recover.
+                rateLimitedUntil = Date.now() + FG_SWEEP_RATE_LIMIT_BACKOFF_MS;
+                console.warn(
+                    '[Ark dust sweep] chain source is rate limiting this connection; standing down for',
+                    Math.round(FG_SWEEP_RATE_LIMIT_BACKOFF_MS / 60000), 'min',
+                );
+            } else {
+                dustFailures += 1;
+                console.warn('[Ark dust sweep] failed:', err?.message ?? err);
+                recordEvent({
+                    kind: 'ark-bg-refresh',
+                    trigger: 'foreground',
+                    outcome: 'error',
+                    elapsedMs: Date.now() - now,
+                    vtxoCount: plan.ids.length,
+                    errorMsg: String(err?.message ?? err).slice(0, 200),
+                });
+            }
         }
     } finally {
         sweepInFlight = false;
@@ -290,6 +344,7 @@ export async function maybeSweepDueArkVtxos(
 
     // S2 backoff: only now (we have work) enforce pacing between submissions.
     const now = Date.now();
+    if (now < rateLimitedUntil) return;
     const gap = Math.min(FG_SWEEP_MIN_GAP_MS * (consecutiveFailures + 1), FG_SWEEP_MAX_GAP_MS);
     if (now - lastSweepAt < gap) return;
 
