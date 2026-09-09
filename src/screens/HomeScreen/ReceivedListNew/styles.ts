@@ -41,6 +41,7 @@ interface Style {
   addressValueTap: ViewStyle;
   fullAddressBox: ViewStyle;
   fullAddressText: TextStyle;
+  addressCaption: TextStyle;
   liquidTabContent: ViewStyle;
 }
 
@@ -296,5 +297,12 @@ export default StyleSheet.create<Style>({
     lineHeight: 17,
     color: '#FFFFFF',
     textAlign: 'center',
+  },
+  addressCaption: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: '#AAAAAA',
+    textAlign: 'center',
+    marginTop: 10,
   },
 });

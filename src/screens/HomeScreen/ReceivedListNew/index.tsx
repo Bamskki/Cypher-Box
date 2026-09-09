@@ -1003,7 +1003,11 @@ export default function ReceivedListNew({ setReceivedListSecondTab, refRBSheet, 
                         backgroundColor="white"
                       />
                     </View>
-                    <Text semibold style={styles.bitcoinAddressText}>
+                    {/* Its own style rather than the address one it used to
+                        borrow: at the address's 18pt this caption wrapped onto
+                        a second line and pushed the panel taller for no reason.
+                        It is a caption, so it is sized like one. */}
+                    <Text semibold style={styles.addressCaption} numberOfLines={1}>
                       Receive 0% fee payments from another Bark user
                     </Text>
                   </>
