@@ -410,6 +410,21 @@ export type AuthStateType = {
      */
     arkRefreshFailStreak: number;
     /**
+     * Consecutive failed sync ticks, reset to 0 by any success.
+     *
+     * Exists because every other connectivity signal is written only on
+     * SUCCESS, so a vault that is failing every tick looks identical to one
+     * that is simply idle, and the UI could only infer trouble from staleness.
+     * That took 20 minutes (TIP_DEGRADED_MS) to reach "offline" while the app
+     * already knew on the first failed tick. A failure is direct evidence;
+     * age is a proxy for it.
+     *
+     * Deliberately NOT persisted: it describes right now, and a streak
+     * restored from a previous run would claim knowledge of a network the app
+     * has not touched since launching.
+     */
+    arkSyncFailStreak: number;
+    /**
      * Epoch ms when the refresh-failing-near-expiry Alert was last shown.
      * Gates re-showing so the escalation fires once per re-show window
      * instead of on every sync tick while the streak persists.
@@ -525,6 +540,7 @@ export type AuthStateType = {
     ) => void;
     setArkBgRefreshConsecutiveFailures: (state: number) => void;
     setArkRefreshFailStreak: (state: number) => void;
+    setArkSyncFailStreak: (state: number) => void;
     setArkRefreshFailAlertAt: (state: number | null) => void;
     setArkBgRefreshDeferredBackup: (state: boolean) => void;
     setArkBgRefreshLastWarn24hAt: (state: number | null) => void;
@@ -621,6 +637,7 @@ const createAuthStore = (
     arkBgRefreshLastAttempt: null,
     arkBgRefreshConsecutiveFailures: 0,
     arkRefreshFailStreak: 0,
+    arkSyncFailStreak: 0,
     arkRefreshFailAlertAt: null,
     arkBgRefreshDeferredBackup: false,
     arkBgRefreshLastWarn24hAt: null,
@@ -710,6 +727,7 @@ const createAuthStore = (
     setArkBgRefreshLastAttempt: (state) => set({ arkBgRefreshLastAttempt: state }),
     setArkBgRefreshConsecutiveFailures: (state: number) => set({ arkBgRefreshConsecutiveFailures: state }),
     setArkRefreshFailStreak: (state: number) => set({ arkRefreshFailStreak: state }),
+    setArkSyncFailStreak: (state: number) => set({ arkSyncFailStreak: state }),
     setArkRefreshFailAlertAt: (state: number | null) => set({ arkRefreshFailAlertAt: state }),
     setArkBgRefreshDeferredBackup: (state: boolean) => set({ arkBgRefreshDeferredBackup: state }),
     setArkBgRefreshLastWarn24hAt: (state: number | null) => set({ arkBgRefreshLastWarn24hAt: state }),
@@ -792,6 +810,7 @@ const createAuthStore = (
             arkBgRefreshLastAttempt: null,
             arkBgRefreshConsecutiveFailures: 0,
             arkRefreshFailStreak: 0,
+            arkSyncFailStreak: 0,
             arkRefreshFailAlertAt: null,
             arkBgRefreshDeferredBackup: false,
             arkBgRefreshLastWarn24hAt: null,

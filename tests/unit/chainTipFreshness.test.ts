@@ -1,6 +1,7 @@
 import {
     deriveTipFreshness,
     deriveVaultConnectivity,
+    SYNC_FAIL_STREAK_FOR_RED,
     effectiveChainTip,
     EXPIRY_ALARM_MAX_DRIFT_MS,
     NOMINAL_BLOCK_MINUTES,
@@ -9,6 +10,7 @@ import {
     TIP_FRESH_MS,
 } from '../../src/services/ark/chainTipFreshness';
 
+const SEC = 1000;
 const MIN = 60 * 1000;
 const NOW = 1_800_000_000_000;
 
@@ -119,6 +121,84 @@ describe('deriveVaultConnectivity', () => {
         });
         expect(r.level).toBe('green');
         expect(r.syncAgeMs).toBe(0);
+    });
+
+    describe('failed sync ticks, not just staleness', () => {
+        // Observed on device 2026-09-08: a phone with airplane mode on AND
+        // Wi-Fi off reported "connection slow" while completely unreachable,
+        // and would have kept saying so for 20 minutes. Both timestamps this
+        // derivation reads are written only on SUCCESS, so a vault failing
+        // every tick looked exactly like an idle one and the only route to red
+        // was TIP_DEGRADED_MS ageing out. The app knew on the first failed
+        // tick; nothing recorded it.
+
+        it('does not stay green once a tick has actually failed', () => {
+            // Everything still fresh by age. Age alone would say green.
+            expect(
+                deriveVaultConnectivity({
+                    tipFetchedAtMs: NOW,
+                    lastSyncedAtMs: NOW,
+                    nowMs: NOW,
+                    syncFailStreak: 1,
+                }).level,
+            ).toBe('yellow');
+        });
+
+        it('is red on a sustained streak, without waiting out the 20 minute staleness', () => {
+            const r = deriveVaultConnectivity({
+                tipFetchedAtMs: NOW - 30 * SEC,
+                lastSyncedAtMs: NOW - 30 * SEC,
+                nowMs: NOW,
+                syncFailStreak: SYNC_FAIL_STREAK_FOR_RED,
+            });
+            expect(r.level).toBe('red');
+            // The point of the fix: by age this is unambiguously green.
+            expect(
+                deriveVaultConnectivity({
+                    tipFetchedAtMs: NOW - 30 * SEC,
+                    lastSyncedAtMs: NOW - 30 * SEC,
+                    nowMs: NOW,
+                }).level,
+            ).toBe('green');
+        });
+
+        it('recovers to green as soon as a tick succeeds', () => {
+            // The streak is cleared by success, so the dot must not need the
+            // staleness window to age out before it can say healthy again.
+            expect(
+                deriveVaultConnectivity({
+                    tipFetchedAtMs: NOW,
+                    lastSyncedAtMs: NOW,
+                    nowMs: NOW,
+                    syncFailStreak: 0,
+                }).level,
+            ).toBe('green');
+        });
+
+        it('never improves on what age already says', () => {
+            // A zero streak must not argue a stale vault is healthy.
+            expect(
+                deriveVaultConnectivity({
+                    tipFetchedAtMs: NOW - 60 * MIN,
+                    lastSyncedAtMs: NOW - 60 * MIN,
+                    nowMs: NOW,
+                    syncFailStreak: 0,
+                }).level,
+            ).toBe('red');
+        });
+
+        it('treats a missing or nonsense streak as no evidence', () => {
+            for (const bad of [undefined, -1, 0.4, NaN]) {
+                expect(
+                    deriveVaultConnectivity({
+                        tipFetchedAtMs: NOW,
+                        lastSyncedAtMs: NOW,
+                        nowMs: NOW,
+                        syncFailStreak: bad as number,
+                    }).level,
+                ).toBe('green');
+            }
+        });
     });
 
     it('is yellow when the tip is merely degraded', () => {

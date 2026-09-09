@@ -72,6 +72,7 @@ export default function ArkWallet({
         // signal: an outage stops updating them rather than recording itself.
         arkChainTipHeightAt,
         arkLastSyncedAt,
+        arkSyncFailStreak,
         arkRefreshingVtxoIds,
         arkBgRefreshEnabled,
         arkBgRefreshLastSuccessAt,
@@ -116,8 +117,9 @@ export default function ArkWallet({
                 tipFetchedAtMs: arkChainTipHeightAt,
                 lastSyncedAtMs: arkLastSyncedAt,
                 nowMs: connTick,
+                syncFailStreak: arkSyncFailStreak,
             }),
-        [arkChainTipHeightAt, arkLastSyncedAt, connTick],
+        [arkChainTipHeightAt, arkLastSyncedAt, arkSyncFailStreak, connTick],
     );
 
     // OS notification permission state for the bgRefreshStatus pill.

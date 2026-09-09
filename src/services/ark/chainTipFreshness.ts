@@ -151,12 +151,37 @@ export interface VaultConnectivity {
     syncAgeMs: number | null;
 }
 
+/**
+ * Consecutive failed sync ticks at which the vault is called offline.
+ *
+ * Two, so roughly a minute at the 30s tick. One is enough to stop claiming
+ * everything is fine, but not enough to shout: a single failed tick is a
+ * common blip and flashing red on every one of them would train the user to
+ * ignore the colour that matters most.
+ */
+export const SYNC_FAIL_STREAK_FOR_RED = 2;
+
 export function deriveVaultConnectivity(args: {
     tipFetchedAtMs: number | null;
     lastSyncedAtMs: number | null;
     nowMs: number;
+    /**
+     * Consecutive failed sync ticks, 0 when the last tick succeeded.
+     *
+     * Without this the derivation is age-only, and both timestamps above are
+     * written ONLY on success, so a vault failing every single tick is
+     * indistinguishable from an idle one. Reaching red then took
+     * TIP_DEGRADED_MS, 20 minutes, and a device with its network switched off
+     * reported "connection slow" for the whole of it while the app had known
+     * on the first failed tick. Observed on device 2026-09-08.
+     *
+     * A failure is direct evidence. Age is only a proxy for it, so when both
+     * are available the evidence wins.
+     */
+    syncFailStreak?: number;
 }): VaultConnectivity {
     const { tipFetchedAtMs, lastSyncedAtMs, nowMs } = args;
+    const failStreak = Math.max(0, Math.trunc(args.syncFailStreak ?? 0));
     const tip = deriveTipFreshness({ fetchedAtMs: tipFetchedAtMs, nowMs });
 
     const syncAgeMs =
@@ -176,8 +201,16 @@ export function deriveVaultConnectivity(args: {
                     ? 'yellow'
                     : 'red';
 
+    // Failed ticks escalate on their own, independently of age. One says stop
+    // claiming green when we have just been told otherwise; two says offline.
+    const failLevel: VaultConnectivityLevel =
+        failStreak >= SYNC_FAIL_STREAK_FOR_RED ? 'red' : failStreak > 0 ? 'yellow' : 'green';
+
     const rank: Record<VaultConnectivityLevel, number> = { green: 0, yellow: 1, red: 2 };
-    const level = rank[syncLevel] > rank[tipLevel] ? syncLevel : tipLevel;
+    // Worst of the three wins, same rule as before with one more input.
+    const level = [tipLevel, syncLevel, failLevel].reduce((worst, l) =>
+        rank[l] > rank[worst] ? l : worst,
+    );
 
     return { level, tip, syncAgeMs };
 }

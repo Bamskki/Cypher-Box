@@ -270,6 +270,7 @@ export default function useArkSync(): UseArkSync {
     const setArkPendingLnReceives = useAuthStore((s) => s.setArkPendingLnReceives);
     const setArkChainTipHeight = useAuthStore((s) => s.setArkChainTipHeight);
     const setArkLastSyncedAt = useAuthStore((s) => s.setArkLastSyncedAt);
+    const setArkSyncFailStreak = useAuthStore((s) => s.setArkSyncFailStreak);
     const setArkLastBackupAt = useAuthStore((s) => s.setArkLastBackupAt);
     const arkRoundIntervalSecs = useAuthStore((s) => s.arkRoundIntervalSecs);
     const setArkRoundIntervalSecs = useAuthStore((s) => s.setArkRoundIntervalSecs);
@@ -1567,6 +1568,10 @@ export default function useArkSync(): UseArkSync {
                 setArkChainTipHeight(tip);
             }
             setArkLastSyncedAt(Date.now());
+            // A completed tick is the only thing that clears the streak, so
+            // the connectivity dot recovers the moment the vault is reachable
+            // again rather than waiting for staleness to age out.
+            setArkSyncFailStreak(0);
             setLastError(null);
 
             // --- Soonest spendable expiry (feeds the failure escalation) ---
@@ -1698,6 +1703,12 @@ export default function useArkSync(): UseArkSync {
             }
         } catch (err) {
             console.warn('[Ark] sync failed:', err);
+            // Record the failure itself. Everything else here is written only
+            // on success, which left the UI inferring trouble from staleness
+            // and taking 20 minutes to admit a vault was offline. Read from
+            // the store rather than a closed-over value so the count is right
+            // even if this callback is stale.
+            setArkSyncFailStreak(useAuthStore.getState().arkSyncFailStreak + 1);
             setLastError(err instanceof Error ? err : new Error(String(err)));
         } finally {
             inFlight.current = false;
@@ -1710,6 +1721,7 @@ export default function useArkSync(): UseArkSync {
         setArkPendingLnReceives,
         setArkChainTipHeight,
         setArkLastSyncedAt,
+        setArkSyncFailStreak,
         setArkLastBackupAt,
         arkExitInProgress,
         arkExitDestinationAddress,

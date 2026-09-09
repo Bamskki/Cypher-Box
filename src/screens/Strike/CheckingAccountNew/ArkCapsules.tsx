@@ -1259,6 +1259,8 @@ export default function ArkCapsules({ matchedRate, currency }: ArkCapsulesProps)
     // alongside the rest of the wallet's read state without spinning up a
     // separate poll.
     const arkLastSyncedAt = useAuthStore((s) => s.arkLastSyncedAt);
+    // Failed ticks, so the pill can degrade on evidence rather than on age.
+    const arkSyncFailStreak = useAuthStore((s) => s.arkSyncFailStreak);
     // One-shot flag set by the notification tap handler in
     // src/services/ark/scheduler.ts. Drives the auto-refresh effect below
     // so the user lands on this tab with refresh already running, without
@@ -1324,8 +1326,9 @@ export default function ArkCapsules({ matchedRate, currency }: ArkCapsulesProps)
                 tipFetchedAtMs: arkChainTipHeightAt,
                 lastSyncedAtMs: arkLastSyncedAt,
                 nowMs: nowTick,
+                syncFailStreak: arkSyncFailStreak,
             }),
-        [arkChainTipHeightAt, arkLastSyncedAt, nowTick],
+        [arkChainTipHeightAt, arkLastSyncedAt, arkSyncFailStreak, nowTick],
     );
 
     /**
