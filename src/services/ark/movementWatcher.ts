@@ -6,7 +6,11 @@ import {
 } from '@secondts/bark-react-native';
 
 import useAuthStore from '@Cypher/stores/authStore';
-import { notifyArkReceived, notifyArkRefreshComplete } from './backgroundNotifications';
+import {
+    cancelArkRefreshReminder,
+    notifyArkReceived,
+    notifyArkRefreshComplete,
+} from './backgroundNotifications';
 import { getArkWalletHandle } from './walletHandle';
 
 /**
@@ -217,6 +221,12 @@ function handleNotification(notif: { tag: string; inner?: any }): void {
     // completed round, ever, for this process. Backgrounded only: with
     // the app open the Capsules UI is the completion signal.
     if (subsystem === 'refresh' && status === 'successful') {
+        // Drop the backstop first, and OUTSIDE the dedupe guard. This runs on
+        // every re-emission of the movement, which is what we want: the alarm
+        // must die even if the notification itself was already handled, or
+        // suppressed because the app was in the foreground. Cancelling an id
+        // that is not queued is a no-op.
+        cancelArkRefreshReminder();
         if (!notifiedRefreshMovementIds.has(movement.id)) {
             notifiedRefreshMovementIds.add(movement.id);
             if (AppState.currentState !== 'active') {
