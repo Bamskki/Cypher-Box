@@ -2051,7 +2051,25 @@ export default function ArkCapsules({ matchedRate, currency }: ArkCapsulesProps)
                 SimpleToast.show('No dust capsules to refresh.', SimpleToast.SHORT);
                 return;
             }
-            if (total <= ARK_VTXO_DUST_SATS) {
+            // Gate on whether the sweep is WORTH anything, not on whether the
+            // ASP would take it.
+            //
+            // Two different limits were being confused. Below ARK_VTXO_DUST_SATS
+            // the server refuses the batch outright. Below ARK_REFRESH_MIN_SATS
+            // it accepts it and hands back another dust capsule, because the
+            // output is the total minus a fee and the total was already under
+            // the floor. The second case is the one users actually hit: 381
+            // sats of dust sweeps happily into 379 sats of dust, achieving
+            // nothing but a round fee and an hour of waiting.
+            //
+            // No fee estimate is needed to know this. If the total is under the
+            // floor then the output is under the floor even at zero fee, so the
+            // check is exact rather than a guess. That also keeps the decision
+            // ahead of estimateArkRefreshFee, which matters: that call reaches
+            // the chain source and dies on a 429, which would otherwise throw
+            // the user into a generic failure toast and they would never see
+            // this dialog at all.
+            if (total < ARK_REFRESH_MIN_SATS) {
                 // Below the dust limit the ASP will not take the batch at all,
                 // so the sweep is genuinely impossible rather than merely
                 // uneconomic. A toast saying "not enough" was true and useless:
@@ -2068,7 +2086,7 @@ export default function ArkCapsules({ matchedRate, currency }: ArkCapsulesProps)
                 // honest answer.
                 if (!isCoinosConnected) {
                     SimpleToast.show(
-                        `Only ${total} sats of dust so far. It needs to total more than ${ARK_VTXO_DUST_SATS} sats before it can be swept into one capsule.`,
+                        `Only ${total} sats of dust so far. It needs to total at least ${ARK_REFRESH_MIN_SATS} sats before combining it is worth the fee.`,
                         SimpleToast.LONG,
                     );
                     return;
@@ -2094,9 +2112,10 @@ export default function ArkCapsules({ matchedRate, currency }: ArkCapsulesProps)
                 );
                 // COPY: Bam finalizes.
                 Alert.alert(
-                    "These are too small to combine",
+                    "Combining these won't help yet",
                     `${total} sats of dust across ${ids.length} capsule${ids.length === 1 ? '' : 's'}. ` +
-                    `The Ark server won't accept a batch under ${ARK_VTXO_DUST_SATS} sats, so they can't be combined yet.`,
+                    `Combining them costs a fee and still leaves you under ${ARK_REFRESH_MIN_SATS} sats, ` +
+                    `so the result would be dust again.`,
                     [
                         {
                             text: 'Move them to CoinOS',
