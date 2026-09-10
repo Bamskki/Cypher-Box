@@ -241,7 +241,9 @@ export async function maybeSweepDustArkVtxos(
             return;
         }
 
-        sweepInFlight = true;
+        // Latch already claimed above, before the awaits. Only the pacing
+        // clock is stamped here, so a tick that bailed out earlier does not
+        // consume the next window.
         lastDustSweepAt = now;
         console.log(
             '[Ark dust sweep] firing for', plan.ids.length, 'capsule(s), total',
