@@ -238,7 +238,8 @@ export function isArkCapsuleTapSource(s: unknown): boolean {
         isArkExpiryWarningSource(s) ||
         isArkExitReadySource(s) ||
         s === 'ark-received' ||
-        s === 'ark-refresh-complete'
+        s === 'ark-refresh-complete' ||
+        s === ARK_REFRESH_REMINDER_SOURCE
     );
 }
 
@@ -648,6 +649,85 @@ export function notifyArkRefreshComplete(capsuleCount?: number): void {
         'low',
         { source: 'ark-refresh-complete', capsuleCount },
     );
+}
+
+export const ARK_REFRESH_REMINDER_SOURCE = 'ark-refresh-reminder';
+
+/**
+ * One fixed id: only one round can be in flight per wallet at a time
+ * (refreshSubmissionInFlight and sweepInFlight both enforce that), so a
+ * per-round key would buy nothing and a stale one could never be cancelled.
+ * Scheduling again simply replaces the pending alarm.
+ */
+const REFRESH_REMINDER_ID = fnv1aNotificationId('ark-refresh-reminder');
+
+/** Rounds are documented as taking up to about an hour on mainnet. */
+const REFRESH_REMINDER_DELAY_MS = 60 * 60 * 1000;
+
+/**
+ * Backstop reminder for a refresh round, scheduled when the round is submitted.
+ *
+ * WHY THIS EXISTS ALONGSIDE notifyArkRefreshComplete. That one is better in
+ * every way except availability: it fires on the real completion event, with
+ * the real capsule count, and says the round is done because it saw it happen.
+ * But it runs inside movementWatcher, which only observes anything while the
+ * app process is alive. Once iOS suspends or kills the app, nothing is watching
+ * and no completion notification is ever produced. Observed on device
+ * 2026-09-10: a round finalised while the app was closed and the user learned
+ * about it by opening the app and looking.
+ *
+ * A scheduled local notification is handed to the OS at submit time, so it
+ * fires whether or not the app is still running. That is the entire point, and
+ * the only reason to accept a timer over an event.
+ *
+ * It is therefore deliberately CAUTIOUS about what it claims. It does not say
+ * the refresh finished, because it does not know: an hour is the documented
+ * upper bound, not a guarantee, and the round may have failed. It says the
+ * round should be done and invites the user to look.
+ *
+ * Cancelled by {@link cancelArkRefreshReminder} the moment a completion is
+ * actually observed, so a user whose app stayed alive gets the accurate
+ * "Refresh complete" and never sees this one.
+ */
+export function scheduleArkRefreshReminder(capsuleCount?: number): void {
+    // Same toggle that gates every other Ark alarm.
+    if (!useAuthStore.getState().arkBgRefreshEnabled) return;
+    ensureInit();
+    const subject =
+        typeof capsuleCount === 'number' && capsuleCount > 0
+            ? `${capsuleCount} capsule${capsuleCount === 1 ? '' : 's'}`
+            : 'Your capsules';
+    try {
+        // Cast as the permission check above does: this library's types are
+        // stale and omit the scheduling methods it ships. Casting only the new
+        // call sites, so the repo's error baseline does not move.
+        (PushNotification as any).localNotificationSchedule({
+            id: REFRESH_REMINDER_ID,
+            channelId: CHANNEL_ID,
+            title: 'Refresh should be done',
+            // Deliberately not "is done". See the docstring: this alarm was set
+            // an hour ago and has observed nothing since.
+            message: `${subject} were refreshing. Tap to check they went through.`,
+            date: new Date(Date.now() + REFRESH_REMINDER_DELAY_MS),
+            priority: 'low',
+            importance: 'low',
+            playSound: false,
+            userInfo: { source: ARK_REFRESH_REMINDER_SOURCE, capsuleCount },
+            allowWhileIdle: true,
+        });
+    } catch (err) {
+        // Never let a reminder break a submission that already succeeded.
+        console.warn('[Ark notifications] scheduleArkRefreshReminder:', err);
+    }
+}
+
+/** Drop the backstop, called as soon as a completion is actually observed. */
+export function cancelArkRefreshReminder(): void {
+    try {
+        (PushNotification as any).cancelLocalNotification(REFRESH_REMINDER_ID);
+    } catch (err) {
+        console.warn('[Ark notifications] cancelArkRefreshReminder:', err);
+    }
 }
 
 /**

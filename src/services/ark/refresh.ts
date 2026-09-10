@@ -4,6 +4,7 @@ import { assertNoActiveArkExitAsync } from './exit';
 import { fetchArkBalance } from './balance';
 import { fetchArkVtxos } from './vtxos';
 import { writeArkAutoBackup } from './backup';
+import { scheduleArkRefreshReminder } from './backgroundNotifications';
 import { recordEvent } from '@Cypher/stores/eventLogStore';
 import useAuthStore from '@Cypher/stores/authStore';
 import type { FeeEstimate, RoundState } from '@secondts/bark-react-native';
@@ -369,6 +370,17 @@ export async function refreshArkVtxosDelegatedAndSync(
 ): Promise<ArkDelegatedRefreshResult> {
     const handle = await requireHandle();
     const result = await refreshArkVtxosDelegated(vtxoIds, totalSats);
+    // Backstop reminder, armed only once the ASP has accepted the round. Handed
+    // to the OS now so it survives the app being suspended or killed, which is
+    // the case movementWatcher's completion notification cannot cover: it only
+    // observes anything while the process is alive. Cancelled the moment a real
+    // completion is seen, so a user whose app stays up never sees it.
+    try {
+        scheduleArkRefreshReminder(vtxoIds.length);
+    } catch (err) {
+        // A reminder must never take down a submission that already succeeded.
+        console.warn('[Ark refresh] reminder schedule failed:', err);
+    }
     await handle.sync();
     await Promise.all([fetchArkBalance(), fetchArkVtxos()]);
     // G2: eager backup so the just-refreshed state is captured now, not on
