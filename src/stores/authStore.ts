@@ -435,6 +435,18 @@ export type AuthStateType = {
      * next mount, which is the safer failure mode.
      */
     arkPendingTapRefresh: boolean;
+    /**
+     * One-shot: sweep the dust as soon as the Capsules tab is next mounted.
+     *
+     * Set when the user takes the "top up from CoinOS" way out of a dust set
+     * too small to sweep. The swap runs on another screen, so the intent has to
+     * outlive this one, and the sweep can only run once the topped-up sats have
+     * actually landed as a capsule.
+     *
+     * Not persisted. It describes an intent inside one session; restoring it
+     * from a previous run would fire a round the user never asked for.
+     */
+    arkPendingDustSweep: boolean;
 
     /**
      * One-shot flag: set when the homepage "stuck on-chain funds" banner is
@@ -532,6 +544,7 @@ export type AuthStateType = {
     setArkBgRefreshLastStuckWarnAt: (state: number | null) => void;
     setArkBgRefreshMaxFeeSats: (state: number) => void;
     setArkPendingTapRefresh: (state: boolean) => void;
+    setArkPendingDustSweep: (state: boolean) => void;
     setArkPendingOnchainRecoverOpen: (state: boolean) => void;
     setArkIosBackupReminderActive: (state: boolean) => void;
     setArkArkoorPromptState: (
@@ -628,6 +641,7 @@ const createAuthStore = (
     arkBgRefreshLastStuckWarnAt: null,
     arkBgRefreshMaxFeeSats: 5000,
     arkPendingTapRefresh: false,
+    arkPendingDustSweep: false,
     arkPendingOnchainRecoverOpen: false,
     arkIosBackupReminderActive: false,
     arkArkoorPromptState: {},
@@ -717,6 +731,7 @@ const createAuthStore = (
     setArkBgRefreshLastStuckWarnAt: (state: number | null) => set({ arkBgRefreshLastStuckWarnAt: state }),
     setArkBgRefreshMaxFeeSats: (state: number) => set({ arkBgRefreshMaxFeeSats: state }),
     setArkPendingTapRefresh: (state: boolean) => set({ arkPendingTapRefresh: state }),
+    setArkPendingDustSweep: (state: boolean) => set({ arkPendingDustSweep: state }),
     setArkPendingOnchainRecoverOpen: (state: boolean) => set({ arkPendingOnchainRecoverOpen: state }),
     setArkIosBackupReminderActive: (state: boolean) => set({ arkIosBackupReminderActive: state }),
     setArkArkoorPromptState: (state) => set({ arkArkoorPromptState: state }),

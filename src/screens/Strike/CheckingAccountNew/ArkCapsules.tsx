@@ -1129,6 +1129,17 @@ function RefreshWaitBanner({
     );
 }
 
+/**
+ * What a dust top-up aims for, in sats.
+ *
+ * 700 rather than the 500 refresh floor: the batch has to clear the floor
+ * AFTER the round fee, and landing exactly on it would leave the swept capsule
+ * one sat of drift away from being dust again. It also matches the number the
+ * receive screens already tell users to aim for, so the two pieces of advice
+ * agree.
+ */
+const DUST_TOPUP_TARGET_SATS = 700;
+
 export default function ArkCapsules({ matchedRate, currency }: ArkCapsulesProps) {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [refreshing, setRefreshing] = useState(false);
@@ -1164,6 +1175,13 @@ export default function ArkCapsules({ matchedRate, currency }: ArkCapsulesProps)
     // so the user lands on this tab with refresh already running, without
     // having to find a button.
     const arkPendingTapRefresh = useAuthStore((s) => s.arkPendingTapRefresh);
+    // One-shot: sweep the dust once a top-up swap has landed. Set on the way
+    // out to the swap screen, consumed on the way back in.
+    const arkPendingDustSweep = useAuthStore((s) => s.arkPendingDustSweep);
+    const setArkPendingDustSweep = useAuthStore((s) => s.setArkPendingDustSweep);
+    // Both dust escape hatches are swaps with CoinOS, so neither is offered
+    // when it is not connected.
+    const isCoinosConnected = useAuthStore((s) => s.isAuth) === true;
     const setArkPendingTapRefresh = useAuthStore((s) => s.setArkPendingTapRefresh);
     const arkRefreshStuck = useAuthStore((s) => s.arkRefreshStuck);
     const setArkRefreshStuck = useAuthStore((s) => s.setArkRefreshStuck);
@@ -1361,6 +1379,34 @@ export default function ArkCapsules({ matchedRate, currency }: ArkCapsulesProps)
     //   3. Otherwise → fire the batch with skipConfirm so the refresh
     //      starts immediately. Selection + fee preview don't add safety
     //      here: the user already opted in by tapping the warning.
+    /**
+     * Follow-through for the dust top-up.
+     *
+     * The user chose "top up" on the too-small-to-combine dialog, swapped in
+     * from CoinOS, and has landed back here. Fire the sweep they were trying to
+     * run in the first place.
+     *
+     * Waits for `rows`, the same gate the tap-refresh effect below uses: an
+     * empty list means the wallet has not hydrated yet, and sweeping off a set
+     * we have not read would submit the wrong ids.
+     *
+     * The flag is cleared BEFORE the sweep, not after. handleDustRefresh is
+     * async and can fail, and a flag still set on failure would re-fire the
+     * round on the next mount, which is exactly the retry storm this codebase
+     * has been bitten by twice today.
+     *
+     * If the top-up has not landed as a capsule yet, or landed as one big
+     * enough not to count as dust, handleDustRefresh says so through its own
+     * guard. That is the honest outcome, and it is why this does not try to
+     * verify the balance itself.
+     */
+    useEffect(() => {
+        if (!arkPendingDustSweep) return;
+        if (rows.length === 0) return;
+        setArkPendingDustSweep(false);
+        handleDustRefresh();
+    }, [arkPendingDustSweep, rows, setArkPendingDustSweep]);
+
     useEffect(() => {
         if (!arkPendingTapRefresh) return;
         if (rows.length === 0) return;
@@ -2006,9 +2052,64 @@ export default function ArkCapsules({ matchedRate, currency }: ArkCapsulesProps)
                 return;
             }
             if (total <= ARK_VTXO_DUST_SATS) {
-                SimpleToast.show(
-                    `Only ${total} sats of dust so far. It needs to total more than ${ARK_VTXO_DUST_SATS} sats before it can be swept into one capsule.`,
-                    SimpleToast.LONG,
+                // Below the dust limit the ASP will not take the batch at all,
+                // so the sweep is genuinely impossible rather than merely
+                // uneconomic. A toast saying "not enough" was true and useless:
+                // it named the obstacle and left the user holding sats they
+                // could not combine and had no obvious way to rescue.
+                //
+                // Two ways out, and they are opposites, so the user picks:
+                // take the value off Ark entirely, or add just enough to make
+                // the batch viable. Both go through the existing swap screen;
+                // neither is a new money path.
+                //
+                // Gated on CoinOS being connected, because both options are
+                // swaps with it. Without it, the old message is still the
+                // honest answer.
+                if (!isCoinosConnected) {
+                    SimpleToast.show(
+                        `Only ${total} sats of dust so far. It needs to total more than ${ARK_VTXO_DUST_SATS} sats before it can be swept into one capsule.`,
+                        SimpleToast.LONG,
+                    );
+                    return;
+                }
+                const shortfall = Math.max(1, DUST_TOPUP_TARGET_SATS - total);
+                // COPY: Bam finalizes.
+                Alert.alert(
+                    "These are too small to combine",
+                    `${total} sats of dust across ${ids.length} capsule${ids.length === 1 ? '' : 's'}. ` +
+                    `The Ark server won't accept a batch under ${ARK_VTXO_DUST_SATS} sats, so they can't be combined yet.`,
+                    [
+                        {
+                            text: 'Move them to CoinOS',
+                            onPress: () => {
+                                dispatchNavigate('SwapAmount', {
+                                    swapFrom: 'ark',
+                                    sendTo: 'coinos',
+                                    prefillSats: total,
+                                    sourceBalance: total,
+                                });
+                            },
+                        },
+                        {
+                            text: `Top up ${shortfall} sats`,
+                            onPress: () => {
+                                // Arm the follow-up sweep. The swap happens on
+                                // another screen, so the intent has to outlive
+                                // this one; ArkCapsules consumes the flag when
+                                // it is next mounted, by which time the topped
+                                // up sats have had a chance to land.
+                                setArkPendingDustSweep(true);
+                                dispatchNavigate('SwapAmount', {
+                                    swapFrom: 'coinos',
+                                    sendTo: 'ark',
+                                    prefillSats: shortfall,
+                                });
+                            },
+                        },
+                        { text: 'Not now', style: 'cancel' },
+                    ],
+                    { cancelable: true },
                 );
                 return;
             }

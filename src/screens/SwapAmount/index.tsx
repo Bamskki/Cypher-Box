@@ -33,12 +33,22 @@ const SMALL_RECEIVE_SATS = 700;
 export default function SwapAmount() {
     const navigation = useNavigation();
     const route = useRoute();
-    const { swapFrom, sendTo, fromAddress, toAddress, sourceBalance = 0 } = route.params as {
+    const { swapFrom, sendTo, fromAddress, toAddress, sourceBalance = 0, prefillSats } = route.params as {
         swapFrom: LightningSwapProviderId;
         sendTo: LightningSwapProviderId;
         fromAddress?: string;
         toAddress?: string;
         sourceBalance?: number;
+        /**
+         * Amount to open the screen with, in sats.
+         *
+         * Set by callers that already know the number, currently the dust
+         * top-up: the user is not choosing an amount there, they are covering a
+         * specific shortfall, and making them work it out is asking them to do
+         * arithmetic the app already did. Still editable; it is a starting
+         * value, not a lock.
+         */
+        prefillSats?: number;
     };
     const { matchedRateStrike, strikeUser } = useAuthStore();
     // Ark sats locked in an in-flight refresh. When the source is Ark and the
@@ -95,6 +105,16 @@ export default function SwapAmount() {
         return () => clearTimeout(t);
     }, [loading]);
     const [success, setSuccess] = useState(false);
+    // Seed the amount from `prefillSats` exactly once. Not a controlled sync:
+    // re-applying it would fight the user every time they edited the field.
+    const prefillApplied = React.useRef(false);
+    React.useEffect(() => {
+        if (prefillApplied.current) return;
+        if (!prefillSats || !Number.isFinite(prefillSats) || prefillSats <= 0) return;
+        prefillApplied.current = true;
+        setIsSats(true);
+        setSats(String(Math.ceil(prefillSats)));
+    }, [prefillSats]);
     const [swappedSats, setSwappedSats] = useState('');
     const [swappedFiat, setSwappedFiat] = useState('');
     const [feeSats, setFeeSats] = useState<number | null>(null);
