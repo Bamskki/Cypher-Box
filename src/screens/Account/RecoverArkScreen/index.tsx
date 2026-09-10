@@ -164,7 +164,7 @@ export default function RecoverArkScreen() {
         }
         if (!valid) {
             setErrorMsg(
-                "Invalid seed phrase. Double-check spelling — each word must be a BIP39 word.",
+                "Invalid seed phrase. Double-check spelling. Each word must be a BIP39 word.",
             );
             return null;
         }
@@ -242,7 +242,7 @@ export default function RecoverArkScreen() {
                 const message =
                     conflict.kind === 'different-wallet'
                         ? `A saved seed already exists on this device's ${keychainLabel} behind ${BIOMETRIC_LABEL} for wallet ${conflict.existingFingerprint}.\n\nIf you want the new seed to take its place, make sure the old seed is written down somewhere safe.`
-                        : `A saved seed already exists on this device's ${keychainLabel} but couldn't be read to compare (${conflict.reason}).\n\nIf you want the new seed to take its place, make sure the old seed is written down somewhere safe — it may otherwise be lost.`;
+                        : `A saved seed already exists on this device's ${keychainLabel} but couldn't be read to compare (${conflict.reason}).\n\nIf you want the new seed to take its place, make sure the old seed is written down somewhere safe. It may otherwise be lost.`;
                 Alert.alert(
                     "Replace keychain-saved seed?",
                     message,
@@ -382,7 +382,7 @@ export default function RecoverArkScreen() {
                 setRestoring(false);
                 setErrorMsg(
                     `Backup file is corrupt: ${err?.message ?? 'decryption failed'}. ` +
-                    `Try a different backup source — Drive, iCloud, or pick a manually-exported file.`,
+                    `Try a different backup source: Drive, iCloud, or pick a manually-exported file.`,
                 );
                 return true; // handled (with error); don't keep scanning
             }
@@ -616,7 +616,7 @@ export default function RecoverArkScreen() {
             setRestoring(false);
             setErrorMsg(
                 `Couldn't read backup from iCloud Drive: ${err?.message ?? 'unknown error'}. ` +
-                `Make sure iCloud Drive is enabled for Cypher Box, then tap again — ` +
+                `Make sure iCloud Drive is enabled for Cypher Box, then tap again. ` +
                 `the picker should show "iCloud Drive → Cypher Box → ark-backup-{fingerprint}.cbark".`,
             );
             return;
@@ -661,7 +661,7 @@ export default function RecoverArkScreen() {
         }
         if (!valid) {
             setErrorMsg(
-                "Invalid seed phrase. Double-check spelling — each word must be a BIP39 word.",
+                "Invalid seed phrase. Double-check spelling. Each word must be a BIP39 word.",
             );
             return;
         }
@@ -669,7 +669,7 @@ export default function RecoverArkScreen() {
         if (datadirExists) {
             Alert.alert(
                 "An Ark wallet already exists",
-                "There's already an Ark wallet set up on this device. Open it first to reset before restoring from backup — otherwise the existing wallet stays.",
+                "There's already an Ark wallet set up on this device. Open it first to reset before restoring from backup. Otherwise the existing wallet stays.",
                 [
                     { text: "Cancel", style: "cancel" },
                     { text: "Open setup", onPress: () => dispatchNavigate("CreateArkScreen") },
@@ -692,7 +692,7 @@ export default function RecoverArkScreen() {
                 const message =
                     conflict.kind === 'different-wallet'
                         ? `A saved seed already exists on this device's ${keychainLabel} behind ${BIOMETRIC_LABEL} for wallet ${conflict.existingFingerprint}.\n\nIf you want the new seed to take its place, make sure the old seed is written down somewhere safe.`
-                        : `A saved seed already exists on this device's ${keychainLabel} but couldn't be read to compare (${conflict.reason}).\n\nIf you want the new seed to take its place, make sure the old seed is written down somewhere safe — it may otherwise be lost.`;
+                        : `A saved seed already exists on this device's ${keychainLabel} but couldn't be read to compare (${conflict.reason}).\n\nIf you want the new seed to take its place, make sure the old seed is written down somewhere safe. It may otherwise be lost.`;
                 Alert.alert(
                     "Replace keychain-saved seed?",
                     message,
@@ -732,7 +732,7 @@ export default function RecoverArkScreen() {
             setSubmitting(false);
             setErrorMsg(
                 /Internal/i.test(msg)
-                    ? "Couldn't open or create the Ark wallet — local state may be stale. Open the setup screen and tap Reset, then try again."
+                    ? "Couldn't open or create the Ark wallet. Local state may be stale. Open the setup screen and tap Reset, then try again."
                     : `Recovery failed: ${msg}`,
             );
             return;
@@ -841,7 +841,7 @@ function ChooseView({
                 Restore your Ark wallet
             </Text>
             <Text style={styles.introBody}>
-                {`Your Ark seed phrase is in this device's Keychain — you don't need to type it. Tap unlock below to load the seed via ${BIOMETRIC_LABEL} / passcode.\n\nVTXO capsules can't be re-derived from the seed alone, so you'll also need your ark-backup file — from ${cloudLabel} (if you connected it earlier) or a manual export.`}
+                {`Your Ark seed phrase is in this device's Keychain, so you don't need to type it. Tap unlock below to load the seed via ${BIOMETRIC_LABEL} / passcode.\n\nVTXO capsules can't be re-derived from the seed alone, so you'll also need your ark-backup file, from ${cloudLabel} (if you connected it earlier) or a manual export.`}
             </Text>
 
             {!unlockedMnemonic && (
@@ -869,7 +869,7 @@ function ChooseView({
                     }}
                 >
                     <Text style={{ color: colors.green, fontSize: 12 }}>
-                        ✓ Seed unlocked — ready to restore
+                        ✓ Seed unlocked, ready to restore
                     </Text>
                 </View>
             )}
@@ -986,7 +986,7 @@ function TypeSeedView({
                 Type your 12-word Ark seed phrase
             </Text>
             <Text style={styles.introBody}>
-                Enter the words exactly as you wrote them down — order matters. Tap space or return to jump to the next box.
+                Enter the words exactly as you wrote them down. Order matters. Tap space or return to jump to the next box.
                 {"\n\n"}
                 Note: VTXO capsules cannot be recovered from the seed alone. To restore your funds, also restore from your ark-backup file (the buttons below).
             </Text>

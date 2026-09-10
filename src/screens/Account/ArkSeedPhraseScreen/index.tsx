@@ -221,7 +221,7 @@ export default function ArkSeedPhraseScreen() {
     const ensureWalletCreated = async (): Promise<boolean> => {
         if (walletReady) return true;
         if (!mnemonic || !mnemonic.trim()) {
-            SimpleToast.show("No seed phrase available — go back and try again.", SimpleToast.LONG);
+            SimpleToast.show("No seed phrase available. Go back and try again.", SimpleToast.LONG);
             return false;
         }
         try {
@@ -386,7 +386,7 @@ export default function ArkSeedPhraseScreen() {
                 if (iCloudOn) {
                     setCloudBackupDone(true);
                     SimpleToast.show(
-                        'iCloud Drive is on for Cypher Box — backup syncs automatically.',
+                        'iCloud Drive is on for Cypher Box. Backup syncs automatically.',
                         SimpleToast.LONG,
                     );
                     return;
@@ -456,7 +456,7 @@ export default function ArkSeedPhraseScreen() {
                 case 'uploaded-and-verified':
                     setCloudBackupDone(true);
                     SimpleToast.show(
-                        "Backup uploaded to Google Drive and verified — it will keep updating automatically.",
+                        "Backup uploaded to Google Drive and verified. It will keep updating automatically.",
                         SimpleToast.LONG,
                     );
                     break;
@@ -532,7 +532,7 @@ export default function ArkSeedPhraseScreen() {
                 const message =
                     conflict.kind === 'different-wallet'
                         ? `A saved seed already exists on this device's ${keychainLabel} behind ${biometricLabel} for wallet ${conflict.existingFingerprint}.\n\nIf you want the new seed to take its place, make sure the old seed is written down somewhere safe.`
-                        : `A saved seed already exists on this device's ${keychainLabel} but couldn't be read to compare (${conflict.reason}).\n\nIf you want the new seed to take its place, make sure the old seed is written down somewhere safe — it may otherwise be lost.`;
+                        : `A saved seed already exists on this device's ${keychainLabel} but couldn't be read to compare (${conflict.reason}).\n\nIf you want the new seed to take its place, make sure the old seed is written down somewhere safe. It may otherwise be lost.`;
                 Alert.alert(
                     "Replace keychain-saved seed?",
                     message,
@@ -646,7 +646,7 @@ export default function ArkSeedPhraseScreen() {
                 case 'written-and-verified':
                     setSafBackupConfirmed(true);
                     SimpleToast.show(
-                        "Backup saved to your folder and verified — it will keep updating automatically.",
+                        "Backup saved to your folder and verified. It will keep updating automatically.",
                         SimpleToast.LONG,
                     );
                     break;
@@ -713,8 +713,8 @@ export default function ArkSeedPhraseScreen() {
             Alert.alert(
                 "Save your backup first",
                 isIOS
-                    ? "Your seed phrase alone can't restore Ark funds — the encrypted backup file is required too. Tap 'Save backup file' above and save it somewhere you trust (iCloud Drive recommended)."
-                    : "Your seed phrase alone can't restore Ark funds — the encrypted backup file is required too. Pick at least one: Google Drive (off-device), or a folder on this phone (survives uninstall).",
+                    ? "Your seed phrase alone can't restore Ark funds. The encrypted backup file is required too. Tap 'Save backup file' above and save it somewhere you trust (iCloud Drive recommended)."
+                    : "Your seed phrase alone can't restore Ark funds. The encrypted backup file is required too. Pick at least one: Google Drive (off-device), or a folder on this phone (survives uninstall).",
                 [{ text: "OK" }],
                 { cancelable: true },
             );
@@ -726,7 +726,7 @@ export default function ArkSeedPhraseScreen() {
         if (saveToKeychain) {
             const result = await persistToKeychain();
             if (result === 'error') {
-                SimpleToast.show("Keychain save failed — please back up manually", SimpleToast.LONG);
+                SimpleToast.show("Keychain save failed. Please back up manually", SimpleToast.LONG);
             }
             // 'cancelled' = user kept the existing keychain seed by
             // choice. Silent, not a failure.
@@ -820,7 +820,7 @@ export default function ArkSeedPhraseScreen() {
                     showsVerticalScrollIndicator={false}
                 >
                     <View style={styles.content}>
-                        <Text style={styles.sectionTitle}>1/2 — Seed phrase</Text>
+                        <Text style={styles.sectionTitle}>1/2 · Seed phrase</Text>
                         <Text style={styles.warnTitle}>⚠ Write these 12 words down</Text>
                         <Text style={styles.warnBody}>
                             Keep it safe and secure offline (paper and pen are good enough).
@@ -843,7 +843,7 @@ export default function ArkSeedPhraseScreen() {
                         )}
                         {keychainStatus === "err" && (
                             <Text style={styles.statusErr}>
-                                ✗ Keychain save failed — please back up the words manually
+                                ✗ Keychain save failed. Please back up the words manually
                             </Text>
                         )}
 
@@ -932,7 +932,7 @@ export default function ArkSeedPhraseScreen() {
                                      for Cypher Box). We can't probe the toggle,
                                      so the copy is honest about the conditional. */}
                         <Text style={[styles.sectionSub, { marginTop: 18 }]}>
-                            Lose the phone, though, and the local file goes with it —
+                            Lose the phone, though, and the local file goes with it,
                             and your seed alone can't restore Ark funds. Add an
                             optional off-device copy for device-loss protection:
                         </Text>
@@ -949,8 +949,8 @@ export default function ArkSeedPhraseScreen() {
                                 </Text>
                                 <Text style={styles.backupOptionDetail}>
                                     {isIOS
-                                        ? "Opens the share sheet so you can save the encrypted ark-backup file. We recommend saving inside iCloud Drive — Cypher Box will then keep it current automatically as your VTXO capsules change. Anywhere else (email, AirDrop, local Files) works for recovery too, but you'll need to re-export after every Lightning receive. Whoever stores it sees ciphertext only."
-                                        : "Connects your Google account and uploads your ark-backup file to Drive's appDataFolder — hidden from the main Drive UI, only Cypher Box can read it. Updates upload automatically as your VTXO capsules change. Google sees only ciphertext."}
+                                        ? "Opens the share sheet so you can save the encrypted ark-backup file. We recommend saving inside iCloud Drive, so Cypher Box keeps it current automatically as your VTXO capsules change. Anywhere else (email, AirDrop, local Files) works for recovery too, but you'll need to re-export after every Lightning receive. Whoever stores it sees ciphertext only."
+                                        : "Connects your Google account and uploads your ark-backup file to Drive's appDataFolder, hidden from the main Drive UI, only Cypher Box can read it. Updates upload automatically as your VTXO capsules change. Google sees only ciphertext."}
                                 </Text>
                                 <TouchableOpacity
                                     onPress={handleConnectAndBackupCloud}
@@ -1049,7 +1049,7 @@ export default function ArkSeedPhraseScreen() {
                                         {safBackupConfirmed ? "  ✓" : ""}
                                     </Text>
                                     <Text style={styles.backupOptionDetail}>
-                                        Pick a folder you control — for example
+                                        Pick a folder you control, for example
                                         Internal Storage → Documents → Backups.
                                         The encrypted file is written there
                                         whenever your wallet changes, and unlike
@@ -1134,7 +1134,7 @@ export default function ArkSeedPhraseScreen() {
                                 </Text>
                                 <Text style={styles.warnPanelBody}>
                                     Your seed phrase alone can't restore Ark
-                                    funds — Bark stores per-VTXO state in an
+                                    funds, because Bark stores per-VTXO state in an
                                     encrypted backup file we can't re-derive
                                     from the seed. Pick any one option above
                                     before creating the wallet.

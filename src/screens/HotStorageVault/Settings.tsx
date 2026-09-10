@@ -566,7 +566,7 @@ export default function Settings({wallet, to, matchedRate, toStrike}: any) {
                                         {keychainBusy
                                             ? "Updating Keychain…"
                                             : isKeychainBackedUp
-                                            ? "Seed saved to Keychain ✓ — Remove"
+                                            ? "Seed saved to Keychain ✓ · Remove"
                                             : "Back up seed to iPhone Keychain"}
                                     </Text>
                                 </TouchableOpacity>
