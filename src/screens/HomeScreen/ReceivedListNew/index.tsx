@@ -1012,8 +1012,9 @@ export default function ReceivedListNew({ setReceivedListSecondTab, refRBSheet, 
               // tab above uses, and for the same reason: a transform moves what
               // is drawn without shifting the layout flow beneath it, so the
               // sheet's own height and the content under it stay put.
-              // Landed by eye: 50 rode too high, 40 sits right.
-              <View style={[styles.liquidTabContent, { transform: [{ translateY: -40 }] }]}>
+              // Landed by eye on device: 50 rode too high, 40 still high, 25 sits
+              // right.
+              <View style={[styles.liquidTabContent, { transform: [{ translateY: -25 }] }]}>
                 {arkAddressError ? (
                   <AddressFetchFailed
                     message={arkAddressError}
