@@ -442,7 +442,10 @@ export default function SwapAmount() {
     // leave un-refreshable dust that expires. Sats mode types the sat amount;
     // fiat mode mirrors the sat equivalent into `usd`.
     const currentSats = Math.round(isSats ? Number(sats) : Number(usd)) || 0;
-    const smallBarkSwapWarn = sendTo === 'ark' && currentSats > 0 && currentSats <= SMALL_RECEIVE_SATS;
+    // Strictly below, matching ArkInvoiceScreen. 700 is the number the warning
+    // asks the user to reach, so warning at exactly 700 contradicted its own
+    // advice.
+    const smallBarkSwapWarn = sendTo === 'ark' && currentSats > 0 && currentSats < SMALL_RECEIVE_SATS;
 
     return (
         <ScreenLayout disableScroll showToolbar isBackButton title="Lightning Swap">
@@ -481,7 +484,7 @@ export default function SwapAmount() {
                 })()}
                 {smallBarkSwapWarn && (
                     <Text style={{ textAlign: 'center', marginTop: 8, marginHorizontal: 8, fontSize: 12, color: '#FFD54F', lineHeight: 17 }}>
-                        Small amounts can leave un-refreshable dust that expires. Swapping above 700 sats keeps them refreshable.
+                        Small amounts can leave un-refreshable dust that expires. Swapping 700 sats or more keeps them refreshable.
                     </Text>
                 )}
             </View>
