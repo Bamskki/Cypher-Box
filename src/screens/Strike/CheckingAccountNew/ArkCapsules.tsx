@@ -2073,7 +2073,25 @@ export default function ArkCapsules({ matchedRate, currency }: ArkCapsulesProps)
                     );
                     return;
                 }
-                const shortfall = Math.max(1, DUST_TOPUP_TARGET_SATS - total);
+                // The top-up has to arrive as DUST itself, or it will not join
+                // the batch it was meant to rescue.
+                //
+                // Aiming straight at 700 breaks for most of the range this
+                // dialog can appear in. The guard fires at a dust total of 330
+                // or less, so the shortfall to 700 is 370 or more, and any
+                // total at or below 200 asks for 500+, which lands as a healthy
+                // capsule and is excluded from the dust set. The user would
+                // swap in funds and the sweep would refuse again, for a reason
+                // no one could see.
+                //
+                // Capping one sat under the refresh floor keeps the incoming
+                // capsule inside the dust set. The batch then totals
+                // dust + up to 499, comfortably past the ASP's limit even
+                // though it may land short of 700.
+                const shortfall = Math.max(
+                    1,
+                    Math.min(DUST_TOPUP_TARGET_SATS - total, ARK_REFRESH_MIN_SATS - 1),
+                );
                 // COPY: Bam finalizes.
                 Alert.alert(
                     "These are too small to combine",
@@ -2088,6 +2106,12 @@ export default function ArkCapsules({ matchedRate, currency }: ArkCapsulesProps)
                                     sendTo: 'coinos',
                                     prefillSats: total,
                                     sourceBalance: total,
+                                    // Cap at the dust total. Editing this up
+                                    // would pull healthy capsules out of the
+                                    // vault, which is the opposite of what the
+                                    // user came here to do: this option exists
+                                    // to clear dust, not to move funds.
+                                    maxSats: total,
                                 });
                             },
                         },

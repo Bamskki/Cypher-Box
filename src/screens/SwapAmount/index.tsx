@@ -33,7 +33,7 @@ const SMALL_RECEIVE_SATS = 700;
 export default function SwapAmount() {
     const navigation = useNavigation();
     const route = useRoute();
-    const { swapFrom, sendTo, fromAddress, toAddress, sourceBalance = 0, prefillSats } = route.params as {
+    const { swapFrom, sendTo, fromAddress, toAddress, sourceBalance = 0, prefillSats, maxSats } = route.params as {
         swapFrom: LightningSwapProviderId;
         sendTo: LightningSwapProviderId;
         fromAddress?: string;
@@ -49,6 +49,20 @@ export default function SwapAmount() {
          * value, not a lock.
          */
         prefillSats?: number;
+        /**
+         * Hard ceiling on the amount, in sats.
+         *
+         * Set by the dust "move them to CoinOS" option. That path exists to
+         * clear dust, and editing the amount up would pull healthy capsules out
+         * of the vault instead, which is the opposite of what the user came for
+         * and defeats the point of the option.
+         *
+         * Enforced by clamping rather than by making the field read-only: the
+         * user can still type, still reduce it, and sees the value snap back if
+         * they overshoot. Locking the keyboard outright would leave them
+         * poking at a dead input with no explanation.
+         */
+        maxSats?: number;
     };
     const { matchedRateStrike, strikeUser } = useAuthStore();
     // Ark sats locked in an in-flight refresh. When the source is Ark and the
@@ -108,6 +122,16 @@ export default function SwapAmount() {
     // Seed the amount from `prefillSats` exactly once. Not a controlled sync:
     // re-applying it would fight the user every time they edited the field.
     const prefillApplied = React.useRef(false);
+    // Clamp to `maxSats` whenever the typed value goes over. Runs on the sats
+    // field only: fiat entry is mirrored into it by CustomKeyboard, so this
+    // catches both.
+    React.useEffect(() => {
+        if (!maxSats || !Number.isFinite(maxSats) || maxSats <= 0) return;
+        const typed = Number(sats);
+        if (Number.isFinite(typed) && typed > maxSats) {
+            setSats(String(maxSats));
+        }
+    }, [sats, maxSats]);
     React.useEffect(() => {
         if (prefillApplied.current) return;
         if (!prefillSats || !Number.isFinite(prefillSats) || prefillSats <= 0) return;
