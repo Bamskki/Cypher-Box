@@ -2123,6 +2123,7 @@ export default function ArkCapsules({ matchedRate, currency }: ArkCapsulesProps)
                                 dispatchNavigate('SwapAmount', {
                                     swapFrom: 'ark',
                                     sendTo: 'coinos',
+                                    purpose: 'dust-exit',
                                     prefillSats: total,
                                     sourceBalance: total,
                                     // Cap at the dust total. Editing this up
@@ -2146,7 +2147,15 @@ export default function ArkCapsules({ matchedRate, currency }: ArkCapsulesProps)
                                 dispatchNavigate('SwapAmount', {
                                     swapFrom: 'coinos',
                                     sendTo: 'ark',
+                                    purpose: 'dust-topup',
                                     prefillSats: shortfall,
+                                    // Same ceiling the shortfall is computed
+                                    // against. Without it the user can edit
+                                    // the amount up, the top-up lands as a
+                                    // healthy capsule outside the dust set,
+                                    // and the sweep armed below refuses for a
+                                    // reason nothing on screen explains.
+                                    maxSats: ARK_REFRESH_MIN_SATS - 1,
                                 });
                             },
                         },

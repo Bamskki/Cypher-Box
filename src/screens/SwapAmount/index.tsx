@@ -22,6 +22,10 @@ import {
     type LightningSwapProvider,
     type LightningSwapProviderId,
 } from "@Cypher/services/lightningSwap";
+// From the defining module rather than the ark barrel, matching the direct
+// imports ArkCapsules already uses for constants the barrel has in-flight
+// edits around. Same value either way; this just avoids the churn.
+import { ARK_REFRESH_MIN_SATS } from "@Cypher/services/ark/config";
 import { getFiatRate } from "../../../models/fiatUnit";
 
 // Warning-yellow gradient for the small-amount "Swap anyways" CTA + dust note.
@@ -33,7 +37,7 @@ const SMALL_RECEIVE_SATS = 700;
 export default function SwapAmount() {
     const navigation = useNavigation();
     const route = useRoute();
-    const { swapFrom, sendTo, fromAddress, toAddress, sourceBalance = 0, prefillSats, maxSats } = route.params as {
+    const { swapFrom, sendTo, fromAddress, toAddress, sourceBalance = 0, prefillSats, maxSats, purpose } = route.params as {
         swapFrom: LightningSwapProviderId;
         sendTo: LightningSwapProviderId;
         fromAddress?: string;
@@ -63,6 +67,22 @@ export default function SwapAmount() {
          * poking at a dead input with no explanation.
          */
         maxSats?: number;
+        /**
+         * Why this screen was opened, when the answer changes what to say.
+         *
+         * Passed explicitly rather than inferred from `prefillSats` or from the
+         * rail pair. Inference was the tempting shortcut and it is wrong twice
+         * over: another caller prefilling an amount would silently inherit
+         * dust copy, and `swapFrom`/`sendTo` cannot tell a deliberate 319-sat
+         * top-up apart from a user typing 319 by hand, which is exactly the
+         * case the small-amount warning exists to catch.
+         *
+         * 'dust-topup'  covering a shortfall so a dust batch clears the
+         *               refresh floor. Small is the POINT here, so the generic
+         *               small-amount warning is suppressed.
+         * 'dust-exit'   taking dust off Ark entirely.
+         */
+        purpose?: 'dust-topup' | 'dust-exit';
     };
     const { matchedRateStrike, strikeUser } = useAuthStore();
     // Ark sats locked in an in-flight refresh. When the source is Ark and the
@@ -486,10 +506,24 @@ export default function SwapAmount() {
     // leave un-refreshable dust that expires. Sats mode types the sat amount;
     // fiat mode mirrors the sat equivalent into `usd`.
     const currentSats = Math.round(isSats ? Number(sats) : Number(usd)) || 0;
-    const smallBarkSwapWarn = sendTo === 'ark' && currentSats > 0 && currentSats <= SMALL_RECEIVE_SATS;
+    // Suppressed for the dust top-up. That flow computes the amount itself,
+    // caps it under the refresh floor, and sent the user here precisely to
+    // deposit a small sum. Warning them off it would contradict the dialog
+    // that opened this screen, and the CTA it drives ("Swap anyways") frames
+    // the intended action as a mistake the user is overriding.
+    const isDustTopup = purpose === 'dust-topup';
+    const smallBarkSwapWarn =
+        !isDustTopup && sendTo === 'ark' && currentSats > 0 && currentSats <= SMALL_RECEIVE_SATS;
 
     return (
-        <ScreenLayout disableScroll showToolbar isBackButton title="Lightning Swap">
+        <ScreenLayout
+            disableScroll
+            showToolbar
+            isBackButton
+            title={
+                isDustTopup ? 'Dust Top-up' : purpose === 'dust-exit' ? 'Move Dust Out' : 'Lightning Swap'
+            }
+        >
             <View style={styles.main}>
                 <GradientInput isSats={isSats} walletInfo={{ matchedRate, currency }} sats={sats} setSats={setSats} usd={usd} />
                 {swapFrom === 'ark' && pendingInRoundSats > 0 && (sourceBalance === 0 || (Number(sats) || 0) > sourceBalance) && (
@@ -526,6 +560,18 @@ export default function SwapAmount() {
                 {smallBarkSwapWarn && (
                     <Text style={{ textAlign: 'center', marginTop: 8, marginHorizontal: 8, fontSize: 12, color: '#FFD54F', lineHeight: 17 }}>
                         Small amounts can leave un-refreshable dust that expires. Swapping above 700 sats keeps them refreshable.
+                    </Text>
+                )}
+                {/* Replaces the warning above rather than sitting alongside it.
+                    The screen otherwise gives no reason for the odd prefilled
+                    number, and the ceiling is worth stating because the field
+                    is editable and overshooting it silently defeats the sweep
+                    the user is here to enable.
+                    COPY: Bam finalizes. */}
+                {isDustTopup && (
+                    <Text style={{ textAlign: 'center', marginTop: 8, marginHorizontal: 8, fontSize: 12, color: '#ddd', lineHeight: 17 }}>
+                        This is meant to be small. It has to stay under {ARK_REFRESH_MIN_SATS} sats to combine with
+                        the dust you already have.
                     </Text>
                 )}
             </View>
