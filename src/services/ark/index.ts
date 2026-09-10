@@ -200,7 +200,14 @@ export type { ArkRefreshFeeView, ArkRefreshResult, ArkDelegatedRefreshResult } f
 
 export { setArkBackgroundRefreshEnabled } from './backgroundRefresh';
 
-export { maybeSweepDueArkVtxos } from './foregroundSweep';
+export { maybeSweepDueArkVtxos, maybeSweepDustArkVtxos } from './foregroundSweep';
+
+export {
+    ARK_DUST_SWEEP_MIN_BLOCKS_LEFT,
+    ARK_DUST_SWEEP_MIN_TOTAL_SATS,
+    buildDustSweepPlan,
+} from './dustSweep';
+export type { BuildDustSweepInputs, DustSweepPlan, DustSweepVtxoInput } from './dustSweep';
 
 export { barkStateTag, isActiveExit } from './barkState';
 

@@ -11,6 +11,7 @@ import {
 } from './backgroundKeychain';
 import { getArkWalletHandle, getCachedArkMnemonic, openArkWallet } from './walletHandle';
 import { hasActiveArkExitRecords } from './exit';
+import { maybeSweepDustArkVtxos } from './foregroundSweep';
 import { maintenanceArkDelegated } from './refresh';
 import { syncArkWallet } from './sync';
 import { AVG_BLOCK_MINUTES, fetchChainTipHeight } from './chainTip';
@@ -237,6 +238,23 @@ export async function runArkBackgroundMaintenance(
             }
         } catch (regErr: any) {
             console.warn('[Ark bg-refresh] expiry re-registration failed (non-fatal):', regErr?.message ?? regErr);
+        }
+
+        // Dust sweep on the same wake. `maintenanceDelegated` picks its own
+        // capsules inside bark and there is no evidence it picks sub floor ones,
+        // so a wallet whose only problem is dust would wake, do nothing, and go
+        // back to sleep. This is the one rescue that shape has, and it needs no
+        // user present: the ASP accepts the delegation in seconds and finishes
+        // the round alone. Skipped by its own guards if maintenance above just
+        // submitted a round (one submission per wallet at a time).
+        try {
+            const vtxos = await fetchArkVtxos();
+            const tipHeight = await fetchChainTipHeight();
+            if (vtxos && typeof tipHeight === 'number') {
+                await maybeSweepDustArkVtxos(vtxos.spendable, tipHeight);
+            }
+        } catch (dustErr: any) {
+            console.warn('[Ark bg-refresh] dust sweep failed (non-fatal):', dustErr?.message ?? dustErr);
         }
     } catch (err: any) {
         const s = useAuthStore.getState();

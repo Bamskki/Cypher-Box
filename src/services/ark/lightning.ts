@@ -60,6 +60,33 @@ export async function tryClaimArkLightningReceives(): Promise<ArkLightningReceiv
         // (e.g. stuck mid-round), which deadlocks the whole 30s sync via
         // its inFlight guard. Observed live: one stuck wait=true call
         // silenced every subsequent cycle until app restart.
+        // DEV only. The claim reports "All N lightning receive claim(s) failed"
+        // with no cause attached (BarkError carries only message/tag/stack, the
+        // per-receive reason is discarded at the FFI boundary), and the receive
+        // is gone by the time anything can be probed after the fact.
+        //
+        // `state` is the field that settles what actually happened, and it cost
+        // most of a night's debugging to learn that: "awaiting-payment" means
+        // nothing ever arrived and the claim failure is noise, while
+        // "htlcs-ready" or later means the money is there and the claim is
+        // genuinely broken. Those two look identical in the error.
+        //
+        // Costs an extra SDK call per sync tick, hence __DEV__ only.
+        if (__DEV__) try {
+            const pendingBefore = await handle.pendingLightningReceives();
+            console.log(
+                '[Ark claim] PRE-CLAIM pending receives:',
+                pendingBefore.length,
+                JSON.stringify(pendingBefore.map((r: { paymentHash: string; amountSats: bigint; state: string }) => ({
+                    hash: r.paymentHash.slice(0, 12),
+                    sats: Number(r.amountSats),
+                    state: r.state,
+                }))),
+            );
+        } catch (probeErr: any) {
+            console.warn('[Ark claim] PRE-CLAIM probe failed:', probeErr?.message ?? probeErr);
+        }
+
         const raw = await handle.tryClaimAllLightningReceives(false);
         console.log(
             '[Ark claim] returned',
@@ -89,6 +116,23 @@ export async function tryClaimArkLightningReceives(): Promise<ArkLightningReceiv
             '| message=', e?.message ?? String(err),
             '| inner=', e?.inner?.errorMessage ?? e?.inner?.message ?? 'n/a',
         );
+        // DEV only. The line above reports `inner= n/a` for claim failures,
+        // because BarkError puts nothing where that destructure reaches. Own
+        // properties are exactly ["message","tag","stack"] and the message is
+        // only the aggregate sentence, so the per-receive reason never crosses
+        // the binding at all. Keep the dump so the next person can confirm that
+        // for themselves rather than re-deriving it, and so it surfaces
+        // immediately if a future SDK starts attaching a cause.
+        if (__DEV__) try {
+            const own = Object.getOwnPropertyNames(err as object);
+            console.warn(
+                '[Ark claim] RAW ERROR keys=', JSON.stringify(own),
+                '| full=', JSON.stringify(err, own),
+                '| proto=', Object.prototype.toString.call(err),
+            );
+        } catch (dumpErr) {
+            console.warn('[Ark claim] RAW ERROR could not be serialised:', String(dumpErr));
+        }
         return [];
     }
 }

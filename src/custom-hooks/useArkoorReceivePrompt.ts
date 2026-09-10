@@ -9,8 +9,10 @@ import {
     ARK_REFRESH_MIN_SATS,
     ArkRefreshInFlightError,
     AVG_BLOCK_MINUTES,
+    buildDustSweepPlan,
     cancelVtxoExpiryWarnings,
     estimateArkRefreshFee,
+    maybeSweepDustArkVtxos,
     refreshArkVtxosDelegatedAndSync,
     scheduleVtxoExpiryWarnings,
 } from '@Cypher/services/ark';
@@ -421,6 +423,59 @@ export default function useArkoorReceivePrompt(): void {
                         })
                         .finally(release);
                     return;
+                }
+
+                // Before the notice: can the wallet fold this capsule in with
+                // the other dust instead? A Lightning receive is paid out of the
+                // ASP's VTXO pool and can arrive as several sub floor pieces (a
+                // 700 sat receive landed as a 300 and a 400), and each piece
+                // reaches this branch alone and unrefreshable. Together they are
+                // a dust only batch, which is the shape the ASP accepts. Telling
+                // the user to spend capsules the wallet is about to combine
+                // would be both alarming and wrong, so the sweep wins.
+                // Requires a known chain tip: without it a capsule that reports
+                // a real expiry height cannot be checked against the round
+                // window, and guessing there is what poisons a batch.
+                if (belowFloor && typeof tip === 'number') {
+                    const liveVtxos = useAuthStore.getState().arkVtxos ?? [];
+                    const refreshingIds = new Set(
+                        useAuthStore.getState().arkRefreshingVtxoIds ?? [],
+                    );
+                    const dustPlan = buildDustSweepPlan({
+                        vtxos: liveVtxos.map((v) => ({
+                            id: v.id,
+                            sats: v.sats,
+                            blocksUntilExpiry:
+                                v.expiryHeight > 0 ? v.expiryHeight - tip : null,
+                            stateTag: v.exiting ? 'exiting' : v.state,
+                            alreadyRefreshing: refreshingIds.has(v.id),
+                        })),
+                        exitInProgress: useAuthStore.getState().arkExitInProgress,
+                        minRefreshSats: ARK_REFRESH_MIN_SATS,
+                    });
+                    if (dustPlan.sweep && dustPlan.ids.includes(firstId)) {
+                        recordEvent({ kind: 'arkoor-prompt', outcome: 'auto-refresh', vtxoIdPrefix, sats: sats ?? undefined });
+                        // Optimistic, same as the single capsule path above: keep
+                        // it out of the next decision pass while the round runs.
+                        const curSweep = useAuthStore.getState().arkArkoorPromptState;
+                        const exSweep = curSweep[firstId];
+                        if (exSweep) {
+                            setArkArkoorPromptState({
+                                ...curSweep,
+                                [firstId]: { ...exSweep, status: 'refreshed' },
+                            });
+                        }
+                        SimpleToast.show(
+                            `Received ${amountPhrase}. Combining your small capsules to keep them longer.`,
+                            SimpleToast.SHORT,
+                        );
+                        // The sweep owns its own in-flight lock, pacing and
+                        // error reporting, so this is fire and forget. If it
+                        // cannot submit right now the foreground tick retries.
+                        void maybeSweepDustArkVtxos(liveVtxos, tip);
+                        release();
+                        return;
+                    }
                 }
 
                 // NOTICE path (too small to refresh, or the estimate would pull
