@@ -451,7 +451,27 @@ export async function executeArkSend(
         // throws so the user checks Activity instead of being silently re-sent.
         let settled = false;
         for (let attempt = 1; attempt <= MAX_LN_SEND_ATTEMPTS; attempt++) {
-            const status = await dispatchLnSend(handle, dest, amount, comment);
+            // Wrapped, so a connection that dies mid-dispatch is reported as
+            // UNKNOWN rather than as a failure. This is the one send path that
+            // was not: runBroadcastCall guards sendArkoorPayment and sendOnchain
+            // below, and the four other ASP-facing calls across exit.ts,
+            // offboard.ts, exitFunding.ts and recoverOnchainBoard.ts, but the
+            // Lightning branch went straight to the SDK.
+            //
+            // It is also the path where being wrong costs the most. On a
+            // transport failure the ASP may already have begun the HTLC. If the
+            // caller is told "failed" it re-arms the send control, and for an
+            // ln-address or ln-offer a retry mints a FRESH invoice with a new
+            // payment hash, so it settles alongside the first one. The recipient
+            // is paid twice and the retry loop below cannot see it, because it
+            // only ever retries on a movement confirmed refunded.
+            //
+            // Throwing here leaves the loop entirely, which is correct: an
+            // indeterminate outcome must never be retried.
+            const status = await runBroadcastCall(
+                () => dispatchLnSend(handle, dest, amount, comment),
+                'payment',
+            );
 
             // Fast path: bark settled at dispatch and handed us the preimage.
             if (status.tag === LightningSendStatus_Tags.Paid) {
@@ -536,52 +556,39 @@ export async function executeArkSend(
 
     console.log('[Ark send]', dest.kind, 'resolved id=', id.slice(0, 16) + '…');
 
-    // Slow-broadcast hint for `onchain` direction. The ASP sets the round's
-    // on-chain fee rate at construction; empirically it picks at-or-below
-    // mempool's economyFee floor to maximise its margin (the user paid Y
-    // sats but only ~45% of that hit miners; rest is server margin). This
-    // routinely lands withdrawals at ~2 sat/vb, meaning hours of mempool
-    // wait. Fire off a non-blocking mempool fee-rate fetch + warn-log if
-    // the resulting tx is well below current `fastestFee`. Pre-broadcast
-    // disclosure already exists on ArkWithdrawReviewScreen; this log is
-    // the breadcrumb a downstream auto-CPFP-prompt feature would key on.
+    // REMOVED 2026-09-08: a fire-and-forget slow-broadcast breadcrumb that
+    // fetched `https://mempool.space/api/tx/<txid>` after every on-chain
+    // withdrawal.
     //
-    // Fire-and-forget so we don't add latency to the send return path.
-    // 2-second budget on the mempool fetch; bail silently on error or
-    // timeout. Only runs for 'onchain' direction since LN sends route off
-    // chain and the rate concept doesn't apply.
-    if (dest.kind === 'onchain') {
-        const onchainTxid = id;
-        void (async () => {
-            try {
-                const controller = new AbortController();
-                const t = setTimeout(() => controller.abort(), 2000);
-                const [txRes, feeRes] = await Promise.all([
-                    fetch(`https://mempool.space/api/tx/${onchainTxid}`, { signal: controller.signal }),
-                    fetch('https://mempool.space/api/v1/fees/recommended', { signal: controller.signal }),
-                ]);
-                clearTimeout(t);
-                if (!txRes.ok || !feeRes.ok) return;
-                const tx = await txRes.json();
-                const feeRecs = await feeRes.json();
-                const vsize = (tx?.weight ?? 0) / 4;
-                const fee = tx?.fee ?? 0;
-                if (!vsize || !fee) return;
-                const broadcastRate = fee / vsize;
-                const fastest = Number(feeRecs?.fastestFee ?? 1);
-                if (broadcastRate < fastest / 2) {
-                    console.warn(
-                        '[Ark send] onchain broadcast at ' + broadcastRate.toFixed(1) +
-                        ' sat/vb (current fastestFee=' + fastest + ' sat/vb). ' +
-                        'Tx ' + onchainTxid.slice(0, 12) + '… may take hours to confirm. ' +
-                        'User can speed up via CPFP on the receiving wallet (see Hot Vault → tap pending → "Accelerate transaction").',
-                    );
-                }
-            } catch {
-                /* swallow — best-effort breadcrumb only */
-            }
-        })();
-    }
+    // It bound this device's IP to a specific withdrawal txid at a host the
+    // wallet otherwise never contacts. On a default install the chain source is
+    // blockstream.info, and esploraProviders states the invariant it broke: "A
+    // healthy wallet talks to exactly one provider." It was ungated: no setting,
+    // no consent, not even __DEV__.
+    //
+    // What it bought was a console.warn, and often not even that. There is no
+    // retry and no delay, so the lookup regularly ran before the tx had
+    // propagated, 404'd, and returned early. The disclosure was paid on every
+    // withdrawal; the breadcrumb was not always produced.
+    //
+    // NOT REPLACED, and the reason is worth recording. The plan was to keep the
+    // warning and derive it from the fee endpoint plus a local transaction size.
+    // There is no local transaction size. In a cooperative offboard the ASP
+    // builds and broadcasts the round transaction; this device never broadcasts
+    // anything, and that transaction's weight and fee are shared across everyone
+    // in the round, so `fee / vsize` was never a measure of this user's payment
+    // to begin with. `ArkSendFeeView` carries feeSats but no weight, and the SDK
+    // hands back only a txid.
+    //
+    // Nothing user-facing is lost. Pre-broadcast fee disclosure already exists
+    // on ArkWithdrawReviewScreen, and the remedy the warning pointed at (CPFP
+    // via Hot Vault, tap the pending row, Accelerate transaction) is a shipped
+    // flow the user reaches without it. The only consumer was a downstream
+    // auto-CPFP prompt that was never built.
+    //
+    // The fee-rate endpoint itself is fine and stays in use elsewhere
+    // (exitFunding.ts): it carries no user data. Only the per-txid lookup was
+    // the problem.
 
     // Re-read local state so the UI reflects the send before the 30s poll.
     //

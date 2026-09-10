@@ -7,7 +7,6 @@ import {
     View,
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
-import { Shadow } from "react-native-neomorph-shadows";
 import styles from "./styles";
 
 interface Props extends TouchableOpacityProps {
@@ -21,6 +20,29 @@ interface Props extends TouchableOpacityProps {
     linearGradientStyleMain?: any;
     gradiantColors?: string[];
     isShadow?: boolean;
+}
+
+
+/**
+ * Strip shadow-only keys, keep everything else.
+ *
+ * The `topShadowStyle` / `bottomShadowStyle` props this component takes are not
+ * pure decoration: callers put the button's width, height, border radius and
+ * alignment in them too. Dropping the styles wholesale would resize every
+ * button in the app; keeping them wholesale would draw the very shadow being
+ * removed.
+ */
+function layoutOnly(input: any) {
+    const flat = StyleSheet.flatten(input) ?? {};
+    const {
+        shadowColor,
+        shadowOffset,
+        shadowOpacity,
+        shadowRadius,
+        elevation,
+        ...rest
+    } = flat as Record<string, unknown>;
+    return rest;
 }
 
 export default function GradientView({
@@ -52,26 +74,31 @@ export default function GradientView({
                     }
                     style={[styles.linearGradient, linearGradientStyleMain]}
                 >
-                    <Shadow
-                        inner // <- enable inner shadow
-                        useArt // <- set this prop to use non-native shadow on ios
-                        style={StyleSheet.flatten([styles.shadow, topShadowStyle])}
-                    >
-                        {/* Inner Shadow renders BEFORE children so the children
-                            paint on top. Under RN 0.77 Fabric the
-                            react-native-neomorph-shadows `useArt` fallback no
-                            longer renders a vector inset rim (ART module is
-                            gone in New Arch) — instead the Shadow paints a
-                            solid translucent overlay across its bounds.
-                            Painting it before children stops the colored tint
-                            from sitting on top of the button text (the
-                            blueish/greenish glow on the labels). */}
-                        <Shadow
-                            inner // <- enable inner shadow
-                            useArt // <- set this prop to use non-native shadow on ios
-                            style={StyleSheet.flatten([styles.innerShadow, bottomShadowStyle])} />
+                    {/* NO neumorphic rim. react-native-neomorph-shadows draws
+                        its inset rim through ART, which New Arch removed, so on
+                        RN 0.77 Fabric its `useArt` fallback paints a flat
+                        translucent overlay across its own bounds instead. That
+                        overlay is the green/blue haze reported over these
+                        button labels, and it was never the effect anyone asked
+                        for: it is the library failing.
+
+                        A previous pass moved the inner Shadow above {children}
+                        so the tint stopped covering the text. That helped but
+                        left the outer Shadow still painting, so the haze stayed,
+                        just behind the label rather than over it. Both are gone
+                        now.
+
+                        The wrapper survives as a plain View because these style
+                        objects carry LAYOUT as well as shadow (width, height,
+                        borderRadius, justifyContent), and 35 call sites depend
+                        on that sizing. `layoutOnly` keeps the geometry and drops
+                        the shadow keys, which also stops React Native drawing a
+                        real iOS shadow from them: several callers pass
+                        `shadowOpacity: 2`, which is outside the valid 0..1
+                        range and would render at full strength. */}
+                    <View style={layoutOnly([styles.shadow, topShadowStyle])}>
                         {children}
-                    </Shadow>
+                    </View>
                 </LinearGradient>
             </View>
         </TouchableOpacity>

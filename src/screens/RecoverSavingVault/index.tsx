@@ -423,7 +423,7 @@ export default function RecoverSavingVault({ route }: Props) {
                 </Text>
                 <Text style={styles.keychainSub}>
                     {isSingle
-                        ? 'Tap to unlock with FaceID / passcode and restore — no typing required.'
+                        ? 'Tap to unlock with FaceID / passcode and restore. No typing required.'
                         : `We found ${keychainBackups.length} backed-up hot vaults on this device. Pick one to restore, or remove ones you no longer need.`}
                 </Text>
 

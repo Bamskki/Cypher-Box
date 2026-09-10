@@ -37,6 +37,11 @@ interface Style {
   lightningTabContent: ViewStyle;
   bitcoinTabContent: ViewStyle;
   bitcoinAddressText: TextStyle;
+  addressLabel: TextStyle;
+  addressValueTap: ViewStyle;
+  fullAddressBox: ViewStyle;
+  fullAddressText: TextStyle;
+  addressCaption: TextStyle;
   liquidTabContent: ViewStyle;
 }
 
@@ -257,11 +262,47 @@ export default StyleSheet.create<Style>({
   liquidTabContent: {
     paddingHorizontal: 16,
     paddingBottom: 16,
-    height: 220,
+    // minHeight, not height: the expanded address adds a block below the row,
+    // and a fixed height clipped it.
+    minHeight: 220,
     alignItems: 'center'
   },
   bitcoinAddressText: {
     fontSize: 18,
+    marginTop: 10,
+  },
+  addressLabel: {
+    fontSize: 15,
+    color: '#AAAAAA',
+    marginTop: 10,
+    marginRight: 8,
+  },
+  // flexShrink so a long address gives way to the label and the copy icon
+  // instead of pushing them off the row.
+  addressValueTap: {
+    flexShrink: 1,
+  },
+  fullAddressBox: {
+    marginTop: 10,
+    marginHorizontal: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.14)',
+  },
+  fullAddressText: {
+    fontSize: 12,
+    lineHeight: 17,
+    color: '#FFFFFF',
+    textAlign: 'center',
+  },
+  addressCaption: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: '#AAAAAA',
+    textAlign: 'center',
     marginTop: 10,
   },
 });

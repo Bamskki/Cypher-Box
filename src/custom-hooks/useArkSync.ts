@@ -51,6 +51,8 @@ import { processArkMovementsForActivity } from '@Cypher/services/ark/movementsAc
 // Imported from the file path directly (not the @Cypher/services/ark
 // barrel) — the barrel doesn't re-export the expiry module.
 import { formatBlocksUntil } from '@Cypher/services/ark/expiry';
+// Also not re-exported through the barrel.
+import { shouldRescheduleExpiryWarning } from '@Cypher/services/ark/chainTipFreshness';
 import useAuthStore from '@Cypher/stores/authStore';
 import { recordEvent } from '@Cypher/stores/eventLogStore';
 import {
@@ -268,6 +270,7 @@ export default function useArkSync(): UseArkSync {
     const setArkPendingLnReceives = useAuthStore((s) => s.setArkPendingLnReceives);
     const setArkChainTipHeight = useAuthStore((s) => s.setArkChainTipHeight);
     const setArkLastSyncedAt = useAuthStore((s) => s.setArkLastSyncedAt);
+    const setArkSyncFailStreak = useAuthStore((s) => s.setArkSyncFailStreak);
     const setArkLastBackupAt = useAuthStore((s) => s.setArkLastBackupAt);
     const arkRoundIntervalSecs = useAuthStore((s) => s.arkRoundIntervalSecs);
     const setArkRoundIntervalSecs = useAuthStore((s) => s.setArkRoundIntervalSecs);
@@ -1148,8 +1151,32 @@ export default function useArkSync(): UseArkSync {
                     const blocksLeft = v.expiryHeight - tip;
                     if (blocksLeft <= 0) continue;
                     const expiryAtMs = nowMs + blocksLeft * blockMs;
-                    nextScheduled[v.id] = expiryAtMs;
-                    if (needsScheduleMigration || prevScheduled[v.id] == null) {
+                    const previousAtMs = prevScheduled[v.id] ?? null;
+                    // Re-queue when our estimate of the deadline has moved.
+                    // Previously the guard was `prevScheduled[v.id] == null`
+                    // alone, which scheduled each VTXO exactly once and never
+                    // again: the estimate was recomputed every tick but the OS
+                    // alarms stayed pinned to the very first projection, and
+                    // the two were never compared. The 10-minute nominal block
+                    // interval means real expiry arrives EARLIER than that
+                    // first projection, so the drift always runs in the
+                    // direction that fires the warnings late. Re-queueing is
+                    // idempotent by id, so this replaces rather than stacks.
+                    const drifted = shouldRescheduleExpiryWarning({
+                        previousAtMs,
+                        currentAtMs: expiryAtMs,
+                    });
+                    const reschedule = needsScheduleMigration || drifted;
+                    // Carry the previous value forward when we are NOT
+                    // re-queueing. This map's documented contract is "the
+                    // expiry we scheduled FOR", and overwriting it with the
+                    // freshly recomputed estimate on every tick broke that in
+                    // two ways: drift became undetectable (each tick compared
+                    // against a value one tick old, never more than ~30s of
+                    // drift), and the map changed every tick, so the persisted
+                    // store took a write every 30s for no reason.
+                    nextScheduled[v.id] = reschedule ? expiryAtMs : (previousAtMs ?? expiryAtMs);
+                    if (reschedule) {
                         try {
                             // Pass per-VTXO sats so the notification title
                             // carries "{N} sats" instead of the generic
@@ -1541,6 +1568,10 @@ export default function useArkSync(): UseArkSync {
                 setArkChainTipHeight(tip);
             }
             setArkLastSyncedAt(Date.now());
+            // A completed tick is the only thing that clears the streak, so
+            // the connectivity dot recovers the moment the vault is reachable
+            // again rather than waiting for staleness to age out.
+            setArkSyncFailStreak(0);
             setLastError(null);
 
             // --- Soonest spendable expiry (feeds the failure escalation) ---
@@ -1672,6 +1703,12 @@ export default function useArkSync(): UseArkSync {
             }
         } catch (err) {
             console.warn('[Ark] sync failed:', err);
+            // Record the failure itself. Everything else here is written only
+            // on success, which left the UI inferring trouble from staleness
+            // and taking 20 minutes to admit a vault was offline. Read from
+            // the store rather than a closed-over value so the count is right
+            // even if this callback is stale.
+            setArkSyncFailStreak(useAuthStore.getState().arkSyncFailStreak + 1);
             setLastError(err instanceof Error ? err : new Error(String(err)));
         } finally {
             inFlight.current = false;
@@ -1684,6 +1721,7 @@ export default function useArkSync(): UseArkSync {
         setArkPendingLnReceives,
         setArkChainTipHeight,
         setArkLastSyncedAt,
+        setArkSyncFailStreak,
         setArkLastBackupAt,
         arkExitInProgress,
         arkExitDestinationAddress,

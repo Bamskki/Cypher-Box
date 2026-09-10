@@ -809,7 +809,7 @@ export function ArkSettingsBody({ view = 'backup' }: { view?: 'backup' | 'action
     if (driveBusy) return;
     Alert.alert(
       'Disconnect Google Drive?',
-      'Your existing backup file will stay in Drive — disconnecting only stops future uploads. You can reconnect any time.',
+      'Your existing backup file will stay in Drive. Disconnecting only stops future uploads. You can reconnect any time.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -858,12 +858,12 @@ export function ArkSettingsBody({ view = 'backup' }: { view?: 'backup' | 'action
     const available = await isICloudBackupAvailable();
     if (available) {
       setArkIosBackupReminderActive(false);
-      SimpleToast.show('iCloud Drive verified — reminder dismissed.', SimpleToast.LONG);
+      SimpleToast.show('iCloud Drive verified. Reminder dismissed.', SimpleToast.LONG);
       return;
     }
     Alert.alert(
       "iCloud Drive isn't on for Cypher Box",
-      "Open iOS Settings → [your name] → iCloud → iCloud Drive → scroll the app list and switch Cypher Box ON. Then come back here and tap 'iCloud Drive is on — dismiss' again.",
+      "Open iOS Settings → [your name] → iCloud → iCloud Drive → scroll the app list and switch Cypher Box ON. Then come back here and tap 'iCloud Drive is on, dismiss' again.",
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Open Settings', onPress: () => Linking.openSettings().catch(() => {}) },
@@ -1968,7 +1968,7 @@ export function ArkSettingsBody({ view = 'backup' }: { view?: 'backup' | 'action
                   reminder is active.
                 - How to enable iCloud Drive: opens the iCloud-hint
                   alert (links into iOS Settings).
-                - iCloud Drive is on — dismiss: auto-validates via the
+                - iCloud Drive is on, dismiss: auto-validates via the
                   ubiquity probe before flipping the flag off, so a
                   user who taps it without actually enabling iCloud
                   Drive is sent back to Settings rather than silently
@@ -1989,7 +1989,7 @@ export function ArkSettingsBody({ view = 'backup' }: { view?: 'backup' | 'action
                 ⚠ Re-export backup after every receive
               </Text>
               <Text style={{ fontSize: 12, color: colors.white, lineHeight: 17 }}>
-                When you created this wallet, you saved a one-time snapshot of the encrypted backup file. That file doesn't auto-update unless iCloud Drive is on for Cypher Box. Tap "Re-export now" after every Lightning receive — or enable iCloud Drive for Cypher Box and this reminder will go away.
+                When you created this wallet, you saved a one-time snapshot of the encrypted backup file. That file doesn't auto-update unless iCloud Drive is on for Cypher Box. Tap "Re-export now" after every Lightning receive, or enable iCloud Drive for Cypher Box and this reminder will go away.
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 10 }}>
                 <TouchableOpacity
@@ -2048,7 +2048,7 @@ export function ArkSettingsBody({ view = 'backup' }: { view?: 'backup' | 'action
                   }}
                 >
                   <Text bold style={{ fontSize: 12, color: '#4ADE80' }}>
-                    iCloud Drive is on — dismiss
+                    iCloud Drive is on, dismiss
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -2626,7 +2626,7 @@ export function ArkSettingsBody({ view = 'backup' }: { view?: 'backup' | 'action
                       When to use Emergency Exit
                     </Text>
                     {'\n\n'}
-                    Normal sends, swaps and refreshes all go through the Ark server (Second.tech). Emergency Exit is the trustless fallback that doesn't need the server — it broadcasts pre-signed exit transactions directly to the Bitcoin chain.
+                    Normal sends, swaps and refreshes all go through the Ark server (Second.tech). Emergency Exit is the trustless fallback that doesn't need the server. It broadcasts pre-signed exit transactions directly to the Bitcoin chain.
                     {'\n\n'}
                     Use it when:
                     {'\n'}
@@ -2638,7 +2638,7 @@ export function ArkSettingsBody({ view = 'backup' }: { view?: 'backup' | 'action
                     {'\n'}
                     • News breaks of a server-side compromise and you want out fast without waiting for cooperative paths
                     {'\n\n'}
-                    Emergency Exit moves funds on-chain (slower, higher fee) so it's the break-glass option, not the everyday one. In normal use prefer swap or refresh — same destinations, faster, cheaper.
+                    Emergency Exit moves funds on-chain (slower, higher fee) so it's the break-glass option, not the everyday one. In normal use prefer swap or refresh: same destinations, faster, cheaper.
                   </Text>
                 </View>
               )}
@@ -2700,7 +2700,7 @@ export function ArkSettingsBody({ view = 'backup' }: { view?: 'backup' | 'action
                   </Text>
                   <Text style={{ fontSize: 13, color: '#AAA', marginBottom: 14 }}>
                     Pick a destination for your on-chain payout. The exit takes
-                    ~24h to clear the protocol timelock — the address can't be
+                    ~24h to clear the protocol timelock, and the address can't be
                     changed after you start.
                   </Text>
 
@@ -2746,8 +2746,8 @@ export function ArkSettingsBody({ view = 'backup' }: { view?: 'backup' | 'action
                 <>
                   <Text bold style={{ fontSize: 17, color: '#FFF', marginBottom: 10 }}>
                     {pickerStep === 'hot-addr'
-                      ? (addrListOpen ? 'Pick a Hot Vault address' : 'Hot Vault — destination')
-                      : (addrListOpen ? 'Pick a Cold Storage address' : 'Cold Storage — destination')}
+                      ? (addrListOpen ? 'Pick a Hot Vault address' : 'Hot Vault destination')
+                      : (addrListOpen ? 'Pick a Cold Storage address' : 'Cold Storage destination')}
                   </Text>
 
                   {/* Default flow: QR + address + "Choose another" — mirrors
@@ -3168,7 +3168,7 @@ export function ArkSettingsBody({ view = 'backup' }: { view?: 'backup' | 'action
                 Delete Ark vault?
               </Text>
               <Text style={{ fontSize: 13, color: '#CCC', lineHeight: 19, marginBottom: 16 }}>
-                This wipes your Ark wallet from this device — the local
+                This wipes your Ark wallet from this device. The local
                 database with your VTXO capsules. To restore funds you'll
                 still need your{' '}
                 <Text bold style={{ color: '#FFF' }}>ark-backup file</Text>.

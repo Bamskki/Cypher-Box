@@ -20,6 +20,7 @@ import { dispatchReset, resetAndNavigate } from "@Cypher/helpers/navigation";
 import { startsWithLn } from "../Send";
 import { getStrikeCurrency } from "@Cypher/helpers/coinosHelper";
 import CustomProgressBar from "@Cypher/components/CustomProgressBar";
+import { LightningSendSuccess } from "@Cypher/components";
 
 export default function Transaction({navigation, route}: any) {
     const {matchedRate, currency = 'USD', type, value, converted, isSats, to, item, swappedTo} = route?.params;
@@ -105,6 +106,49 @@ export default function Transaction({navigation, route}: any) {
     });
 
     console.log(type, amountUSD)
+
+    // Lightning payment sends take the shared success view (Bam's call,
+    // 2026-09-09), so Strike, CoinOS and Bark all end a Lightning send the
+    // same way.
+    //
+    // Everything else keeps the screen below, and the exclusions are the
+    // point. BUY and SELL are Strike fiat trades, not Lightning payments, and
+    // this screen carries their "Purchase Complete" / "Sale Complete" copy. A
+    // swap (`swappedTo`) passes a sentinel like 'Ark' or 'coinos' as `to`
+    // rather than a real address, so it must not be rendered as "Paid to Ark",
+    // and it has its own success view already.
+    const isLightningSend =
+        type !== 'BUY' &&
+        type !== 'SELL' &&
+        !swappedTo &&
+        !!to &&
+        (startsWithLn(to) || String(to).includes('@'));
+
+    if (isLightningSend && response) {
+        return (
+            <ScreenLayout disableScroll showToolbar title={""} isBackButton={false}>
+                <LightningSendSuccess
+                    sats={amountSat}
+                    fiat={String(amountUSD)}
+                    fiatSymbol={getStrikeCurrency(currency)}
+                    // An ln-address is short and worth reading in full; a
+                    // BOLT11 invoice is not, so it is shortened.
+                    paidTo={
+                        String(to).includes('@')
+                            ? String(to)
+                            : `${String(to).slice(0, 12)}…${String(to).slice(-8)}`
+                    }
+                    // No `fromLabel`: this screen is reached from several
+                    // Strike and CoinOS paths and none of them pass which
+                    // wallet paid. Naming the wrong wallet on a payment
+                    // receipt is worse than naming none, so it is left off
+                    // until the callers carry it. Bark sends do show it.
+                    onHome={onPressClickHandler}
+                />
+            </ScreenLayout>
+        );
+    }
+
     return (
         <ScreenLayout disableScroll showToolbar title={""} isBackButton={false}>
             <View style={styles.main}>

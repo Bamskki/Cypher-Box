@@ -69,7 +69,7 @@ export default function SavingVault() {
                 );
                 setKeychainStatus("err");
                 SimpleToast.show(
-                    "Keychain save skipped — you can enable it later in vault settings",
+                    "Keychain save skipped. You can enable it later in vault settings",
                     SimpleToast.LONG,
                 );
             } else {
@@ -102,7 +102,7 @@ export default function SavingVault() {
                         result.error,
                     );
                     SimpleToast.show(
-                        "Keychain save failed — please back up the 12 words manually",
+                        "Keychain save failed. Please back up the 12 words manually",
                         SimpleToast.LONG,
                     );
                     // Intentional: we do NOT abort the flow here. The seed
@@ -185,7 +185,7 @@ export default function SavingVault() {
                 )}
                 {keychainStatus === "err" && (
                     <Text style={styles.keychainStatusErr}>
-                        ✗ Keychain save failed — paper backup still required
+                        ✗ Keychain save failed. Paper backup still required
                     </Text>
                 )}
 

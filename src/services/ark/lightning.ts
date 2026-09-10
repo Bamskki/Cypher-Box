@@ -1,6 +1,7 @@
 import bolt11 from 'bolt11';
 
 import { getArkWalletHandle } from './walletHandle';
+import { looksLikeConnectionLoss } from './networkFault';
 
 /**
  * Plain-JS view of a pending Lightning receive.
@@ -60,6 +61,33 @@ export async function tryClaimArkLightningReceives(): Promise<ArkLightningReceiv
         // (e.g. stuck mid-round), which deadlocks the whole 30s sync via
         // its inFlight guard. Observed live: one stuck wait=true call
         // silenced every subsequent cycle until app restart.
+        // DEV only. The claim reports "All N lightning receive claim(s) failed"
+        // with no cause attached (BarkError carries only message/tag/stack, the
+        // per-receive reason is discarded at the FFI boundary), and the receive
+        // is gone by the time anything can be probed after the fact.
+        //
+        // `state` is the field that settles what actually happened, and it cost
+        // most of a night's debugging to learn that: "awaiting-payment" means
+        // nothing ever arrived and the claim failure is noise, while
+        // "htlcs-ready" or later means the money is there and the claim is
+        // genuinely broken. Those two look identical in the error.
+        //
+        // Costs an extra SDK call per sync tick, hence __DEV__ only.
+        if (__DEV__) try {
+            const pendingBefore = await handle.pendingLightningReceives();
+            console.log(
+                '[Ark claim] PRE-CLAIM pending receives:',
+                pendingBefore.length,
+                JSON.stringify(pendingBefore.map((r: { paymentHash: string; amountSats: bigint; state: string }) => ({
+                    hash: r.paymentHash.slice(0, 12),
+                    sats: Number(r.amountSats),
+                    state: r.state,
+                }))),
+            );
+        } catch (probeErr: any) {
+            console.warn('[Ark claim] PRE-CLAIM probe failed:', probeErr?.message ?? probeErr);
+        }
+
         const raw = await handle.tryClaimAllLightningReceives(false);
         console.log(
             '[Ark claim] returned',
@@ -89,6 +117,23 @@ export async function tryClaimArkLightningReceives(): Promise<ArkLightningReceiv
             '| message=', e?.message ?? String(err),
             '| inner=', e?.inner?.errorMessage ?? e?.inner?.message ?? 'n/a',
         );
+        // DEV only. The line above reports `inner= n/a` for claim failures,
+        // because BarkError puts nothing where that destructure reaches. Own
+        // properties are exactly ["message","tag","stack"] and the message is
+        // only the aggregate sentence, so the per-receive reason never crosses
+        // the binding at all. Keep the dump so the next person can confirm that
+        // for themselves rather than re-deriving it, and so it surfaces
+        // immediately if a future SDK starts attaching a cause.
+        if (__DEV__) try {
+            const own = Object.getOwnPropertyNames(err as object);
+            console.warn(
+                '[Ark claim] RAW ERROR keys=', JSON.stringify(own),
+                '| full=', JSON.stringify(err, own),
+                '| proto=', Object.prototype.toString.call(err),
+            );
+        } catch (dumpErr) {
+            console.warn('[Ark claim] RAW ERROR could not be serialised:', String(dumpErr));
+        }
         return [];
     }
 }
@@ -233,21 +278,41 @@ export async function cancelArkLightningReceive(
             return {
                 ok: false,
                 kind: 'preimage-revealed',
-                reason: 'Payment is already in flight — can\'t cancel.',
+                reason: 'Payment is already in flight, so it can\'t be cancelled.',
             };
         }
         if (/already finished/i.test(msg)) {
             return {
                 ok: false,
                 kind: 'already-finished',
-                reason: 'Receive already settled — nothing to cancel.',
+                reason: 'Receive already settled, so there is nothing to cancel.',
+            };
+        }
+        // A dropped connection is not a refusal. Without this branch anything
+        // the two guards above do not match fell through to `kind: 'unknown'`
+        // with the raw text as its reason, which reads to the user as a
+        // definite "it did not happen" for an outcome we cannot know: the ASP
+        // may have accepted the cancellation before the line died.
+        //
+        // Bounded, unlike the send paths: the UI leaves the row in place on
+        // failure, so the next 30s sync corrects the display either way. The
+        // fix is about not asserting something we cannot know.
+        if (looksLikeConnectionLoss(err)) {
+            return {
+                ok: false,
+                kind: 'unknown',
+                reason: 'The connection dropped, so this may or may not have been cancelled. Check again in a moment.',
             };
         }
         console.warn('[Ark cancel-ln-recv] failed:', err);
         return {
             ok: false,
             kind: 'unknown',
-            reason: msg || 'Cancel failed; try again or wait for the next sync.',
+            // Prefer the written sentence over bark's internal text. `msg ||`
+            // had it backwards: it showed the SDK's own vocabulary, unbounded
+            // in length and written for developers, and the human fallback only
+            // appeared when the SDK gave us nothing at all.
+            reason: 'Cancel failed; try again or wait for the next sync.',
         };
     }
 }

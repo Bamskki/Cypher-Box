@@ -14,6 +14,7 @@ export { default as GradientTabNew } from './GradientTabNew';
 export { default as GradientInput } from './GradientInput';
 export { default as GradientInputNew } from './GradientInputNew';
 export { default as CustomKeyboard } from './CustomKeyboard';
+export { default as LightningSendSuccess } from './LightningSendSuccess';
 export { default as Blink } from './Blink';
 export { default as SwipeButton } from './SwipeButton';
 export { default as RingEffect } from './RingEffect';

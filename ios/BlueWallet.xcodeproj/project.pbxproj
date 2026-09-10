@@ -669,6 +669,7 @@
 				4B36CFF6FE55027DCA5CB6E1 /* Upload Bugsnag dSYM */,
 				9FF41DE89C69AED2AC3BAA92 /* [CP] Embed Pods Frameworks */,
 				98840B4C0BAF250AB1154EC4 /* [CP] Copy Pods Resources */,
+				D69E95167DDF706690AF1C07 /* Debug only: allow local networking */,
 			);
 			buildRules = (
 			);
@@ -1074,6 +1075,25 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		D69E95167DDF706690AF1C07 /* Debug only: allow local networking */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Debug only: allow local networking";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Debug builds only. Permits cleartext HTTP to private-range addresses so a\n# physical device can reach the Metro dev server over the LAN. Release and\n# archive builds ship Info.plist exactly as committed, with neither key.\nif [ \"${CONFIGURATION}\" != \"Debug\" ]; then\n  exit 0\nfi\n\nPLIST=\"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\nPB=/usr/libexec/PlistBuddy\nDESC=\"Development builds connect to a Metro server on your local network.\"\n\nif [ ! -f \"${PLIST}\" ]; then\n  echo \"warning: no Info.plist at ${PLIST}, skipping local networking patch\"\n  exit 0\nfi\n\n\"${PB}\" -c \"Add :NSAppTransportSecurity:NSAllowsLocalNetworking bool true\" \"${PLIST}\" 2>/dev/null \\\n  || \"${PB}\" -c \"Set :NSAppTransportSecurity:NSAllowsLocalNetworking true\" \"${PLIST}\"\n\n\"${PB}\" -c \"Add :NSLocalNetworkUsageDescription string ${DESC}\" \"${PLIST}\" 2>/dev/null \\\n  || \"${PB}\" -c \"Set :NSLocalNetworkUsageDescription ${DESC}\" \"${PLIST}\"\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -1172,7 +1192,7 @@
 				CODE_SIGN_ENTITLEMENTS = BlueWallet/BlueWallet.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 20;
+				CURRENT_PROJECT_VERSION = 21;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 8J926CQQU9;
 				ENABLE_BITCODE = NO;
@@ -1196,7 +1216,7 @@
 					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
 					"$(inherited)",
 				);
-				MARKETING_VERSION = 0.1.9;
+				MARKETING_VERSION = 0.1.10;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -1227,7 +1247,7 @@
 				CODE_SIGN_ENTITLEMENTS = BlueWallet/BlueWalletRelease.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 20;
+				CURRENT_PROJECT_VERSION = 21;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 8J926CQQU9;
 				ENABLE_BITCODE = NO;
@@ -1246,7 +1266,7 @@
 					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
 					"$(inherited)",
 				);
-				MARKETING_VERSION = 0.1.9;
+				MARKETING_VERSION = 0.1.10;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -1404,7 +1424,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 20;
+				CURRENT_PROJECT_VERSION = 21;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = ZJTFQCTLVX;
@@ -1455,7 +1475,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 20;
+				CURRENT_PROJECT_VERSION = 21;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = ZJTFQCTLVX;
@@ -1495,7 +1515,7 @@
 				CODE_SIGN_ENTITLEMENTS = BlueWallet/BlueWallet.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 20;
+				CURRENT_PROJECT_VERSION = 21;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 8J926CQQU9;
 				ENABLE_BITCODE = NO;
@@ -1550,7 +1570,7 @@
 				CODE_SIGN_ENTITLEMENTS = BlueWallet/BlueWalletRelease.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 20;
+				CURRENT_PROJECT_VERSION = 21;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 8J926CQQU9;
 				ENABLE_BITCODE = NO;

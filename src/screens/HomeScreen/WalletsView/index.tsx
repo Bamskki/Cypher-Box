@@ -3,6 +3,7 @@ import { Text } from "@Cypher/component-library";
 import { Refresh } from "@Cypher/assets/images";
 import { ARK_REFRESH_MIN_SATS, FEATURE_ARK_ENABLED, areBgNotificationsEnabled, blocksToDays, cancelArkPendingRound, isVtxoMidRound, sumMidRoundVtxos } from "@Cypher/services/ark";
 import useAuthStore from "@Cypher/stores/authStore";
+import { deriveVaultConnectivity } from "@Cypher/services/ark/chainTipFreshness";
 import screenWidth from "@Cypher/style-guide/screenWidth";
 import { colors } from "@Cypher/style-guide";
 import { dispatchNavigate } from "@Cypher/helpers";
@@ -10,6 +11,7 @@ import { CarouselPageVisibilityContext } from "@Cypher/custom-hooks";
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { Animated, AppState, FlatList, Image, NativeScrollEvent, NativeSyntheticEvent, Platform, TouchableOpacity, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
+import SimpleToast from "react-native-simple-toast";
 
 interface Props {
     balance: any;
@@ -81,7 +83,39 @@ const WalletsView = forwardRef<WalletsViewHandle, Props>(function WalletsView({
         arkRefreshStuck,
         setArkPendingOnchainRecoverOpen,
         arkExitFeeReserveSats,
+        setArkExitFeeReserveSats,
+        // Behind the offline warning below. All three are written only on a
+        // SUCCESSFUL read, which is what makes their age the signal.
+        arkChainTipHeightAt,
+        arkLastSyncedAt,
+        arkSyncFailStreak,
     } = useAuthStore();
+
+    /**
+     * Slow clock for the offline warning.
+     *
+     * The warning has to be able to APPEAR with no store activity at all: the
+     * failure it reports is exactly the one that stops anything being written.
+     * Without a tick of its own the row would keep showing whatever it last
+     * said while the vault sat unreachable. 30s matches the Capsules tab and
+     * the home card, and the thresholds it feeds are minutes wide.
+     */
+    const [connTick, setConnTick] = useState(() => Date.now());
+    useEffect(() => {
+        const t = setInterval(() => setConnTick(Date.now()), 30_000);
+        return () => clearInterval(t);
+    }, []);
+
+    const vaultConnectivity = useMemo(
+        () =>
+            deriveVaultConnectivity({
+                tipFetchedAtMs: arkChainTipHeightAt,
+                lastSyncedAtMs: arkLastSyncedAt,
+                nowMs: connTick,
+                syncFailStreak: arkSyncFailStreak,
+            }),
+        [arkChainTipHeightAt, arkLastSyncedAt, arkSyncFailStreak, connTick],
+    );
 
     // Per-card vertical nudge for the Ark slide.
     //
@@ -154,7 +188,7 @@ const WalletsView = forwardRef<WalletsViewHandle, Props>(function WalletsView({
     }, [arkVtxos, arkChainTipHeight]);
 
     const expiryWarning = soonestDaysLeft !== null && soonestDaysLeft < 7
-        ? `Oldest capsule expires in ${Math.round(soonestDaysLeft)}d — refresh soon`
+        ? `Oldest capsule expires in ${Math.round(soonestDaysLeft)}d, refresh soon`
         : null;
 
     // Dust capsules: below the PER-INPUT refresh floor (ARK_REFRESH_MIN_SATS,
@@ -239,6 +273,29 @@ const WalletsView = forwardRef<WalletsViewHandle, Props>(function WalletsView({
     }, []);
 
     const bgRefreshStatus = useMemo(() => {
+        // OFFLINE FIRST, ahead of everything below including an in-flight
+        // refresh.
+        //
+        // Every other line in this chain is derived from the cached chain tip:
+        // how many days a capsule has left, whether it is dust, whether a
+        // refresh is due. When the vault cannot be reached none of those
+        // numbers are reads, they are projections off a tip that stopped
+        // moving, and they keep counting down as if nothing were wrong. That
+        // is the failure that misleads in the expensive direction, so it
+        // outranks the advice built on top of it.
+        //
+        // The card's own status dot says the same thing quietly. This row says
+        // it in red, because the dot answers "is it connected" and this answers
+        // "should you trust the numbers you are looking at".
+        if (vaultConnectivity.level === 'red') {
+            return {
+                // COPY: Bam finalizes.
+                text: 'Bark vault is offline. Capsule times shown are estimates until it reconnects.',
+                error: true,
+                tapTab: 0,
+            };
+        }
+
         // Refresh in flight: short-circuit to all-clear. The Ark Card
         // itself surfaces the live "Refreshing N capsules · X sats" line
         // inside its balance area (see Card's `refreshingInfo` prop) so
@@ -265,11 +322,19 @@ const WalletsView = forwardRef<WalletsViewHandle, Props>(function WalletsView({
             // and the recover section this deep-links to is hidden anyway.
             if (stuckSats > 0 && stuckSats < STUCK_BOARD_MIN_SATS && (arkExitFeeReserveSats ?? 0) <= 0) {
                 return {
-                    text: `You have ${stuckSats.toLocaleString()} sats failing to board your Bark vault. Recover here.`,
+                    text: `You have ${stuckSats.toLocaleString()} sats failing to board your Bark vault. Recover here, or use them for Emergency Exit fees.`,
                     linkText: 'here',
                     tapTab: 0, // Capsules tab
                     openOnchainRecover: true,
                     error: true,
+                    // Drives the second action under this banner. The in-card
+                    // path (ArkWallet) has offered this since the reserve
+                    // landed, but that whole block is gated behind
+                    // `!hideActionButtons`, so in shared-button mode (the
+                    // default home layout) the only option ever shown was
+                    // Recover. Same call and same wording as the in-card link
+                    // so the two surfaces stay one feature.
+                    reserveExitFeeSats: stuckSats,
                 };
             }
         }
@@ -314,7 +379,7 @@ const WalletsView = forwardRef<WalletsViewHandle, Props>(function WalletsView({
 
         if (Platform.OS === 'ios' && arkIosBackupReminderActive) {
             return {
-                text: 'Backup not synced — enable iCloud Drive in iOS Settings',
+                text: 'Backup not synced. Enable iCloud Drive in iOS Settings',
                 error: true,
             };
         }
@@ -327,6 +392,11 @@ const WalletsView = forwardRef<WalletsViewHandle, Props>(function WalletsView({
         arkIosBackupReminderActive,
         pendingRound,
         arkBalanceDetail,
+        // Without this the offline branch never re-evaluates and the row keeps
+        // showing whatever it said when the vault was last reachable, which is
+        // the exact failure the branch exists to report.
+        vaultConnectivity,
+        arkExitFeeReserveSats,
     ]);
 
     const [indexStrike, setIndexStrike] = useState(0);
@@ -1094,6 +1164,45 @@ const WalletsView = forwardRef<WalletsViewHandle, Props>(function WalletsView({
                                 {body}
                             </Text>
                         </TouchableOpacity>
+                        {/* Second action: keep the un-boardable funds on-chain
+                            as the exit-fee reserve instead of recovering them.
+                            Arms arkExitFeeReserveSats, which tells sync.ts to
+                            stop trying to board them and suppresses this
+                            banner on the next tick.
+
+                            Separate TouchableOpacity rather than a second link
+                            inside `body`, because the banner's whole text is
+                            already one tap target routing to Recover, and
+                            nesting a differently-routed link inside it makes
+                            the hit areas ambiguous. */}
+                        {Number((bgRefreshStatus as any).reserveExitFeeSats ?? 0) > 0 && (
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setArkExitFeeReserveSats(
+                                        Number((bgRefreshStatus as any).reserveExitFeeSats),
+                                    );
+                                    SimpleToast.show('Kept on-chain for exit fees.', SimpleToast.SHORT);
+                                }}
+                                activeOpacity={0.7}
+                                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                accessibilityRole="button"
+                                accessibilityLabel="Leave on-chain funds as exit fees"
+                                style={{ marginTop: 6 }}
+                            >
+                                <Text
+                                    h4
+                                    bold
+                                    style={{
+                                        color: colors.gray.light,
+                                        textAlign: 'center',
+                                        textDecorationLine: 'underline',
+                                        paddingHorizontal: 12,
+                                    }}
+                                >
+                                    Leave on-chain funds as exit fees
+                                </Text>
+                            </TouchableOpacity>
+                        )}
                     </Animated.View>
                 );
             })()}

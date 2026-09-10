@@ -3,8 +3,7 @@ import { View, Image, ActivityIndicator, TouchableOpacity, Animated, Easing, Ale
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 import LinearGradient from "react-native-linear-gradient";
-import { CustomKeyboard, GradientInput } from "@Cypher/components";
-import { GradientShock, Electricity } from "@Cypher/assets/images";
+import { CustomKeyboard, GradientInput , LightningSendSuccess } from "@Cypher/components";
 import { dispatchNavigate, dispatchReset } from "@Cypher/helpers";
 import { colors } from "@Cypher/style-guide";
 import useAuthStore from "@Cypher/stores/authStore";
@@ -22,6 +21,10 @@ import {
     type LightningSwapProvider,
     type LightningSwapProviderId,
 } from "@Cypher/services/lightningSwap";
+// From the defining module rather than the ark barrel, matching the direct
+// imports ArkCapsules already uses for constants the barrel has in-flight
+// edits around. Same value either way; this just avoids the churn.
+import { ARK_REFRESH_MIN_SATS } from "@Cypher/services/ark/config";
 import { getFiatRate } from "../../../models/fiatUnit";
 
 // Warning-yellow gradient for the small-amount "Swap anyways" CTA + dust note.
@@ -33,12 +36,52 @@ const SMALL_RECEIVE_SATS = 700;
 export default function SwapAmount() {
     const navigation = useNavigation();
     const route = useRoute();
-    const { swapFrom, sendTo, fromAddress, toAddress, sourceBalance = 0 } = route.params as {
+    const { swapFrom, sendTo, fromAddress, toAddress, sourceBalance = 0, prefillSats, maxSats, purpose } = route.params as {
         swapFrom: LightningSwapProviderId;
         sendTo: LightningSwapProviderId;
         fromAddress?: string;
         toAddress?: string;
         sourceBalance?: number;
+        /**
+         * Amount to open the screen with, in sats.
+         *
+         * Set by callers that already know the number, currently the dust
+         * top-up: the user is not choosing an amount there, they are covering a
+         * specific shortfall, and making them work it out is asking them to do
+         * arithmetic the app already did. Still editable; it is a starting
+         * value, not a lock.
+         */
+        prefillSats?: number;
+        /**
+         * Hard ceiling on the amount, in sats.
+         *
+         * Set by the dust "move them to CoinOS" option. That path exists to
+         * clear dust, and editing the amount up would pull healthy capsules out
+         * of the vault instead, which is the opposite of what the user came for
+         * and defeats the point of the option.
+         *
+         * Enforced by clamping rather than by making the field read-only: the
+         * user can still type, still reduce it, and sees the value snap back if
+         * they overshoot. Locking the keyboard outright would leave them
+         * poking at a dead input with no explanation.
+         */
+        maxSats?: number;
+        /**
+         * Why this screen was opened, when the answer changes what to say.
+         *
+         * Passed explicitly rather than inferred from `prefillSats` or from the
+         * rail pair. Inference was the tempting shortcut and it is wrong twice
+         * over: another caller prefilling an amount would silently inherit
+         * dust copy, and `swapFrom`/`sendTo` cannot tell a deliberate 319-sat
+         * top-up apart from a user typing 319 by hand, which is exactly the
+         * case the small-amount warning exists to catch.
+         *
+         * 'dust-topup'  covering a shortfall so a dust batch clears the
+         *               refresh floor. Small is the POINT here, so the generic
+         *               small-amount warning is suppressed.
+         * 'dust-exit'   taking dust off Ark entirely.
+         */
+        purpose?: 'dust-topup' | 'dust-exit';
     };
     const { matchedRateStrike, strikeUser } = useAuthStore();
     // Ark sats locked in an in-flight refresh. When the source is Ark and the
@@ -95,6 +138,26 @@ export default function SwapAmount() {
         return () => clearTimeout(t);
     }, [loading]);
     const [success, setSuccess] = useState(false);
+    // Seed the amount from `prefillSats` exactly once. Not a controlled sync:
+    // re-applying it would fight the user every time they edited the field.
+    const prefillApplied = React.useRef(false);
+    // Clamp to `maxSats` whenever the typed value goes over. Runs on the sats
+    // field only: fiat entry is mirrored into it by CustomKeyboard, so this
+    // catches both.
+    React.useEffect(() => {
+        if (!maxSats || !Number.isFinite(maxSats) || maxSats <= 0) return;
+        const typed = Number(sats);
+        if (Number.isFinite(typed) && typed > maxSats) {
+            setSats(String(maxSats));
+        }
+    }, [sats, maxSats]);
+    React.useEffect(() => {
+        if (prefillApplied.current) return;
+        if (!prefillSats || !Number.isFinite(prefillSats) || prefillSats <= 0) return;
+        prefillApplied.current = true;
+        setIsSats(true);
+        setSats(String(Math.ceil(prefillSats)));
+    }, [prefillSats]);
     const [swappedSats, setSwappedSats] = useState('');
     const [swappedFiat, setSwappedFiat] = useState('');
     const [feeSats, setFeeSats] = useState<number | null>(null);
@@ -252,7 +315,7 @@ export default function SwapAmount() {
             const fallback = 'Swap failed. Please try again.';
             let message = fallback;
             if (error instanceof InvoiceCreationFailedError) {
-                message = `${toProvider?.displayName ?? sendTo} couldn't create an invoice — ${(error.cause as Error)?.message ?? error.message}`;
+                message = `${toProvider?.displayName ?? sendTo} couldn't create an invoice: ${(error.cause as Error)?.message ?? error.message}`;
             } else if (error instanceof PaymentFailedError) {
                 // A VTXO the Ark server reports as "unregistered" is a stuck
                 // capsule that blocks EVERY Ark send until it's cleared. The raw
@@ -301,60 +364,6 @@ export default function SwapAmount() {
     };
 
     // Expanding ring animations
-    const slideAnim = React.useRef(new Animated.Value(300)).current;
-    const fadeAnim = React.useRef(new Animated.Value(0)).current;
-    const ring1Scale = React.useRef(new Animated.Value(1)).current;
-    const ring1Opacity = React.useRef(new Animated.Value(0.8)).current;
-    const ring2Scale = React.useRef(new Animated.Value(1)).current;
-    const ring2Opacity = React.useRef(new Animated.Value(0.8)).current;
-
-    React.useEffect(() => {
-        if (success) {
-            // Slide up + fade in
-            Animated.parallel([
-                Animated.timing(slideAnim, {
-                    toValue: 0,
-                    duration: 600,
-                    easing: Easing.out(Easing.cubic),
-                    useNativeDriver: true,
-                }),
-                Animated.timing(fadeAnim, {
-                    toValue: 1,
-                    duration: 600,
-                    easing: Easing.out(Easing.cubic),
-                    useNativeDriver: true,
-                }),
-            ]).start();
-
-            const createRingAnimation = (scale: Animated.Value, opacity: Animated.Value, delay: number) => {
-                return Animated.loop(
-                    Animated.sequence([
-                        Animated.delay(delay),
-                        Animated.parallel([
-                            Animated.timing(scale, {
-                                toValue: 1.8,
-                                duration: 2000,
-                                easing: Easing.out(Easing.ease),
-                                useNativeDriver: true,
-                            }),
-                            Animated.timing(opacity, {
-                                toValue: 0,
-                                duration: 2000,
-                                easing: Easing.out(Easing.ease),
-                                useNativeDriver: true,
-                            }),
-                        ]),
-                        Animated.parallel([
-                            Animated.timing(scale, { toValue: 1, duration: 0, useNativeDriver: true }),
-                            Animated.timing(opacity, { toValue: 0.8, duration: 0, useNativeDriver: true }),
-                        ]),
-                    ])
-                );
-            };
-            createRingAnimation(ring1Scale, ring1Opacity, 0).start();
-            createRingAnimation(ring2Scale, ring2Opacity, 700).start();
-        }
-    }, [success]);
 
     /**
      * Render a wallet badge in the from→to direction strip. Uses the
@@ -384,56 +393,25 @@ export default function SwapAmount() {
     if (success) {
         return (
             <ScreenLayout showToolbar isBackButton={false}>
-                <Animated.View style={[styles.successContainer, { transform: [{ translateY: slideAnim }], opacity: fadeAnim }]}>
-                    <Text semibold style={styles.successTitle}>Swap Sent ⚡</Text>
-                    <Text semibold style={styles.successValue}>{swappedSats} sats</Text>
-                    <Text semibold style={styles.successFiat}>{currency === 'EUR' ? '€' : '$'}{swappedFiat}</Text>
-                    {feeSats !== null && feeSats > 0 && (() => {
-                        // Surface the realised network fee under the fiat
-                        // line. Only providers that report it (Ark) reach
-                        // this branch — custodial swaps hide the row.
-                        // Percentage matches the pre-swap preview formula
-                        // and the ArkSendScreen Fee % row for consistency.
-                        const swappedSatsNum = Number(swappedSats) || 0;
-                        const gross = swappedSatsNum + feeSats;
-                        const feePct = gross > 0 ? Math.min(999, (feeSats / gross) * 100) : null;
-                        const pctStr = feePct === null
-                            ? ''
-                            : feePct < 0.01
-                                ? ' (< 0.01%)'
-                                : ` (${feePct.toFixed(feePct < 1 ? 2 : 1)}%)`;
-                        return (
-                            <Text style={styles.successFee}>
-                                Network fee: {feeSats} sats{pctStr}{feeNote ? ` · ${feeNote}` : ''}
-                            </Text>
-                        );
-                    })()}
-                    <View style={styles.animationContainer}>
-                        <Animated.View style={[styles.ring, { transform: [{ scale: ring1Scale }], opacity: ring1Opacity }]}>
-                            <Image source={GradientShock} style={styles.ringImage} />
-                        </Animated.View>
-                        <Animated.View style={[styles.ring, { transform: [{ scale: ring2Scale }], opacity: ring2Opacity }]}>
-                            <Image source={GradientShock} style={styles.ringImage} />
-                        </Animated.View>
-                        <Image source={Electricity} style={styles.boltImage} />
-                    </View>
-                    <View style={styles.successDirection}>
-                        {renderProviderBadge(fromProvider, swapFrom, 'success')}
-                        <Text style={styles.successArrow}>→</Text>
-                        {renderProviderBadge(toProvider, sendTo, 'success')}
-                    </View>
-                    <Text semibold style={styles.successNetwork}>Lightning Network</Text>
-                    <TouchableOpacity onPress={() => navigation.popToTop()} style={styles.homeButton}>
-                        <LinearGradient
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 0 }}
-                            colors={[colors.pink.extralight, colors.pink.default]}
-                            style={styles.homeButtonGradient}
-                        >
-                            <Text bold style={styles.homeText}>Home</Text>
-                        </LinearGradient>
-                    </TouchableOpacity>
-                </Animated.View>
+                <LightningSendSuccess
+                    title="Swap Sent ⚡"
+                    sats={swappedSats}
+                    fiat={swappedFiat}
+                    fiatSymbol={currency === 'EUR' ? '€' : '$'}
+                    feeSats={feeSats}
+                    feeNote={feeNote}
+                    // A swap's destination is another of the user's own
+                    // wallets, so an address would be meaningless here. Keep
+                    // the from/to badges, which say the true thing.
+                    detail={
+                        <View style={styles.successDirection}>
+                            {renderProviderBadge(fromProvider, swapFrom, 'success')}
+                            <Text style={styles.successArrow}>→</Text>
+                            {renderProviderBadge(toProvider, sendTo, 'success')}
+                        </View>
+                    }
+                    onHome={() => navigation.popToTop()}
+                />
             </ScreenLayout>
         );
     }
@@ -442,10 +420,28 @@ export default function SwapAmount() {
     // leave un-refreshable dust that expires. Sats mode types the sat amount;
     // fiat mode mirrors the sat equivalent into `usd`.
     const currentSats = Math.round(isSats ? Number(sats) : Number(usd)) || 0;
-    const smallBarkSwapWarn = sendTo === 'ark' && currentSats > 0 && currentSats <= SMALL_RECEIVE_SATS;
+    // Strictly below, matching ArkInvoiceScreen. 700 is the number the warning
+    // asks the user to reach, so warning at exactly 700 contradicted its own
+    // advice.
+    //
+    // Suppressed entirely for the dust top-up. That flow computes the amount
+    // itself, caps it under the refresh floor, and sent the user here
+    // precisely to deposit a small sum. Warning them off it would contradict
+    // the dialog that opened this screen, and the CTA it drives ("Swap
+    // anyways") frames the intended action as a mistake being overridden.
+    const isDustTopup = purpose === 'dust-topup';
+    const smallBarkSwapWarn =
+        !isDustTopup && sendTo === 'ark' && currentSats > 0 && currentSats < SMALL_RECEIVE_SATS;
 
     return (
-        <ScreenLayout disableScroll showToolbar isBackButton title="Lightning Swap">
+        <ScreenLayout
+            disableScroll
+            showToolbar
+            isBackButton
+            title={
+                isDustTopup ? 'Dust Top-up' : purpose === 'dust-exit' ? 'Move Dust Out' : 'Lightning Swap'
+            }
+        >
             <View style={styles.main}>
                 <GradientInput isSats={isSats} walletInfo={{ matchedRate, currency }} sats={sats} setSats={setSats} usd={usd} />
                 {swapFrom === 'ark' && pendingInRoundSats > 0 && (sourceBalance === 0 || (Number(sats) || 0) > sourceBalance) && (
@@ -481,7 +477,19 @@ export default function SwapAmount() {
                 })()}
                 {smallBarkSwapWarn && (
                     <Text style={{ textAlign: 'center', marginTop: 8, marginHorizontal: 8, fontSize: 12, color: '#FFD54F', lineHeight: 17 }}>
-                        Small amounts can leave un-refreshable dust that expires. Swapping above 700 sats keeps them refreshable.
+                        Small amounts can leave un-refreshable dust that expires. Swapping 700 sats or more keeps them refreshable.
+                    </Text>
+                )}
+                {/* Replaces the warning above rather than sitting alongside it.
+                    The screen otherwise gives no reason for the odd prefilled
+                    number, and the ceiling is worth stating because the field
+                    is editable and overshooting it silently defeats the sweep
+                    the user is here to enable.
+                    COPY: Bam finalizes. */}
+                {isDustTopup && (
+                    <Text style={{ textAlign: 'center', marginTop: 8, marginHorizontal: 8, fontSize: 12, color: '#ddd', lineHeight: 17 }}>
+                        This is meant to be small. It has to stay under {ARK_REFRESH_MIN_SATS} sats to combine with
+                        the dust you already have.
                     </Text>
                 )}
             </View>

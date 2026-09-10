@@ -50,7 +50,11 @@ export default function ArkInvoiceScreen({ navigation, route }: any) {
     // Small-amount warning: in sats mode the typed value is the sat amount; in
     // fiat mode CustomKeyboard mirrors the sat equivalent into `usd`.
     const currentSats = Math.round(isSats ? Number(sats) : Number(usd)) || 0;
-    const smallAmountWarn = currentSats > 0 && currentSats <= SMALL_RECEIVE_SATS;
+    // Strictly below the floor. 700 is the amount the warning tells users to
+    // reach, so warning AT 700 contradicted its own advice: you typed the
+    // number it asked for and it still called the amount small. 699 warns,
+    // 700 does not.
+    const smallAmountWarn = currentSats > 0 && currentSats < SMALL_RECEIVE_SATS;
 
     const handleCreate = async () => {
         if (!sats) {
@@ -139,7 +143,7 @@ export default function ArkInvoiceScreen({ navigation, route }: any) {
             </View>
             {smallAmountWarn && (
                 <Text style={{ textAlign: 'center', marginHorizontal: 24, marginBottom: 6, fontSize: 12, color: '#FFD54F', lineHeight: 17 }}>
-                    Small amounts can leave un-refreshable dust that expires. Receiving above 700 sats keeps them refreshable.
+                    Small amounts can leave un-refreshable dust that expires. Receiving 700 sats or more keeps them refreshable.
                 </Text>
             )}
             <CustomKeyboard
@@ -154,6 +158,14 @@ export default function ArkInvoiceScreen({ navigation, route }: any) {
                 currency={currency}
                 colors_={ARK_GRADIENT}
                 buttonColors_={smallAmountWarn ? WARN_YELLOW : undefined}
+                // The button's title defaults to white, and both gradients it
+                // can wear here are light: ARK_GRADIENT is #FFFFFF to #E6E6E6
+                // and WARN_YELLOW is #FFD54F to #FFB300. White on either is
+                // invisible, so once an amount was entered the CTA read as a
+                // blank slab. Disabled keeps white, because GradientButton
+                // swaps to a grey fill in that state. Same pattern as
+                // ArkSendScreen's CTA.
+                titleColor={sats.length && !isLoading ? colors.black.default : colors.whiteText}
                 // Invoices have no "max" semantics — the receiver picks
                 // any amount they want to be paid. MAX is a send-side
                 // affordance (drain the wallet); suppress it on receive.

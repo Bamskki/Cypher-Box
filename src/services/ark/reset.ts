@@ -20,10 +20,16 @@ export interface ResetArkWalletOptions {
      * biometric (Face/Touch ID) fast path so the user doesn't have to
      * re-type 12 words on the same device.
      *
-     * Defaults to false — i.e. the historic "nuke everything" behavior
-     * for reset paths that explicitly want a clean slate (DEV-only reset
-     * in CreateArkScreen, the auto-reset triggered after a successful
-     * unilateral exit in `useArkSync`).
+     * Defaults to false, i.e. the historic "nuke everything" behavior for
+     * reset paths that explicitly want a clean slate.
+     *
+     * This used to name "the auto-reset triggered after a successful unilateral
+     * exit in useArkSync" as a caller. There is no such caller, and grep finds
+     * no reference to one anywhere in the tree. Every caller is user-initiated:
+     * "Reset & wipe" and the orphan auto-clean in CreateArkScreen, the re-key in
+     * ArkSeedPhraseScreen, and "Delete vault" in Ark settings. Worth stating,
+     * because that phantom caller is what made this function look like it sat
+     * under the exit-fix freeze.
      */
     keepSeedInKeychain?: boolean;
 
@@ -81,11 +87,33 @@ export async function resetArkWalletState(
     // Scrub the in-memory PBKDF2 key so it doesn't carry over to a new wallet.
     clearArkKeyCache();
 
+    // DO NOT SWALLOW THIS.
+    //
+    // The old catch here reasoned "a missing datadir is the success state
+    // anyway", which is true for exactly one failure mode. `RNFS.unlink` also
+    // fails on open file descriptors, iOS file protection and partial directory
+    // deletes, and in those cases the datadir is still on disk. Reset then
+    // carried on and deleted the Keychain mnemonic and the background seed copy
+    // below, and `resetArkWalletState` resolved normally as though it had
+    // worked.
+    //
+    // End state: the wallet's data still on disk with the only key to it
+    // destroyed, and nobody told. That is the one outcome this function must
+    // never produce.
+    //
+    // So: bail before anything else is deleted. Nothing after this point runs,
+    // which also leaves the backup files alone, since they are the recovery
+    // path if the datadir really is stuck. The seed survives, so the wallet is
+    // still recoverable, and the caller gets a real error instead of silence.
     try {
         await deleteArkDatadir();
-    } catch (err) {
-        console.warn('[Ark] deleteArkDatadir failed:', err);
-        // Swallow — a missing datadir is the success state anyway.
+    } catch (err: any) {
+        console.warn('[Ark] deleteArkDatadir failed, aborting reset:', err);
+        throw new Error(
+            'Could not delete the Ark wallet data, so the seed was kept to avoid ' +
+            'leaving wallet data on this device with no way to open it. ' +
+            'Nothing was deleted. Close the app and try again.',
+        );
     }
 
     // Wallet-scoped backup deletion. Best-effort, swallow per-channel

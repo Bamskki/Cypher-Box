@@ -12,6 +12,7 @@ import {
     isVtxoMidRound,
     recoverArkOnchainBoard,
 } from "@Cypher/services/ark";
+import { deriveVaultConnectivity } from "@Cypher/services/ark/chainTipFreshness";
 import { getCapsuleColorBand } from "@Cypher/helpers/arkCapsuleColor";
 import { btc } from "@Cypher/helpers/bitcoinUnits";
 import useAuthStore from "@Cypher/stores/authStore";
@@ -65,6 +66,13 @@ export default function ArkWallet({
         reserveArkAmount,
         arkVtxos,
         arkChainTipHeight,
+        // Timestamps behind the card's connectivity dot. Both are only
+        // written on SUCCESS (tip on a good esplora read, sync at the end of
+        // a completed cycle), which is exactly what makes their AGE the
+        // signal: an outage stops updating them rather than recording itself.
+        arkChainTipHeightAt,
+        arkLastSyncedAt,
+        arkSyncFailStreak,
         arkRefreshingVtxoIds,
         arkBgRefreshEnabled,
         arkBgRefreshLastSuccessAt,
@@ -83,6 +91,36 @@ export default function ArkWallet({
     // which drains a stuck on-chain boarding deposit back to a fresh Hot
     // Vault change address. Same source HomeScreen uses to find the vault.
     const { wallets } = useContext(BlueStorageContext);
+
+    /**
+     * Slow clock for the connectivity dot.
+     *
+     * The dot has to be able to degrade with NO store activity at all. Both
+     * timestamps it reads are written only on success, so the exact failure it
+     * exists to report (sync loop wedged, esplora unreachable) is the one that
+     * produces no re-render. Without a tick of its own the card would hold its
+     * last green indefinitely while the vault sat dead, which is the failure
+     * direction that misleads.
+     *
+     * 30s matches the Capsules tab's tick. The thresholds are minutes wide, so
+     * anything faster is waste.
+     */
+    const [connTick, setConnTick] = useState(() => Date.now());
+    useEffect(() => {
+        const t = setInterval(() => setConnTick(Date.now()), 30_000);
+        return () => clearInterval(t);
+    }, []);
+
+    const vaultConnectivity = useMemo(
+        () =>
+            deriveVaultConnectivity({
+                tipFetchedAtMs: arkChainTipHeightAt,
+                lastSyncedAtMs: arkLastSyncedAt,
+                nowMs: connTick,
+                syncFailStreak: arkSyncFailStreak,
+            }),
+        [arkChainTipHeightAt, arkLastSyncedAt, arkSyncFailStreak, connTick],
+    );
 
     // OS notification permission state for the bgRefreshStatus pill.
     // Drives the "Notifications off" branch that replaced the v0.1.1-dropped
@@ -347,7 +385,7 @@ export default function ArkWallet({
     }, [arkVtxos, arkChainTipHeight, refreshingIds]);
 
     const expiryWarning = soonestDaysLeft !== null && soonestDaysLeft < 7
-        ? `Oldest capsule expires in ${Math.round(soonestDaysLeft)}d — refresh soon`
+        ? `Oldest capsule expires in ${Math.round(soonestDaysLeft)}d, refresh soon`
         : null;
 
     /**
@@ -440,6 +478,27 @@ export default function ArkWallet({
      * subsumes it.
      */
     const bgRefreshStatus = useMemo(() => {
+        // 0. OFFLINE, ahead of everything below.
+        //
+        // Same branch and same copy as the shared-row version in WalletsView.
+        // It is here as well as there because the two layouts show different
+        // status rows, and a warning that exists in only one of them is
+        // invisible to whichever users are in the other. That is not
+        // hypothetical: the exit-fee reserve nudge lived in this file alone and
+        // no one in the default layout ever saw it.
+        //
+        // Everything below this point is derived from the cached chain tip, so
+        // when the vault is unreachable those numbers are projections rather
+        // than reads, and they keep counting down as if nothing were wrong.
+        if (vaultConnectivity.level === 'red') {
+            // COPY: Bam finalizes. Kept identical to WalletsView on purpose.
+            return {
+                text: 'Bark vault is offline. Capsule times shown are estimates until it reconnects.',
+                error: true,
+                tapTab: 0,
+            };
+        }
+
         // 1. Refresh / send / board in flight. Short-circuits the rest of
         //    the chain because the Card itself now renders a prominent
         //    pulsing "Refreshing N capsules · X sats" line inside the
@@ -499,7 +558,7 @@ export default function ArkWallet({
         //    enabling iCloud Drive). Android never sets this flag.
         if (Platform.OS === 'ios' && arkIosBackupReminderActive) {
             return {
-                text: 'Backup not synced — enable iCloud Drive in iOS Settings',
+                text: 'Backup not synced. Enable iCloud Drive in iOS Settings',
                 error: true,
             };
         }
@@ -516,6 +575,9 @@ export default function ArkWallet({
         arkIosBackupReminderActive,
         pendingRoundCount,
         pendingRoundSats,
+        // Or the offline branch never re-evaluates and the pill keeps showing
+        // whatever it said while the vault was last reachable.
+        vaultConnectivity,
     ]);
 
     // IMPORTANT: the parent's `convertedRate` prop is globally computed from
@@ -617,6 +679,7 @@ export default function ArkWallet({
                             ? { count: pendingRoundCount, sats: pendingRoundSats }
                             : null}
                         arkCapsuleSlots={arkCapsuleSlots}
+                        vaultConnectivity={vaultConnectivity}
                     />
                     {/* When shared buttons are active (`hideActionButtons`),
                         skip this minHeight-40 reserve so the shared row can
@@ -815,7 +878,7 @@ export default function ArkWallet({
                         </Text>
                         <TouchableOpacity onPress={createArkWalletClickHandler}>
                             <Text bold style={styles.login}>
-                                ⚠ Experimental — tap to learn more
+                                ⚠ Experimental · tap to learn more
                             </Text>
                         </TouchableOpacity>
                     </View>

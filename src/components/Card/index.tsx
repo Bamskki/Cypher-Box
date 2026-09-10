@@ -11,6 +11,7 @@ import LinearGradient from "react-native-linear-gradient";
 import GradientButtonWithShadow from "../GradientButtonWithShadow";
 import styles from "./styles";
 import useAuthStore from "@Cypher/stores/authStore";
+import type { VaultConnectivity } from "@Cypher/services/ark/chainTipFreshness";
 import { CarouselPageVisibilityContext, useEasedProgress } from "@Cypher/custom-hooks";
 import { useIsFocused } from "@react-navigation/native";
 import Reanimated, { useAnimatedStyle } from "react-native-reanimated";
@@ -62,6 +63,17 @@ interface Props {
      * existing live caller renders the balance as before.
      */
     hideBalance?: boolean;
+    /**
+     * Vault connectivity for the Ark card's corner status line.
+     *
+     * Passed in rather than derived here because the derivation needs a slow
+     * clock of its own: if the sync loop is the thing that is wedged, no store
+     * write arrives to re-render us, so a component that only reacts to store
+     * changes would sit on a stale green forever. ArkWallet owns that tick.
+     *
+     * Null/undefined renders nothing, so every non-Ark caller is unaffected.
+     */
+    vaultConnectivity?: VaultConnectivity | null;
 }
 
 export default function Card({ onPress,
@@ -81,6 +93,7 @@ export default function Card({ onPress,
     refreshingInfo = null,
     arkCapsuleSlots,
     hideBalance = false,
+    vaultConnectivity = null,
 }: Props) {
     const {coldStorageWalletID, walletID, allBTCWallets} = useAuthStore();
 
@@ -212,26 +225,52 @@ export default function Card({ onPress,
 
     const cardChildren = (
         <>
-            {/* Translucent lightning watermark behind the card content —
-                mirrors the same treatment on the home "Unlock Lightning
-                Wallet" CTA so all Lightning surfaces share the visual
-                language. 12% alpha keeps it readable but lets the card's
-                pink (Strike/CoinOS) or grey (Ark) gradient show through. */}
-            <Image
-                source={Electricity}
-                style={{
-                    position: 'absolute',
-                    alignSelf: 'center',
-                    top: '50%',
-                    marginTop: -42,
-                    width: 60,
-                    height: 84,
-                    tintColor: '#FFFFFF',
-                    opacity: 0.10,
-                }}
-                resizeMode="contain"
-                pointerEvents="none"
-            />
+            {vaultConnectivity?.level === 'red' ? (
+                /* Offline vault: the watermark itself becomes the warning.
+                   A red dot in the corner is easy to miss on a card the user
+                   glances at, and the failure it reports is the one that reads
+                   most convincingly as normal — every expiry countdown keeps
+                   ticking off an estimated tip, so a stale card looks healthy.
+                   Swapping the lightning glyph for a warning sign changes the
+                   card's whole silhouette, which is noticeable without reading.
+                   Ionicons rather than a new asset: `warning` is already
+                   bundled and this needs no artwork. Carried at a higher alpha
+                   than the 0.10 lightning because it has to register, not
+                   recede. */
+                <View
+                    style={{
+                        position: 'absolute',
+                        alignSelf: 'center',
+                        top: '50%',
+                        marginTop: -42,
+                        opacity: 0.22,
+                    }}
+                    pointerEvents="none"
+                >
+                    <Ionicons name="warning" size={84} color="#FF7A68" />
+                </View>
+            ) : (
+                /* Translucent lightning watermark behind the card content —
+                    mirrors the same treatment on the home "Unlock Lightning
+                    Wallet" CTA so all Lightning surfaces share the visual
+                    language. 12% alpha keeps it readable but lets the card's
+                    pink (Strike/CoinOS) or grey (Ark) gradient show through. */
+                <Image
+                    source={Electricity}
+                    style={{
+                        position: 'absolute',
+                        alignSelf: 'center',
+                        top: '50%',
+                        marginTop: -42,
+                        width: 60,
+                        height: 84,
+                        tintColor: '#FFFFFF',
+                        opacity: 0.10,
+                    }}
+                    resizeMode="contain"
+                    pointerEvents="none"
+                />
+            )}
             <View style={styles.view}>
                 {wallet === 'ARK' ? (
                     // Boat-outline icon next to the "Ark Vault" title —
@@ -431,6 +470,66 @@ export default function Card({ onPress,
                         use a solid color and let the wrapper's percent
                         width control the fill. */}
                     <Reanimated.View style={[styles.linearGradient2, { backgroundColor: colors.pink.dark, minWidth: 6 } as any, fillStyle]} />
+                </View>
+            )}
+            {/* Vault connectivity, bottom-right corner.
+                ABSOLUTE, not a flow child. `shadowTop` is a fixed 128pt box
+                (Card/styles.ts), so the card has no spare vertical room: an
+                appended row pushes past the border and gets clipped by it.
+                Anchoring to the container instead keeps the line inside the
+                card whatever the rows above it do. `right: 30` matches the
+                card's paddingHorizontal so it lines up with the brand mark
+                and the capsule slot row rather than the raw border edge,
+                since absolute children position against the padding box.
+
+                Quiet by design: on a healthy vault this is reassurance the
+                user can ignore, and the loud signal for an unhealthy one is
+                the warning watermark behind it rather than this line.
+
+                COPY: Bam finalizes. Same status vocabulary as the fuller
+                pill on the Capsules tab, shortened because the card is
+                already titled "Bark Vault" and repeating the noun here
+                reads as stutter. */}
+            {vaultConnectivity && (
+                <View style={{
+                    position: 'absolute',
+                    right: 30,
+                    bottom: 12,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                }}>
+                    <View
+                        style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: 4,
+                            marginRight: 6,
+                            backgroundColor:
+                                vaultConnectivity.level === 'green'
+                                    ? '#4ADE80'
+                                    : vaultConnectivity.level === 'yellow'
+                                        ? colors.ark.light
+                                        : '#FF7A68',
+                        }}
+                    />
+                    <Text
+                        style={{
+                            fontSize: 12,
+                            fontWeight: '600',
+                            color:
+                                vaultConnectivity.level === 'green'
+                                    ? '#4ADE80'
+                                    : vaultConnectivity.level === 'yellow'
+                                        ? colors.ark.light
+                                        : '#FF7A68',
+                        }}
+                    >
+                        {vaultConnectivity.level === 'green'
+                            ? 'Connected'
+                            : vaultConnectivity.level === 'yellow'
+                                ? 'Connection slow'
+                                : 'Offline'}
+                    </Text>
                 </View>
             )}
         </>
