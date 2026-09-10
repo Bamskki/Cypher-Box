@@ -171,10 +171,28 @@ export default function ArkSendReviewScreen({ route }: Props) {
             const result = await executeArkSend(destination, amountSats);
             const netSats = result.netAmountSats;
             const fiat = (netSats * matchedRate * btc(1)).toFixed(2);
+            // Only the Lightning rails take the shared success view. An
+            // Ark-to-Ark or on-chain send keeps the existing screen, which is
+            // the one that can say an on-chain payment still has to confirm.
+            const isLightning =
+                destination.kind === 'ln-invoice' ||
+                destination.kind === 'ln-offer' ||
+                destination.kind === 'ln-address';
             dispatchNavigate('ArkSendSuccessScreen', {
                 value: String(netSats),
                 valueUsd: fiat,
                 currency,
+                isLightning,
+                // An ln-address is short and worth reading in full. A BOLT11
+                // invoice is not, so show the shortened form for those; the
+                // user is confirming what they already reviewed, not auditing
+                // an address they have never seen.
+                paidTo: isLightning
+                    ? (destination.kind === 'ln-address'
+                        ? destination.value
+                        : `${destinationRaw.slice(0, 12)}…${destinationRaw.slice(-8)}`)
+                    : undefined,
+                fromLabel: isLightning ? 'Bark Vault' : undefined,
             });
         } catch (err: any) {
             console.error('[ArkSendReview] send failed:', err);

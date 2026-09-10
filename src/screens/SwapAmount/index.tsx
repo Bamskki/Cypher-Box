@@ -3,8 +3,7 @@ import { View, Image, ActivityIndicator, TouchableOpacity, Animated, Easing, Ale
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { ScreenLayout, Text } from "@Cypher/component-library";
 import LinearGradient from "react-native-linear-gradient";
-import { CustomKeyboard, GradientInput } from "@Cypher/components";
-import { GradientShock, Electricity } from "@Cypher/assets/images";
+import { CustomKeyboard, GradientInput , LightningSendSuccess } from "@Cypher/components";
 import { dispatchNavigate, dispatchReset } from "@Cypher/helpers";
 import { colors } from "@Cypher/style-guide";
 import useAuthStore from "@Cypher/stores/authStore";
@@ -301,60 +300,6 @@ export default function SwapAmount() {
     };
 
     // Expanding ring animations
-    const slideAnim = React.useRef(new Animated.Value(300)).current;
-    const fadeAnim = React.useRef(new Animated.Value(0)).current;
-    const ring1Scale = React.useRef(new Animated.Value(1)).current;
-    const ring1Opacity = React.useRef(new Animated.Value(0.8)).current;
-    const ring2Scale = React.useRef(new Animated.Value(1)).current;
-    const ring2Opacity = React.useRef(new Animated.Value(0.8)).current;
-
-    React.useEffect(() => {
-        if (success) {
-            // Slide up + fade in
-            Animated.parallel([
-                Animated.timing(slideAnim, {
-                    toValue: 0,
-                    duration: 600,
-                    easing: Easing.out(Easing.cubic),
-                    useNativeDriver: true,
-                }),
-                Animated.timing(fadeAnim, {
-                    toValue: 1,
-                    duration: 600,
-                    easing: Easing.out(Easing.cubic),
-                    useNativeDriver: true,
-                }),
-            ]).start();
-
-            const createRingAnimation = (scale: Animated.Value, opacity: Animated.Value, delay: number) => {
-                return Animated.loop(
-                    Animated.sequence([
-                        Animated.delay(delay),
-                        Animated.parallel([
-                            Animated.timing(scale, {
-                                toValue: 1.8,
-                                duration: 2000,
-                                easing: Easing.out(Easing.ease),
-                                useNativeDriver: true,
-                            }),
-                            Animated.timing(opacity, {
-                                toValue: 0,
-                                duration: 2000,
-                                easing: Easing.out(Easing.ease),
-                                useNativeDriver: true,
-                            }),
-                        ]),
-                        Animated.parallel([
-                            Animated.timing(scale, { toValue: 1, duration: 0, useNativeDriver: true }),
-                            Animated.timing(opacity, { toValue: 0.8, duration: 0, useNativeDriver: true }),
-                        ]),
-                    ])
-                );
-            };
-            createRingAnimation(ring1Scale, ring1Opacity, 0).start();
-            createRingAnimation(ring2Scale, ring2Opacity, 700).start();
-        }
-    }, [success]);
 
     /**
      * Render a wallet badge in the from→to direction strip. Uses the
@@ -384,56 +329,25 @@ export default function SwapAmount() {
     if (success) {
         return (
             <ScreenLayout showToolbar isBackButton={false}>
-                <Animated.View style={[styles.successContainer, { transform: [{ translateY: slideAnim }], opacity: fadeAnim }]}>
-                    <Text semibold style={styles.successTitle}>Swap Sent ⚡</Text>
-                    <Text semibold style={styles.successValue}>{swappedSats} sats</Text>
-                    <Text semibold style={styles.successFiat}>{currency === 'EUR' ? '€' : '$'}{swappedFiat}</Text>
-                    {feeSats !== null && feeSats > 0 && (() => {
-                        // Surface the realised network fee under the fiat
-                        // line. Only providers that report it (Ark) reach
-                        // this branch — custodial swaps hide the row.
-                        // Percentage matches the pre-swap preview formula
-                        // and the ArkSendScreen Fee % row for consistency.
-                        const swappedSatsNum = Number(swappedSats) || 0;
-                        const gross = swappedSatsNum + feeSats;
-                        const feePct = gross > 0 ? Math.min(999, (feeSats / gross) * 100) : null;
-                        const pctStr = feePct === null
-                            ? ''
-                            : feePct < 0.01
-                                ? ' (< 0.01%)'
-                                : ` (${feePct.toFixed(feePct < 1 ? 2 : 1)}%)`;
-                        return (
-                            <Text style={styles.successFee}>
-                                Network fee: {feeSats} sats{pctStr}{feeNote ? ` · ${feeNote}` : ''}
-                            </Text>
-                        );
-                    })()}
-                    <View style={styles.animationContainer}>
-                        <Animated.View style={[styles.ring, { transform: [{ scale: ring1Scale }], opacity: ring1Opacity }]}>
-                            <Image source={GradientShock} style={styles.ringImage} />
-                        </Animated.View>
-                        <Animated.View style={[styles.ring, { transform: [{ scale: ring2Scale }], opacity: ring2Opacity }]}>
-                            <Image source={GradientShock} style={styles.ringImage} />
-                        </Animated.View>
-                        <Image source={Electricity} style={styles.boltImage} />
-                    </View>
-                    <View style={styles.successDirection}>
-                        {renderProviderBadge(fromProvider, swapFrom, 'success')}
-                        <Text style={styles.successArrow}>→</Text>
-                        {renderProviderBadge(toProvider, sendTo, 'success')}
-                    </View>
-                    <Text semibold style={styles.successNetwork}>Lightning Network</Text>
-                    <TouchableOpacity onPress={() => navigation.popToTop()} style={styles.homeButton}>
-                        <LinearGradient
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 0 }}
-                            colors={[colors.pink.extralight, colors.pink.default]}
-                            style={styles.homeButtonGradient}
-                        >
-                            <Text bold style={styles.homeText}>Home</Text>
-                        </LinearGradient>
-                    </TouchableOpacity>
-                </Animated.View>
+                <LightningSendSuccess
+                    title="Swap Sent ⚡"
+                    sats={swappedSats}
+                    fiat={swappedFiat}
+                    fiatSymbol={currency === 'EUR' ? '€' : '$'}
+                    feeSats={feeSats}
+                    feeNote={feeNote}
+                    // A swap's destination is another of the user's own
+                    // wallets, so an address would be meaningless here. Keep
+                    // the from/to badges, which say the true thing.
+                    detail={
+                        <View style={styles.successDirection}>
+                            {renderProviderBadge(fromProvider, swapFrom, 'success')}
+                            <Text style={styles.successArrow}>→</Text>
+                            {renderProviderBadge(toProvider, sendTo, 'success')}
+                        </View>
+                    }
+                    onHome={() => navigation.popToTop()}
+                />
             </ScreenLayout>
         );
     }

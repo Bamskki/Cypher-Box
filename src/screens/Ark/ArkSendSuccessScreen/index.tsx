@@ -8,7 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { ScreenLayout, Text } from '@Cypher/component-library';
-import { GradientButton, GradientCard } from '@Cypher/components';
+import { GradientButton, GradientCard, LightningSendSuccess } from '@Cypher/components';
 import Ring from '@Cypher/components/RingEffect';
 import { Bitcoin, BitcoinTower, Electrik } from '@Cypher/assets/images';
 import { dispatchReset } from '@Cypher/helpers/navigation';
@@ -62,6 +62,17 @@ interface Props {
             networkLabel?: string;
             isOnchain?: boolean;
             note?: string;
+            /**
+             * True only for a Lightning rail (invoice, offer, ln-address).
+             * Opt-in rather than inferred: an Ark-to-Ark or on-chain send must
+             * not take the Lightning view, and defaulting this to true would
+             * hand it to every caller that has not been updated.
+             */
+            isLightning?: boolean;
+            /** Destination, for "Paid to <x>". */
+            paidTo?: string;
+            /** Source wallet, for "from <x>". */
+            fromLabel?: string;
         };
     };
 }
@@ -74,6 +85,9 @@ export default function ArkSendSuccessScreen({ route }: Props) {
     const networkLabel = route?.params?.networkLabel ?? 'Lightning Network';
     const isOnchain = route?.params?.isOnchain === true;
     const note = route?.params?.note;
+    const isLightning = route?.params?.isLightning === true;
+    const paidTo = route?.params?.paidTo;
+    const fromLabel = route?.params?.fromLabel;
 
     const [response, setResponse] = useState(false);
     const fadeInOpacity = useSharedValue(0);
@@ -98,6 +112,33 @@ export default function ArkSendSuccessScreen({ route }: Props) {
     }));
 
     const onHome = () => dispatchReset('HomeScreen');
+
+    // Lightning sends use the shared success view (Bam's call, 2026-09-09):
+    // one treatment across Strike, CoinOS and Bark instead of three.
+    //
+    // Everything else keeps the screen below, and that is the point of the
+    // gate rather than an oversight. The on-chain cases that land here, an
+    // on-chain send and the exit-fee top-up, are NOT final when this appears.
+    // The shared view is built to read as finished, carries a bolt and says
+    // "Lightning Network", and has nowhere to put the "has to confirm first"
+    // note those paths depend on. It already cost one user a screen that said
+    // "Payment Sent / 0 sats / Lightning Network" over an on-chain deposit.
+    if (isLightning && !isOnchain) {
+        return (
+            <ScreenLayout disableScroll showToolbar title="" isBackButton={false}>
+                <LightningSendSuccess
+                    title={title}
+                    sats={value}
+                    fiat={valueUsd}
+                    fiatSymbol={getStrikeCurrency(currency)}
+                    paidTo={paidTo}
+                    fromLabel={fromLabel}
+                    networkLabel={networkLabel}
+                    onHome={onHome}
+                />
+            </ScreenLayout>
+        );
+    }
 
     return (
         <ScreenLayout disableScroll showToolbar title="" isBackButton={false}>
