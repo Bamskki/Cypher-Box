@@ -451,7 +451,27 @@ export async function executeArkSend(
         // throws so the user checks Activity instead of being silently re-sent.
         let settled = false;
         for (let attempt = 1; attempt <= MAX_LN_SEND_ATTEMPTS; attempt++) {
-            const status = await dispatchLnSend(handle, dest, amount, comment);
+            // Wrapped, so a connection that dies mid-dispatch is reported as
+            // UNKNOWN rather than as a failure. This is the one send path that
+            // was not: runBroadcastCall guards sendArkoorPayment and sendOnchain
+            // below, and the four other ASP-facing calls across exit.ts,
+            // offboard.ts, exitFunding.ts and recoverOnchainBoard.ts, but the
+            // Lightning branch went straight to the SDK.
+            //
+            // It is also the path where being wrong costs the most. On a
+            // transport failure the ASP may already have begun the HTLC. If the
+            // caller is told "failed" it re-arms the send control, and for an
+            // ln-address or ln-offer a retry mints a FRESH invoice with a new
+            // payment hash, so it settles alongside the first one. The recipient
+            // is paid twice and the retry loop below cannot see it, because it
+            // only ever retries on a movement confirmed refunded.
+            //
+            // Throwing here leaves the loop entirely, which is correct: an
+            // indeterminate outcome must never be retried.
+            const status = await runBroadcastCall(
+                () => dispatchLnSend(handle, dest, amount, comment),
+                'payment',
+            );
 
             // Fast path: bark settled at dispatch and handed us the preimage.
             if (status.tag === LightningSendStatus_Tags.Paid) {

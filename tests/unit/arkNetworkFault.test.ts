@@ -313,7 +313,47 @@ describe('telling a refusal apart from a dropped connection', () => {
         expect(loss(new Error('insufficient funds'))).toBe(false);
         expect(loss(new Error('bad user input: invalid address'))).toBe(false);
         expect(loss(new Error('amount below dust limit'))).toBe(false);
-        expect(loss({ tag: 'Internal', message: 'BarkError.Internal' })).toBe(false);
+        expect(loss(new Error('amount is below the minimum'))).toBe(false);
+    });
+
+    it('treats an unrecognised error as ambiguous, not as a refusal', () => {
+        // CHANGED DELIBERATELY. This case previously asserted `false`, back when
+        // the rule matched transport failures positively and returned false for
+        // everything it did not recognise.
+        //
+        // A bare "internal error" carries no evidence either way: the ASP may
+        // have signed and broadcast before whatever went wrong. Reporting it as
+        // a definite refusal re-arms the send control, and for an ln-address or
+        // ln-offer a retry mints a fresh invoice with a new payment hash, so it
+        // settles alongside the first and the recipient is paid twice.
+        //
+        // The unknown case now sits on the safe side. The cost is a balance
+        // check the user did not need; the cost of the old default was a
+        // double payment.
+        expect(loss({ tag: 'Internal', message: 'BarkError.Internal' })).toBe(true);
+        expect(loss(new Error('something nobody has seen before'))).toBe(true);
+    });
+
+    it('is not fooled by a gRPC status with the source chain trimmed', () => {
+        // Observed on device 2026-09-08 (bark 0.6.1): a dropped ASP connection
+        // arrives as tonic's verbose Display output, which happens to contain
+        // "dns" and "transport". The old positive regex matched on those, not on
+        // the gRPC status, and the status text on its own carries neither. It
+        // says "unavailable"; the old pattern knew "unreachable".
+        //
+        // So the old rule was correct only for as long as bark kept printing the
+        // source chain. These are the shapes that would have broken it.
+        expect(loss({ tag: 'Inner', message: "code: 'The service is currently unavailable'" })).toBe(true);
+        expect(loss({ tag: 'Inner', message: "code: 'DEADLINE_EXCEEDED'" })).toBe(true);
+        expect(loss({ tag: 'Inner', message: 'h2 protocol error' })).toBe(true);
+    });
+
+    it('reads a doubly wrapped error through its cause chain', () => {
+        // arkErrorText used to read tag/message/inner only, so a refusal wrapped
+        // twice lost its signal before any matcher saw it and fell to the
+        // default. Cheap to support and it fails in the right direction.
+        expect(loss({ message: 'send failed', cause: { message: 'insufficient funds' } })).toBe(false);
+        expect(loss({ message: 'outer', cause: { cause: { message: 'below dust limit' } } })).toBe(false);
     });
 
     it('does not throw on null, undefined or a non-error', () => {

@@ -18,6 +18,27 @@
  * `exit.claimArkExitsToAddress`, and `recoverOnchainBoard`. Fixing a path
  * rather than a capability leaves the next call site to reintroduce it.
  *
+ * CALL SITES. Keep this list current; an audit found the Lightning ones missing
+ * from it, and the list being wrong is part of why they stayed unguarded. Six
+ * sites were enumerated here, all of them arkoor, on-chain or exit paths, so
+ * "the Lightning branch is not on the list" never looked like an omission.
+ *
+ *   exit.ts                 claimArkExitsToAddress
+ *   exitFunding.ts          convertToExitFees
+ *   recoverOnchainBoard.ts  recoverArkOnchainBoard
+ *   offboard.ts             offboardArkVtxos
+ *   send.ts                 sendArkoorPayment
+ *   send.ts                 sendOnchain
+ *   send.ts                 dispatchLnSend          <- added 2026-09-08
+ *
+ * `lightning.ts#cancelArkLightningReceive` uses `looksLikeConnectionLoss`
+ * directly rather than this wrapper, because it returns a discriminated result
+ * instead of throwing. Same rule, different shape.
+ *
+ * The test to apply when adding a call: does it hand something to the ASP or
+ * the chain that could still land after the connection dies? If yes, it belongs
+ * here, and it belongs on this list.
+ *
  * It imports nothing from the SDK on purpose, so any module can wrap a call
  * without dragging the native binding into a unit test.
  */

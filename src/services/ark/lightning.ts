@@ -1,6 +1,7 @@
 import bolt11 from 'bolt11';
 
 import { getArkWalletHandle } from './walletHandle';
+import { looksLikeConnectionLoss } from './networkFault';
 
 /**
  * Plain-JS view of a pending Lightning receive.
@@ -277,21 +278,41 @@ export async function cancelArkLightningReceive(
             return {
                 ok: false,
                 kind: 'preimage-revealed',
-                reason: 'Payment is already in flight — can\'t cancel.',
+                reason: 'Payment is already in flight, so it can\'t be cancelled.',
             };
         }
         if (/already finished/i.test(msg)) {
             return {
                 ok: false,
                 kind: 'already-finished',
-                reason: 'Receive already settled — nothing to cancel.',
+                reason: 'Receive already settled, so there is nothing to cancel.',
+            };
+        }
+        // A dropped connection is not a refusal. Without this branch anything
+        // the two guards above do not match fell through to `kind: 'unknown'`
+        // with the raw text as its reason, which reads to the user as a
+        // definite "it did not happen" for an outcome we cannot know: the ASP
+        // may have accepted the cancellation before the line died.
+        //
+        // Bounded, unlike the send paths: the UI leaves the row in place on
+        // failure, so the next 30s sync corrects the display either way. The
+        // fix is about not asserting something we cannot know.
+        if (looksLikeConnectionLoss(err)) {
+            return {
+                ok: false,
+                kind: 'unknown',
+                reason: 'The connection dropped, so this may or may not have been cancelled. Check again in a moment.',
             };
         }
         console.warn('[Ark cancel-ln-recv] failed:', err);
         return {
             ok: false,
             kind: 'unknown',
-            reason: msg || 'Cancel failed; try again or wait for the next sync.',
+            // Prefer the written sentence over bark's internal text. `msg ||`
+            // had it backwards: it showed the SDK's own vocabulary, unbounded
+            // in length and written for developers, and the human fallback only
+            // appeared when the SDK gave us nothing at all.
+            reason: 'Cancel failed; try again or wait for the next sync.',
         };
     }
 }

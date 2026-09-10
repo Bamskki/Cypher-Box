@@ -32,23 +32,47 @@ export type ArkNetworkFault =
     | 'ark-server'
     | 'unknown';
 
-/** Flatten a thrown value into searchable text. BarkError hides detail in `inner`. */
+/**
+ * Flatten a thrown value into searchable text. BarkError hides detail in `inner`.
+ *
+ * Follows `cause` as well, because an error wrapped once loses nothing but an
+ * error wrapped twice used to lose the signal entirely before any matcher saw
+ * it. Depth-limited and cycle-guarded: this runs on the error path, where
+ * throwing again would replace a useful message with a useless one.
+ *
+ * Measured on device 2026-09-08 (bark 0.6.1): a dropped ASP connection arrives
+ * as a BarkError whose own properties are exactly ["message","tag","stack"],
+ * with no `inner` and no `cause`, and the whole detail sits in `message`. The
+ * traversal below is therefore defensive rather than load-bearing today.
+ */
 export function arkErrorText(err: unknown): string {
-    if (err == null) return '';
-    if (typeof err === 'string') return err;
-    const e = err as {
-        tag?: unknown;
-        message?: unknown;
-        inner?: { errorMessage?: unknown; message?: unknown };
+    const parts: string[] = [];
+    const seen = new Set<unknown>();
+
+    const walk = (v: unknown, depth: number): void => {
+        if (v == null || depth > 4) return;
+        if (typeof v === 'string') {
+            parts.push(v);
+            return;
+        }
+        if (typeof v !== 'object' || seen.has(v)) return;
+        seen.add(v);
+        const e = v as {
+            tag?: unknown;
+            message?: unknown;
+            errorMessage?: unknown;
+            inner?: unknown;
+            cause?: unknown;
+        };
+        for (const p of [e.tag, e.message, e.errorMessage]) {
+            if (typeof p === 'string') parts.push(p);
+        }
+        walk(e.inner, depth + 1);
+        walk(e.cause, depth + 1);
     };
-    return [
-        e.tag,
-        e.message,
-        e.inner?.errorMessage,
-        e.inner?.message,
-    ]
-        .filter((p) => typeof p === 'string')
-        .join(' ');
+
+    walk(err, 0);
+    return parts.join(' ');
 }
 
 function hostOf(url: string): string | null {
@@ -190,11 +214,39 @@ export function describeArkFailure(
  * Deliberately biased toward returning true. A false "may have gone through"
  * costs a user one balance check. A false "your funds were not moved" costs
  * them their trust that the wallet knows where their money is.
+ *
+ * POLARITY: refusals are enumerated, everything else is unknown.
+ *
+ * This used to match transport failures positively and return false for
+ * anything it did not recognise, which put the unknown case on the dangerous
+ * side: an unmatched error was reported as a definite refusal, and the caller
+ * re-armed its send control on the strength of it. For an ln-address or
+ * ln-offer a retry mints a fresh invoice with a new payment hash, so it settles
+ * alongside the first and the recipient is paid twice.
+ *
+ * Refusals are a closed set we own: not enough funds, below dust, a bad
+ * address, a quota rejection. Transport failures are open ended, and the set
+ * grew every time the SDK reworded something. Enumerating the closed side puts
+ * the unknown case on the safe side, which is the same "fail closed" convention
+ * reset.ts documents.
+ *
+ * Measured on device 2026-09-08, bark 0.6.1, ~3 minutes fully offline: 79
+ * captured ASP failures, two distinct shapes, and BOTH would have matched the
+ * old positive regex (on "dns" and on "transport"). So this is not a live bug
+ * today. It is latent, and the reason is worth stating: they matched on words
+ * from tonic's verbose `source:` chain, not on the gRPC status. The status text
+ * alone, "The service is currently unavailable", matched nothing, because the
+ * old pattern carried `unreachable` and not `unavailable`. Any upstream change
+ * that trims that source chain would have flipped both shapes to "definite
+ * refusal" silently.
  */
+const DEFINITE_REFUSAL =
+    /insufficient|not enough|below dust|dust limit|too small|minimum|invalid address|bad user input|malformed|unparse|could not parse|\b429\b|too many requests|rate limit|exceeds the current limit|already spent|already finished|not found/i;
+
 export function looksLikeConnectionLoss(err: unknown): boolean {
     const tag = (err as { tag?: string })?.tag ?? '';
     const text = `${tag} ${arkErrorText(err)}`;
-    return /ServerConnection|connect|timed? ?out|network|unreachable|dns|socket|transport|aborted|reset by peer|broken pipe/i.test(
-        text,
-    );
+    // Nothing to read is not evidence of a refusal. Treat it as unknown.
+    if (!text.trim()) return true;
+    return !DEFINITE_REFUSAL.test(text);
 }
