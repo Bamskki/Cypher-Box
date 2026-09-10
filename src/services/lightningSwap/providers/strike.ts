@@ -194,7 +194,7 @@ const strikeProvider: LightningSwapProvider = {
                 throw new PaymentPendingError(
                     'strike',
                     `Strike payment ${pidShort} is still settling on Lightning. ` +
-                    `Do NOT retry — open the Strike app to check. It will complete or refund automatically within a few hours.`,
+                    `Do NOT retry. Open the Strike app to check. It will complete or refund automatically within a few hours.`,
                     String(paymentId ?? ''),
                 );
             }

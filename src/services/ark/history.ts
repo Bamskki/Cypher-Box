@@ -173,9 +173,9 @@ function describe(
                 : direction;
 
     switch (status) {
-        case 'pending':   return `Pending — ${body.toLowerCase()}`;
-        case 'failed':    return `Failed — ${body.toLowerCase()}`;
-        case 'canceled':  return `Canceled — ${body.toLowerCase()}`;
+        case 'pending':   return `Pending: ${body.toLowerCase()}`;
+        case 'failed':    return `Failed: ${body.toLowerCase()}`;
+        case 'canceled':  return `Canceled: ${body.toLowerCase()}`;
         default:          return body;
     }
 }
